@@ -239,151 +239,151 @@ const EventDetail: React.FC = () => {
   // };
 
   // Example usage
-  const sendGuestEmail = async (
-    toEmail: string,
-    qrContent: string,
-    eventDetails: Event
-  ) => {
-    const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-      qrContent
-    )}&size=150x150`;
-    const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Your Event Ticket</title>
-    <style>
-      /* General Styles */
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-        color: #333;
-        margin: 0;
-        padding: 0;
-      }
-      a {
-        text-decoration: none;
-      }
-      .container {
-        max-width: 600px;
-        margin: 20px auto;
-        background: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        overflow: hidden;
-      }
+  // const sendGuestEmail = async (
+  //   toEmail: string,
+  //   qrContent: string,
+  //   eventDetails: Event
+  // ) => {
+  //   const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+  //     qrContent
+  //   )}&size=150x150`;
+  //       const htmlContent = `
+  //   // <!DOCTYPE html>
+  //   // <html lang="en">
+  //   //   <head>
+  //   //     <meta charset="UTF-8" />
+  //   //     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  //   //     <title>Your Event Ticket</title>
+  //   //     <style>
+  //   //       /* General Styles */
+  //   //       body {
+  //   //         font-family: Arial, sans-serif;
+  //   //         background-color: #f9f9f9;
+  //   //         color: #333;
+  //   //         margin: 0;
+  //   //         padding: 0;
+  //   //       }
+  //   //       a {
+  //   //         text-decoration: none;
+  //   //       }
+  //   //       .container {
+  //   //         max-width: 600px;
+  //   //         margin: 20px auto;
+  //   //         background: #ffffff;
+  //   //         border-radius: 10px;
+  //   //         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  //   //         overflow: hidden;
+  //   //       }
 
-      /* Header */
-      .header {
-        background-color: #9370db;
-        color: #fff;
-        text-align: center;
-        padding: 20px;
-        font-size: 1.5rem;
-      }
+  //   //       /* Header */
+  //   //       .header {
+  //   //         background-color: #9370db;
+  //   //         color: #fff;
+  //   //         text-align: center;
+  //   //         padding: 20px;
+  //   //         font-size: 1.5rem;
+  //   //       }
 
-      /* Event Details */
-      .content {
-        padding: 20px;
-        text-align: center;
-      }
-      .content p {
-        font-size: 1rem;
-        line-height: 1.6;
-        margin: 10px 0;
-      }
+  //   //       /* Event Details */
+  //   //       .content {
+  //   //         padding: 20px;
+  //   //         text-align: center;
+  //   //       }
+  //   //       .content p {
+  //   //         font-size: 1rem;
+  //   //         line-height: 1.6;
+  //   //         margin: 10px 0;
+  //   //       }
 
-      .details {
-        margin: 20px 0;
-      }
+  //   //       .details {
+  //   //         margin: 20px 0;
+  //   //       }
 
-      .details strong {
-        color: #9370db;
-      }
+  //   //       .details strong {
+  //   //         color: #9370db;
+  //   //       }
 
-      /* QR Code */
-      .qr-code {
-        margin: 20px auto;
-        text-align: center;
-      }
-      .qr-code img {
-        width: 200px;
-        height: 200px;
-        border: 5px solid #f4c430;
-        border-radius: 8px;
-      }
+  //   //       /* QR Code */
+  //   //       .qr-code {
+  //   //         margin: 20px auto;
+  //   //         text-align: center;
+  //   //       }
+  //   //       .qr-code img {
+  //   //         width: 200px;
+  //   //         height: 200px;
+  //   //         border: 5px solid #f4c430;
+  //   //         border-radius: 8px;
+  //   //       }
 
-      /* Footer */
-      .footer {
-        background-color: #f4c430;
-        color: #333;
-        text-align: center;
-        padding: 10px;
-        font-size: 0.9rem;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <!-- Header -->
-      <div class="header">
-        🎉 Your Ticket for <strong>${eventDetails.title}</strong>
-      </div>
+  //   //       /* Footer */
+  //   //       .footer {
+  //   //         background-color: #f4c430;
+  //   //         color: #333;
+  //   //         text-align: center;
+  //   //         padding: 10px;
+  //   //         font-size: 0.9rem;
+  //   //       }
+  //   //     </style>
+  //   //   </head>
+  //   //   <body>
+  //   //     <div class="container">
+  //   //       <!-- Header -->
+  //   //       <div class="header">
+  //   //         🎉 Your Ticket for <strong>${eventDetails.title}</strong>
+  //   //       </div>
 
-      <!-- Event Details -->
-      <div class="content">
-        <p>${eventDetails.description}</p>
-        <div class="details">
-          <p><strong>Date:</strong> ${new Date(
-            eventDetails.time
-          ).toLocaleString()}</p>
-        </div>
+  //   //       <!-- Event Details -->
+  //   //       <div class="content">
+  //   //         <p>${eventDetails.description}</p>
+  //   //         <div class="details">
+  //   //           <p><strong>Date:</strong> ${new Date(
+  //   //             eventDetails.time
+  //   //           ).toLocaleString()}</p>
+  //   //         </div>
 
-        <!-- QR Code -->
-        <div class="qr-code">
-          <img src="${qrCodeBase64}" alt="Your QR Code" />
-        </div>
-        <p>Please show this QR code at the event for entry.</p>
-      </div>
+  //   //         <!-- QR Code -->
+  //   //         <div class="qr-code">
+  //   //           <img src="${qrCodeBase64}" alt="Your QR Code" />
+  //   //         </div>
+  //   //         <p>Please show this QR code at the event for entry.</p>
+  //   //       </div>
 
-      <!-- Footer -->
-      <div class="footer">
-        See you there! 🎟 <br />
-        Preemly Team
-      </div>
-    </div>
-  </body>
-</html>
-`;
+  //   //       <!-- Footer -->
+  //   //       <div class="footer">
+  //   //         See you there! 🎟 <br />
+  //   //         Preemly Team
+  //   //       </div>
+  //   //     </div>
+  //   //   </body>
+  //   // </html>
+  //   // `;
 
-    // await sendEmail(
-    //   toEmail,
-    //   `Your ticket for ${eventDetails.title}`,
-    //   htmlContent
-    // );
-  };
+  //   // await sendEmail(
+  //   //   toEmail,
+  //   //   `Your ticket for ${eventDetails.title}`,
+  //   //   htmlContent
+  //   // );
+  // };
 
-  const sendEmailsToGuests = async () => {
-    if (!event || event.guests.length === 0) {
-      console.warn("No guests to send emails to.");
-      return;
-    }
+  // const sendEmailsToGuests = async () => {
+  //   if (!event || event.guests.length === 0) {
+  //     console.warn("No guests to send emails to.");
+  //     return;
+  //   }
 
-    try {
-      for (const guest of event.guests) {
-        const qrContent = guest.id.toString(); // Encoding the guest's ID for now
+  //   try {
+  //     for (const guest of event.guests) {
+  //       const qrContent = guest.id.toString(); // Encoding the guest's ID for now
 
-        await sendGuestEmail(guest.email, qrContent, event);
-      }
+  //       await sendGuestEmail(guest.email, qrContent, event);
+  //     }
 
-      alert("Emails sent successfully to all guests!");
-    } catch (error) {
-      console.error("Error sending emails to guests:", error);
-      alert("Failed to send some or all emails.");
-    }
-  };
+  //     alert("Emails sent successfully to all guests!");
+  //   } catch (error) {
+  //     console.error("Error sending emails to guests:", error);
+  //     alert("Failed to send some or all emails.");
+  //   }
+  // };
 
   const saveGuests = async () => {
     try {
@@ -526,9 +526,9 @@ const EventDetail: React.FC = () => {
           <SaveGuestsButton onClick={saveGuests}>Save Guests</SaveGuestsButton>
         </>
       )}
-      <SaveGuestsButton onClick={sendEmailsToGuests}>
+      {/* <SaveGuestsButton onClick={sendEmailsToGuests}>
         Send Email
-      </SaveGuestsButton>
+      </SaveGuestsButton> */}
 
       <AddGuestButton onClick={() => setModalOpen(true)}>
         Upload Poster

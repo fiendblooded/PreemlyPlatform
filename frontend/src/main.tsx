@@ -5,8 +5,9 @@ import App from "./App";
 import dotenv from "dotenv";
 import { Auth0Provider } from "@auth0/auth0-react";
 dotenv.config();
-const domain = process.env.DOMAIN || "";
-const clientId = process.env.CLIENTID || "";
+const domain = "dev-ye6rboqfch0cwuik.us.auth0.com";
+const clientId = "V5rE0wHpT72anvpCAQ8B6IJ5NKvOiGTp";
+
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );

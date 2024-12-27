@@ -12,13 +12,9 @@ const mg = mailgun.client({
   url: "https://api.eu.mailgun.net",
 });
 
-const sendEmail = async (
-  recipient: string,
-  subject: string,
-  htmlContent: string
-) => {
+const sendEmail = async (recipient, subject, htmlContent) => {
   try {
-    const response = await mg.messages.create("preemly.eu"!, {
+    const response = await mg.messages.create("preemly.eu", {
       from: "info@preemly.eu", // Must match the verified Mailgun domain
       to: [recipient],
       subject: subject,
