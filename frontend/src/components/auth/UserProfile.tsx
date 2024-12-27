@@ -91,7 +91,13 @@ const UserProfile: React.FC = () => {
       <ProfileInfo isVisible={isVisible}>
         <h3>{user?.name}</h3>
         <p>{user?.email}</p>
-        <button onClick={() => logout()}>Log Out</button>
+        <button
+          onClick={() =>
+            logout({ logoutParams: { returnTo: window.location.origin } })
+          }
+        >
+          Log Out
+        </button>
       </ProfileInfo>
     </ProfileContainer>
   );
