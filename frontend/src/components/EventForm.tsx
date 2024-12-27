@@ -107,6 +107,7 @@ const TicketInSpaceContainer = styled.div`
 `;
 
 const EventForm: React.FC = () => {
+  const __dirname = window.location.origin;
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [poster, setPoster] = useState<string | null>(null);
@@ -133,7 +134,7 @@ const EventForm: React.FC = () => {
 
     setError("");
     try {
-      const response = await axios.post("http://localhost:3002/api/events", {
+      const response = await axios.post(`${__dirname}/api/events`, {
         title,
         description,
         ownerId: user?.sub || "random", // Use the Auth0 user ID

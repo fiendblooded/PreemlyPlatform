@@ -3,7 +3,7 @@ import styled from "styled-components";
 import Papa from "papaparse"; // CSV parser library
 import axios from "axios";
 import React from "react";
-import path from "path";
+
 const __dirname = window.location.origin;
 const Wrapper = styled.div`
   margin-top: 20px;

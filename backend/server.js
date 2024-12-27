@@ -87,6 +87,33 @@ app.put("/api/events/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+// Update Poster of an Event
+app.put("/api/events/:id/poster", async (req, res) => {
+  const { poster } = req.body; // Poster URL or path
+  if (!poster) {
+    return res.status(400).json({
+      success: false,
+      message: "Poster URL is required",
+    });
+  }
+
+  try {
+    const updatedEvent = await Event.findByIdAndUpdate(
+      req.params.id,
+      { poster },
+      { new: true }
+    );
+    if (!updatedEvent) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+    }
+    res.json({ success: true, data: updatedEvent });
+  } catch (error) {
+    console.error("Error in Update Poster:", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
 
 // Delete Event
 app.delete("/api/events/:id", async (req, res) => {

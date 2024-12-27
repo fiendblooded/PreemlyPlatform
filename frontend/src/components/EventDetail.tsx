@@ -7,7 +7,7 @@ import { Event } from "../types";
 import PosterUploadModal from "./PosterUploadModal";
 import CSVUploader from "./CSVUploader";
 // import sendEmail from "../mailgunService";
-import path from "path";
+
 const __dirname = window.location.origin;
 const PageWrapper = styled.div`
   padding: 20px;

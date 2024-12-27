@@ -2,7 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import React from "react";
-import path from "path";
+
 const __dirname = window.location.origin;
 const ModalOverlay = styled.div`
   position: fixed;
