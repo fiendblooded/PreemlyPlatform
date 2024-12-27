@@ -6,7 +6,7 @@ import EventList from "./EventList";
 import { useNavigate } from "react-router-dom";
 import { CTAButton, MenuButtonText } from "./SideBar";
 import path from "path";
-const __dirname = path.resolve();
+const __dirname = window.location.origin;
 const PageWrapper = styled.div`
   padding: 0px 20px;
 `;

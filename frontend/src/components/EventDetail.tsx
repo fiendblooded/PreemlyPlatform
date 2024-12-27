@@ -8,7 +8,7 @@ import PosterUploadModal from "./PosterUploadModal";
 import CSVUploader from "./CSVUploader";
 // import sendEmail from "../mailgunService";
 import path from "path";
-const __dirname = path.resolve();
+const __dirname = window.location.origin;
 const PageWrapper = styled.div`
   padding: 20px;
   background-color: #121212; /* Dark background */
