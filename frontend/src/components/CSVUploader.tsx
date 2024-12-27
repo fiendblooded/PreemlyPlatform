@@ -3,6 +3,8 @@ import styled from "styled-components";
 import Papa from "papaparse"; // CSV parser library
 import axios from "axios";
 import React from "react";
+import path from "path";
+const __dirname = path.resolve();
 const Wrapper = styled.div`
   margin-top: 20px;
   padding: 20px;
@@ -129,7 +131,7 @@ const CSVUploader: React.FC<CSVUploaderProps> = ({
 
   const handleUpload = async () => {
     try {
-      await axios.post(`http://localhost:3002/api/events/${eventId}/guests`, {
+      await axios.post(`${__dirname}/api/events/${eventId}/guests`, {
         guests,
       });
       setGuests([]);

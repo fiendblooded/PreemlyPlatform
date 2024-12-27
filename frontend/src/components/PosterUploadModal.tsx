@@ -2,6 +2,8 @@ import { useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import React from "react";
+import path from "path";
+const __dirname = path.resolve();
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -140,7 +142,7 @@ const PosterUploadModal: React.FC<PosterUploadModalProps> = ({
     reader.onload = async () => {
       try {
         const base64Poster = reader.result as string;
-        await axios.put(`http://localhost:3002/api/events/${eventId}/poster`, {
+        await axios.put(`${__dirname}/api/events/${eventId}/poster`, {
           poster: base64Poster,
         });
         alert("Poster updated successfully!");

@@ -7,6 +7,8 @@ import { Event } from "../types";
 import PosterUploadModal from "./PosterUploadModal";
 import CSVUploader from "./CSVUploader";
 // import sendEmail from "../mailgunService";
+import path from "path";
+const __dirname = path.resolve();
 const PageWrapper = styled.div`
   padding: 20px;
   background-color: #121212; /* Dark background */
@@ -190,9 +192,7 @@ const EventDetail: React.FC = () => {
 
   const fetchEvent = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:3002/api/events/${id}`
-      );
+      const response = await axios.get(`${__dirname}/api/events/${id}`);
       setEvent(response.data.data);
     } catch (error) {
       console.error("Error fetching event:", error);
@@ -387,7 +387,7 @@ const EventDetail: React.FC = () => {
 
   const saveGuests = async () => {
     try {
-      await axios.post(`http://localhost:3002/api/events/${id}/guests`, {
+      await axios.post(`${__dirname}/api/events/${id}/guests`, {
         guests: newGuests,
       });
       fetchEvent();
@@ -398,7 +398,7 @@ const EventDetail: React.FC = () => {
   };
   const deleteEvent = async () => {
     try {
-      await axios.delete(`http://localhost:3002/api/events/${id}`);
+      await axios.delete(`${__dirname}/api/events/${id}`);
       navigate("/events");
     } catch (error) {
       console.error("Error saving guests:", error);

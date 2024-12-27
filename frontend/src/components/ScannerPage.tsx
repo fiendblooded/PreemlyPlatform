@@ -4,7 +4,8 @@ import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import axios from "axios";
 import { Header } from "./Events";
 import ToastNotification from "./ToastNotification"; // Import the reusable component
-
+import path from "path";
+const __dirname = path.resolve();
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -29,7 +30,7 @@ const ScannerPage: React.FC = () => {
       const guestId = result[0].rawValue; // Assuming result contains the guest ID
       console.log(guestId);
       const response = await axios.put(
-        `http://localhost:3002/api/guests/${guestId}/attendance`
+        `${__dirname}/api/guests/${guestId}/attendance`
       );
 
       console.log(guestId);

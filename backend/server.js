@@ -5,12 +5,12 @@ import { connectDB } from "./config/db.js";
 import Event from "./models/event.model.js";
 import Guest from "./models/guest.model.js";
 import path from "path";
-
+const __dirname = path.resolve();
 const app = express();
 app.use(cors());
 dotenv.config();
 const PORT = process.env.PORT || 3002;
-const __dirname = path.resolve();
+
 // Middleware
 app.use(express.json()); // Parse JSON data in the request body
 // Connect to database

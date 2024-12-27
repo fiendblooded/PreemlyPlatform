@@ -5,7 +5,8 @@ import { Event } from "../types";
 import EventList from "./EventList";
 import { useNavigate } from "react-router-dom";
 import { CTAButton, MenuButtonText } from "./SideBar";
-
+import path from "path";
+const __dirname = path.resolve();
 const PageWrapper = styled.div`
   padding: 0px 20px;
 `;
@@ -21,7 +22,7 @@ const Events: React.FC = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get("http://localhost:3002/api/events");
+      const response = await axios.get(`${__dirname}/api/events`);
 
       setEvents(response.data.data);
     } catch (error) {
