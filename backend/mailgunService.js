@@ -1,30 +1,30 @@
-import formData from "form-data";
-import Mailgun from "mailgun.js";
-import dotenv from "dotenv";
-dotenv.config();
+// import formData from "form-data";
+// import Mailgun from "mailgun.js";
+// import dotenv from "dotenv";
+// dotenv.config();
 
-const key = process.env.MAILGUN_KEY || "";
+// const key = process.env.MAILGUN_KEY || "";
 
-const mailgun = new Mailgun(formData);
-const mg = mailgun.client({
-  username: "api",
-  key,
-  url: "https://api.eu.mailgun.net",
-});
+// const mailgun = new Mailgun(formData);
+// const mg = mailgun.client({
+//   username: "api",
+//   key,
+//   url: "https://api.eu.mailgun.net",
+// });
 
-const sendEmail = async (recipient, subject, htmlContent) => {
-  try {
-    const response = await mg.messages.create("preemly.eu", {
-      from: "info@preemly.eu", // Must match the verified Mailgun domain
-      to: [recipient],
-      subject: subject,
-      html: htmlContent,
-    });
+// const sendEmail = async (recipient, subject, htmlContent) => {
+//   try {
+//     const response = await mg.messages.create("preemly.eu", {
+//       from: "info@preemly.eu", // Must match the verified Mailgun domain
+//       to: [recipient],
+//       subject: subject,
+//       html: htmlContent,
+//     });
 
-    return response;
-  } catch (error) {
-    console.error("Error sending email with Mailgun:", error);
-    throw error;
-  }
-};
-export default sendEmail;
+//     return response;
+//   } catch (error) {
+//     console.error("Error sending email with Mailgun:", error);
+//     throw error;
+//   }
+// };
+// export default sendEmail;

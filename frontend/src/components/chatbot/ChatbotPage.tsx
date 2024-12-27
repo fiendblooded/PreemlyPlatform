@@ -169,7 +169,7 @@ const Container = styled.div`
 //     cursor: not-allowed;
 //   }
 // `;
-// const API_KEY = process.env.API_KEY || "";
+
 const ChatbotPage: React.FC = () => {
   // const [messages, setMessages] = useState<{ sender: string; text: string }[]>(
   //   []
