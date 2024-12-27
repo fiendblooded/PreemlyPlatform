@@ -1,0 +1,26 @@
+{
+  "name": "preemlyplatform",
+  "version": "1.0.0",
+  "description": "Codebase for preemly platform at platform.preemly.eu",
+  "main": "index.js",
+  "scripts": {
+    "dev": "NODE_ENV=development backend/server.js",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "NODE_ENV=production node backend/server.js"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongodb": "^6.12.0",
+    "mongoose": "^8.9.2",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
