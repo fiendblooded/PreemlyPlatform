@@ -1,10 +1,10 @@
 import { useState } from "react";
 import styled from "styled-components";
-import axios from "axios";
 import EventCreatorWelcome from "./form/EventCreatorWelcome";
 import TicketInSpace from "./form/TicketInSpace";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 const FormWrapper = styled.div`
   background-color: #121212;
   padding: 20px;
@@ -127,6 +127,7 @@ const EventForm: React.FC = () => {
       reader.readAsDataURL(file);
     }
   };
+  const axiosInstance = useAxiosWithAuth();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -134,16 +135,22 @@ const EventForm: React.FC = () => {
 
     setError("");
     try {
-      const response = await axios.post(`${__dirname}/api/events`, {
+      const response = await axiosInstance.post(`/events`, {
         title,
         description,
         ownerId: user?.sub || "random", // Use the Auth0 user ID
-        poster,
+        poster: "z",
+        guests: [],
+        date: "2023-07-15T10:30:00Z",
       });
 
-      console.log("Event created:", response.data);
+      console.log("Event created:", response);
+
+      // Navigate to the event page using the returned _id
+      const eventId = response.data.message._id; // Ensure this matches the backend structure
+      navigate(`/events/${eventId}`);
+
       setSuccess(true);
-      navigate(`/events/${response.data.id}`);
       setTitle("");
       setDescription("");
     } catch (err) {
@@ -153,6 +160,7 @@ const EventForm: React.FC = () => {
       setLoading(false);
     }
   };
+
   function determineUIForStage() {
     switch (stage) {
       case 0:

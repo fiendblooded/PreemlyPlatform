@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import styled from "styled-components";
 import { Event } from "../types";
 // import QRCode from "qrcode";
 import PosterUploadModal from "./PosterUploadModal";
 import CSVUploader from "./CSVUploader";
+import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 // import sendEmail from "../mailgunService";
 
-const __dirname = window.location.origin;
 const PageWrapper = styled.div`
   padding: 20px;
   background-color: #121212; /* Dark background */
@@ -189,10 +188,10 @@ const EventDetail: React.FC = () => {
   const [newGuests, setNewGuests] = useState<
     { fullName: string; age: number; email: string }[]
   >([]);
-
+  const axiosInstance = useAxiosWithAuth();
   const fetchEvent = async () => {
     try {
-      const response = await axios.get(`${__dirname}/api/events/${id}`);
+      const response = await axiosInstance.get(`/events/${id}`);
       setEvent(response.data.data);
     } catch (error) {
       console.error("Error fetching event:", error);
@@ -387,7 +386,7 @@ const EventDetail: React.FC = () => {
 
   const saveGuests = async () => {
     try {
-      await axios.post(`${__dirname}/api/events/${id}/guests`, {
+      await axiosInstance.post(`/events/${id}/guests`, {
         guests: newGuests,
       });
       fetchEvent();
@@ -398,7 +397,7 @@ const EventDetail: React.FC = () => {
   };
   const deleteEvent = async () => {
     try {
-      await axios.delete(`${__dirname}/api/events/${id}`);
+      await axiosInstance.delete(`/events/${id}`);
       navigate("/events");
     } catch (error) {
       console.error("Error saving guests:", error);
@@ -406,6 +405,7 @@ const EventDetail: React.FC = () => {
   };
   useEffect(() => {
     fetchEvent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   if (loading) return <LoadingMessage>Loading event details...</LoadingMessage>;

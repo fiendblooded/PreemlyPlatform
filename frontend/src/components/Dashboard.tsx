@@ -1,4 +1,3 @@
-// import axios from "axios";
 import styled from "styled-components";
 // import { Line } from "react-chartjs-2";
 // import GaugeChart from "react-gauge-chart";
@@ -12,6 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 // import { Event } from "../types";
 
 ChartJS.register(
@@ -81,11 +81,11 @@ const DashboardWrapper = styled.div`
 const Dashboard: React.FC = () => {
   // const [events, setEvents] = useState<Event[]>([]);
   // // const [loading, setLoading] = useState(true);
-
+  const axiosInstance = useAxiosWithAuth();
   // // useEffect(() => {
   // //   const fetchEvents = async () => {
   // //     try {
-  // //       const response = await axios.get("http://localhost:3002/api/events");
+  // //       const response = await axiosInstance.get("http://localhost:3002/api/events");
   // //       setEvents(response.data);
   // //     } catch (error) {
   // //       console.error("Error fetching events:", error);

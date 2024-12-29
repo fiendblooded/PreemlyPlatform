@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
-import axios from "axios";
 import React from "react";
+import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 
 const __dirname = window.location.origin;
 const ModalOverlay = styled.div`
@@ -116,7 +116,7 @@ const PosterUploadModal: React.FC<PosterUploadModalProps> = ({
   );
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-
+  const axiosInstance = useAxiosWithAuth();
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
@@ -142,7 +142,7 @@ const PosterUploadModal: React.FC<PosterUploadModalProps> = ({
     reader.onload = async () => {
       try {
         const base64Poster = reader.result as string;
-        await axios.put(`${__dirname}/api/events/${eventId}/poster`, {
+        await axiosInstance.put(`/events/${eventId}/poster`, {
           poster: base64Poster,
         });
         alert("Poster updated successfully!");

@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import axios from "axios";
 import { Event } from "../types";
 import EventList from "./EventList";
 import { useNavigate } from "react-router-dom";
 import { CTAButton, MenuButtonText } from "./SideBar";
+import useAxiosWithAuth from "./auth/useAxiosWithAuth";
+import useAuthSetup from "../useAuthSetup";
 
-const __dirname = window.location.origin;
 const PageWrapper = styled.div`
   padding: 0px 20px;
 `;
@@ -17,22 +17,46 @@ export const Header = styled.h1`
   justify-content: space-between;
 `;
 
+const Spinner = styled.div`
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #09f;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 const Events: React.FC = () => {
+  useAuthSetup();
   const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState<boolean>(true); // Loading state
+  const axiosInstance = useAxiosWithAuth();
+  const navigate = useNavigate();
 
   const fetchEvents = async () => {
+    setLoading(true); // Start loading
     try {
-      const response = await axios.get(`${__dirname}/api/events`);
-
+      const response = await axiosInstance.get(`/events`);
       setEvents(response.data.data);
     } catch (error) {
       console.error("Error fetching events:", error);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
-  const navigate = useNavigate();
+
   useEffect(() => {
     fetchEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  console.log({ events });
 
   return (
     <PageWrapper>
@@ -58,7 +82,7 @@ const Events: React.FC = () => {
         </CTAButton>
       </Header>
 
-      <EventList events={events} />
+      {loading ? <Spinner /> : <EventList events={events} />}
     </PageWrapper>
   );
 };

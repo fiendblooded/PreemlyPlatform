@@ -1,9 +1,9 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
-import axios from "axios";
 import { Header } from "./Events";
 import ToastNotification from "./ToastNotification"; // Import the reusable component
+import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 
 const __dirname = window.location.origin;
 const Container = styled.div`
@@ -24,13 +24,13 @@ const ScannerContainer = styled.div`
 const ScannerPage: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState<boolean>(false);
-
+  const axiosInstance = useAxiosWithAuth();
   const handleScan = async (result: IDetectedBarcode[]) => {
     try {
       const guestId = result[0].rawValue; // Assuming result contains the guest ID
       console.log(guestId);
-      const response = await axios.put(
-        `${__dirname}/api/guests/${guestId}/attendance`
+      const response = await axiosInstance.put(
+        ` /guests/${guestId}/attendance`
       );
 
       console.log(guestId);

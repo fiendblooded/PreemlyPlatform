@@ -1,7 +1,6 @@
 import { useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
-import axios from "axios";
 import { Header } from "./Events";
 import ToastNotification from "./ToastNotification"; // Import the reusable component
 import { useNavigate } from "react-router-dom";

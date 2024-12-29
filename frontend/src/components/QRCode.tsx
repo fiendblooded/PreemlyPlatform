@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 
 interface QrCodeProps {
   content: string; // The text or link to encode

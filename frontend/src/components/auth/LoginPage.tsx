@@ -114,7 +114,19 @@ const LoginPage: React.FC = () => {
         </svg>
       </SpinningContainer>
       <Title>Welcome to Preemly</Title>
-      <StyledButton onClick={() => loginWithRedirect()}>Log In</StyledButton>
+      <StyledButton
+        onClick={() =>
+          loginWithRedirect({
+            authorizationParams: {
+              audience: "https://api.preemly.eu",
+              scope: "read:events write:events",
+              prompt: "consent", // Force showing the consent screen
+            },
+          })
+        }
+      >
+        Log In
+      </StyledButton>
     </LoginContainer>
   );
 };

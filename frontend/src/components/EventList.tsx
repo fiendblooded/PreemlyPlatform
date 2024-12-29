@@ -45,9 +45,10 @@ const EventList: React.FC<EventListProps> = ({ events }) => {
     setSearchQuery(e.target.value);
   };
 
-  const filteredEvents = events.filter((event) =>
-    event.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredEvents =
+    events?.filter((event) =>
+      event.title.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
   return (
     <Wrapper>

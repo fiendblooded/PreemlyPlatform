@@ -1,8 +1,8 @@
 import { useState } from "react";
 import styled from "styled-components";
 import Papa from "papaparse"; // CSV parser library
-import axios from "axios";
 import React from "react";
+import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 
 const __dirname = window.location.origin;
 const Wrapper = styled.div`
@@ -89,7 +89,7 @@ const CSVUploader: React.FC<CSVUploaderProps> = ({
   const [guests, setGuests] = useState<Guest[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-
+  const axiosInstance = useAxiosWithAuth();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -131,7 +131,7 @@ const CSVUploader: React.FC<CSVUploaderProps> = ({
 
   const handleUpload = async () => {
     try {
-      await axios.post(`${__dirname}/api/events/${eventId}/guests`, {
+      await axiosInstance.post(`/events/${eventId}/guests`, {
         guests,
       });
       setGuests([]);
