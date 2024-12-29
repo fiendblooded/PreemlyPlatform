@@ -4,7 +4,7 @@
   "description": "Codebase for preemly platform at platform.preemly.eu",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_ENV=development backend/server.js",
+    "dev": "NODE_ENV=development node backend/server.js",
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
     "start": "NODE_ENV=production node backend/server.js"
   },
@@ -15,6 +15,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-jwt": "^8.5.1",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.1.0",
     "mongodb": "^6.12.0",
     "mongoose": "^8.9.2",
     "tslib": "^2.8.1"

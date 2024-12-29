@@ -5,11 +5,27 @@ import { connectDB } from "./config/db.js";
 import Event from "./models/event.model.js";
 import Guest from "./models/guest.model.js";
 import path from "path";
+import verifyUser from "./verifyUser.js";
 const __dirname = path.resolve();
 const app = express();
 app.use(cors());
 dotenv.config();
 const PORT = process.env.PORT || 3002;
+
+const checkScopes = (requiredScopes) => (req, res, next) => {
+  const tokenScopes = req.user.scope?.split(" ") || [];
+  const hasRequiredScopes = requiredScopes.every((scope) =>
+    tokenScopes.includes(scope)
+  );
+
+  if (!hasRequiredScopes) {
+    return res
+      .status(403)
+      .json({ success: false, message: "Forbidden: Insufficient permissions" });
+  }
+
+  next();
+};
 
 // Middleware
 app.use(express.json()); // Parse JSON data in the request body
@@ -18,37 +34,44 @@ app.listen(PORT, () => {
   connectDB();
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-app.post("/api/events", async (req, res) => {
-  // Create Event
-
+app.post("/api/events", verifyUser, async (req, res) => {
   const event = req.body;
+
   if (!event || !event?.title) {
     return res
       .status(400)
       .json({ success: false, message: "Please provide all fields" });
   }
+
   const newEvent = new Event(event);
   try {
-    await newEvent.save();
-    res.status(201).json({ success: true, data: newEvent.event });
+    await newEvent.save(); // MongoDB assigns `_id` here
+
+    // Include the MongoDB `_id` in the response
+    res.json({
+      success: true,
+      message: { _id: newEvent._id }, // Explicitly return the `_id`
+    });
   } catch (error) {
     console.error("Error in Create Event:", error.message);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
 
-app.get("/api/events", async (req, res) => {
-  try {
-    const events = await Event.find().populate({
-      path: "guests",
-      model: "Guest", // Explicitly define the model to populate
-    });
-    res.json({ success: true, data: events });
-  } catch (error) {
-    console.error("Error in Get All Events:", error.message);
-    res.status(500).json({ success: false, message: "Server Error" });
+app.get(
+  "/api/events",
+  verifyUser,
+  checkScopes(["read:events"]),
+  async (req, res) => {
+    try {
+      const events = await Event.find({ ownerId: req.user.sub }); // Example query
+      res.json({ success: true, data: events });
+    } catch (error) {
+      console.error("Error fetching events:", error.message);
+      res.status(500).json({ success: false, message: "Server Error" });
+    }
   }
-});
+);
 
 // Get Single Event
 app.get("/api/events/:id", async (req, res) => {
