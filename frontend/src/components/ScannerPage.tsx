@@ -5,13 +5,11 @@ import { Header } from "./Events";
 import ToastNotification from "./ToastNotification"; // Import the reusable component
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 
-const __dirname = window.location.origin;
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
   background-color: #121212; /* Dark background */
   padding-right: 80px;
 `;

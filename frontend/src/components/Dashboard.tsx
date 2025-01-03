@@ -29,7 +29,6 @@ const DashboardWrapper = styled.div`
   background-color: #e9f0f2;
   color: #f5f5f5;
   font-family: Arial, sans-serif;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;

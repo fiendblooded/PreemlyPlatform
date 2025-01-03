@@ -104,32 +104,32 @@ const GlobalStyle = createGlobalStyle`
     font-family: Axiforma, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #E4ECF1;
+    background-color: #F3F6F9;
     color: #f5f5f5;
   }
 `;
 const SidebarWrapper = styled.div`
-  width: 250px;
+  position: sticky;
+
   height: 100vh;
-  background-color: #181a1e; /* Dark background */
+  background-color: rgb(11, 14, 19); /* Dark background */
   display: flex;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
   padding-top: 0px;
-  position: fixed;
   gap: 6px;
   top: 0;
   left: 0;
   font-family: Axiforma, sans-serif !important;
+  width: 250px !important;
 `;
 const SidebarTopContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 `;
 const MenuButton = styled.button<{ isactive: boolean }>`
   background-color: ${(props) =>
@@ -138,7 +138,7 @@ const MenuButton = styled.button<{ isactive: boolean }>`
   border: 1px solid transparent;
   border-radius: 6px;
   height: 36px;
-  width: 220px;
+  width: 85%;
   font-family: Axiforma, sans-serif !important;
   display: flex;
   cursor: pointer;
@@ -178,6 +178,7 @@ const ImageContainer = styled.div`
   width: 100%;
   padding: 10px 0;
   display: flex;
+  height: 60px;
   align-items: center;
   justify-content: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -199,7 +200,7 @@ const Sidebar: React.FC = () => {
       <GlobalStyle />
       <SidebarTopContainer>
         <ImageContainer>
-          <img src={Logo} alt="logo" width={"40%"} />
+          <img src={Logo} alt="logo" width={"55%"} />
         </ImageContainer>
         <MenuButton onClick={() => navigate("/")} isactive={getPageStatus("")}>
           <svg

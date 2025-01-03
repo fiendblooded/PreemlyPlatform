@@ -2,11 +2,12 @@ import { useAuth0 } from "@auth0/auth0-react";
 import styled, { keyframes } from "styled-components";
 
 const LoginContainer = styled.div`
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
   background-color: #121212; /* Dark background */
   padding-right: 80px;
 `;

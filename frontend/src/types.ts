@@ -1,5 +1,5 @@
 export type Guest = {
-  id: string;
+  _id: string;
   fullName: string;
   age: number;
   email: string;
@@ -7,7 +7,7 @@ export type Guest = {
 };
 
 export type Event = {
-  time: string | number | Date;
+  date: string | number | Date;
   _id: string;
   title: string;
   description: string;

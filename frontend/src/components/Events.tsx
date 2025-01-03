@@ -8,27 +8,50 @@ import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import useAuthSetup from "../useAuthSetup";
 
 const PageWrapper = styled.div`
-  padding: 0px 20px;
+  padding: 0px 25px;
 `;
 
 export const Header = styled.h1`
   color: black; /* Purple */
   display: flex;
+  font-size: 32px;
   justify-content: space-between;
 `;
 
+const SpinnerContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 300px;
+  width: 100%;
+`;
 const Spinner = styled.div`
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  width: 36px;
-  height: 36px;
+  border: 8px solid rgba(0, 0, 0, 0.1);
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  border-left-color: #09f;
+  border-left-color: #f4c430;
   animation: spin 1s linear infinite;
 
   @keyframes spin {
     to {
       transform: rotate(360deg);
     }
+  }
+`;
+const SearchInput = styled.input`
+  width: 80%;
+  padding: 10px;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  border: 1px solid #444;
+  border-radius: 5px;
+  background-color: #121212;
+  color: #f5f5f5;
+
+  &:focus {
+    outline: none;
+    border-color: #9370db; /* Purple */
   }
 `;
 
@@ -56,12 +79,25 @@ const Events: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const filteredEvents =
+    events?.filter(
+      (event) =>
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
+
   console.log({ events });
 
   return (
     <PageWrapper>
       <Header>
-        Events
+        Events ({filteredEvents.length})
         <CTAButton onClick={() => navigate("/events/create-new-event")}>
           <svg
             width="20"
@@ -81,8 +117,19 @@ const Events: React.FC = () => {
           <MenuButtonText>Add event</MenuButtonText>
         </CTAButton>
       </Header>
-
-      {loading ? <Spinner /> : <EventList events={events} />}
+      <SearchInput
+        type="text"
+        placeholder="Search for an event..."
+        value={searchQuery}
+        onChange={handleSearchChange}
+      />
+      {loading ? (
+        <SpinnerContainer>
+          <Spinner />{" "}
+        </SpinnerContainer>
+      ) : (
+        <EventList events={filteredEvents} />
+      )}
     </PageWrapper>
   );
 };

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import styled from "styled-components";
+import useAuthSetup from "../../useAuthSetup";
 
 const ProfileContainer = styled.div`
   display: flex;
@@ -9,96 +10,109 @@ const ProfileContainer = styled.div`
   align-items: center;
   font-size: 14px;
   justify-content: center;
+  position: relative;
 
   color: #f5f5f5;
   gap: 10px;
   cursor: pointer;
-  position: relative;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 `;
+
 const UserDetailsContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: -2px;
 `;
+
 const UserRole = styled.div`
   color: grey;
+  font-size: 12px;
 `;
+
 const ProfileImage = styled.img`
   width: 36px;
   height: 36px;
   border-radius: 50%;
 `;
 
-const ProfileInfo = styled.div<{ isVisible: boolean }>`
-  display: ${({ isVisible }) => (isVisible ? "flex" : "none")};
-  flex-direction: column;
-  position: absolute;
-  width: 180px;
+// const ProfileInfo = styled.div`
+//   position: relative;
+//   display: flex;
+//   align-items: center;
+//   overflow: hidden;
+//   height: 60px;
+//   width: 100%;
+// `;
 
-  bottom: 50px;
-  right: 0;
-  background-color: #2a2a3b;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  gap: 10px;
+const LogOutButton = styled.button<{ isVisible: boolean }>`
+  background-color: #c50000;
+  color: white;
+  border: none;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 0px;
+  margin-right: -1px;
+  width: ${(props) => (props.isVisible ? "60px" : "0px")};
+  transition: width 0.3s ease-in-out;
+  padding: 0px;
+  opacity: ${(props) => (props.isVisible ? "1" : "0")};
 
-  h3 {
-    font-size: 0.9rem;
-    margin: 0;
-    color: #ffd524; /* Yellow */
-  }
-
-  p {
-    font-size: 0.75rem;
-    margin: 0;
-    color: #aaa; /* Light gray for email */
-  }
-
-  button {
-    background-color: #f4c430; /* Yellow */
-    color: #121212;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.85rem;
-
-    &:hover {
-      background-color: #ffd700;
-    }
+  &:hover {
+    background-color: darkred;
   }
 `;
+
+const namespace = "https://custom-claims.preemly.eu/"; // The same namespace used in your Action
 
 const UserProfile: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth0();
   const [isVisible, setIsVisible] = useState(false);
+  useAuthSetup();
 
   if (!isAuthenticated) return null;
 
-  const toggleVisibility = () => {
-    setIsVisible((prev) => !prev);
-  };
-
   return (
-    <ProfileContainer onClick={toggleVisibility}>
-      <ProfileImage src={user?.picture} alt={user?.name} />
+    <ProfileContainer
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+    >
+      <ProfileImage
+        src={user?.[`${namespace}picture`]}
+        alt={user?.[`${namespace}name`]}
+      />
       <UserDetailsContainer>
-        <div>{user?.name}</div>
-        <UserRole>Business</UserRole>
+        <div>{user?.[`${namespace}name`]}</div>
+        <UserRole>{user?.[`${namespace}email`]}</UserRole>
       </UserDetailsContainer>
-      <ProfileInfo isVisible={isVisible}>
-        <h3>{user?.name}</h3>
-        <p>{user?.email}</p>
-        <button
-          onClick={() =>
-            logout({ logoutParams: { returnTo: window.location.origin } })
-          }
+      <LogOutButton
+        isVisible={isVisible}
+        onClick={() =>
+          logout({ logoutParams: { returnTo: window.location.origin } })
+        }
+      >
+        <svg
+          width="20"
+          height="21"
+          viewBox="0 0 20 21"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          Log Out
-        </button>
-      </ProfileInfo>
+          <path
+            d="M12.9883 6.8794V3.5332C12.9883 2.42863 12.0929 1.5332 10.9883 1.5332H3.62297C2.51841 1.5332 1.62297 2.42863 1.62297 3.5332V18.0643C1.62297 19.1688 2.5184 20.0643 3.62297 20.0643H10.9883C12.0928 20.0643 12.9883 19.1688 12.9883 18.0643V15.1957"
+            stroke="white"
+            stroke-width="1.3"
+            stroke-linecap="round"
+          />
+          <path
+            d="M6.66797 11.6207C6.30898 11.6207 6.01797 11.3297 6.01797 10.9707C6.01797 10.6117 6.30898 10.3207 6.66797 10.3207V11.6207ZM19.4597 10.5111C19.7135 10.7649 19.7135 11.1765 19.4597 11.4303L15.3231 15.5669C15.0692 15.8207 14.6577 15.8207 14.4038 15.5669C14.15 15.3131 14.15 14.9015 14.4038 14.6477L18.0808 10.9707L14.4038 7.29375C14.15 7.03991 14.15 6.62835 14.4038 6.37451C14.6577 6.12067 15.0692 6.12067 15.3231 6.37451L19.4597 10.5111ZM6.66797 10.3207L19 10.3207V11.6207L6.66797 11.6207V10.3207Z"
+            fill="white"
+          />
+        </svg>
+      </LogOutButton>
     </ProfileContainer>
   );
 };

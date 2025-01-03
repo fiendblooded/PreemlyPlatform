@@ -9,13 +9,13 @@ const useAuthSetup = () => {
     const fetchToken = async () => {
       if (isAuthenticated) {
         try {
-          const token = await getAccessTokenSilently({
+          await getAccessTokenSilently({
             authorizationParams: {
               audience: "https://api.preemly.eu", // Your API
               scope: "read:events write:events",
             },
           });
-          console.log("Token fetched on page reload:", token);
+          //console.log("Token fetched on page reload:", token);
         } catch (err) {
           console.error("Error fetching token silently:", err);
           // Redirect to login if the silent fetch fails

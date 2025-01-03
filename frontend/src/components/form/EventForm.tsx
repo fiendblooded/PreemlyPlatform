@@ -1,10 +1,10 @@
 import { useState } from "react";
 import styled from "styled-components";
-import EventCreatorWelcome from "./form/EventCreatorWelcome";
-import TicketInSpace from "./form/TicketInSpace";
+import EventCreatorWelcome from "./EventCreatorWelcome";
+import TicketInSpace from "./TicketInSpace";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
-import useAxiosWithAuth from "./auth/useAxiosWithAuth";
+import useAxiosWithAuth from "../auth/useAxiosWithAuth";
 const FormWrapper = styled.div`
   background-color: #121212;
   padding: 20px;
@@ -139,7 +139,7 @@ const EventForm: React.FC = () => {
         title,
         description,
         ownerId: user?.sub || "random", // Use the Auth0 user ID
-        poster: "z",
+        poster: poster,
         guests: [],
         date: "2023-07-15T10:30:00Z",
       });

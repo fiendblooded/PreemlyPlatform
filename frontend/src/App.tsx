@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import EventDetail from "./components/EventDetail";
-import EventForm from "./components/EventForm";
+import EventForm from "./components/form/EventForm";
 import styled, { createGlobalStyle } from "styled-components";
 import Sidebar from "./components/SideBar";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -125,9 +125,8 @@ const AppWrapper = styled.div`
 `;
 
 const ContentWrapper = styled.div`
-  margin-left: 250px; /* Sidebar width */
-  width: 100vw;
-  height: 100vh;
+  width: calc(100% - 250px);
+  display: grid;
 `;
 
 const App: React.FC = () => {
@@ -140,7 +139,7 @@ const App: React.FC = () => {
           <Sidebar />
         </ProtectedRoute>
         <ContentWrapper>
-          <PreembotButton />
+          {/* <PreembotButton /> */}
           <Routes>
             {/* Home Page */}
             <Route path="/" element={<Dashboard />} />
