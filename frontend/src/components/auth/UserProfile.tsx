@@ -15,7 +15,6 @@ const ProfileContainer = styled.div`
   color: #f5f5f5;
   gap: 10px;
   cursor: pointer;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
 `;
 
 const UserDetailsContainer = styled.div`

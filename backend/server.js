@@ -6,11 +6,15 @@ import Event from "./models/event.model.js";
 import Guest from "./models/guest.model.js";
 import path from "path";
 import verifyUser from "./verifyUser.js";
+import bodyParser from "body-parser";
+import sendEmail from "./mailgunService.js";
 const __dirname = path.resolve();
 const app = express();
 app.use(cors());
 dotenv.config();
 const PORT = process.env.PORT || 3002;
+app.use(bodyParser.json({ limit: "10mb" })); // Increase JSON payload limit
+app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" })); // For form data
 
 const checkScopes = (requiredScopes) => (req, res, next) => {
   const tokenScopes = req.user.scope?.split(" ") || [];
@@ -52,6 +56,24 @@ app.post("/api/events", verifyUser, async (req, res) => {
       success: true,
       message: { _id: newEvent._id }, // Explicitly return the `_id`
     });
+  } catch (error) {
+    console.error("Error in Create Event:", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
+app.post("/api/mail", async (req, res) => {
+  const { recipient, subject, htmlContent } = req.body;
+
+  if (!recipient || !subject || !htmlContent) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Please provide all fields" });
+  }
+
+  try {
+    await sendEmail(recipient, subject, htmlContent);
+    res.status(204).send();
   } catch (error) {
     console.error("Error in Create Event:", error.message);
     res.status(500).json({ success: false, message: "Server Error" });
