@@ -5,10 +5,13 @@ import { connectDB } from "./config/db.js";
 import Event from "./models/event.model.js";
 import Guest from "./models/guest.model.js";
 import path from "path";
-import verifyUser from "./verifyUser.js";
+import verifyUser from "./utils/verify-user.js";
 import bodyParser from "body-parser";
-import sendEmail from "./mailgunService.js";
-import { v2 as cloudinary } from 'cloudinary';
+import sendEmail from "./services/mailgun.service.js";
+import { uploadImage } from "./config/cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
+import extractPublicId from "./utils/helpers.js";
+import axios from 'axios';
 
 const __dirname = path.resolve();
 const app = express();
@@ -47,38 +50,6 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-app.post("/api/events", verifyUser, async (req, res) => {
-  const event = req.body;
-
-  if (!event || !event?.title || !event?.poster) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Please provide all fields, including poster" });
-  }
-
-  try {
-    // Загрузка постера на Cloudinary
-    const uploadResponse = await cloudinary.uploader.upload(event.poster, {
-      folder: "events_posters", // Опционально: можно указать папку
-    });
-
-    // Сохранение ссылки на загруженный постер
-    event.poster = uploadResponse.secure_url;
-
-    const newEvent = new Event(event);
-    await newEvent.save();
-
-    res.json({
-      success: true,
-      message: { _id: newEvent._id },
-    });
-  } catch (error) {
-    console.error("Error in Create Event:", error.message);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-});
-
-
 app.post("/api/mail", async (req, res) => {
   const { recipient, subject, htmlContent } = req.body;
 
@@ -97,9 +68,35 @@ app.post("/api/mail", async (req, res) => {
   }
 });
 
-import axios from 'axios'; // Для загрузки изображений из Cloudinary
+app.post("/api/events", verifyUser, async (req, res) => {
+  const event = req.body;
 
-// Получение списка событий
+  if (!event || !event?.title || !event?.poster) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Please provide all fields, including poster" });
+  }
+
+  try {
+    const uploadResponse = await cloudinary.uploader.upload(event.poster, {
+      folder: "events_posters",
+    });
+
+    event.poster = uploadResponse.secure_url;
+
+    const newEvent = new Event(event);
+    await newEvent.save();
+
+    res.json({
+      success: true,
+      message: { _id: newEvent._id },
+    });
+  } catch (error) {
+    console.error("Error in Create Event:", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
 app.get(
   "/api/events",
   verifyUser,
@@ -108,24 +105,23 @@ app.get(
     try {
       const events = await Event.find({ ownerId: req.user.sub });
 
-      // Загрузка изображений для каждого события
       const eventsWithImages = await Promise.all(
         events.map(async (event) => {
           try {
             const imageResponse = await axios.get(event.poster, {
-              responseType: "arraybuffer", // Чтобы получить изображение в бинарном формате
+              responseType: "arraybuffer", 
             });
             const imageBase64 = Buffer.from(imageResponse.data, "binary").toString("base64");
 
             return {
-              ...event._doc, // Данные события
-              posterImage: `data:image/jpeg;base64,${imageBase64}`, // Предполагаем формат JPEG
+              ...event._doc,
+              posterImage: `data:image/jpeg;base64,${imageBase64}`,
             };
           } catch (err) {
             console.error(`Error fetching image for event ${event._id}:`, err.message);
             return {
               ...event._doc,
-              posterImage: null, // Если не удалось загрузить изображение
+              posterImage: null,
             };
           }
         })
@@ -139,7 +135,6 @@ app.get(
   }
 );
 
-// Получение одного события
 app.get("/api/events/:id", async (req, res) => {
   try {
     const event = await Event.findById(req.params.id).populate("guests");
@@ -149,7 +144,6 @@ app.get("/api/events/:id", async (req, res) => {
         .json({ success: false, message: "Event not found" });
     }
 
-    // Загрузка изображения из Cloudinary
     try {
       const imageResponse = await axios.get(event.poster, {
         responseType: "arraybuffer",
@@ -160,7 +154,7 @@ app.get("/api/events/:id", async (req, res) => {
         success: true,
         data: {
           ...event._doc,
-          posterImage: `data:image/jpeg;base64,${imageBase64}`, // Добавляем изображение в формате Base64
+          posterImage: `data:image/jpeg;base64,${imageBase64}`,
         },
       });
     } catch (err) {
@@ -169,7 +163,7 @@ app.get("/api/events/:id", async (req, res) => {
         success: true,
         data: {
           ...event._doc,
-          posterImage: null, // Если не удалось загрузить изображение
+          posterImage: null,
         },
       });
     }
@@ -179,8 +173,6 @@ app.get("/api/events/:id", async (req, res) => {
   }
 });
 
-
-// Update Event
 app.put("/api/events/:id", async (req, res) => {
   try {
     const updatedEvent = await Event.findByIdAndUpdate(
@@ -201,6 +193,7 @@ app.put("/api/events/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+
 app.put("/api/events/:id/poster", async (req, res) => {
   const { poster } = req.body;
 
@@ -212,23 +205,28 @@ app.put("/api/events/:id/poster", async (req, res) => {
   }
 
   try {
-    // Загрузка нового постера на Cloudinary
-    const uploadResponse = await cloudinary.uploader.upload(poster, {
-      folder: "events_posters",
-    });
+    const existingEvent = await Event.findById(req.params.id);
+    if (!existingEvent) {
+      return res.status(404).json({ success: false, message: "Event not found" });
+    }
 
-    // Обновление ссылки в базе данных
+    if (existingEvent.poster) {
+      try {
+        const posterPublicId = extractPublicId(existingEvent.poster);
+        const deleteResponse = await cloudinary.uploader.destroy("events_posters/" + posterPublicId);
+        console.log("Image delete response:", deleteResponse);
+      } catch (cloudinaryError) {
+        console.error("Error deleting old image from Cloudinary:", cloudinaryError.message);
+      }
+    }
+
+    const uploadResponse = await uploadImage(poster, "events_posters");
+
     const updatedEvent = await Event.findByIdAndUpdate(
       req.params.id,
       { poster: uploadResponse.secure_url },
       { new: true }
     );
-
-    if (!updatedEvent) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Event not found" });
-    }
 
     res.json({ success: true, data: updatedEvent });
   } catch (error) {
@@ -237,16 +235,25 @@ app.put("/api/events/:id/poster", async (req, res) => {
   }
 });
 
-
-// Delete Event
 app.delete("/api/events/:id", async (req, res) => {
   try {
-    const deletedEvent = await Event.findByIdAndDelete(req.params.id);
-    if (!deletedEvent) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Event not found" });
+    const eventToDelete = await Event.findById(req.params.id);
+    if (!eventToDelete) {
+      return res.status(404).json({ success: false, message: "Event not found" });
     }
+
+    if (eventToDelete.poster) {
+      try {
+        const posterPublicId = extractPublicId(eventToDelete.poster);
+        const deleteResponse = await cloudinary.uploader.destroy("events_posters/" + posterPublicId);
+        console.log("Image delete response:", deleteResponse);
+      } catch (cloudinaryError) {
+        console.error("Error deleting image from Cloudinary:", cloudinaryError.message);
+      }
+    }
+
+    await Event.findByIdAndDelete(req.params.id);
+
     res.status(204).send();
   } catch (error) {
     console.error("Error in Delete Event:", error.message);
@@ -254,36 +261,31 @@ app.delete("/api/events/:id", async (req, res) => {
   }
 });
 
-// Add Guests to Event
-app.post("/api/events/:id/guests", async (req, res) => {
-  const guests = req.body.guests;
-  if (!Array.isArray(guests) || guests.length === 0) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Guests must be a non-empty array" });
+app.post("/api/events", verifyUser, async (req, res) => {
+  const { title, description, poster } = req.body;
+
+  if (!title || !poster) {
+    return res.status(400).json({ success: false, message: "Missing fields" });
   }
+
   try {
-    const event = await Event.findById(req.params.id);
-    if (!event) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Event not found" });
-    }
+    const uploadResult = await uploadImage(poster, "events");
+    
+    const newEvent = new Event({
+      title,
+      description,
+      poster: uploadResult.secure_url,
+      ownerId: req.user.sub,
+    });
 
-    const guestDocs = guests.map((guest) => ({ ...guest, eventId: event._id }));
-    const createdGuests = await Guest.insertMany(guestDocs);
-
-    event.guests.push(...createdGuests.map((guest) => guest._id));
-    await event.save();
-
-    res.status(201).json({ success: true, data: createdGuests });
+    await newEvent.save();
+    res.json({ success: true, data: newEvent });
   } catch (error) {
-    console.error("Error in Add Guests:", error.message);
+    console.error("Error creating event:", error.message);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
 
-// Update Guest
 app.put("/api/guests/:id", async (req, res) => {
   try {
     const updatedGuest = await Guest.findByIdAndUpdate(
@@ -305,7 +307,6 @@ app.put("/api/guests/:id", async (req, res) => {
   }
 });
 
-// Delete Guest
 app.delete("/api/guests/:id", async (req, res) => {
   try {
     const deletedGuest = await Guest.findByIdAndDelete(req.params.id);
