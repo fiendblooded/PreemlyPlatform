@@ -8,6 +8,8 @@ import path from "path";
 import verifyUser from "./verifyUser.js";
 import bodyParser from "body-parser";
 import sendEmail from "./mailgunService.js";
+import { v2 as cloudinary } from 'cloudinary';
+
 const __dirname = path.resolve();
 const app = express();
 app.use(cors());
@@ -15,6 +17,12 @@ dotenv.config();
 const PORT = process.env.PORT || 3002;
 app.use(bodyParser.json({ limit: "10mb" })); // Increase JSON payload limit
 app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" })); // For form data
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const checkScopes = (requiredScopes) => (req, res, next) => {
   const tokenScopes = req.user.scope?.split(" ") || [];
@@ -38,29 +46,38 @@ app.listen(PORT, () => {
   connectDB();
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
 app.post("/api/events", verifyUser, async (req, res) => {
   const event = req.body;
 
-  if (!event || !event?.title) {
+  if (!event || !event?.title || !event?.poster) {
     return res
       .status(400)
-      .json({ success: false, message: "Please provide all fields" });
+      .json({ success: false, message: "Please provide all fields, including poster" });
   }
 
-  const newEvent = new Event(event);
   try {
-    await newEvent.save(); // MongoDB assigns `_id` here
+    // Загрузка постера на Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(event.poster, {
+      folder: "events_posters", // Опционально: можно указать папку
+    });
 
-    // Include the MongoDB `_id` in the response
+    // Сохранение ссылки на загруженный постер
+    event.poster = uploadResponse.secure_url;
+
+    const newEvent = new Event(event);
+    await newEvent.save();
+
     res.json({
       success: true,
-      message: { _id: newEvent._id }, // Explicitly return the `_id`
+      message: { _id: newEvent._id },
     });
   } catch (error) {
     console.error("Error in Create Event:", error.message);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+
 
 app.post("/api/mail", async (req, res) => {
   const { recipient, subject, htmlContent } = req.body;
@@ -80,14 +97,41 @@ app.post("/api/mail", async (req, res) => {
   }
 });
 
+import axios from 'axios'; // Для загрузки изображений из Cloudinary
+
+// Получение списка событий
 app.get(
   "/api/events",
   verifyUser,
   checkScopes(["read:events"]),
   async (req, res) => {
     try {
-      const events = await Event.find({ ownerId: req.user.sub }); // Example query
-      res.json({ success: true, data: events });
+      const events = await Event.find({ ownerId: req.user.sub });
+
+      // Загрузка изображений для каждого события
+      const eventsWithImages = await Promise.all(
+        events.map(async (event) => {
+          try {
+            const imageResponse = await axios.get(event.poster, {
+              responseType: "arraybuffer", // Чтобы получить изображение в бинарном формате
+            });
+            const imageBase64 = Buffer.from(imageResponse.data, "binary").toString("base64");
+
+            return {
+              ...event._doc, // Данные события
+              posterImage: `data:image/jpeg;base64,${imageBase64}`, // Предполагаем формат JPEG
+            };
+          } catch (err) {
+            console.error(`Error fetching image for event ${event._id}:`, err.message);
+            return {
+              ...event._doc,
+              posterImage: null, // Если не удалось загрузить изображение
+            };
+          }
+        })
+      );
+
+      res.json({ success: true, data: eventsWithImages });
     } catch (error) {
       console.error("Error fetching events:", error.message);
       res.status(500).json({ success: false, message: "Server Error" });
@@ -95,7 +139,7 @@ app.get(
   }
 );
 
-// Get Single Event
+// Получение одного события
 app.get("/api/events/:id", async (req, res) => {
   try {
     const event = await Event.findById(req.params.id).populate("guests");
@@ -104,12 +148,37 @@ app.get("/api/events/:id", async (req, res) => {
         .status(404)
         .json({ success: false, message: "Event not found" });
     }
-    res.json({ success: true, data: event });
+
+    // Загрузка изображения из Cloudinary
+    try {
+      const imageResponse = await axios.get(event.poster, {
+        responseType: "arraybuffer",
+      });
+      const imageBase64 = Buffer.from(imageResponse.data, "binary").toString("base64");
+
+      res.json({
+        success: true,
+        data: {
+          ...event._doc,
+          posterImage: `data:image/jpeg;base64,${imageBase64}`, // Добавляем изображение в формате Base64
+        },
+      });
+    } catch (err) {
+      console.error(`Error fetching image for event ${event._id}:`, err.message);
+      res.json({
+        success: true,
+        data: {
+          ...event._doc,
+          posterImage: null, // Если не удалось загрузить изображение
+        },
+      });
+    }
   } catch (error) {
     console.error("Error in Get Event:", error.message);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+
 
 // Update Event
 app.put("/api/events/:id", async (req, res) => {
@@ -132,33 +201,42 @@ app.put("/api/events/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
-// Update Poster of an Event
 app.put("/api/events/:id/poster", async (req, res) => {
-  const { poster } = req.body; // Poster URL or path
+  const { poster } = req.body;
+
   if (!poster) {
     return res.status(400).json({
       success: false,
-      message: "Poster URL is required",
+      message: "Poster is required",
     });
   }
 
   try {
+    // Загрузка нового постера на Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(poster, {
+      folder: "events_posters",
+    });
+
+    // Обновление ссылки в базе данных
     const updatedEvent = await Event.findByIdAndUpdate(
       req.params.id,
-      { poster },
+      { poster: uploadResponse.secure_url },
       { new: true }
     );
+
     if (!updatedEvent) {
       return res
         .status(404)
         .json({ success: false, message: "Event not found" });
     }
+
     res.json({ success: true, data: updatedEvent });
   } catch (error) {
     console.error("Error in Update Poster:", error.message);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+
 
 // Delete Event
 app.delete("/api/events/:id", async (req, res) => {
