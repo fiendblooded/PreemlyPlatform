@@ -3,7 +3,7 @@ name: Deploy to Vercel
 on:
   push:
     branches:
-      - main # Запуск на пуш в ветку main
+      - main
 
 jobs:
   deploy:
@@ -41,5 +41,5 @@ jobs:
           working-directory: ./frontend
 
       - name: Start backend
-        run: npm run start:prod
+        run: npm run start
         working-directory: ./backend
