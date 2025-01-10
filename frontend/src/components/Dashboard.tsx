@@ -11,7 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import useAxiosWithAuth from "./auth/useAxiosWithAuth";
+// import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 // import { Event } from "../types";
 
 ChartJS.register(
@@ -80,7 +80,7 @@ const DashboardWrapper = styled.div`
 const Dashboard: React.FC = () => {
   // const [events, setEvents] = useState<Event[]>([]);
   // // const [loading, setLoading] = useState(true);
-  const axiosInstance = useAxiosWithAuth();
+  // const axiosInstance = useAxiosWithAuth();
   // // useEffect(() => {
   // //   const fetchEvents = async () => {
   // //     try {

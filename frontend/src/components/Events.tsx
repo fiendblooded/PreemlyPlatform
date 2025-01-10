@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Event } from "../types";
 import EventList from "./EventList";
-import { useNavigate } from "react-router-dom";
-import { CTAButton, MenuButtonText } from "./SideBar";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import useAuthSetup from "../useAuthSetup";
 import TopBar from "./TopBar";
@@ -18,10 +16,11 @@ const ContentWrapper = styled.div`
   flex-direction: column;
 `;
 
-export const Header = styled.h1`
+export const Header = styled.div`
+  margin-top: 20px;
   color: #061c3a; /* Purple */
   display: flex;
-  font-size: 32px;
+  font-size: 28px;
   justify-content: space-between;
 `;
 
@@ -32,7 +31,7 @@ const SpinnerContainer = styled.div`
   margin-top: 300px;
   width: 100%;
 `;
-const Spinner = styled.div`
+export const Spinner = styled.div`
   border: 8px solid rgba(0, 0, 0, 0.1);
   width: 52px;
   height: 52px;
@@ -46,36 +45,74 @@ const Spinner = styled.div`
     }
   }
 `;
+const SearchContainer = styled.div`
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
+  width: 100%;
+  max-width: 400px;
+`;
+
+export const SearchIcon = styled.svg`
+  width: 20px;
+  height: 20px;
+  fill: rgb(137, 137, 137);
+  margin-right: 8px;
+`;
+
 const SearchInput = styled.input`
-  width: 300px;
-  height: 30px;
-  padding: 10px;
-
-  font-size: 1rem;
-  border: 1px solid #444;
-  border-radius: 5px;
-  background-color: #121212;
-  color: #f5f5f5;
-
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #333;
+  outline: none;
   &:focus {
-    outline: none;
-    border-color: #9370db; /* Purple */
+  }
+  &::placeholder {
+    color: #aaa;
   }
 `;
-const EventsCount = styled.div`
-  font-size: 24px;
-  color: blue;
-  padding-bottom: 8px;
+
+export const ActiveStatusContainer = styled.div<{ isDetail?: boolean }>`
+  margin: 0px;
+  margin-top: 80px;
+  display: flex;
+  ${(props) => props.isDetail && "width: 70%; margin: 20px auto;"}
+  gap: 20px;
+  border-bottom: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
 `;
-const Title = styled.div``;
+export const ActiveStatusButton = styled.div<{
+  isActive: boolean;
+  marginLeft?: number;
+}>`
+  color: ${(props) => (props.isActive ? "black" : "rgb(167, 167, 167)")};
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: ${(props) =>
+    props.marginLeft != undefined ? props.marginLeft : 28}px;
+  border-bottom: 2px solid
+    ${(props) => (props.isActive ? "#e6bf30" : "transparent")};
+
+  /* Add smooth transition */
+  transition: color 0.3s ease, border-bottom-color 0.3s ease;
+
+  &:hover {
+    color: ${(props) => (props.isActive ? "black" : "grey")};
+    border-bottom: 2px solid ${(props) => (props.isActive ? "#e6bf30" : "grey")};
+  }
+`;
 
 const Events: React.FC = () => {
   useAuthSetup();
+  const [activeStatus, setActiveStatus] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const axiosInstance = useAxiosWithAuth();
-  const navigate = useNavigate();
-
   const fetchEvents = async () => {
     setLoading(true); // Start loading
     try {
@@ -102,42 +139,80 @@ const Events: React.FC = () => {
   const filteredEvents =
     events?.filter(
       (event) =>
-        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          event.description
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())) &&
+        !!event.poster === activeStatus
     ) || [];
-
-  console.log({ events });
 
   return (
     <PageWrapper>
       <TopBar sectionTitle="Events" />
+      <ActiveStatusContainer>
+        <ActiveStatusButton
+          isActive={activeStatus}
+          onClick={() => setActiveStatus(true)}
+        >
+          Active Events
+        </ActiveStatusButton>
+        <ActiveStatusButton
+          isActive={!activeStatus}
+          onClick={() => setActiveStatus(false)}
+        >
+          Past Events
+        </ActiveStatusButton>
+      </ActiveStatusContainer>
       <ContentWrapper>
         <Header>
-          Your events <EventsCount>({filteredEvents.length})</EventsCount>
-          <SearchInput
-            type="text"
-            placeholder="Search for an event..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
-          <CTAButton onClick={() => navigate("/events/create-new-event")}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M10 14.1667V7.5M13.3333 10.8342L6.66667 10.8333M5.83333 2.5V4.16667M14.1667 2.5V4.16667M5.16667 17.5H14.8333C15.7668 17.5 16.2335 17.5 16.59 17.3183C16.9036 17.1586 17.1586 16.9036 17.3183 16.59C17.5 16.2335 17.5 15.7668 17.5 14.8333V6.83333C17.5 5.89991 17.5 5.4332 17.3183 5.07668C17.1586 4.76308 16.9036 4.50811 16.59 4.34832C16.2335 4.16667 15.7668 4.16667 14.8333 4.16667H5.16667C4.23325 4.16667 3.76654 4.16667 3.41002 4.34832C3.09641 4.50811 2.84144 4.76308 2.68166 5.07668C2.5 5.4332 2.5 5.89991 2.5 6.83333V14.8333C2.5 15.7668 2.5 16.2335 2.68166 16.59C2.84144 16.9036 3.09641 17.1586 3.41002 17.3183C3.76654 17.5 4.23325 17.5 5.16667 17.5Z"
-                stroke="currentcolor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <MenuButtonText>Add event</MenuButtonText>
-          </CTAButton>
+          {filteredEvents.length} {activeStatus ? "Active" : "Past"} event
+          {(filteredEvents.length > 1 || filteredEvents.length === 0) && "s"}
+          <SearchContainer>
+            <SearchIcon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.9536 14.9458L21 21M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+                  stroke="rgb(137, 137, 137)"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </SearchIcon>
+            <SearchInput
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+
+            {searchQuery != "" && (
+              <svg
+                onClick={() => {
+                  setSearchQuery("");
+                }}
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 9L15 15M15 9L9 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                  stroke="rgb(137, 137, 137)"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            )}
+          </SearchContainer>
         </Header>
 
         {loading ? (

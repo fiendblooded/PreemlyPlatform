@@ -7,7 +7,7 @@ export type Guest = {
 };
 
 export type Event = {
-  date: string | number | Date;
+  date: string;
   _id: string;
   title: string;
   description: string;

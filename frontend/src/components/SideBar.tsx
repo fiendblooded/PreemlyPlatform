@@ -1,6 +1,5 @@
 import styled, { createGlobalStyle } from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
-import UserProfile from "./auth/UserProfile";
 import Logo from "../logo.png";
 const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -158,7 +157,7 @@ export const CTAButton = styled.button`
   border-radius: 6px;
   height: 36px;
   width: 160px;
-  font-weight: bold;
+
   display: flex;
   cursor: pointer;
   gap: 6px;
@@ -181,8 +180,8 @@ const ImageContainer = styled.div`
   height: 60px;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 20px;
+  cursor: pointer;
 `;
 
 const Sidebar: React.FC = () => {
@@ -200,7 +199,12 @@ const Sidebar: React.FC = () => {
       <GlobalStyle />
       <SidebarTopContainer>
         <ImageContainer>
-          <img src={Logo} alt="logo" width={"55%"} />
+          <img
+            src={Logo}
+            onClick={() => navigate("/")}
+            alt="logo"
+            width={"55%"}
+          />
         </ImageContainer>
         <MenuButton onClick={() => navigate("/")} isactive={getPageStatus("")}>
           <svg
@@ -320,7 +324,6 @@ const Sidebar: React.FC = () => {
           <MenuButtonText>PreemBot</MenuButtonText>
         </MenuButton>
       </SidebarTopContainer>
-      <UserProfile />
     </SidebarWrapper>
   );
 };

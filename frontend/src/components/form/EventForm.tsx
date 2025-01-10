@@ -141,7 +141,7 @@ const EventForm: React.FC = () => {
         ownerId: user?.sub || "random", // Use the Auth0 user ID
         poster: poster,
         guests: [],
-        date: "2023-07-15T10:30:00Z",
+        date: new Date().toISOString(), // Use the current date and time in ISO format
       });
 
       console.log("Event created:", response);
