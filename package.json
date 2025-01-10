@@ -1,18 +1,22 @@
 {
   "name": "preemlyplatform",
-  "version": "1.0.0",
+  "version": "1.1",
   "description": "Codebase for preemly platform at platform.preemly.eu",
+  "author": "b.myrinets & t.arhipov",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_ENV=development node backend/server.js",
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
-    "start": "NODE_ENV=production node backend/server.js"
+    "start:test": "NODE_ENV=development nodemon backend/index.js",
+    "start:dev": "NODE_ENV=development node backend/index.js",
+    "start:prod": "NODE_ENV=production node backend/index.js",
+    "start": "node backend/index.js"
   },
   "type": "module",
-  "author": "",
-  "license": "ISC",
+  "license": "CC-BY-NC-4.0",
   "dependencies": {
+    "axios": "^1.7.9",
     "body-parser": "^1.20.3",
+    "cloudinary": "^2.5.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
