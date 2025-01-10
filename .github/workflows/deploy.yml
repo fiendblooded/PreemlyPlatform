@@ -37,8 +37,9 @@ jobs:
         uses: amondnet/vercel-action@v20
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-args: '--prod --yes'
           working-directory: ./frontend
-          vercel-args: '--prod'
+        
 
       - name: Start backend
         run: npm run start
