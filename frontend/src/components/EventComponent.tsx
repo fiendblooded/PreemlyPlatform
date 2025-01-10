@@ -6,14 +6,15 @@ interface EventProps {
   event: Event;
 }
 
-const Card = styled.div`
+const Card = styled.div<{ isPublished: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 300px; /* Adjust to control the card size */
   height: 400px; /* Adjust height for the poster */
-  border: 1px solid rgb(214, 214, 214);
-  border-radius: 8px;
+  // border: 1px solid rgb(214, 214, 214);
+  border-top: 4px solid ${(props) => (props.isPublished ? "#83d4b7" : "grey")};
+  border-radius: 4px;
   background-color: #ffffff;
   color: #f5f5f5;
   padding: 15px;
@@ -30,7 +31,7 @@ const Card = styled.div`
 
 const Poster = styled.img`
   width: 100%;
-  height: 180px; /* Fixed height for the poster */
+  height: 150px; /* Fixed height for the poster */
   object-fit: cover; /* Maintain aspect ratio and crop if needed */
   border-radius: 8px;
   margin-bottom: 10px;
@@ -83,17 +84,21 @@ const InfoBar = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-top: 10px;
+  border-top: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
 `;
 
 const GuestCount = styled.div`
   display: flex;
   align-items: center;
+  line-height: 100px;
   font-size: 0.9rem;
   color: black;
+  height: 30px;
 
   svg {
+    padding-bottom: 6px;
     margin-right: 5px;
-    color: #9370db; /* Purple */
   }
 `;
 
@@ -104,6 +109,7 @@ const EventComponent: React.FC<EventProps> = ({ event }) => {
 
   return (
     <Card
+      isPublished={!!event.poster}
       onClick={() =>
         navigate(`/events/${event._id}`, {
           state: { from: location.pathname },
@@ -122,9 +128,24 @@ const EventComponent: React.FC<EventProps> = ({ event }) => {
       <Description>{event.description}</Description>
       <InfoBar>
         <GuestCount>
-          🧑 {event.guests.length}{" "}
-          {event.guests.length != 1 ? "Guests" : "Guest"}
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M13 20V18C13 15.2386 10.7614 13 8 13C5.23858 13 3 15.2386 3 18V20H13ZM13 20H21V19C21 16.0545 18.7614 14 16 14C14.5867 14 13.3103 14.6255 12.4009 15.6311M11 7C11 8.65685 9.65685 10 8 10C6.34315 10 5 8.65685 5 7C5 5.34315 6.34315 4 8 4C9.65685 4 11 5.34315 11 7ZM18 9C18 10.1046 17.1046 11 16 11C14.8954 11 14 10.1046 14 9C14 7.89543 14.8954 7 16 7C17.1046 7 18 7.89543 18 9Z"
+              stroke="black"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          {event.guests.length} {event.guests.length != 1 ? "Guests" : "Guest"}
         </GuestCount>
+        <GuestCount>{new Date(event.date).toLocaleString()}</GuestCount>
       </InfoBar>
     </Card>
   );

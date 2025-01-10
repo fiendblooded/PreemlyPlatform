@@ -10,7 +10,6 @@ const ListWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 55px;
-  margin-top: 20px;
 `;
 
 const EmptyMessage = styled.p`

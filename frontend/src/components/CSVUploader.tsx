@@ -4,7 +4,6 @@ import Papa from "papaparse"; // CSV parser library
 import React from "react";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 
-const __dirname = window.location.origin;
 const Wrapper = styled.div`
   margin-top: 20px;
   padding: 20px;
