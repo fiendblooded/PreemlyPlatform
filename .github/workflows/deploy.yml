@@ -3,7 +3,7 @@ name: Deploy to Vercel
 on:
   push:
     branches:
-      - main
+      - main # Запуск на пуш в ветку main
 
 jobs:
   deploy:
@@ -36,9 +36,9 @@ jobs:
       - name: Deploy frontend to Vercel
         uses: amondnet/vercel-action@v20
         with:
-            token: ${{ secrets.VERCEL_TOKEN }}
-            working-directory: ./frontend
-            args: '--prod'
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          working-directory: ./frontend
+          vercel-args: '--prod'
 
       - name: Start backend
         run: npm run start
