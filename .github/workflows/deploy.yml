@@ -36,9 +36,9 @@ jobs:
       - name: Deploy frontend to Vercel
         uses: amondnet/vercel-action@v20
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
-          working-directory: ./frontend
+            token: ${{ secrets.VERCEL_TOKEN }}
+            working-directory: ./frontend
+            args: '--prod'
 
       - name: Start backend
         run: npm run start
