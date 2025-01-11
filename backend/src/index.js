@@ -7,7 +7,7 @@ import Guest from "./models/guest.model.js";
 import path from "path";
 import verifyUser from "./utils/verify-user.js";
 import bodyParser from "body-parser";
-import sendEmail from "./services/mailgun.service.js";
+// import sendEmail from "./services/mailgun.service.js";
 import { uploadImage } from "./config/cloudinary.js";
 import { v2 as cloudinary } from "cloudinary";
 import extractPublicId from "./utils/helpers.js";
@@ -47,7 +47,7 @@ app.use(express.json()); // Parse JSON data in the request body
 // Connect to database
 app.listen(PORT, () => {
   connectDB();
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on PORT: ${PORT}`);
 });
 
 app.post("/api/mail", async (req, res) => {
@@ -60,7 +60,7 @@ app.post("/api/mail", async (req, res) => {
   }
 
   try {
-    await sendEmail(recipient, subject, htmlContent);
+    // await sendEmail(recipient, subject, htmlContent);
     res.status(204).send();
   } catch (error) {
     console.error("Error in Create Event:", error.message);
@@ -342,9 +342,9 @@ app.put("/api/guests/:id/attendance", async (req, res) => {
   }
 });
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "/frontend/dist")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
-  });
-}
+// if (process.env.NODE_ENV === "production") {
+//   app.use(express.static(path.join(__dirname, "/frontend/dist")));
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+//   });
+// }

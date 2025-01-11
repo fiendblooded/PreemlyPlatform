@@ -10,7 +10,6 @@ import WelcomeScreen from "./components/WelcomeScreen";
 import Events from "./components/Events";
 import Dashboard from "./components/Dashboard";
 import ChatbotPage from "./components/chatbot/ChatbotPage";
-import PreembotButton from "./components/PreembotButton";
 import useAuthSetup from "./useAuthSetup";
 
 export const GlobalStyle = createGlobalStyle`

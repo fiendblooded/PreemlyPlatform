@@ -5,11 +5,9 @@
   "author": "b.myrinets & t.arhipov",
   "main": "index.js",
   "scripts": {
-    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
-    "start:test": "NODE_ENV=development nodemon backend/index.js",
-    "start:dev": "NODE_ENV=development node backend/index.js",
-    "start:prod": "NODE_ENV=production node backend/index.js",
-    "start": "node backend/index.js"
+    "start:dev": "NODE_ENV=development nodemon src/index.js",
+    "start:prod": "NODE_ENV=production node src/index.js",
+    "start": "node src/index.js"
   },
   "type": "module",
   "license": "CC-BY-NC-4.0",

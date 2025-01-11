@@ -5,9 +5,9 @@ const useAxiosWithAuth = () => {
   const { getAccessTokenSilently } = useAuth0();
   //const __dirname = window.location.origin;
   const axiosInstance = axios.create({
-    baseURL: `http://localhost:5001/api`, // Your backend's base URL
+    baseURL: `https://backend-opal-sigma.vercel.app/api`,
   });
-  const audience = "https://api.preemly.eu";
+  const audience = "https://dev-ye6rboqfch0cwuik.us.auth0.com/api/v2/";
   const scopes = "read:events write:events offline_access";
   // Add a request interceptor to include the token
   axiosInstance.interceptors.request.use(async (config) => {

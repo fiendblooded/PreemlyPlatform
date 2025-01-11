@@ -11,7 +11,7 @@ const useAuthSetup = () => {
         try {
           await getAccessTokenSilently({
             authorizationParams: {
-              audience: "https://api.preemly.eu", // Your API
+              audience: "https://dev-ye6rboqfch0cwuik.us.auth0.com/api/v2/", // Your API
               scope: "read:events write:events",
             },
           });

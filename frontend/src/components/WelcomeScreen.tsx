@@ -46,7 +46,7 @@ const Countdown = styled.div`
 const WelcomeScreen: React.FC = () => {
   const [guestName, setGuestName] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>("");
-  const message = useWebSocket("ws://localhost:3002");
+  const message = useWebSocket("ws://frontend-pi-bay-46.vercel.app/ws");
 
   useEffect(() => {
     const targetDate = new Date("2024-12-12T18:30:00").getTime();

@@ -119,7 +119,7 @@ const LoginPage: React.FC = () => {
         onClick={() =>
           loginWithRedirect({
             authorizationParams: {
-              audience: "https://api.preemly.eu",
+              audience: "https://dev-ye6rboqfch0cwuik.us.auth0.com/api/v2/",
               scope: "read:events write:events",
               prompt: "consent", // Force showing the consent screen
             },
