@@ -11,7 +11,7 @@ const verifyUser = (req, res, next) => {
       .json({ success: false, message: "Unauthorized: No token provided" });
   }
   const auth0Domain = "dev-ye6rboqfch0cwuik.us.auth0.com"; // e.g., "your-domain.auth0.com"
-  const audience = "https://dev-ye6rboqfch0cwuik.us.auth0.com/api/v2/";
+  const audience = "https://api.preemly.eu";
   const client = jwksRsa({
     jwksUri: `https://${auth0Domain}/.well-known/jwks.json`,
   });
