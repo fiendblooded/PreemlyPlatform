@@ -3,8 +3,9 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { Auth0Provider } from "@auth0/auth0-react";
-const domain = "dev-ye6rboqfch0cwuik.us.auth0.com";
-const clientId = "V5rE0wHpT72anvpCAQ8B6IJ5NKvOiGTp";
+const domain = import.meta.env.VITE_APP_DOMAIN;
+const clientId = import.meta.env.VITE_APP_CLIENTID;
+const audience = import.meta.env.VITE_APP_AUDIENCE;
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -16,7 +17,7 @@ root.render(
       clientId={clientId}
       authorizationParams={{
         redirect_uri: window.location.origin,
-        audience: "https://api.preemly.eu", // Your API
+        audience: audience,
         scope: "read:events write:events offline_access",
       }}
     >

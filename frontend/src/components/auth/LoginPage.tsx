@@ -1,6 +1,8 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import styled, { keyframes } from "styled-components";
 
+const audience = import.meta.env.VITE_APP_AUDIENCE;
+
 const LoginContainer = styled.div`
   width: 100%;
   height: 100%;
@@ -119,7 +121,7 @@ const LoginPage: React.FC = () => {
         onClick={() =>
           loginWithRedirect({
             authorizationParams: {
-              audience: "https://api.preemly.eu",
+              audience: audience,
               scope: "read:events write:events",
               prompt: "consent", // Force showing the consent screen
             },
