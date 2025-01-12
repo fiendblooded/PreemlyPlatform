@@ -61,6 +61,7 @@ app.post("/api/mail", async (req, res) => {
 
   try {
     // await sendEmail(recipient, subject, htmlContent);
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!");
     res.status(204).send();
   } catch (error) {
     console.error("Error in Create Event:", error.message);
