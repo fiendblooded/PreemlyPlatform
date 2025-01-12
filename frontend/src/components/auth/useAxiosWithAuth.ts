@@ -4,10 +4,11 @@ import { useAuth0 } from "@auth0/auth0-react";
 const useAxiosWithAuth = () => {
   const { getAccessTokenSilently } = useAuth0();
   //const __dirname = window.location.origin;
+  const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const axiosInstance = axios.create({
-    baseURL: `http://localhost:5001/api`, // Your backend's base URL
+    baseURL: backendUrl, // Your backend's base URL
   });
-  const audience = "https://api.preemly.eu";
+  const audience = import.meta.env.VITE_APP_AUDIENCE;
   const scopes = "read:events write:events offline_access";
   // Add a request interceptor to include the token
   axiosInstance.interceptors.request.use(async (config) => {

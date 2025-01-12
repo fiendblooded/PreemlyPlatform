@@ -4,6 +4,7 @@ import { useEffect } from "react";
 const useAuthSetup = () => {
   const { isAuthenticated, getAccessTokenSilently, loginWithRedirect } =
     useAuth0();
+  const audience = import.meta.env.VITE_APP_AUDIENCE;
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -11,7 +12,7 @@ const useAuthSetup = () => {
         try {
           await getAccessTokenSilently({
             authorizationParams: {
-              audience: "https://api.preemly.eu", // Your API
+              audience: audience, // тут не работает
               scope: "read:events write:events",
             },
           });
