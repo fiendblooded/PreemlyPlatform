@@ -6,7 +6,7 @@ const useAxiosWithAuth = () => {
   //const __dirname = window.location.origin;
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const axiosInstance = axios.create({
-    baseURL: backendUrl, // Your backend's base URL
+    baseURL: backendUrl,
   });
   const audience = import.meta.env.VITE_APP_AUDIENCE;
   const scopes = "read:events write:events offline_access";
