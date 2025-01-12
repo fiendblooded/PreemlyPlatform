@@ -18,7 +18,7 @@ const app = express();
 app.use(cors());
 dotenv.config();
 const PORT = process.env.PORT || 3002;
-app.use(bodyParser.json({ limit: "10mb" })); // Increase JSON payload limit
+app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" })); // For form data
 
 cloudinary.config({
