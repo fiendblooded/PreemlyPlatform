@@ -12,28 +12,32 @@ const mg = mailgun.client({
 });
 
 const validateEmail = (email) => {
-  // Простая регулярная проверка формата email
   const re = /\S+@\S+\.\S+/;
   return re.test(email);
 };
 
 const sendEmail = async (recipient, subject, htmlContent) => {
-  recipient = ["timur1arkhipov@gmail.com"]
-  if (!validateEmail(recipient)) {
+  if (Array.isArray(recipient)) {
+    for (let email of recipient) {
+      if (!validateEmail(email)) {
+        throw new Error(`Invalid email address: ${email}`);
+      }
+    }
+  } else if (!validateEmail(recipient)) {
     throw new Error(`Invalid email address: ${recipient}`);
   }
 
   try {
     const response = await mg.messages.create("preemly.eu", {
-      from: "info@preemly.eu", // Must match the verified Mailgun domain
-      to: [recipient],
+      from: "info@preemly.eu",
+      to: recipient,
       subject: subject,
       html: htmlContent,
     });
 
     return response;
   } catch (error) {
-    console.error(error);
+    console.error("Error in Create Event:", error);
     throw error;
   }
 };
