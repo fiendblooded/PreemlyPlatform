@@ -33,7 +33,7 @@ const sendEmail = async (recipient, subject, htmlContent) => {
 
     return response;
   } catch (error) {
-    console.error("Error sending email with Mailgun:", error);
+    console.error(error);
     throw error;
   }
 };
