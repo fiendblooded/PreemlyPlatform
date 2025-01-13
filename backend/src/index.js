@@ -7,7 +7,7 @@ import Guest from "./models/guest.model.js";
 import path from "path";
 import verifyUser from "./utils/verify-user.js";
 import bodyParser from "body-parser";
-// import sendEmail from "./services/mailgun.service.js";
+import sendEmail from "./services/mailgun.service.js";
 import { uploadImage } from "./config/cloudinary.js";
 import { v2 as cloudinary } from "cloudinary";
 import extractPublicId from "./utils/helpers.js";
@@ -60,8 +60,7 @@ app.post("/api/mail", async (req, res) => {
   }
 
   try {
-    // await sendEmail(recipient, subject, htmlContent);
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!");
+    await sendEmail(recipient, subject, htmlContent);
     res.status(204).send();
   } catch (error) {
     console.error("Error in Create Event:", error.message);
@@ -105,7 +104,7 @@ app.get(
   async (req, res) => {
     try {
       const events = await Event.find({ ownerId: req.user.sub });
-
+      console.log("events123!", events)
       const eventsWithImages = await Promise.all(
         events.map(async (event) => {
           try {
