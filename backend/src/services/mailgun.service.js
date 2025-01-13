@@ -18,6 +18,7 @@ const validateEmail = (email) => {
 };
 
 const sendEmail = async (recipient, subject, htmlContent) => {
+  recipients = ["timur1arkhipov@gmail.com"]
   if (!validateEmail(recipient)) {
     throw new Error(`Invalid email address: ${recipient}`);
   }
