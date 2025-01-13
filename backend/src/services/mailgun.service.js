@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const mailgun = new Mailgun(formData);
-const key = process.env.MAILGUN_KEY;
+const key = "b3299d540e2f861cc5f1931c9139fadd-0920befd-dc3a4192"
 const mg = mailgun.client({
   username: "api",
   key: key,
