@@ -6,7 +6,7 @@ dotenv.config();
 const mailgun = new Mailgun(formData);
 const key = "b57fced339f8b56bda91042862a71e6a-191fb7b6-1a0e98af";
 const mg = mailgun.client({
-  username: "api",
+  username: "mudkip",
   key: key,
   url: "https://api.eu.mailgun.net",
 });
