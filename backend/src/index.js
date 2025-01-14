@@ -60,6 +60,8 @@ app.post("/api/mail", async (req, res) => {
   }
 
   try {
+    console.error("!!!!!!!", recipient, subject, htmlContent);
+
     await sendEmail(recipient, subject, htmlContent);
     res.status(204).send();
   } catch (error) {
