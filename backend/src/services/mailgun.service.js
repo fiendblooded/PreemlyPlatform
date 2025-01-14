@@ -7,7 +7,7 @@ const mailgun = new Mailgun(formData);
 
 // Используем ключ из примера
 const key = "b57fced339f8b56bda91042862a71e6a-191fb7b6-1a0e98af";
-const domain = "sandbox-123.mailgun.org";
+const domain = "sandbox962334c8dbd348f8b4a8584175564a7b.mailgun.org";
 
 const mg = mailgun.client({
   username: "api",
