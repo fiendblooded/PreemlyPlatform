@@ -47,7 +47,7 @@ app.use(express.json()); // Parse JSON data in the request body
 // Connect to database
 app.listen(PORT, () => {
   connectDB();
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on PORT:${PORT}`);
 });
 
 app.post("/api/mail", async (req, res) => {
@@ -60,7 +60,7 @@ app.post("/api/mail", async (req, res) => {
   }
 
   try {
-    console.error("!!!!!!!", recipient, subject, htmlContent);
+    console.error("Data:", recipient, subject, htmlContent);
 
     await sendEmail(recipient, subject, htmlContent);
     res.status(204).send();
