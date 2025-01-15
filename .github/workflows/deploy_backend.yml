@@ -23,24 +23,10 @@ jobs:
           cd backend
           npm ci
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v20
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku_deploy@v3.12.12
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod --yes'
+          heroku_api_key: "HRKU-eab5f280-333c-4a4c-a891-4f0203c8d84c"
+          heroku_app_name: "preemly"
+          heroku_email: "myrinets.bohdan@gmail.com"
           working-directory: ./backend
-        env:
-            MONGO_URI: ${{ secrets.MONGO_URI }}
-            PORT: ${{ secrets.PORT }}
-            MAILGUN_KEY: ${{ secrets.MAILGUN_KEY }}
-            API_KEY: ${{ secrets.API_KEY }}
-            AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
-            CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-            CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-            CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-            VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-            VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-            VITE_APP_AUDIENCE: ${{ secrets.VITE_APP_AUDIENCE }}
-            VITE_APP_DOMAIN: ${{ secrets.VITE_APP_DOMAIN }}
-            VITE_APP_CLIENTID: ${{ secrets.VITE_APP_CLIENTID }}
-            VITE_APP_WS_URL: ${{ secrets.VITE_APP_WS_URL }}
