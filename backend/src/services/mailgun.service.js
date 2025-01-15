@@ -39,6 +39,7 @@ const sendEmail = async (recipient, subject, htmlContent) => {
     return response;
   } catch (error) {
     console.error("Error in Create Event:", error);
+
     throw error;
   }
 };
