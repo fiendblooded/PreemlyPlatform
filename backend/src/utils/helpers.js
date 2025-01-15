@@ -6,6 +6,7 @@ const extractPublicId = (url) => {
     return fileName.split(".")[0];
   } catch (error) {
     console.error("Error extracting public_id:", error.message);
+
     throw new Error("Invalid Cloudinary URL format");
   }
 };
