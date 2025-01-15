@@ -16,9 +16,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 18.20.4
           cache: 'npm'
           cache-dependency-path: './backend/package-lock.json'
+
+      - name: Install specific npm version
+        run: npm install -g npm@8.19.4
 
       - name: Install Dependencies
         working-directory: ./backend
