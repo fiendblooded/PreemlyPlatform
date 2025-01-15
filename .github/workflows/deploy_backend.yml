@@ -11,10 +11,10 @@ jobs:
   deploy-backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
           node-version: '18'
 
@@ -24,7 +24,7 @@ jobs:
           npm ci
 
       - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v4.1.6
+        uses: akhileshns/heroku-deploy@v3.13.15
         with:
           heroku_api_key: "HRKU-eab5f280-333c-4a4c-a891-4f0203c8d84c"
           heroku_app_name: "preemly"

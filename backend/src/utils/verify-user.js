@@ -38,6 +38,7 @@ const verifyUser = (req, res, next) => {
     (err, decoded) => {
       if (err) {
         console.error("JWT verification failed:", err);
+
         return res
           .status(401)
           .json({ success: false, message: "Unauthorized: Invalid token" });
