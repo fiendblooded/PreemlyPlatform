@@ -150,6 +150,7 @@ app.get("/api/events/:id", async (req, res) => {
       const imageResponse = await axios.get(event.poster, {
         responseType: "arraybuffer",
       });
+
       const imageBase64 = Buffer.from(imageResponse.data, "binary").toString("base64");
 
       res.json({
