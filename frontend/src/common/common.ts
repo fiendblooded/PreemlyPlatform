@@ -7,9 +7,9 @@ export function getDateRangeDetails(date1: string, date2: string): string {
     throw new Error("Invalid date format.");
   }
 
-  if (startDate > endDate) {
-    throw new Error("Start date must be earlier than end date.");
-  }
+  // if (startDate > endDate) {
+  //   throw new Error("Start date must be earlier than end date.");
+  // }
 
   // Check if the dates are on the same day
   const isSameDay = startDate.toDateString() === endDate.toDateString();

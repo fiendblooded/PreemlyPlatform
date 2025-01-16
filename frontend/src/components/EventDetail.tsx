@@ -691,7 +691,7 @@ const EventDetail: React.FC = () => {
                 <thead>
                   <tr>
                     <th>Full Name</th>
-                    <th>Age</th>
+                    {/* <th>Age</th> */}
                     <th>Email</th>
                     <th>Attendance</th>
                     <th>Actions</th>
@@ -714,7 +714,7 @@ const EventDetail: React.FC = () => {
                   {filteredGuests?.map((guest) => (
                     <tr key={guest._id}>
                       <td>{guest.fullName}</td>
-                      <td>{guest.age}</td>
+                      {/* <td>{guest.age}</td> */}
                       <td>{guest.email}</td>
                       <td>{guest.attendance_status ? "Present" : "Absent"}</td>
                       <td></td>
@@ -734,7 +734,7 @@ const EventDetail: React.FC = () => {
                           }
                         />
                       </td>
-                      <td>
+                      {/* <td>
                         <input
                           type="number"
                           placeholder="Age"
@@ -747,7 +747,7 @@ const EventDetail: React.FC = () => {
                             )
                           }
                         />
-                      </td>
+                      </td> */}
                       <td>
                         <input
                           type="email"

@@ -9,7 +9,7 @@ const ToastWrapper = styled.div<{ visible: boolean }>`
   color: white;
   padding: 15px 20px;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   opacity: ${(props) => (props.visible ? 1 : 0)};
   transition: opacity 0.5s ease-in-out;

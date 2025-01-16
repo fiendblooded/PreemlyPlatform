@@ -4,6 +4,7 @@ import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { Header } from "./Events";
 import ToastNotification from "./ToastNotification"; // Import the reusable component
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -23,18 +24,20 @@ const ScannerPage: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState<boolean>(false);
   const axiosInstance = useAxiosWithAuth();
+  const navigate = useNavigate();
   const handleScan = async (result: IDetectedBarcode[]) => {
     const guestId = result[0].rawValue; // Assuming result contains the guest ID
 
     const response = await axiosInstance.put(`/guests/${guestId}/attendance`);
-    console.log(response);
-    setToastMessage(`Guest ${response.data.guest?.fullName} marked as present`);
+    const name = response.data.data.fullName;
+    setToastMessage(`Welcome to the Hackathon, ${name}`);
     setToastVisible(true);
 
     // Hide the toast after 5 seconds
     setTimeout(() => {
       setToastVisible(false);
       setToastMessage(null);
+      navigate("/welcome");
     }, 3002);
     // } catch (error) {
     //   console.error("Error updating attendance:", error);
