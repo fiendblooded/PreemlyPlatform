@@ -12,7 +12,7 @@ const useAuthSetup = () => {
         try {
           await getAccessTokenSilently({
             authorizationParams: {
-              audience: audience, // тут не работает
+              audience: audience,
               scope: "read:events write:events",
             },
           });

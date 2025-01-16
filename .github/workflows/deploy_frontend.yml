@@ -28,15 +28,6 @@ jobs:
           cd frontend
           npm run build
         env:
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          PORT: ${{ secrets.PORT }}
-          MAILGUN_KEY: ${{ secrets.MAILGUN_KEY }}
-          API_KEY: ${{ secrets.API_KEY }}
-          AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
-          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_APP_AUDIENCE: ${{ secrets.VITE_APP_AUDIENCE }}
           VITE_APP_DOMAIN: ${{ secrets.VITE_APP_DOMAIN }}

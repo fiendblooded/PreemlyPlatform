@@ -46,7 +46,7 @@ app.use(express.json()); // Parse JSON data in the request body
 // Connect to database
 app.listen(PORT, () => {
   connectDB();
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on PORT:${PORT}`);
 });
 
 //SEND EMAIL
@@ -60,6 +60,8 @@ app.post("/api/mail", async (req, res) => {
   }
 
   try {
+    console.error("Data:", recipient, subject, htmlContent);
+
     await sendEmail(recipient, subject, htmlContent);
     res.status(204).send();
   } catch (error) {
@@ -107,7 +109,7 @@ app.get(
   async (req, res) => {
     try {
       const events = await Event.find({ ownerId: req.user.sub });
-
+      console.log("events123!", events);
       const eventsWithImages = await Promise.all(
         events.map(async (event) => {
           try {
