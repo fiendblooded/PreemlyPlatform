@@ -14,9 +14,8 @@ import {
 } from "./Events";
 import { getDateRangeDetails } from "../common/common";
 import ToastNotification from "./ToastNotification";
-// import sendEmail from "../mailgunService";
 
-const PageWrapper = styled.div`
+export const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
 `;
@@ -89,7 +88,7 @@ const SearchContainer = styled.div`
 
   /* Highlight the container when the input inside is focused */
   &:focus-within {
-    border-color: #f4c430; /* Yellow border */
+    border-color: rgb(107, 61, 223); /* Yellow border */
   }
 `;
 
@@ -197,16 +196,16 @@ const GuestTableHeaderContainer = styled.div`
   justify-content: space-between;
   align-items: center;
 `;
-const AddGuestButton = styled.button<{ marginTop?: number }>`
-  width: 160px;
+const PrimaryButton = styled.button<{ marginTop?: number; width?: number }>`
+  width: ${(props) => (props.width ? props.width : 160)}px;
   margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
-  background-color: #f4c430;
+  background-color: rgb(107, 61, 223);
   border: none;
   height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #121212;
+  color: white;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
@@ -214,7 +213,28 @@ const AddGuestButton = styled.button<{ marginTop?: number }>`
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #ffd700;
+    background-color: rgb(155, 119, 249);
+  }
+`;
+const SecondaryButton = styled.button<{ marginTop?: number; width?: number }>`
+  width: ${(props) => (props.width ? props.width : 160)}px;
+  margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
+  background-color: white;
+  border: none;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #875cf5;
+  color: #875cf5;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: rgb(239, 233, 255);
   }
 `;
 const DeleteButton = styled.div`
@@ -235,26 +255,6 @@ const DeleteButton = styled.div`
   }
 `;
 
-const SaveGuestsButton = styled.button<{ marginTop?: number }>`
-  width: 160px;
-  margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
-  background-color: #9370db;
-  border: none;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #121212;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #7a5fc7;
-  }
-`;
 const DetailsHeader = styled.div`
   width: 70%;
 
@@ -292,7 +292,7 @@ const GuestActionsButtonsContainer = styled.div`
   display: flex;
   gap: 6px;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
 `;
 
 const EventDetail: React.FC = () => {
@@ -495,7 +495,7 @@ const EventDetail: React.FC = () => {
 
   const saveGuests = async () => {
     try {
-      await axiosInstance.post(`/events/${id}/guests`, {
+      await axiosInstance.put(`/events/${id}/guests`, {
         guests: newGuests,
       });
       fetchEvent();
@@ -627,7 +627,7 @@ const EventDetail: React.FC = () => {
                   d="M3 9H21M7 3V5M17 3V5M6 13H8M6 17H8M11 13H13M11 17H13M16 13H18M16 17H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z"
                   stroke="black"
                   stroke-width="2"
-                  stroke-linecap="round"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
               </svg>
@@ -663,7 +663,7 @@ const EventDetail: React.FC = () => {
                       d="M14.9536 14.9458L21 21M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
                       stroke="rgb(137, 137, 137)"
                       stroke-width="2"
-                      stroke-linecap="round"
+                      strokeLinecap="round"
                       stroke-linejoin="round"
                     />
                   </svg>
@@ -676,12 +676,12 @@ const EventDetail: React.FC = () => {
                 />
               </SearchContainer>
               <GuestActionsButtonsContainer>
-                <SaveGuestsButton onClick={sendEmailsToGuests} marginTop={20}>
+                <SecondaryButton onClick={sendEmailsToGuests} marginTop={20}>
                   Send Emails
-                </SaveGuestsButton>
-                <AddGuestButton onClick={addNewGuestRow} marginTop={20}>
-                  Add Guest
-                </AddGuestButton>
+                </SecondaryButton>
+                <PrimaryButton onClick={addNewGuestRow} marginTop={20}>
+                  + Add Guest
+                </PrimaryButton>
               </GuestActionsButtonsContainer>
             </GuestTableHeaderContainer>
 
@@ -693,6 +693,7 @@ const EventDetail: React.FC = () => {
                     <th>Full Name</th>
                     <th>Age</th>
                     <th>Email</th>
+                    <th>Attendance</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -715,6 +716,7 @@ const EventDetail: React.FC = () => {
                       <td>{guest.fullName}</td>
                       <td>{guest.age}</td>
                       <td>{guest.email}</td>
+                      <td>{guest.attendance_status ? "Present" : "Absent"}</td>
                       <td></td>
                     </tr>
                   ))}
@@ -756,20 +758,25 @@ const EventDetail: React.FC = () => {
                           }
                         />
                       </td>
+                      <td></td>
                       <td>
                         <GuestActionsButtonsContainer>
-                          <SaveGuestsButton onClick={() => saveGuests()}>
-                            Add
-                          </SaveGuestsButton>
-                          <AddGuestButton
+                          <PrimaryButton
+                            onClick={() => saveGuests()}
+                            width={38}
+                          >
+                            +
+                          </PrimaryButton>
+                          <SecondaryButton
                             onClick={() => {
                               const reducedGuests = [...newGuests];
                               reducedGuests.splice(index, 1);
                               setNewGuests(reducedGuests);
                             }}
+                            width={38}
                           >
-                            Cancel
-                          </AddGuestButton>
+                            x
+                          </SecondaryButton>
                         </GuestActionsButtonsContainer>
                       </td>
                     </tr>

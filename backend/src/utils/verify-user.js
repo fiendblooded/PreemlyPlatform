@@ -3,7 +3,6 @@ import jwksRsa from "jwks-rsa";
 
 // Middleware to verify the JWT
 const verifyUser = (req, res, next) => {
-  console.log(req);
   const token = req.headers.authorization?.split(" ")[1]; // Extract the token
   if (!token) {
     return res
@@ -42,7 +41,6 @@ const verifyUser = (req, res, next) => {
           .status(401)
           .json({ success: false, message: "Unauthorized: Invalid token" });
       }
-      console.log("Decoded JWT:", decoded); // Debugging
       req.user = decoded; // Attach user info to the request
       next();
     }

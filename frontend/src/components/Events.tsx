@@ -6,11 +6,12 @@ import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import useAuthSetup from "../useAuthSetup";
 import TopBar from "./TopBar";
 
-const PageWrapper = styled.div`
+export const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
 `;
-const ContentWrapper = styled.div`
+export const ContentWrapper = styled.div<{ marginTop?: number }>`
+  margin-top: ${(props) => (props.marginTop ? `${props.marginTop}px` : "0px")};
   padding: 0px 25px;
   display: flex;
   flex-direction: column;
@@ -180,7 +181,7 @@ const Events: React.FC = () => {
                   d="M14.9536 14.9458L21 21M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
                   stroke="rgb(137, 137, 137)"
                   stroke-width="2"
-                  stroke-linecap="round"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
               </svg>
@@ -207,7 +208,7 @@ const Events: React.FC = () => {
                   d="M9 9L15 15M15 9L9 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
                   stroke="rgb(137, 137, 137)"
                   stroke-width="1.5"
-                  stroke-linecap="round"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
               </svg>

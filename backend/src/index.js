@@ -7,11 +7,11 @@ import Guest from "./models/guest.model.js";
 import path from "path";
 import verifyUser from "./utils/verify-user.js";
 import bodyParser from "body-parser";
-// import sendEmail from "./services/mailgun.service.js";
+import sendEmail from "./services/mailgun.service.js";
 import { uploadImage } from "./config/cloudinary.js";
 import { v2 as cloudinary } from "cloudinary";
 import extractPublicId from "./utils/helpers.js";
-import axios from 'axios';
+import axios from "axios";
 
 const __dirname = path.resolve();
 const app = express();
@@ -42,7 +42,6 @@ const checkScopes = (requiredScopes) => (req, res, next) => {
   next();
 };
 
-// Middleware
 app.use(express.json()); // Parse JSON data in the request body
 // Connect to database
 app.listen(PORT, () => {
@@ -50,6 +49,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
+//SEND EMAIL
 app.post("/api/mail", async (req, res) => {
   const { recipient, subject, htmlContent } = req.body;
 
@@ -60,8 +60,7 @@ app.post("/api/mail", async (req, res) => {
   }
 
   try {
-    // await sendEmail(recipient, subject, htmlContent);
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!");
+    await sendEmail(recipient, subject, htmlContent);
     res.status(204).send();
   } catch (error) {
     console.error("Error in Create Event:", error.message);
@@ -69,13 +68,15 @@ app.post("/api/mail", async (req, res) => {
   }
 });
 
+//CREATE EVENT
 app.post("/api/events", verifyUser, async (req, res) => {
   const event = req.body;
 
   if (!event || !event?.title || !event?.poster) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Please provide all fields, including poster" });
+    return res.status(400).json({
+      success: false,
+      message: "Please provide all fields, including poster",
+    });
   }
 
   try {
@@ -98,6 +99,7 @@ app.post("/api/events", verifyUser, async (req, res) => {
   }
 });
 
+//GET EVENTS
 app.get(
   "/api/events",
   verifyUser,
@@ -110,16 +112,22 @@ app.get(
         events.map(async (event) => {
           try {
             const imageResponse = await axios.get(event.poster, {
-              responseType: "arraybuffer", 
+              responseType: "arraybuffer",
             });
-            const imageBase64 = Buffer.from(imageResponse.data, "binary").toString("base64");
+            const imageBase64 = Buffer.from(
+              imageResponse.data,
+              "binary"
+            ).toString("base64");
 
             return {
               ...event._doc,
               posterImage: `data:image/jpeg;base64,${imageBase64}`,
             };
           } catch (err) {
-            console.error(`Error fetching image for event ${event._id}:`, err.message);
+            console.error(
+              `Error fetching image for event ${event._id}:`,
+              err.message
+            );
             return {
               ...event._doc,
               posterImage: null,
@@ -136,6 +144,7 @@ app.get(
   }
 );
 
+//GET EVENT BY ID
 app.get("/api/events/:id", async (req, res) => {
   try {
     const event = await Event.findById(req.params.id).populate("guests");
@@ -149,7 +158,9 @@ app.get("/api/events/:id", async (req, res) => {
       const imageResponse = await axios.get(event.poster, {
         responseType: "arraybuffer",
       });
-      const imageBase64 = Buffer.from(imageResponse.data, "binary").toString("base64");
+      const imageBase64 = Buffer.from(imageResponse.data, "binary").toString(
+        "base64"
+      );
 
       res.json({
         success: true,
@@ -159,7 +170,10 @@ app.get("/api/events/:id", async (req, res) => {
         },
       });
     } catch (err) {
-      console.error(`Error fetching image for event ${event._id}:`, err.message);
+      console.error(
+        `Error fetching image for event ${event._id}:`,
+        err.message
+      );
       res.json({
         success: true,
         data: {
@@ -174,6 +188,7 @@ app.get("/api/events/:id", async (req, res) => {
   }
 });
 
+//UPDATE EVENT BY ID
 app.put("/api/events/:id", async (req, res) => {
   try {
     const updatedEvent = await Event.findByIdAndUpdate(
@@ -195,6 +210,7 @@ app.put("/api/events/:id", async (req, res) => {
   }
 });
 
+//UPDATE EVENT'S POSTER BY ID
 app.put("/api/events/:id/poster", async (req, res) => {
   const { poster } = req.body;
 
@@ -208,16 +224,23 @@ app.put("/api/events/:id/poster", async (req, res) => {
   try {
     const existingEvent = await Event.findById(req.params.id);
     if (!existingEvent) {
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
     }
 
     if (existingEvent.poster) {
       try {
         const posterPublicId = extractPublicId(existingEvent.poster);
-        const deleteResponse = await cloudinary.uploader.destroy("events_posters/" + posterPublicId);
+        const deleteResponse = await cloudinary.uploader.destroy(
+          "events_posters/" + posterPublicId
+        );
         console.log("Image delete response:", deleteResponse);
       } catch (cloudinaryError) {
-        console.error("Error deleting old image from Cloudinary:", cloudinaryError.message);
+        console.error(
+          "Error deleting old image from Cloudinary:",
+          cloudinaryError.message
+        );
       }
     }
 
@@ -236,20 +259,28 @@ app.put("/api/events/:id/poster", async (req, res) => {
   }
 });
 
+//DELETE EVENT BY ID
 app.delete("/api/events/:id", async (req, res) => {
   try {
     const eventToDelete = await Event.findById(req.params.id);
     if (!eventToDelete) {
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
     }
 
     if (eventToDelete.poster) {
       try {
         const posterPublicId = extractPublicId(eventToDelete.poster);
-        const deleteResponse = await cloudinary.uploader.destroy("events_posters/" + posterPublicId);
+        const deleteResponse = await cloudinary.uploader.destroy(
+          "events_posters/" + posterPublicId
+        );
         console.log("Image delete response:", deleteResponse);
       } catch (cloudinaryError) {
-        console.error("Error deleting image from Cloudinary:", cloudinaryError.message);
+        console.error(
+          "Error deleting image from Cloudinary:",
+          cloudinaryError.message
+        );
       }
     }
 
@@ -262,6 +293,7 @@ app.delete("/api/events/:id", async (req, res) => {
   }
 });
 
+//CREATE EVENT (again?) - fix
 app.post("/api/events", verifyUser, async (req, res) => {
   const { title, description, poster } = req.body;
 
@@ -271,7 +303,7 @@ app.post("/api/events", verifyUser, async (req, res) => {
 
   try {
     const uploadResult = await uploadImage(poster, "events");
-    
+
     const newEvent = new Event({
       title,
       description,
@@ -287,6 +319,48 @@ app.post("/api/events", verifyUser, async (req, res) => {
   }
 });
 
+app.put("/api/events/:id/guests", async (req, res) => {
+  const { id } = req.params;
+  const { guests } = req.body;
+
+  if (!Array.isArray(guests)) {
+    return res.status(400).json({
+      success: false,
+      message: "Guests must be provided as an array",
+    });
+  }
+
+  try {
+    // Create guest documents
+    const createdGuests = await Guest.insertMany(guests);
+
+    // Extract ObjectIds of created guests
+    const guestIds = createdGuests.map((guest) => guest._id);
+
+    // Update the event with the new guest ObjectIds
+    const updatedEvent = await Event.findByIdAndUpdate(
+      id,
+      { $addToSet: { guests: { $each: guestIds } } },
+      { new: true }
+    ).populate("guests");
+
+    if (!updatedEvent) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+    }
+
+    res.json({
+      success: true,
+      data: updatedEvent,
+    });
+  } catch (error) {
+    console.error("Error updating event guests:", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
+//UPDATE GUEST BY ID
 app.put("/api/guests/:id", async (req, res) => {
   try {
     const updatedGuest = await Guest.findByIdAndUpdate(
@@ -308,6 +382,7 @@ app.put("/api/guests/:id", async (req, res) => {
   }
 });
 
+//DELETE GUEST BY ID
 app.delete("/api/guests/:id", async (req, res) => {
   try {
     const deletedGuest = await Guest.findByIdAndDelete(req.params.id);
@@ -340,5 +415,116 @@ app.put("/api/guests/:id/attendance", async (req, res) => {
   } catch (error) {
     console.error("Error in Mark Attendance:", error.message);
     res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
+//GET USERS
+app.get("/api/users", verifyUser, async (req, res) => {
+  try {
+    // Get the Auth0 Management API access token
+    const tokenResponse = await axios.post(
+      `https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`,
+      {
+        client_id: process.env.AUTH0_M2M_CLIENT_ID,
+        client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
+        audience: `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/`,
+        grant_type: "client_credentials",
+      }
+    );
+
+    const accessToken = tokenResponse.data.access_token;
+
+    // Fetch users from Auth0 Management API
+    const query = req.query.q || ""; // Optional query parameter for searching
+    const response = await axios.get(
+      `https://${
+        process.env.AUTH0_M2M_DOMAIN
+      }/api/v2/users?q=${encodeURIComponent(query)}`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    res.json({ success: true, data: response.data });
+  } catch (error) {
+    console.error("Error fetching users:", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
+//GET USER BY ID
+app.get("/api/users/:id", verifyUser, async (req, res) => {
+  try {
+    // Get the Auth0 Management API access token
+    const tokenResponse = await axios.post(
+      `https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`,
+      {
+        client_id: process.env.AUTH0_M2M_CLIENT_ID,
+        client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
+        audience: `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/`,
+        grant_type: "client_credentials",
+      }
+    );
+
+    const accessToken = tokenResponse.data.access_token;
+    const userId = req.params.id; // User ID (sub) from the URL params
+
+    // Fetch the specific user from Auth0 Management API
+    const response = await axios.get(
+      `https://${
+        process.env.AUTH0_M2M_DOMAIN
+      }/api/v2/users/${encodeURIComponent(userId)}`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    res.json({ success: true, data: response.data });
+  } catch (error) {
+    console.error("Error fetching user:", error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data || "Server Error",
+    });
+  }
+});
+
+//DELETE USER
+app.delete("/api/users/:id", verifyUser, async (req, res) => {
+  try {
+    // Get the Auth0 Management API access token
+    const tokenResponse = await axios.post(
+      `https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`,
+      {
+        client_id: process.env.AUTH0_M2M_CLIENT_ID,
+        client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
+        audience: `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/`,
+        grant_type: "client_credentials",
+      }
+    );
+
+    const accessToken = tokenResponse.data.access_token;
+    const userId = req.params.id; // User ID (sub) from the URL params
+
+    // Delete the user from Auth0 Management API
+    await axios.delete(
+      `https://${
+        process.env.AUTH0_M2M_DOMAIN
+      }/api/v2/users/${encodeURIComponent(userId)}`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    res.json({
+      success: true,
+      message: `User ${userId} deleted successfully.`,
+    });
+  } catch (error) {
+    console.error("Error deleting user:", error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data || "Server Error",
+    });
   }
 });

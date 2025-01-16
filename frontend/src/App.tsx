@@ -10,8 +10,8 @@ import WelcomeScreen from "./components/WelcomeScreen";
 import Events from "./components/Events";
 import Dashboard from "./components/Dashboard";
 import ChatbotPage from "./components/chatbot/ChatbotPage";
-import PreembotButton from "./components/PreembotButton";
 import useAuthSetup from "./useAuthSetup";
+import Profile from "./components/Profile";
 
 export const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -144,7 +144,7 @@ const App: React.FC = () => {
             {/* Home Page */}
             <Route path="/" element={<Dashboard />} />
             <Route path="/events" element={<Events />} />
-
+            <Route path="/profile" element={<Profile />} />
             {/* Individual Event Page */}
 
             <Route path="/events/:id" element={<EventDetail />} />

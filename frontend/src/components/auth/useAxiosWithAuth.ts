@@ -12,7 +12,7 @@ const useAxiosWithAuth = () => {
   const scopes = "read:events write:events offline_access";
   // Add a request interceptor to include the token
   axiosInstance.interceptors.request.use(async (config) => {
-    console.log("I MA HERE");
+    // console.log("I MA HERE");
     try {
       const token = await getAccessTokenSilently({
         authorizationParams: {
@@ -20,7 +20,7 @@ const useAxiosWithAuth = () => {
           scope: scopes, // Add required scopes
         },
       });
-      console.log("Token:", token); // Log the token if successfully fetched
+      // console.log("Token:", token); // Log the token if successfully fetched
       config.headers.Authorization = `Bearer ${token}`;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

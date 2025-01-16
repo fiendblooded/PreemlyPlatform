@@ -5,11 +5,13 @@ import EventComponent from "./EventComponent";
 const Wrapper = styled.div`
   margin-top: 20px;
 `;
-
 const ListWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 55px;
+  justify-content: space-between; /* Dynamically distribute gaps between items */
+  row-gap: 50px; /* Fixed vertical gap between rows */
+  width: 100%; /* Ensures the grid spans the full container width */
+  padding-bottom: 40px;
 `;
 
 const EmptyMessage = styled.p`

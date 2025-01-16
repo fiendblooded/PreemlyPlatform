@@ -11,6 +11,11 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { Event } from "../types";
+import { PageWrapper } from "./Events";
+import TopBar from "./TopBar";
+import { useState, useEffect } from "react";
+import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 // import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 // import { Event } from "../types";
 
@@ -24,117 +29,82 @@ ChartJS.register(
   Legend
 );
 
-const DashboardWrapper = styled.div`
-  padding: 20px;
-  background-color: #e9f0f2;
-  color: #f5f5f5;
-  font-family: Arial, sans-serif;
+const ProjectsOverview = styled.div`
+  margin-top: 80px;
+  margin-left: 20px;
+  width: 40%;
+  height: 500px;
+  background-color: white;
+  border-radius: 4px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  color: black;
 `;
-
-// const GridContainer = styled.div`
-//   display: grid;
-//   grid-template-columns: repeat(5, 1fr);
-//   gap: 20px;
-//   width: 100%;
-//   max-width: 1200px;
-// `;
-
-// const Card = styled.div`
-//   background-color: #1e1e2f;
-//   border-radius: 8px;
-//   padding: 20px;
-//   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-//   text-align: center;
-// `;
-
-// const StatValue = styled.p`
-//   font-size: 2rem;
-//   color: #f4c430;
-//   margin: 10px 0;
-// `;
-
-// const SmallTitle = styled.h4`
-//   margin-bottom: 10px;
-//   color: #f4c430;
-// `;
-
-// const GraphContainer = styled(Card)`
-//   grid-column: span 2;
-// `;
-
-// const GaugeContainer = styled(Card)`
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-//   justify-content: center;
-// `;
-// const Graphs = styled.div`
-//   margin-top: 20px;
-//   display: flex;
-//   gap: 20px;
-// `;
-
+const BlockTitle = styled.div`
+  margin-top: 24px;
+  margin-left: 24px;
+  font-size: 20px;
+  color: black;
+  font-weight: 500;
+`;
 const Dashboard: React.FC = () => {
   // const [events, setEvents] = useState<Event[]>([]);
-  // // const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   // const axiosInstance = useAxiosWithAuth();
-  // // useEffect(() => {
-  // //   const fetchEvents = async () => {
-  // //     try {
-  // //       const response = await axiosInstance.get("http://localhost:3002/api/events");
-  // //       setEvents(response.data);
-  // //     } catch (error) {
-  // //       console.error("Error fetching events:", error);
-  // //     } finally {
-  // //       setLoading(false);
-  // //     }
-  // //   };
+  // useEffect(() => {
+  //   const fetchEvents = async () => {
+  //     try {
+  //       const response = await axiosInstance.get("/events");
+  //       setEvents(response.data);
+  //     } catch (error) {
+  //       console.error("Error fetching events:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-  // //   fetchEvents();
-  // // }, []);
+  //   fetchEvents();
+  // }, []);
 
-  // // const calculateStats = () => {
-  // //   const totalEvents = events.length;
-  // //   const upcomingEvents = events.filter(
-  // //     (event) => new Date(event.time) > new Date()
-  // //   ).length;
-  // //   const pastEvents = totalEvents - upcomingEvents;
-  // //   const totalGuests = events.reduce(
-  // //     (sum, event) => sum + event.guests.length,
-  // //     0
-  // //   );
-  // //   const checkedInGuests = events.reduce(
-  // //     (sum, event) =>
-  // //       sum + event.guests.filter((guest) => guest.attendance_status).length,
-  // //     0
-  // //   );
+  // const calculateStats = () => {
+  //   const totalEvents = events.length;
+  //   const upcomingEvents = events.filter(
+  //     (event) => new Date(event.date) > new Date()
+  //   ).length;
+  //   const pastEvents = totalEvents - upcomingEvents;
+  //   const totalGuests = events.reduce(
+  //     (sum, event) => sum + event.guests.length,
+  //     0
+  //   );
+  //   const checkedInGuests = events.reduce(
+  //     (sum, event) =>
+  //       sum + event.guests.filter((guest) => guest.attendance_status).length,
+  //     0
+  //   );
 
-  // //   return {
-  // //     totalEvents,
-  // //     upcomingEvents,
-  // //     pastEvents,
-  // //     totalGuests,
-  // //     checkedInGuests,
-  // //   };
-  // // };
+  //   return {
+  //     totalEvents,
+  //     upcomingEvents,
+  //     pastEvents,
+  //     totalGuests,
+  //     checkedInGuests,
+  //   };
+  // };
 
-  // // const calculateAverageAttendance = () => {
-  // //   const totalGuests = events.reduce(
-  // //     (sum, event) => sum + event.guests.length,
-  // //     0
-  // //   );
-  // //   const checkedInGuests = events.reduce(
-  // //     (sum, event) =>
-  // //       sum + event.guests.filter((guest) => guest.attendance_status).length,
-  // //     0
-  // //   );
-  // //   return totalGuests === 0
-  // //     ? 0
-  // //     : Math.round((checkedInGuests / totalGuests) * 100);
-  // // };
+  // const calculateAverageAttendance = () => {
+  //   const totalGuests = events.reduce(
+  //     (sum, event) => sum + event.guests.length,
+  //     0
+  //   );
+  //   const checkedInGuests = events.reduce(
+  //     (sum, event) =>
+  //       sum + event.guests.filter((guest) => guest.attendance_status).length,
+  //     0
+  //   );
+  //   return totalGuests === 0
+  //     ? 0
+  //     : Math.round((checkedInGuests / totalGuests) * 100);
+  // };
 
   // // const generateEventDistributionGraphData = () => {
   // //   const dateCounts = events.reduce((acc, event) => {
@@ -163,11 +133,40 @@ const Dashboard: React.FC = () => {
   // //   };
   // // };
 
-  // // const stats = calculateStats();
-  // // const averageAttendance = calculateAverageAttendance();
+  // const stats = calculateStats();
+  // const averageAttendance = calculateAverageAttendance();
 
   return (
-    <DashboardWrapper>
+    <PageWrapper>
+      <TopBar sectionTitle="Dashboard" />
+      <ProjectsOverview>
+        <BlockTitle>Events Summary</BlockTitle>
+      </ProjectsOverview>
+      <ProjectsOverview>
+        <BlockTitle>Stats</BlockTitle>
+        {/* <div>
+          <div>
+            <div>Total Events</div>
+            <div>{stats.totalEvents}</div>
+          </div>
+          <div>
+            <div>Upcoming Events</div>
+            <div>{stats.upcomingEvents}</div>
+          </div>
+          <div>
+            <div>Past Events</div>
+            <div>{stats.pastEvents}</div>
+          </div>
+          <div>
+            <div>Total Guests</div>
+            <div>{stats.totalGuests}</div>
+          </div>
+          <div>
+            <div>Checked-In Guests</div>
+            <div>{stats.checkedInGuests}</div>
+          </div>
+        </div> */}
+      </ProjectsOverview>
       {/* <h1>Dashboard</h1>
       {loading ? (
         <p>Loading...</p>
@@ -222,7 +221,7 @@ const Dashboard: React.FC = () => {
           </Graphs>
         </>
       )} */}
-    </DashboardWrapper>
+    </PageWrapper>
   );
 };
 

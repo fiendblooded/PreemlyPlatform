@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import styled from "styled-components";
 import useAuthSetup from "../../useAuthSetup";
+import { useNavigate } from "react-router-dom";
 
 const ProfileContainer = styled.div`
   display: flex;
@@ -120,7 +121,7 @@ const UserProfile: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth0();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   useAuthSetup();
-
+  const navigate = useNavigate();
   if (!isAuthenticated) return null;
 
   const toggleDropdown = () => {
@@ -143,6 +144,7 @@ const UserProfile: React.FC = () => {
           <DropdownContainer>
             <UserInfoSection>
               <ProfileImage
+                onClick={() => navigate("/profile")}
                 src={user?.[`${namespace}picture`]}
                 alt={user?.[`${namespace}name`]}
                 style={{ width: "60px", height: "60px", borderRadius: "50%" }}
@@ -153,7 +155,7 @@ const UserProfile: React.FC = () => {
               <UpgradeButton>Upgrade to PRO</UpgradeButton>
             </UserInfoSection>
             <OptionsSection>
-              <Option>Profile</Option>
+              <Option onClick={() => navigate("/profile")}>Profile</Option>
               <Option>Settings</Option>
             </OptionsSection>
             <FooterSection>
