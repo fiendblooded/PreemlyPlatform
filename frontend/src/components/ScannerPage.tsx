@@ -24,34 +24,28 @@ const ScannerPage: React.FC = () => {
   const [toastVisible, setToastVisible] = useState<boolean>(false);
   const axiosInstance = useAxiosWithAuth();
   const handleScan = async (result: IDetectedBarcode[]) => {
-    try {
-      const guestId = result[0].rawValue; // Assuming result contains the guest ID
-      console.log(guestId);
-      const response = await axiosInstance.put(
-        ` /guests/${guestId}/attendance`
-      );
+    const guestId = result[0].rawValue; // Assuming result contains the guest ID
 
-      console.log(guestId);
-      setToastMessage(
-        `Guest ${response.data.guest.fullName} marked as present`
-      );
-      setToastVisible(true);
+    const response = await axiosInstance.put(`/guests/${guestId}/attendance`);
+    console.log(response);
+    setToastMessage(`Guest ${response.data.guest?.fullName} marked as present`);
+    setToastVisible(true);
 
-      // Hide the toast after 5 seconds
-      setTimeout(() => {
-        setToastVisible(false);
-        setToastMessage(null);
-      }, 3002);
-    } catch (error) {
-      console.error("Error updating attendance:", error);
-      setToastMessage("Failed to update attendance");
-      setToastVisible(true);
+    // Hide the toast after 5 seconds
+    setTimeout(() => {
+      setToastVisible(false);
+      setToastMessage(null);
+    }, 3002);
+    // } catch (error) {
+    //   console.error("Error updating attendance:", error);
+    //   setToastMessage("Failed to update attendance");
+    //   setToastVisible(true);
 
-      setTimeout(() => {
-        setToastVisible(false);
-        setToastMessage(null);
-      }, 3002);
-    }
+    //   setTimeout(() => {
+    //     setToastVisible(false);
+    //     setToastMessage(null);
+    //   }, 3002);
+    // }
   };
 
   return (

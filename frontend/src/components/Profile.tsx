@@ -93,7 +93,7 @@ const Profile: React.FC = () => {
           </ProfileDetails>
           <ButtonContainer>
             <LogoutButton
-              onClick={() => logout({ returnTo: window.location.origin })}
+              onClick={() => logout({logoutParams:{ returnTo: window.location.origin }})}
             >
               Logout
             </LogoutButton>
