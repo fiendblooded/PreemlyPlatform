@@ -72,7 +72,7 @@ const EventLocationEditor: React.FC<{ event: Event }> = ({ event }) => {
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        await loadGoogleMapsScript("AIzaSyC-_-vvIQu7A1lP5ahPXkrv8gJVyyl_35c"); // Ensure the script is loaded
+        await loadGoogleMapsScript(import.meta.env.GOOGLE_MAPS_API); // Ensure the script is loaded
 
         if (!mapRef.current) return;
 
