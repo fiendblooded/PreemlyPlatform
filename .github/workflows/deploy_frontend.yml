@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'frontend/**'
+      - "frontend/**"
 
 jobs:
   deploy-frontend:
@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install Dependencies
         run: |
@@ -33,11 +33,11 @@ jobs:
           VITE_APP_DOMAIN: ${{ secrets.VITE_APP_DOMAIN }}
           VITE_APP_CLIENTID: ${{ secrets.VITE_APP_CLIENTID }}
           VITE_APP_WS_URL: ${{ secrets.VITE_APP_WS_URL }}
-
+          GOOGLE_MAPS_API: ${{ secrets.GOOGLE_MAPS_API }}
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod --yes'
+          vercel-args: "--prod --yes"
           working-directory: ./frontend
