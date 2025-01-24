@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import styled from "styled-components";
 import { loadGoogleMapsScript } from "../common/common";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
@@ -87,7 +86,8 @@ const EventLocationEditor: React.FC<{ event: Event }> = ({ event }) => {
           draggable: true,
         });
 
-        markerInstance.addListener("dragend", (event) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        markerInstance.addListener("dragend", (event: any) => {
           const newLat = event.latLng?.lat() ?? 0;
           const newLng = event.latLng?.lng() ?? 0;
 

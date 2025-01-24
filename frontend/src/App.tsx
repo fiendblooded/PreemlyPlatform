@@ -10,7 +10,6 @@ import styled, { createGlobalStyle } from "styled-components";
 import Sidebar from "./components/SideBar";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import LoginPage from "./components/auth/LoginPage";
-import ScannerPage from "./components/ScannerPage";
 import WelcomeScreen from "./components/WelcomeScreen";
 import Events from "./components/Events";
 import Dashboard from "./components/Dashboard";
@@ -161,7 +160,7 @@ const AppContent: React.FC = () => {
           <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/events/create-new-event" element={<EventForm />} />
 
-          <Route path="/scanner" element={<ScannerPage />} />
+          {/* <Route path="/scanner" element={<ScannerPage />} /> */}
           <Route
             path="/welcome"
             element={

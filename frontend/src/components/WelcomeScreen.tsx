@@ -248,7 +248,7 @@ const WelcomeScreen: React.FC = () => {
     const date = new Date(dateString); // Parse the ISO string into a Date object
 
     // Format the date components
-    const options = {
+    const options: Intl.DateTimeFormatOptions = {
       weekday: "short", // Short weekday, e.g., "Wed"
       day: "2-digit", // Day of the month, e.g., "22"
       month: "short", // Short month, e.g., "Jan"
@@ -259,6 +259,7 @@ const WelcomeScreen: React.FC = () => {
     // Return the formatted string
     return new Intl.DateTimeFormat("en-US", options).format(date);
   }
+
   const guestsPresent = event?.guests.filter(
     (guest) => guest.attendance_status === true
   ).length;
