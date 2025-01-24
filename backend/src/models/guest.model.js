@@ -6,6 +6,8 @@ const GuestSchema = new mongoose.Schema({
   email: { type: String, required: true },
   age: { type: Number },
   attendance_status: { type: Boolean, default: false },
+  email_sent: { type: Boolean, default: false },
+  team_id: { type: String },
   eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" }, // Reference to Event model
 });
 

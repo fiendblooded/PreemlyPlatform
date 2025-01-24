@@ -8,6 +8,13 @@ const eventSchema = new mongoose.Schema({
   poster: { type: String },
   guests: [{ type: mongoose.Schema.Types.ObjectId, ref: "Guest" }],
   date: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  location: {
+    address: { type: String }, // Human-readable address
+    latitude: { type: Number }, // Coordinates
+    longitude: { type: Number },
+    placeId: { type: String }, // Google Maps Place ID
+  },
   _id: {
     type: mongoose.Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),

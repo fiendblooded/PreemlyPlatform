@@ -86,9 +86,20 @@ app.post("/api/events", verifyUser, async (req, res) => {
       folder: "events_posters",
     });
 
-    event.poster = uploadResponse.secure_url;
-
-    const newEvent = new Event(event);
+    const newEvent = new Event({
+      title: event.title,
+      description: event.description,
+      ownerId: event.ownerId,
+      date: event.date,
+      endDate: event.date,
+      poster: uploadResponse.secure_url,
+      location: {
+        address: "1600 Amphitheatre Parkway, Mountain View, CA, USA",
+        latitude: 37.4224764,
+        longitude: -122.0842499,
+        placeId: "ChIJ2eUgeAK6j4ARbn5u_wAGqWA",
+      },
+    });
     await newEvent.save();
 
     res.json({
