@@ -104,7 +104,7 @@ const FooterSection = styled.div`
   justify-content: center;
 `;
 
-const Overlay = styled.div<{ isVisible: boolean }>`
+export const Overlay = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? "block" : "none")};
   position: fixed;
   top: 0;
@@ -119,6 +119,7 @@ const namespace = "https://custom-claims.preemly.eu/";
 
 const UserProfile: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth0();
+
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   useAuthSetup();
   const navigate = useNavigate();

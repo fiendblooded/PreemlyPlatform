@@ -5,6 +5,7 @@ import EventList from "./EventList";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import useAuthSetup from "../useAuthSetup";
 import TopBar from "./TopBar";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export const PageWrapper = styled.div`
   display: flex;
@@ -25,7 +26,7 @@ export const Header = styled.div`
   justify-content: space-between;
 `;
 
-const SpinnerContainer = styled.div`
+export const SpinnerContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,6 +47,7 @@ export const Spinner = styled.div`
     }
   }
 `;
+
 const SearchContainer = styled.div`
   display: flex;
   align-items: center;
@@ -107,9 +109,11 @@ export const ActiveStatusButton = styled.div<{
     border-bottom: 2px solid ${(props) => (props.isActive ? "#e6bf30" : "grey")};
   }
 `;
-
+const namespace = "https://custom-claims.preemly.eu/";
 const Events: React.FC = () => {
   useAuthSetup();
+  const { user } = useAuth0();
+
   const [activeStatus, setActiveStatus] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
@@ -136,7 +140,7 @@ const Events: React.FC = () => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
-
+  console.log(events);
   const filteredEvents =
     events?.filter(
       (event) =>
@@ -150,6 +154,7 @@ const Events: React.FC = () => {
   return (
     <PageWrapper>
       <TopBar sectionTitle="Events" />
+
       <ActiveStatusContainer>
         <ActiveStatusButton
           isActive={activeStatus}

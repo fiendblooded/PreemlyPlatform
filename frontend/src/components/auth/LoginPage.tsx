@@ -1,6 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import styled, { keyframes } from "styled-components";
-
+import styled from "styled-components";
 const audience = import.meta.env.VITE_APP_AUDIENCE;
 
 const LoginContainer = styled.div`
@@ -10,14 +9,27 @@ const LoginContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #121212; /* Dark background */
-  padding-right: 80px;
+  background-color: #0f0f0f;
 `;
-
-const StyledButton = styled.button`
+const LoginBox = styled.div`
+  width: 25%;
+  height: 35%;
+  background-color: #181818;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+`;
+const StyledButton = styled.div`
+  width: 30%;
+  height: 8%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-top: 20px;
   padding: 10px 20px;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: bold;
   color: #121212;
   background: white;
@@ -37,36 +49,20 @@ const StyledButton = styled.button`
   }
 `;
 const Title = styled.div`
-  font-size: 32px;
+  width: 100%;
+  text-align: center;
+  font-size: 2em;
   font-weight: 600;
   margin-top: 10px;
 `;
-const spin = keyframes`
-from {
-  transform: rotate(0deg);
-}
-to {
-  transform: rotate(360deg);
-}
-`;
-
 // Styled container with the spin animation
-const SpinningContainer = styled.div`
-  width: 161px; /* Set the width */
-  height: 161px; /* Set the height */
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: ${spin} 8s linear infinite; /* Apply the spin animation */
-`;
 
 const LoginPage: React.FC = () => {
   const { loginWithRedirect } = useAuth0();
 
   return (
     <LoginContainer>
-      <SpinningContainer>
+      <LoginBox>
         <svg
           width="161"
           height="161"
@@ -115,21 +111,21 @@ const LoginPage: React.FC = () => {
             </radialGradient>
           </defs>
         </svg>
-      </SpinningContainer>
-      <Title>Welcome to Preemly</Title>
-      <StyledButton
-        onClick={() =>
-          loginWithRedirect({
-            authorizationParams: {
-              audience: audience,
-              scope: "read:events write:events",
-              prompt: "consent", // Force showing the consent screen
-            },
-          })
-        }
-      >
-        Log In
-      </StyledButton>
+        <Title>Welcome to Preemly</Title>
+        <StyledButton
+          onClick={() =>
+            loginWithRedirect({
+              authorizationParams: {
+                audience: audience,
+                scope: "read:events write:events",
+                prompt: "consent", // Force showing the consent screen
+              },
+            })
+          }
+        >
+          Start
+        </StyledButton>
+      </LoginBox>
     </LoginContainer>
   );
 };

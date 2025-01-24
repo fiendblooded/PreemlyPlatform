@@ -63,3 +63,22 @@ export function getDateRangeDetails(date1: string, date2: string): string {
   // Return the formatted result
   return `${range} / ${gmtString} / ${duration} left`;
 }
+
+export const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window.google !== "undefined") {
+      resolve(); // Google Maps already loaded
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () =>
+      reject(new Error("Failed to load Google Maps script"));
+
+    document.head.appendChild(script);
+  });
+};

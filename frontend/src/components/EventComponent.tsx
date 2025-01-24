@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { Event } from "../types";
 import { useLocation, useNavigate } from "react-router-dom";
+import { PrimaryButton, SecondaryButton } from "./EventDetail";
 
 interface EventProps {
   event: Event;
@@ -39,7 +40,7 @@ const Poster = styled.img`
 
 const Title = styled.h3`
   color: black; /* Yellow */
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 1.2rem;
   font-weight: bold;
 `;
@@ -88,14 +89,14 @@ const InfoBar = styled.div`
   border-top: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
 `;
 
-const GuestCount = styled.div`
+const GuestCount = styled.div<{ paddingTop?: number }>`
   display: flex;
   align-items: center;
   line-height: 100px;
   font-size: 0.9rem;
   color: black;
-  height: 30px;
-
+  height: 38px;
+  padding-top: ${(props) => (props.paddingTop ? props.paddingTop : 0)}px;
   svg {
     padding-bottom: 6px;
     margin-right: 5px;
@@ -125,9 +126,10 @@ const EventComponent: React.FC<EventProps> = ({ event }) => {
         />
       )}
       <Title>{event.title}</Title>
+      <GuestCount>{new Date(event.date).toLocaleString()}</GuestCount>
       <Description>{event.description}</Description>
       <InfoBar>
-        <GuestCount>
+        <GuestCount paddingTop={4}>
           <svg
             width="24"
             height="24"
@@ -143,9 +145,20 @@ const EventComponent: React.FC<EventProps> = ({ event }) => {
               stroke-linejoin="round"
             />
           </svg>
-          {event.guests.length} {event.guests.length != 1 ? "Guests" : "Guest"}
+          <div>
+            {event.guests.length}{" "}
+            {event.guests.length != 1 ? "Guests" : "Guest"}
+          </div>
         </GuestCount>
-        <GuestCount>{new Date(event.date).toLocaleString()}</GuestCount>
+        <PrimaryButton
+          width={100}
+          onClick={(clickEvent: React.MouseEvent) => {
+            clickEvent.stopPropagation();
+            navigate(`/welcome/${event._id}`);
+          }}
+        >
+          Check in
+        </PrimaryButton>
       </InfoBar>
     </Card>
   );

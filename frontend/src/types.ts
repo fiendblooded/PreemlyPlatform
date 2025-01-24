@@ -13,4 +13,11 @@ export type Event = {
   description: string;
   guests: Guest[];
   poster: string | null;
+  location: {
+    address: string;
+    latitude: number;
+    longitude: number;
+    placeId: string;
+  };
+  endDate: string;
 };

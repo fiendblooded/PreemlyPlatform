@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import EventDetail from "./components/EventDetail";
 import EventForm from "./components/form/EventForm";
 import styled, { createGlobalStyle } from "styled-components";
@@ -124,39 +129,69 @@ const AppWrapper = styled.div`
   display: flex;
 `;
 
-const ContentWrapper = styled.div`
-  width: calc(100% - 250px);
+const ContentWrapper = styled.div<{ fullWidth: boolean }>`
+  width: ${({ fullWidth }) => (fullWidth ? "100%" : "calc(100% - 250px)")};
+  height: 100vh;
   display: grid;
 `;
 
-const App: React.FC = () => {
-  useAuthSetup();
+const AppContent: React.FC = () => {
+  const location = useLocation();
+
+  // Define routes where the sidebar should not be displayed
+  const noSidebarRoutes = ["/login", "/welcome"];
+  const isFullWidth =
+    noSidebarRoutes.includes(location.pathname) ||
+    location.pathname.startsWith("/welcome/");
+
+  console.log(location.pathname);
   return (
-    <Router>
-      <GlobalStyle />
-      <AppWrapper>
+    <AppWrapper>
+      {!isFullWidth && (
         <ProtectedRoute>
           <Sidebar />
         </ProtectedRoute>
-        <ContentWrapper>
-          {/* <PreembotButton /> */}
-          <Routes>
-            {/* Home Page */}
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/profile" element={<Profile />} />
-            {/* Individual Event Page */}
+      )}
+      <ContentWrapper fullWidth={isFullWidth}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/events/:id" element={<EventDetail />} />
+          <Route path="/events/create-new-event" element={<EventForm />} />
 
-            <Route path="/events/:id" element={<EventDetail />} />
-            {/*Create New Event*/}
-            <Route path="/events/create-new-event" element={<EventForm />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/scanner" element={<ScannerPage />} />
-            <Route path="/welcome" element={<WelcomeScreen />} />
-            <Route path="/preembot" element={<ChatbotPage />} />
-          </Routes>
-        </ContentWrapper>
-      </AppWrapper>
+          <Route path="/scanner" element={<ScannerPage />} />
+          <Route
+            path="/welcome"
+            element={
+              <ProtectedRoute>
+                <WelcomeScreen />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/welcome/:id"
+            element={
+              <ProtectedRoute>
+                <WelcomeScreen />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/preembot" element={<ChatbotPage />} />
+        </Routes>
+      </ContentWrapper>
+    </AppWrapper>
+  );
+};
+
+const App: React.FC = () => {
+  useAuthSetup();
+
+  return (
+    <Router>
+      <GlobalStyle />
+      <AppContent />
     </Router>
   );
 };

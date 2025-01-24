@@ -14,6 +14,7 @@ import {
 } from "./Events";
 import { getDateRangeDetails } from "../common/common";
 import ToastNotification from "./ToastNotification";
+import EventLocationEditor from "./EventLocationEditor";
 
 export const PageWrapper = styled.div`
   display: flex;
@@ -53,12 +54,13 @@ const EventDetailsWrapper = styled.div`
 
 const EventDetails = styled.div`
   flex: 1;
-
+  margin-top: 20px;
   background-color: white;
   color: black;
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 `;
 
 const GuestsWrapper = styled.div`
@@ -196,7 +198,10 @@ const GuestTableHeaderContainer = styled.div`
   justify-content: space-between;
   align-items: center;
 `;
-const PrimaryButton = styled.button<{ marginTop?: number; width?: number }>`
+export const PrimaryButton = styled.button<{
+  marginTop?: number;
+  width?: number;
+}>`
   width: ${(props) => (props.width ? props.width : 160)}px;
   margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
   background-color: rgb(107, 61, 223);
@@ -216,7 +221,10 @@ const PrimaryButton = styled.button<{ marginTop?: number; width?: number }>`
     background-color: rgb(155, 119, 249);
   }
 `;
-const SecondaryButton = styled.button<{ marginTop?: number; width?: number }>`
+export const SecondaryButton = styled.button<{
+  marginTop?: number;
+  width?: number;
+}>`
   width: ${(props) => (props.width ? props.width : 160)}px;
   margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
   background-color: white;
@@ -232,7 +240,6 @@ const SecondaryButton = styled.button<{ marginTop?: number; width?: number }>`
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.3s ease;
-
   &:hover {
     background-color: rgb(239, 233, 255);
   }
@@ -676,6 +683,12 @@ const EventDetail: React.FC = () => {
                 />
               </SearchContainer>
               <GuestActionsButtonsContainer>
+                <SecondaryButton
+                  onClick={() => navigate(`/welcome/${id}`)}
+                  marginTop={20}
+                >
+                  Welcome Screen
+                </SecondaryButton>
                 <SecondaryButton onClick={sendEmailsToGuests} marginTop={20}>
                   Send Emails
                 </SecondaryButton>
@@ -789,6 +802,7 @@ const EventDetail: React.FC = () => {
           </GuestsWrapper>
         </>
       )}
+      {openSection === "location" && <EventLocationEditor event={event} />}
 
       {isModalOpen && (
         <PosterUploadModal

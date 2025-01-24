@@ -173,7 +173,7 @@ export const MenuButtonText = styled.div`
   text-align: left;
   font-size: 15px;
 `;
-const ImageContainer = styled.div`
+export const ImageContainer = styled.div`
   width: 100%;
   padding: 10px 0;
   display: flex;
@@ -206,7 +206,7 @@ const Sidebar: React.FC = () => {
             width={"55%"}
           />
         </ImageContainer>
-        <MenuButton onClick={() => navigate("/")} isactive={getPageStatus("")}>
+        {/* <MenuButton onClick={() => navigate("/")} isactive={getPageStatus("")}>
           <svg
             width="20"
             height="20"
@@ -241,7 +241,7 @@ const Sidebar: React.FC = () => {
           </svg>
 
           <MenuButtonText>Dashboard</MenuButtonText>
-        </MenuButton>
+        </MenuButton> */}
         <MenuButton
           onClick={() => navigate("/events")}
           isactive={getPageStatus("events")}
@@ -263,7 +263,7 @@ const Sidebar: React.FC = () => {
 
           <MenuButtonText>Events</MenuButtonText>
         </MenuButton>
-        <MenuButton
+        {/* <MenuButton
           onClick={() => navigate("/scanner")}
           isactive={getPageStatus("scanner")}
         >
@@ -282,7 +282,7 @@ const Sidebar: React.FC = () => {
             />
           </svg>
           <MenuButtonText>Scanner</MenuButtonText>
-        </MenuButton>
+        </MenuButton> */}
         <MenuButton
           onClick={() => navigate("/welcome")}
           isactive={getPageStatus("welcome")}
@@ -302,7 +302,7 @@ const Sidebar: React.FC = () => {
           </svg>
           <MenuButtonText>Welcome screen</MenuButtonText>
         </MenuButton>
-        <MenuButton
+        {/* <MenuButton
           onClick={() => navigate("/preembot")}
           isactive={getPageStatus("preembot")}
         >
@@ -322,7 +322,7 @@ const Sidebar: React.FC = () => {
           </svg>
 
           <MenuButtonText>PreemBot</MenuButtonText>
-        </MenuButton>
+        </MenuButton> */}
       </SidebarTopContainer>
     </SidebarWrapper>
   );

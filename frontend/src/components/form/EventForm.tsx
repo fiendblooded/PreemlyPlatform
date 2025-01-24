@@ -5,26 +5,43 @@ import TicketInSpace from "./TicketInSpace";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import useAxiosWithAuth from "../auth/useAxiosWithAuth";
+import { Overlay } from "../auth/UserProfile";
+import useAuthSetup from "../../useAuthSetup";
+const Container = styled.div`
+  width: 100%;
+  height: 100%;
+  background: #f2994a; /* fallback for old browsers */
+  background: -webkit-linear-gradient(
+    to right,
+    #f2c94c,
+    #f2994a
+  ); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(
+    to right,
+    #f2c94c,
+    #f2994a
+  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 const FormWrapper = styled.div`
-  background-color: #121212;
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
-  width: 500px;
+  width: 800px;
+  height
   margin: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  /* Centering the div */
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+
 `;
 
 const FormTitle = styled.h2`
-  color: #f4c430;
+  color: black;
   text-align: center;
   margin-bottom: 20px;
 `;
@@ -42,8 +59,8 @@ const Input = styled.input`
   margin-bottom: 15px;
   border: 1px solid #555;
   border-radius: 5px;
-  background-color: #121212;
-  color: #f5f5f5;
+  background-color: white;
+  color: black;
   font-size: 1rem;
 
   &:focus {
@@ -58,8 +75,8 @@ const Textarea = styled.textarea`
   margin-bottom: 15px;
   border: 1px solid #555;
   border-radius: 5px;
-  background-color: #121212;
-  color: #f5f5f5;
+  background-color: white;
+  color: black;
   font-size: 1rem;
   resize: none;
 
@@ -107,15 +124,24 @@ const TicketInSpaceContainer = styled.div`
 `;
 
 const EventForm: React.FC = () => {
-  const __dirname = window.location.origin;
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [poster, setPoster] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
-  const [stage, setStage] = useState(0);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  useAuthSetup();
   const navigate = useNavigate();
+
+  const toggleDropdown = () => {
+    setIsDropdownVisible((prev) => !prev);
+  };
+
+  const closeDropdown = () => {
+    setIsDropdownVisible(false);
+  };
+
   const { user } = useAuth0();
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -161,58 +187,50 @@ const EventForm: React.FC = () => {
     }
   };
 
-  function determineUIForStage() {
-    switch (stage) {
-      case 0:
-        return <EventCreatorWelcome nextPage={() => setStage(1)} />;
-      case 1:
-        return (
-          <FormWrapper>
-            <FormTitle>Create New Event</FormTitle>
-            <FormContainer onSubmit={handleSubmit}>
-              <Input
-                type="text"
-                placeholder="Event Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-              <Textarea
-                placeholder="Event Description"
-                rows={5}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              />
-              <Input type="file" accept="image/*" onChange={handleFileChange} />
-              {poster && (
-                <img
-                  src={poster}
-                  alt="Poster Preview"
-                  style={{ width: "100px", height: "100px" }}
-                />
-              )}
-              <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create Event"}
-              </Button>
-            </FormContainer>
-            {success && (
-              <SuccessMessage>Event created successfully!</SuccessMessage>
-            )}
-            {error && <ErrorMessage>{error}</ErrorMessage>}
-            <TicketInSpaceContainer>
-              <TicketInSpace
-                name={title || "Event Title"}
-                event={description || "Event Description"}
-              />
-            </TicketInSpaceContainer>
-          </FormWrapper>
-        );
-      default:
-        return <div></div>;
-    }
-  }
-  return determineUIForStage();
+  return (
+    <Container>
+      <FormWrapper>
+        <FormTitle>Create New Event</FormTitle>
+        <FormContainer onSubmit={handleSubmit}>
+          <Input
+            type="text"
+            placeholder="Event Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+          <Textarea
+            placeholder="Event Description"
+            rows={5}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+          <Input type="file" accept="image/*" onChange={handleFileChange} />
+          {poster && (
+            <img
+              src={poster}
+              alt="Poster Preview"
+              style={{ width: "100px", height: "100px" }}
+            />
+          )}
+          <Button type="submit" disabled={loading}>
+            {loading ? "Creating..." : "Create Event"}
+          </Button>
+        </FormContainer>
+        {success && (
+          <SuccessMessage>Event created successfully!</SuccessMessage>
+        )}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {/* <TicketInSpaceContainer>
+          <TicketInSpace
+            name={title || "Event Title"}
+            event={description || "Event Description"}
+          />
+        </TicketInSpaceContainer> */}
+      </FormWrapper>
+    </Container>
+  );
 };
 
 export default EventForm;

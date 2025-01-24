@@ -90,7 +90,7 @@ const EventCreatorWelcome: React.FC<EventProps> = ({ nextPage }) => {
   return (
     <EventWrapper>
       <ButtonsContainer>
-        <EventTitle>Welcome to Preemly Event Creator</EventTitle>
+        <EventTitle>Preemly Event Creator</EventTitle>
         <EventSubtitle>
           Preemly makes event creation seamless and stress-free. Choose your
           path below and start building your event today!

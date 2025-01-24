@@ -8,7 +8,7 @@ const Wrapper = styled.div`
 const ListWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between; /* Dynamically distribute gaps between items */
+  column-gap: 50px;
   row-gap: 50px; /* Fixed vertical gap between rows */
   width: 100%; /* Ensures the grid spans the full container width */
   padding-bottom: 40px;
