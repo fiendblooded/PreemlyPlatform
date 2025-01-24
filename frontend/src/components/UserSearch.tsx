@@ -89,7 +89,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ onSelectUser }) => {
         />
         <ClearButton onClick={handleClear}>Clear</ClearButton>
         <SearchButton onClick={handleSearch} disabled={loadingSearch}>
-          {loadingSearch ? "Searching..." : "Search"}
+          {loadingSearch ? "Searching ..." : "Search"}
         </SearchButton>
       </SearchInputWrapper>
 
