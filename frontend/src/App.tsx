@@ -128,9 +128,9 @@ const AppWrapper = styled.div`
   display: flex;
 `;
 
-const ContentWrapper = styled.div<{ fullWidth: boolean }>`
+const ContentWrapper = styled.div<{ fullWidth: boolean; fullHeight: boolean }>`
   width: ${({ fullWidth }) => (fullWidth ? "100%" : "calc(100% - 250px)")};
-  height: 100vh;
+  ${(props) => props.fullHeight && "height:100vh;"}
   display: grid;
 `;
 
@@ -151,7 +151,7 @@ const AppContent: React.FC = () => {
           <Sidebar />
         </ProtectedRoute>
       )}
-      <ContentWrapper fullWidth={isFullWidth}>
+      <ContentWrapper fullWidth={isFullWidth} fullHeight={isFullWidth}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<Dashboard />} />

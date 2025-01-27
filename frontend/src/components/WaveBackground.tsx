@@ -26,7 +26,7 @@ const AnimatedWaves = styled.div`
   position: absolute;
   bottom: 0; /* Waves start at the bottom */
   width: 100%;
-  height: 40%;
+  height: 35%;
 
   overflow: hidden;
 

@@ -8,7 +8,7 @@ import { Event, Guest } from "../types";
 import Spinner from "./Spinner";
 import Dropdown from "./Dropdown";
 import WaveBackground from "./WaveBackground";
-
+import ManualQR from "../manualqr.png";
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -79,9 +79,9 @@ const Title = styled.div`
 
 const SubTitle = styled.div`
   font-size: 24px;
-  width: 35%;
+  width: 50%;
   text-align: center;
-  margin-bottom: 20px;
+  margin-top: 10px;
 `;
 
 const DropdownContainer = styled.div`
@@ -154,6 +154,14 @@ const GuestDetailsContainer = styled.div<{ isVisible: boolean }>`
     isVisible ? "translateY(0)" : "translateY(-10px)"};
   transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
 `;
+const GuestInfoContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+const ManualQRContainer = styled.img`
+  width: 350px;
+  border-radius: 8px;
+`;
 const GuestCountContainer = styled.div`
   border-radius: 100%;
   background-color: white;
@@ -222,6 +230,7 @@ const WelcomeScreen: React.FC = () => {
       // Start a 10-second timer when guest is set
       timeout = setTimeout(() => {
         setGuest(null);
+        fetchEvent();
       }, 10000); // 10 seconds
     }
 
@@ -293,8 +302,10 @@ const WelcomeScreen: React.FC = () => {
         <>
           {guest ? (
             <GuestDetailsContainer isVisible={guest !== null}>
-              <img src={qrCodeBase64} alt="" />
-              <div>Welcome, {guest.fullName}</div>
+              <ManualQRContainer src={ManualQR} alt="" />
+              <div>
+                Vitajte, <b>{guest.fullName}</b>
+              </div>
               <div>{guest.email}</div>
             </GuestDetailsContainer>
           ) : (
@@ -304,13 +315,26 @@ const WelcomeScreen: React.FC = () => {
                 {event?.date ? formatDate(event.date) : ""}
               </DateTimeSC>
 
-              <ScannerComponent setGuest={setGuest} />
-              {/* <GuestCountContainer>+{guestsPresent}</GuestCountContainer> */}
-              <SubTitle>Scan your invitation QR code to check-in</SubTitle>
+              <ScannerComponent
+                setGuest={setGuest}
+                guestCount={guestsPresent || 0}
+              />
+
+              <SubTitle>Naskenujte QR kód z pozvánky pre check-in</SubTitle>
             </Container>
           )}
         </>
       ) : (
+        // <>
+        //   <GuestDetailsContainer isVisible={true}>
+        //     <ManualQRContainer src={ManualQR} alt="" />
+
+        //     <div>
+        //       Vitajte, <b>Bohdan Myrinets</b>
+        //     </div>
+        //     <div>myrinets.bohdan@gmail.com</div>
+        //   </GuestDetailsContainer>
+        // </>
         <>
           <svg
             width="120"

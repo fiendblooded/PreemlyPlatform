@@ -5,6 +5,7 @@ import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { Guest } from "../types";
 
 const Container = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,6 +25,25 @@ const ripple = keyframes`
     opacity: 0;
     transform: scale3d(1.2, 1.2, 1);
   }
+`;
+
+const GuestCountContainer = styled.div`
+  position: absolute;
+  width: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 92px;
+  border-radius: 8px 0px 8px 0px;
+  color: white;
+  font-size: 30px;
+  line-height: 40px;
+  font-family: "Nunito", sans-serif;
+  background-color: #00aef0;
+  right: 0px;
+  bottom: 0px;
+  gap: 4px;
 `;
 
 // Styled Component
@@ -57,8 +77,9 @@ const ScannerContainer = styled.div`
 
 type Props = {
   setGuest: (guest: Guest) => void;
+  guestCount: number;
 };
-const ScannerComponent: React.FC<Props> = ({ setGuest }) => {
+const ScannerComponent: React.FC<Props> = ({ setGuest, guestCount }) => {
   const axiosInstance = useAxiosWithAuth();
 
   const handleScan = async (result: IDetectedBarcode[]) => {
@@ -118,6 +139,11 @@ const ScannerComponent: React.FC<Props> = ({ setGuest }) => {
           }}
         />
       </ScannerContainer>
+      <GuestCountContainer>
+        {/* <b style={{ fontSize: 16, lineHeight: "20px" }}>Počet</b> */}
+        <b style={{ fontSize: 40, lineHeight: "36px" }}>{guestCount}</b>
+        <b style={{ fontSize: 24, lineHeight: "24px" }}>Hostí</b>
+      </GuestCountContainer>
     </Container>
   );
 };

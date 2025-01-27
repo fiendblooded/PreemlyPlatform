@@ -33,7 +33,7 @@ jobs:
           VITE_APP_DOMAIN: ${{ secrets.VITE_APP_DOMAIN }}
           VITE_APP_CLIENTID: ${{ secrets.VITE_APP_CLIENTID }}
           VITE_APP_WS_URL: ${{ secrets.VITE_APP_WS_URL }}
-          GOOGLE_MAPS_API: ${{ secrets.GOOGLE_MAPS_API }}
+          GOOGLE_MAPS_API: ${{ secrets.VITE_GOOGLE_MAPS_API }}
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20

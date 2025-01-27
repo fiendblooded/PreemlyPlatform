@@ -22,14 +22,17 @@ const Title = styled.div`
 `;
 
 const AddressInput = styled.input`
-  width: 50%;
+  width: calc(100% - 16px);
+  font-family: Axiforma, sans-serif;
   flex: 1;
-  border: none;
+  border: 1.5px solid rgb(205, 205, 205);
+  border-radius: 8px;
   background: transparent;
-  font-size: 14px;
+  font-size: 16px;
+  padding: 8px;
   color: #333;
   outline: none;
-
+  margin-bottom: 10px;
   &::placeholder {
     color: #aaa;
   }
@@ -53,7 +56,10 @@ interface Event {
   };
 }
 
-const EventLocationEditor: React.FC<{ event: Event }> = ({ event }) => {
+const EventLocationEditor: React.FC<{ event: Event; refetch: () => void }> = ({
+  event,
+  refetch,
+}) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const autocompleteRef = useRef<HTMLInputElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -67,11 +73,11 @@ const EventLocationEditor: React.FC<{ event: Event }> = ({ event }) => {
   });
 
   const [isUpdating, setIsUpdating] = useState(false);
-
+  const gmapsKey = import.meta.env.VITE_GOOGLE_MAPS_API;
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        await loadGoogleMapsScript(import.meta.env.GOOGLE_MAPS_API); // Ensure the script is loaded
+        await loadGoogleMapsScript(gmapsKey); // Ensure the script is loaded
 
         if (!mapRef.current) return;
 
@@ -165,18 +171,48 @@ const EventLocationEditor: React.FC<{ event: Event }> = ({ event }) => {
       });
 
       console.log("Location updated:", response.data);
-      alert("Location updated successfully!");
     } catch (error) {
       console.error("Error updating location:", error);
       alert("Failed to update location.");
     } finally {
       setIsUpdating(false);
     }
+    refetch();
   };
 
   return (
     <Container>
-      <Title>Event Location</Title>
+      <div
+        style={{
+          fontWeight: "bold",
+          fontSize: 18,
+          marginBottom: "10px",
+          display: "flex",
+          alignItems: "end",
+          lineHeight: "24px",
+        }}
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5.7 15C4.03377 15.6353 3 16.5205 3 17.4997C3 19.4329 7.02944 21 12 21C16.9706 21 21 19.4329 21 17.4997C21 16.5205 19.9662 15.6353 18.3 15M12 9H12.01M18 9C18 13.0637 13.5 15 12 18C10.5 15 6 13.0637 6 9C6 5.68629 8.68629 3 12 3C15.3137 3 18 5.68629 18 9ZM13 9C13 9.55228 12.5523 10 12 10C11.4477 10 11 9.55228 11 9C11 8.44772 11.4477 8 12 8C12.5523 8 13 8.44772 13 9Z"
+            stroke="black"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <div
+          style={{ marginBottom: "-2px", marginLeft: "4px", color: "black" }}
+        >
+          Event location
+        </div>
+      </div>
       <AddressInput
         ref={autocompleteRef}
         type="text"
@@ -184,9 +220,12 @@ const EventLocationEditor: React.FC<{ event: Event }> = ({ event }) => {
         defaultValue={location.address}
       />
       <MapContainer ref={mapRef}></MapContainer>
-      <PrimaryButton onClick={handleSaveLocation} disabled={isUpdating}>
-        {isUpdating ? "Saving..." : "Save Location"}
-      </PrimaryButton>
+      {event.location.latitude != location.latitude &&
+        event.location.longitude != location.longitude && (
+          <PrimaryButton onClick={handleSaveLocation} disabled={isUpdating}>
+            {isUpdating ? "Saving..." : "Save Location"}
+          </PrimaryButton>
+        )}
     </Container>
   );
 };
