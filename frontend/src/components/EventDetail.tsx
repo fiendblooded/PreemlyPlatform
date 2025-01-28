@@ -7,15 +7,11 @@ import PosterUploadModal from "./PosterUploadModal";
 // import CSVUploader from "./CSVUploader";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import TopBar from "./TopBar";
-import {
-  ActiveStatusContainer,
-  ActiveStatusButton,
-  SearchIcon,
-} from "./Events";
-import { getDateRangeDetails } from "../common/common";
-import ToastNotification from "./ToastNotification";
+import { ActiveStatusContainer, ActiveStatusButton } from "./Events";
 import EventLocationEditor from "./EventLocationEditor";
 import EventDetailsEditor from "./EventDetailsEditor";
+import EventGuestsEditor from "./EventGuestsEditor";
+import { getDateRangeDetails } from "../common/common";
 
 export const PageWrapper = styled.div`
   display: flex;
@@ -45,141 +41,12 @@ const PosterImage = styled.img`
   object-fit: cover; /* Ensure the image scales nicely */
 `;
 
-const GuestsWrapper = styled.div`
-  width: 70%;
-  margin: 20px auto;
-  display: flex;
-  flex-direction: column;
-  height: 500px; /* Adjust to limit height */
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-`;
-
-const SearchContainer = styled.div`
-  display: flex;
-  align-items: center;
-  background-color: #f9f9f9;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  padding: 8px 12px;
-  width: 100%;
-  max-width: 400px;
-  margin-top: 20px;
-
-  /* Smooth transition for the border */
-  transition: border-color 0.3s ease;
-
-  /* Highlight the container when the input inside is focused */
-  &:focus-within {
-    border-color: rgb(107, 61, 223); /* Yellow border */
-  }
-`;
-
-const SearchInput = styled.input`
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  color: #333;
-  outline: none;
-
-  &::placeholder {
-    color: #aaa;
-  }
-`;
-
-const ScrollableTable = styled.div`
-  max-height: 400px;
-  overflow-y: auto;
-  border-left: 1px solid #ddd;
-  border-radius: 4px;
-  color: black;
-  padding: 20px;
-  padding-top: 0px;
-  margin: 0 auto;
-  margin-top: 20px;
-
-  /* Subtle Scrollbar Styling */
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #c8c8c8 #f7f7f7; /* Thumb and Track colors for Firefox */
-
-  ::-webkit-scrollbar {
-    width: 8px; /* Slimmer scrollbar */
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: #c8c8c8; /* Soft grey thumb */
-    border-radius: 4px; /* Rounded corners for thumb */
-    border: 1px solid #f7f7f7; /* Light border to blend into the track */
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: #b5b5b5; /* Slightly darker grey on hover */
-  }
-
-  ::-webkit-scrollbar-track {
-    background-color: #f7f7f7; /* Very light grey track */
-    border-radius: 4px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-
-    th,
-    td {
-      padding: 12px 16px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f7f7f7; /* Light grey header background */
-      position: sticky;
-      top: 0;
-      z-index: 900;
-      font-weight: bold;
-      color: #333; /* Dark grey text */
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      border-bottom: 1px solid #ddd; /* Subtle border for separation */
-    }
-
-    td {
-      background-color: #fff; /* White row background */
-      border-bottom: 1px solid #ddd; /* Subtle border between rows */
-      vertical-align: middle;
-    }
-
-    tr:hover {
-      background-color: #f3f3f3; /* Slightly darker grey on hover */
-    }
-
-    td input {
-      color: black;
-      width: 90%;
-      padding: 8px;
-      border: 1px solid #ccc; /* Subtle grey border */
-      border-radius: 4px;
-      font-size: 0.9rem;
-      background-color: #f9f9f9; /* Light grey background for inputs */
-    }
-  }
-`;
-
 const LoadingMessage = styled.p`
   color: #bbb;
   font-size: 1rem;
   text-align: center;
 `;
 
-const GuestTableHeaderContainer = styled.div`
-  padding: 0px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
 export const PrimaryButton = styled.button<{
   marginTop?: number;
   width?: number;
@@ -277,26 +144,16 @@ const DateTime = styled.div`
   font-size: 14px;
   line-height: 100%;
 `;
-const GuestActionsButtonsContainer = styled.div`
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  justify-content: start;
-`;
 
 const EventDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
   const [openSection, setOpenSection] = useState("info");
   const [loading, setLoading] = useState<boolean>(true);
-  const [filterText, setFilterText] = useState<string>(""); // For text filtering
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [toastVisible, setToastVisible] = useState<boolean>(false);
+
   const navigate = useNavigate();
   const [isModalOpen, setModalOpen] = useState(false); // Modal state
-  const [newGuests, setNewGuests] = useState<
-    { fullName: string; age: number; email: string }[]
-  >([]);
+
   const axiosInstance = useAxiosWithAuth();
   const fetchEvent = async () => {
     try {
@@ -309,190 +166,6 @@ const EventDetail: React.FC = () => {
     }
   };
 
-  const addNewGuestRow = () => {
-    setNewGuests([...newGuests, { fullName: "", age: 0, email: "" }]);
-  };
-
-  const handleGuestChange = (
-    index: number,
-    field: keyof (typeof newGuests)[0],
-    value: string | number
-  ) => {
-    const updatedGuests = [...newGuests];
-    updatedGuests[index] = {
-      ...updatedGuests[index],
-      [field]: value,
-    };
-    setNewGuests(updatedGuests);
-  };
-
-  // Example usage
-  const sendGuestEmail = async (
-    toEmail: string,
-    qrContent: string,
-    eventDetails: Event
-  ) => {
-    const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-      qrContent
-    )}&size=150x150`;
-    const htmlContent = `
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Your Event Ticket</title>
-        <style>
-
-          body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-          }
-          a {
-            text-decoration: none;
-          }
-          .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-          }
-
-          .header {
-            background-color: #9370db;
-            color: #fff;
-            text-align: center;
-            padding: 20px;
-            font-size: 1.5rem;
-          }
-
-          /* Event Details */
-          .content {
-            padding: 20px;
-            text-align: center;
-          }
-          .content p {
-            font-size: 1rem;
-            line-height: 1.6;
-            margin: 10px 0;
-          }
-
-          .details {
-            margin: 20px 0;
-          }
-
-          .details strong {
-            color: #9370db;
-          }
-
-          /* QR Code */
-          .qr-code {
-            margin: 20px auto;
-            text-align: center;
-          }
-          .qr-code img {
-            width: 200px;
-            height: 200px;
-            border: 5px solid #f4c430;
-            border-radius: 8px;
-          }
-
-          /* Footer */
-          .footer {
-            background-color: #f4c430;
-            color: #333;
-            text-align: center;
-            padding: 10px;
-            font-size: 0.9rem;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-
-          <div class="header">
-            🎉 Your Ticket for <strong>${eventDetails.title}</strong>
-          </div>
-
-          <div class="content">
-            <p>${eventDetails.description}</p>
-            <div class="details">
-              <p><strong>Date:</strong> ${new Date(
-                eventDetails.date
-              ).toLocaleString()}</p>
-            </div>
-
-            <div class="qr-code">
-              <img src="${qrCodeBase64}" alt="Your QR Code" />
-            </div>
-            <p>Please show this QR code at the event for entry.</p>
-          </div>
-
-          <div class="footer">
-            See you there! 🎟 <br />
-            Preemly Team
-          </div>
-        </div>
-      </body>
-    </html>
-    `;
-
-    await axiosInstance.post(`/mail`, {
-      recipient: toEmail,
-      subject: `Your ticket for ${eventDetails.title}`,
-      htmlContent: htmlContent,
-    });
-  };
-
-  const sendEmailsToGuests = async () => {
-    if (!event || event.guests.length === 0) {
-      console.warn("No guests to send emails to.");
-      return;
-    }
-
-    try {
-      for (const guest of event.guests) {
-        const qrContent = guest._id.toString(); // Encoding the guest's ID for now
-
-        await sendGuestEmail(guest.email, qrContent, event);
-      }
-
-      setToastMessage(`Emails sent successfully to all guests!`);
-      setToastVisible(true);
-
-      // Hide the toast after 5 seconds
-      setTimeout(() => {
-        setToastVisible(false);
-        setToastMessage(null);
-      }, 3002);
-    } catch (error) {
-      console.error("Error sending emails to guests:", error);
-      setToastMessage("Failed to send some or all emails.");
-      setToastVisible(true);
-
-      setTimeout(() => {
-        setToastVisible(false);
-        setToastMessage(null);
-      }, 3002);
-    }
-  };
-
-  const saveGuests = async () => {
-    try {
-      await axiosInstance.put(`/events/${id}/guests`, {
-        guests: newGuests,
-      });
-      fetchEvent();
-      setNewGuests([]);
-    } catch (error) {
-      console.error("Error saving guests:", error);
-    }
-  };
   const deleteEvent = async () => {
     try {
       await axiosInstance.delete(`/events/${id}`);
@@ -502,14 +175,6 @@ const EventDetail: React.FC = () => {
     }
   };
 
-  const deleteGuest = async (guestId: string) => {
-    try {
-      await axiosInstance.delete(`/guests/${guestId}`);
-      fetchEvent();
-    } catch (error) {
-      console.error("Error saving guests:", error);
-    }
-  };
   useEffect(() => {
     fetchEvent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -517,11 +182,6 @@ const EventDetail: React.FC = () => {
 
   if (loading) return <LoadingMessage>Loading event details...</LoadingMessage>;
   if (!event) return <LoadingMessage>Event not found.</LoadingMessage>;
-  const filteredGuests = event?.guests.filter(
-    (guest) =>
-      guest.fullName.toLowerCase().includes(filterText.toLowerCase()) ||
-      guest.email.toLowerCase().includes(filterText.toLowerCase())
-  );
 
   return (
     <PageWrapper>
@@ -568,7 +228,7 @@ const EventDetail: React.FC = () => {
               strokeLinejoin="round"
             />
           </svg>
-          Created: {new Date(event.date).toLocaleString()}
+          {getDateRangeDetails(event.date || "", event.endDate || "")}
         </DateTime>
       </DetailsHeader>
 
@@ -597,164 +257,7 @@ const EventDetail: React.FC = () => {
         <EventDetailsEditor event={event} refetch={fetchEvent} />
       )}
       {openSection === "attendance" && (
-        <>
-          <GuestsWrapper>
-            {/* Filter Input */}
-            <GuestTableHeaderContainer>
-              {" "}
-              <SearchContainer>
-                <SearchIcon
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M14.9536 14.9458L21 21M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
-                      stroke="rgb(137, 137, 137)"
-                      stroke-width="2"
-                      strokeLinecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </SearchIcon>
-                <SearchInput
-                  type="text"
-                  placeholder="Search by name or email..."
-                  value={filterText}
-                  onChange={(e) => setFilterText(e.target.value)}
-                />
-              </SearchContainer>
-              <GuestActionsButtonsContainer>
-                <SecondaryButton
-                  onClick={() => navigate(`/welcome/${id}`)}
-                  marginTop={20}
-                >
-                  Welcome Screen
-                </SecondaryButton>
-                <SecondaryButton onClick={sendEmailsToGuests} marginTop={20}>
-                  Send Emails
-                </SecondaryButton>
-                <PrimaryButton onClick={addNewGuestRow} marginTop={20}>
-                  + Add Guest
-                </PrimaryButton>
-              </GuestActionsButtonsContainer>
-            </GuestTableHeaderContainer>
-
-            {/* Scrollable Table */}
-            <ScrollableTable>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Full Name</th>
-                    {/* <th>Age</th> */}
-                    <th>Email</th>
-                    <th>Attendance</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Placeholder for no guests */}
-                  {filteredGuests?.length === 0 && newGuests.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        style={{ textAlign: "center", padding: "20px" }}
-                      >
-                        No guests added yet. Press "Add Guest" to get started!
-                      </td>
-                    </tr>
-                  )}
-
-                  {/* Filtered Existing Guests */}
-                  {filteredGuests?.map((guest) => (
-                    <tr key={guest._id}>
-                      <td>{guest.fullName}</td>
-                      {/* <td>{guest.age}</td> */}
-                      <td>{guest.email}</td>
-                      <td>{guest.attendance_status ? "Present" : "Absent"}</td>
-                      <td>
-                        <GuestActionsButtonsContainer>
-                          <PrimaryButton onClick={() => deleteGuest(guest._id)}>
-                            Delete
-                          </PrimaryButton>
-                        </GuestActionsButtonsContainer>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {/* New Guests Being Added */}
-                  {newGuests.map((guest, index) => (
-                    <tr key={`new-${index}`}>
-                      <td>
-                        <input
-                          type="text"
-                          placeholder="Full Name"
-                          value={guest.fullName}
-                          onChange={(e) =>
-                            handleGuestChange(index, "fullName", e.target.value)
-                          }
-                        />
-                      </td>
-                      {/* <td>
-                        <input
-                          type="number"
-                          placeholder="Age"
-                          value={guest.age}
-                          onChange={(e) =>
-                            handleGuestChange(
-                              index,
-                              "age",
-                              Number(e.target.value)
-                            )
-                          }
-                        />
-                      </td> */}
-                      <td>
-                        <input
-                          type="email"
-                          placeholder="Email"
-                          value={guest.email}
-                          onChange={(e) =>
-                            handleGuestChange(index, "email", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td></td>
-                      <td>
-                        <GuestActionsButtonsContainer>
-                          <PrimaryButton
-                            onClick={() => saveGuests()}
-                            width={38}
-                          >
-                            +
-                          </PrimaryButton>
-                          <SecondaryButton
-                            onClick={() => {
-                              const reducedGuests = [...newGuests];
-                              reducedGuests.splice(index, 1);
-                              setNewGuests(reducedGuests);
-                            }}
-                            width={38}
-                          >
-                            x
-                          </SecondaryButton>
-                        </GuestActionsButtonsContainer>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </ScrollableTable>
-
-            {/* Add Guest Button */}
-          </GuestsWrapper>
-        </>
+        <EventGuestsEditor event={event} refetch={fetchEvent} />
       )}
       {openSection === "location" && (
         <EventLocationEditor event={event} refetch={fetchEvent} />
@@ -768,7 +271,6 @@ const EventDetail: React.FC = () => {
           onPosterUpdated={fetchEvent}
         />
       )}
-      <ToastNotification message={toastMessage} visible={toastVisible} />
     </PageWrapper>
   );
 };

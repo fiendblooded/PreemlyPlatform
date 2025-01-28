@@ -12,7 +12,7 @@ const Container = styled.div`
   justify-content: center;
   background-color: #121212; /* Dark background */
   border-radius: 20px;
-  margin: 20px auto;
+  margin: 40px;
 `;
 
 const ripple = keyframes`
@@ -48,8 +48,8 @@ const GuestCountContainer = styled.div`
 
 // Styled Component
 const ScannerContainer = styled.div`
-  width: 40vh;
-  height: 40vh;
+  width: 45vh;
+  height: 45vh;
   border-radius: 20px;
   border: 4px solid #00aef0;
   position: relative;
@@ -77,17 +77,18 @@ const ScannerContainer = styled.div`
 
 type Props = {
   setGuest: (guest: Guest) => void;
-  guestCount: number;
+  eventGuests: string[];
 };
-const ScannerComponent: React.FC<Props> = ({ setGuest, guestCount }) => {
+const ScannerComponent: React.FC<Props> = ({ setGuest, eventGuests }) => {
   const axiosInstance = useAxiosWithAuth();
 
   const handleScan = async (result: IDetectedBarcode[]) => {
     const guestId = result[0].rawValue; // Assuming result contains the guest ID
-    const response = await axiosInstance.put(`/guests/${guestId}/attendance`);
-    console.log(response.data.data);
-    const guest = response.data.data as Guest;
-    setGuest(guest);
+    if (eventGuests.includes(guestId)) {
+      const response = await axiosInstance.put(`/guests/${guestId}/attendance`);
+      const guest = response.data.data as Guest;
+      setGuest(guest);
+    }
   };
 
   //hiding the svgs
@@ -139,11 +140,6 @@ const ScannerComponent: React.FC<Props> = ({ setGuest, guestCount }) => {
           }}
         />
       </ScannerContainer>
-      <GuestCountContainer>
-        {/* <b style={{ fontSize: 16, lineHeight: "20px" }}>Počet</b> */}
-        <b style={{ fontSize: 40, lineHeight: "36px" }}>{guestCount}</b>
-        <b style={{ fontSize: 24, lineHeight: "24px" }}>Hostí</b>
-      </GuestCountContainer>
     </Container>
   );
 };

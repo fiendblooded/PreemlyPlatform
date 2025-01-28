@@ -9,6 +9,7 @@ import Spinner from "./Spinner";
 import Dropdown from "./Dropdown";
 import WaveBackground from "./WaveBackground";
 import ManualQR from "../manualqr.png";
+import PresentGuests from "./PresentGuests";
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -46,7 +47,7 @@ const BackButton = styled.button`
   padding: 8px 12px;
   border-radius: 5px;
   transition: background-color 0.4s ease-in-out;
-
+  z-index: 104025023002350;
   &:hover {
     background-color: #00aef0;
   }
@@ -75,15 +76,21 @@ const Title = styled.div`
   font-weight: bold;
   margin-bottom: 10px;
   margin-top: 10px;
+  text-align: center;
 `;
 
 const SubTitle = styled.div`
   font-size: 24px;
   width: 50%;
-  text-align: center;
   margin-top: 10px;
+  text-align: center;
 `;
 
+const MessageSC = styled.div`
+  font-size: 24px;
+
+  margin-top: 10px;
+`;
 const DropdownContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -116,16 +123,18 @@ const Button = styled.button`
   margin-top: 20px;
 `;
 const DateTimeSC = styled.div`
-  font-size: 32px;
+  font-size: 20px;
   color: rgb(207, 207, 207);
-  margin-bottom: 20px;
+
+  margin-top: -10px;
 `;
 const Container = styled.div<{ isVisible: boolean }>`
   width: 80%;
   height: 80%;
   display: flex;
+  gap: 20px;
   margin: auto;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
   font-size: 40px;
@@ -157,21 +166,51 @@ const GuestDetailsContainer = styled.div<{ isVisible: boolean }>`
 const GuestInfoContainer = styled.div`
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 `;
 const ManualQRContainer = styled.img`
   width: 350px;
   border-radius: 8px;
 `;
-const GuestCountContainer = styled.div`
-  border-radius: 100%;
-  background-color: white;
-  font-size: 24px;
-  width: 64px;
-  height: 64px;
+const WelcomeButtonsContainer = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+const PrimaryWelcomeButton = styled.div`
+  font-size: 16px;
+  border-radius: 24px;
+  padding: 12px 20px;
+  background-color: #00aef0;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: black;
+  font-weight: bold;
+  min-width: 160px;
+  gap: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out; /* Add this line */
+  &:hover {
+    background-color: rgb(0, 119, 166);
+  }
+`;
+
+const SecondaryWelcomeButton = styled.div`
+  font-size: 16px;
+  border-radius: 24px;
+  padding: 12px 20px;
+  border: 2px solid #00aef0;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  min-width: 160px;
+`;
+const OrSC = styled.div`
+  font-size: 16px;
+  margin: 12px;
 `;
 
 const wsUrl = import.meta.env.VITE_APP_WS_URL;
@@ -276,7 +315,7 @@ const WelcomeScreen: React.FC = () => {
   const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
     "nevergonnagiveyouup"
   )}&size=150x150`;
-
+  const eventGuests = event?.guests.map((guest) => guest._id) || [];
   return (
     <WelcomeScreenWrapper>
       <BackButton onClick={() => navigate(-1)}>
@@ -310,17 +349,43 @@ const WelcomeScreen: React.FC = () => {
             </GuestDetailsContainer>
           ) : (
             <Container isVisible={guest === null}>
-              <Title>{event?.title || ""}</Title>
-              <DateTimeSC>
-                {event?.date ? formatDate(event.date) : ""}
-              </DateTimeSC>
+              <ScannerComponent setGuest={setGuest} eventGuests={eventGuests} />
 
-              <ScannerComponent
-                setGuest={setGuest}
-                guestCount={guestsPresent || 0}
-              />
-
-              <SubTitle>Naskenujte QR kód z pozvánky pre check-in</SubTitle>
+              <GuestInfoContainer>
+                <Title>{event?.title || ""}</Title>
+                <DateTimeSC>
+                  {event?.date ? formatDate(event.date) : ""}
+                </DateTimeSC>
+                <PresentGuests guests={event?.guests || []} />
+                {/* <MessageSC>Naskenujte QR kód z pozvánky pre check-in</MessageSC> */}
+                <MessageSC>Scan your invitation QR code for check-in</MessageSC>
+                <OrSC>or</OrSC>
+                <WelcomeButtonsContainer>
+                  <PrimaryWelcomeButton>
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10 21H6.2C5.0799 21 4.51984 21 4.09202 20.782C3.71569 20.5903 3.40973 20.2843 3.21799 19.908C3 19.4802 3 18.9201 3 17.8V8.2C3 7.0799 3 6.51984 3.21799 6.09202C3.40973 5.71569 3.71569 5.40973 4.09202 5.21799C4.51984 5 5.0799 5 6.2 5H17.8C18.9201 5 19.4802 5 19.908 5.21799C20.2843 5.40973 20.5903 5.71569 20.782 6.09202C21 6.51984 21 7.0799 21 8.2V10M7 3V5M17 3V5M3 9H21M13.5 13.0001L7 13M10 17.0001L7 17M14 21L16.025 20.595C16.2015 20.5597 16.2898 20.542 16.3721 20.5097C16.4452 20.4811 16.5147 20.4439 16.579 20.399C16.6516 20.3484 16.7152 20.2848 16.8426 20.1574L21 16C21.5523 15.4477 21.5523 14.5523 21 14C20.4477 13.4477 19.5523 13.4477 19 14L14.8426 18.1574C14.7152 18.2848 14.6516 18.3484 14.601 18.421C14.5561 18.4853 14.5189 18.5548 14.4903 18.6279C14.458 18.7102 14.4403 18.7985 14.405 18.975L14 21Z"
+                        stroke="white"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <div style={{ margin: "auto", marginTop: 2 }}>
+                      Manual Check-in
+                    </div>
+                  </PrimaryWelcomeButton>
+                  {/* <SecondaryWelcomeButton>
+                    Manual Check-in
+                  </SecondaryWelcomeButton> */}
+                </WelcomeButtonsContainer>
+              </GuestInfoContainer>
             </Container>
           )}
         </>
