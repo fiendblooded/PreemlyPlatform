@@ -72,23 +72,24 @@ const WelcomeScreenWrapper = styled.div`
 `;
 
 const Title = styled.div`
-  font-size: 48px;
+  font-size: 1.9rem;
   font-weight: bold;
+  width: 100%;
   margin-bottom: 10px;
   margin-top: 10px;
   text-align: center;
 `;
 
 const SubTitle = styled.div`
-  font-size: 24px;
-  width: 50%;
+  font-size: 1.2rem;
+  width: 60%;
   margin-top: 10px;
   text-align: center;
 `;
 
 const MessageSC = styled.div`
-  font-size: 24px;
-
+  font-size: 1.2rem;
+  text-align: center;
   margin-top: 10px;
 `;
 const DropdownContainer = styled.div`

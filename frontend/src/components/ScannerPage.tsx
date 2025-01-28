@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
@@ -10,7 +10,7 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #121212; /* Dark background */
+  background-color: #121212;
   border-radius: 20px;
   margin: 40px;
 `;
@@ -27,26 +27,28 @@ const ripple = keyframes`
   }
 `;
 
-const GuestCountContainer = styled.div`
+const Button = styled.div`
   position: absolute;
-  width: 92px;
+  bottom: 20px;
+  right: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  height: 92px;
-  border-radius: 8px 0px 8px 0px;
-  color: white;
-  font-size: 30px;
-  line-height: 40px;
-  font-family: "Nunito", sans-serif;
-  background-color: #00aef0;
-  right: 0px;
-  bottom: 0px;
-  gap: 4px;
+
+  border-radius: 100%;
+  width: 40px;
+  height: 40px;
+
+  color: #fff;
+  background-color: rgba(189, 189, 189, 0.3);
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    color: #008fcc;
+  }
 `;
 
-// Styled Component
 const ScannerContainer = styled.div`
   width: 45vh;
   height: 45vh;
@@ -79,12 +81,41 @@ type Props = {
   setGuest: (guest: Guest) => void;
   eventGuests: string[];
 };
+
 const ScannerComponent: React.FC<Props> = ({ setGuest, eventGuests }) => {
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const axiosInstance = useAxiosWithAuth();
 
+  // Fetch available video devices
+  useEffect(() => {
+    navigator.mediaDevices
+      .enumerateDevices()
+      .then((mediaDevices) => {
+        const videoDevices = mediaDevices.filter(
+          (device) => device.kind === "videoinput"
+        );
+        setDevices(videoDevices);
+        if (videoDevices.length > 0) {
+          setSelectedDeviceId(videoDevices[0].deviceId); // Default to the first camera
+        }
+      })
+      .catch((err) => console.error("Error fetching devices: ", err));
+  }, []);
+
+  const handleSwitchCamera = () => {
+    if (devices.length > 1) {
+      const currentIndex = devices.findIndex(
+        (device) => device.deviceId === selectedDeviceId
+      );
+      const nextIndex = (currentIndex + 1) % devices.length;
+      setSelectedDeviceId(devices[nextIndex].deviceId);
+    }
+  };
+
   const handleScan = async (result: IDetectedBarcode[]) => {
-    const guestId = result[0].rawValue; // Assuming result contains the guest ID
-    if (eventGuests.includes(guestId)) {
+    const guestId = result[0]?.rawValue;
+    if (guestId && eventGuests.includes(guestId)) {
       const response = await axiosInstance.put(`/guests/${guestId}/attendance`);
       const guest = response.data.data as Guest;
       setGuest(guest);
@@ -123,23 +154,52 @@ const ScannerComponent: React.FC<Props> = ({ setGuest, eventGuests }) => {
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [selectedDeviceId]);
 
   return (
     <Container>
       <ScannerContainer>
-        <Scanner
-          classNames={{ container: "scanner", video: "scanner" }}
-          components={{ audio: false, torch: true }}
-          formats={["qr_code"]}
-          onScan={(result) => handleScan(result)}
-          styles={{
-            finderBorder: 0,
-            container: { borderRadius: 20, border: 0 },
-            video: { borderRadius: 20, border: 0 },
-          }}
-        />
+        {selectedDeviceId && (
+          <Scanner
+            classNames={{ container: "scanner", video: "scanner" }}
+            components={{ audio: false, torch: true }}
+            formats={["qr_code"]}
+            onScan={(result) => handleScan(result)}
+            constraints={{
+              advanced: [
+                {
+                  deviceId: selectedDeviceId, // Use deviceId to specify the camera
+                },
+              ],
+            }}
+            styles={{
+              finderBorder: -2,
+              container: { borderRadius: 20, border: 0 },
+              video: { borderRadius: 20, border: 0 },
+            }}
+          />
+        )}
       </ScannerContainer>
+
+      {devices.length > 1 && (
+        <Button onClick={handleSwitchCamera}>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M21 12C21 16.9706 16.9706 21 12 21C9.69494 21 7.59227 20.1334 6 18.7083L3 16M3 12C3 7.02944 7.02944 3 12 3C14.3051 3 16.4077 3.86656 18 5.29168L21 8M3 21V16M3 16H8M21 3V8M21 8H16"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </Button>
+      )}
     </Container>
   );
 };
