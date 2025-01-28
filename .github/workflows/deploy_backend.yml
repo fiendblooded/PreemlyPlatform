@@ -32,6 +32,6 @@ jobs:
         with:
           appdir: "backend"
           heroku_api_key: "HRKU-eab5f280-333c-4a4c-a891-4f0203c8d84c"
-          heroku_app_name: "preemly"
+          heroku_app_name: "preemly_backend"
           heroku_email: "myrinets.bohdan@gmail.com"
           region: "eu"
