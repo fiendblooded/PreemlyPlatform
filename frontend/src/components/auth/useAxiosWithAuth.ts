@@ -3,7 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 const useAxiosWithAuth = () => {
   const { getAccessTokenSilently } = useAuth0();
-  //const __dirname = window.location.origin;
+  //const __dirname = window.location.origin
   const backendUrl = import.meta.env.VITE_API_BASE_URL;
   const axiosInstance = axios.create({
     baseURL: backendUrl,
