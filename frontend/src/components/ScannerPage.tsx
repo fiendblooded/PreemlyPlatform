@@ -145,7 +145,7 @@ const ScannerComponent: React.FC<Props> = ({ setGuest, eventGuests }) => {
           formats={["qr_code"]}
           onScan={(result) => handleScan(result)}
           constraints={{
-            advanced: [{ facingMode: facingMode }],
+            advanced: [{ facingMode: { exact: facingMode } }],
           }}
           styles={{
             finderBorder: -2,
