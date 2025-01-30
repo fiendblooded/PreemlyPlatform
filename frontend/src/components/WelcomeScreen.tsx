@@ -380,7 +380,7 @@ const WelcomeScreen: React.FC = () => {
   const resetInactivityTimer = () => {
     clearTimeout(inactivityTimer);
     setShowBubbles(false); // Reset to show the main content
-    inactivityTimer = setTimeout(() => setShowBubbles(true), 3000); // Show bubbles after 45 seconds of inactivity
+    inactivityTimer = setTimeout(() => setShowBubbles(true), 45000); // Show bubbles after 45 seconds of inactivity
   };
 
   useEffect(() => {
@@ -391,7 +391,7 @@ const WelcomeScreen: React.FC = () => {
     );
 
     // Set the initial inactivity timer
-    inactivityTimer = setTimeout(() => setShowBubbles(true), 3000);
+    inactivityTimer = setTimeout(() => setShowBubbles(true), 45000);
 
     // Cleanup: Remove event listeners and clear timer on component unmount
     return () => {
