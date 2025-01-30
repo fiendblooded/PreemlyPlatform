@@ -83,9 +83,7 @@ type Props = {
 };
 
 const ScannerComponent: React.FC<Props> = ({ setGuest, eventGuests }) => {
-  const [facingMode, setFacingMode] = useState<"user" | "environment">(
-    "environment"
-  );
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
   const axiosInstance = useAxiosWithAuth();
 
   const handleSwitchCamera = () => {
