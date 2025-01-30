@@ -12,6 +12,7 @@ import ManualQR from "../manualqr.png";
 import PresentGuests from "./PresentGuests";
 import React from "react";
 import { ToastType, useToast } from "./Toasts";
+import AnimatedBackground from "./AnimatedBackground";
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -371,6 +372,36 @@ const WelcomeScreen: React.FC = () => {
   );
 
   const eventGuests = event?.guests.map((guest) => guest._id) || [];
+
+  //BUBBLES
+  const [showBubbles, setShowBubbles] = useState(false);
+  let inactivityTimer: NodeJS.Timeout;
+
+  const resetInactivityTimer = () => {
+    clearTimeout(inactivityTimer);
+    setShowBubbles(false); // Reset to show the main content
+    inactivityTimer = setTimeout(() => setShowBubbles(true), 45000); // Show bubbles after 45 seconds of inactivity
+  };
+
+  useEffect(() => {
+    // Attach event listeners to detect user interaction
+    const events = ["mousemove", "keydown", "mousedown", "touchstart"];
+    events.forEach((event) =>
+      window.addEventListener(event, resetInactivityTimer)
+    );
+
+    // Set the initial inactivity timer
+    inactivityTimer = setTimeout(() => setShowBubbles(true), 45000);
+
+    // Cleanup: Remove event listeners and clear timer on component unmount
+    return () => {
+      clearTimeout(inactivityTimer);
+      events.forEach((event) =>
+        window.removeEventListener(event, resetInactivityTimer)
+      );
+    };
+  }, []);
+  console.log(showBubbles);
   return (
     <WelcomeScreenWrapper>
       <BackButton onClick={() => navigate(-1)}>
@@ -394,6 +425,7 @@ const WelcomeScreen: React.FC = () => {
         <Spinner isVisible={loading} />
       ) : id ? (
         <>
+          {showBubbles && <AnimatedBackground />}
           {guest ? (
             <GuestDetailsContainer isVisible={guest !== null}>
               <ManualQRContainer src={ManualQR} alt="" />
@@ -411,22 +443,36 @@ const WelcomeScreen: React.FC = () => {
                   <ManualInputSC
                     placeholder="Name and surname"
                     value={manualName}
-                    onChange={(event) => setManualName(event.target.value)}
+                    onChange={(event) => {
+                      setManualName(event.target.value);
+                      resetInactivityTimer();
+                    }}
                   />
 
                   <ManualInputSC
                     placeholder="Email"
                     value={manualEmail}
-                    onChange={(event) => setmanualEmail(event.target.value)}
+                    onChange={(event) => {
+                      setmanualEmail(event.target.value);
+                      resetInactivityTimer();
+                    }}
                   />
 
                   <WelcomeButtonsContainer>
                     <SecondaryWelcomeButton
-                      onClick={() => setManualCheckInOpen(false)}
+                      onClick={() => {
+                        setManualCheckInOpen(false);
+                        resetInactivityTimer();
+                      }}
                     >
                       Back
                     </SecondaryWelcomeButton>
-                    <PrimaryWelcomeButton onClick={() => addGuestManually()}>
+                    <PrimaryWelcomeButton
+                      onClick={() => {
+                        addGuestManually();
+                        resetInactivityTimer();
+                      }}
+                    >
                       Check-in
                     </PrimaryWelcomeButton>
                   </WelcomeButtonsContainer>
@@ -468,7 +514,10 @@ const WelcomeScreen: React.FC = () => {
                         </svg>
                         <div
                           style={{ margin: "auto", marginTop: 2 }}
-                          onClick={() => setManualCheckInOpen(true)}
+                          onClick={() => {
+                            setManualCheckInOpen(true);
+                            resetInactivityTimer();
+                          }}
                         >
                           Manual Check-in
                         </div>
