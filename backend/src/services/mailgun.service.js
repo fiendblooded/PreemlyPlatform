@@ -15,7 +15,7 @@ const validateEmail = (email) => {
 
   return re.test(email);
 };
-// const sendEmail = async (recipient, subject, htmlContent) => {
+// const sendEmail = async (recipient, subject, htmlContent) => { 
 //   try {
 //     const response = await mg.messages.create("preemly.eu", {
 //       from: "info@preemly.eu", // Must match the verified Mailgun domain
