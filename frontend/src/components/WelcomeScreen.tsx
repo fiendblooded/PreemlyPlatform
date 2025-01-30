@@ -13,6 +13,8 @@ import PresentGuests from "./PresentGuests";
 import React from "react";
 import { ToastType, useToast } from "./Toasts";
 import AnimatedBackground from "./AnimatedBackground";
+import PreemlyLogo from "../logo.png";
+import HacknimeLogo from "../hacknimelogo.png";
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -75,7 +77,7 @@ const WelcomeScreenWrapper = styled.div`
 `;
 
 const Title = styled.div`
-  font-size: 1.9rem;
+  font-size: 2.1rem;
   font-weight: bold;
   width: 100%;
   margin-bottom: 10px;
@@ -91,7 +93,7 @@ const SubTitle = styled.div`
 `;
 
 const MessageSC = styled.div`
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   text-align: center;
   margin-top: 10px;
 `;
@@ -150,23 +152,6 @@ const Container = styled.div<{ isVisible: boolean }>`
   transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
 `;
 
-const GuestDetailsContainer = styled.div<{ isVisible: boolean }>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  gap: 10px;
-  color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  animation: ${({ isVisible }) => (isVisible ? fadeIn : fadeOut)} 0.5s
-    ease-in-out;
-  opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
-  transform: ${({ isVisible }) =>
-    isVisible ? "translateY(0)" : "translateY(-10px)"};
-  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-`;
 const GuestInfoContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -174,7 +159,7 @@ const GuestInfoContainer = styled.div`
   align-items: center;
 `;
 const ManualQRContainer = styled.img`
-  width: 350px;
+  width: 80%;
   border-radius: 8px;
 `;
 const WelcomeButtonsContainer = styled.div`
@@ -186,9 +171,9 @@ const WelcomeButtonsContainer = styled.div`
   justify-content: center;
 `;
 const PrimaryWelcomeButton = styled.div`
-  font-size: 16px;
+  font-size: 18px;
   border-radius: 24px;
-  padding: 12px 20px;
+  padding: 14px 22px;
   background-color: #00aef0;
   color: white;
   display: flex;
@@ -221,7 +206,7 @@ const SecondaryWelcomeButton = styled.div`
   }
 `;
 const OrSC = styled.div`
-  font-size: 16px;
+  font-size: 18px;
   margin: 12px;
 `;
 
@@ -245,6 +230,89 @@ const ManualInputSC = styled.input`
     border-color: #00aef0;
     outline: none;
   }
+`;
+const LogosContainer = styled.div`
+  width: 90%;
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Center vertically */
+`;
+
+const LogoContainer = styled.img`
+  width: 40%; /* Each logo takes 40% width */
+  height: auto; /* Auto height to maintain aspect ratio */
+  object-fit: contain; /* Ensure the full image is shown without distortion */
+  margin: 0 2%; /* Add some space between the images */
+`;
+
+const VerticalDelimiter = styled.div`
+  height: 90%;
+  width: 2px;
+  background-color: white;
+`;
+const HorizontalDelimiter = styled.div`
+  width: 90%;
+  height: 1px;
+  background-color: white;
+`;
+
+const GuestDetailsContainer = styled.div`
+  width: 25%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #ffffff;
+  background-color: #00aef0;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+`;
+const ProgramContainer = styled.div`
+  height: 100%;
+  width: 50%;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+`;
+const GuestWelcomeScreen = styled.div<{ isVisible: boolean }>`
+  display: flex;
+  width: 100%;
+  height: 60%;
+  margin: auto;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  animation: ${({ isVisible }) => (isVisible ? fadeIn : fadeOut)} 0.5s
+    ease-in-out;
+  opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
+  transform: ${({ isVisible }) =>
+    isVisible ? "translateY(0)" : "translateY(-10px)"};
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+`;
+const ScheduleContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-items: center;
+`;
+const ScheduleSection = styled.div`
+  height: 25%;
+  width: 90%;
+  display: flex;
+  font-size: 40px;
+  justify-content: space-between;
+  align-items: center;
+`;
+const ScheduleInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+`;
+const ScheduleSectionTitle = styled.div`
+  font-weight: bold;
 `;
 
 const wsUrl = import.meta.env.VITE_APP_WS_URL;
@@ -425,14 +493,58 @@ const WelcomeScreen: React.FC = () => {
       ) : id ? (
         <>
           {showBubbles && <AnimatedBackground />}
+
           {guest ? (
-            <GuestDetailsContainer isVisible={guest !== null}>
-              <ManualQRContainer src={ManualQR} alt="" />
-              <div>
-                Vitajte, <b>{guest.fullName}</b>
-              </div>
-              <div>{guest.email}</div>
-            </GuestDetailsContainer>
+            <GuestWelcomeScreen isVisible={guest !== null}>
+              <GuestDetailsContainer>
+                <div>
+                  <b>Let's hack it!</b>
+                </div>
+                <ManualQRContainer src={ManualQR} alt="" />
+
+                <div style={{ fontSize: 36, textAlign: "center" }}>
+                  <b>{guest.fullName}</b>
+                </div>
+                <LogosContainer>
+                  <LogoContainer src={HacknimeLogo} width={200} />
+                  <LogoContainer src={PreemlyLogo} />
+                </LogosContainer>
+              </GuestDetailsContainer>
+              <VerticalDelimiter />
+              <ProgramContainer>
+                <Title>What's next?</Title>
+                <ScheduleContainer>
+                  <ScheduleSection>
+                    <ScheduleInfo>
+                      <ScheduleSectionTitle>Grand Opening</ScheduleSectionTitle>
+                      <div></div>
+                    </ScheduleInfo>
+                    <div>9:00</div>
+                  </ScheduleSection>
+                  <HorizontalDelimiter />
+                  <ScheduleSection>
+                    <ScheduleInfo>
+                      <ScheduleSectionTitle>
+                        Explanation of the challenge
+                      </ScheduleSectionTitle>
+                      <div></div>
+                    </ScheduleInfo>
+                    <div>9:30</div>
+                  </ScheduleSection>
+                  <HorizontalDelimiter />
+                  <ScheduleSection>
+                    <ScheduleInfo>
+                      <ScheduleSectionTitle>
+                        Introduction of the mentors
+                      </ScheduleSectionTitle>
+                      <div></div>
+                    </ScheduleInfo>
+                    <div>9:50</div>
+                  </ScheduleSection>
+                  <HorizontalDelimiter />
+                </ScheduleContainer>
+              </ProgramContainer>
+            </GuestWelcomeScreen>
           ) : (
             <Container isVisible={guest === null}>
               {isManualCheckInOpen ? (
@@ -489,7 +601,6 @@ const WelcomeScreen: React.FC = () => {
                       {event?.date ? formatDate(event.date) : ""}
                     </DateTimeSC>
                     <PresentGuests guests={guestsPresent || []} />
-                    {/* <MessageSC>Naskenujte QR kód z pozvánky pre check-in</MessageSC> */}
                     <MessageSC>
                       Scan your invitation QR code for check-in
                     </MessageSC>

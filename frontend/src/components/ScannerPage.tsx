@@ -50,8 +50,8 @@ const Button = styled.div`
 `;
 
 const ScannerContainer = styled.div`
-  width: 45vh;
-  height: 45vh;
+  width: 50vh;
+  height: 50vh;
   border-radius: 20px;
   border: 4px solid #00aef0;
   position: relative;
