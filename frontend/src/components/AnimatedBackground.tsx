@@ -1,39 +1,40 @@
 import React from "react";
-import "./AnimatedBackground.css";
+import styled, { keyframes } from "styled-components";
+import VideoSource from "../assets/welcomevideo.mp4";
+
+// Keyframes for animations
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
+const FullscreenContainer = styled.div`
+  font-family: "Axiforma", sans-serif;
+  background-color: #f2f2f3;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: absolute;
+  z-index: 100503052340504360;
+  opacity: 0; /* Start hidden */
+  animation: ${fadeIn} 1.5s forwards; /* Appear animation */
+`;
+
+const StyledVideo = styled.video`
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+`;
 
 const AnimatedBackground: React.FC = () => {
   return (
-    <div className="container">
-      <div className="text-container">tap to start your Preemly check-in</div>
-      <div className="gradient-bg">
-        <svg xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="goo">
-              <feGaussianBlur
-                in="SourceGraphic"
-                stdDeviation="10"
-                result="blur"
-              />
-              <feColorMatrix
-                in="blur"
-                mode="matrix"
-                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"
-                result="goo"
-              />
-              <feBlend in="SourceGraphic" in2="goo" />
-            </filter>
-          </defs>
-        </svg>
-        <div className="gradients-container">
-          <div className="g1"></div>
-          <div className="g2"></div>
-          <div className="g3"></div>
-          <div className="g4"></div>
-          <div className="g5"></div>
-          <div className="interactive"></div>
-        </div>
-      </div>
-    </div>
+    <FullscreenContainer>
+      <StyledVideo src={VideoSource} autoPlay muted loop playsInline />
+    </FullscreenContainer>
   );
 };
 

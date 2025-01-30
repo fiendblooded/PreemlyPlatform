@@ -141,23 +141,6 @@
 }
 
 /* Appear/Disappear Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 0.95;
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 0.95;
-  }
-  to {
-    opacity: 0;
-  }
-}
 
 /* Animations for circles */
 @keyframes moveInCircle {
