@@ -1,8 +1,7 @@
 Codebase for preemly platform at platform.preemly.eu
 
 # **Preemly**
-
-**The smarter way to plan, manage, and execute events.**
+![Frame 1160445212](https://github.com/user-attachments/assets/8290146c-8054-459e-8288-4ed23d2fa9ce)
 
 Preemly is an AI-driven event management platform designed to **save event teams time**, streamline workflows, and deliver advanced tools for organizing events of all sizes.
 
@@ -13,6 +12,7 @@ Preemly is an AI-driven event management platform designed to **save event teams
 1. **AI Assistant – PreemBot**  
    - Create events by simply **chatting** with our AI assistant.  
    - PreemBot helps you define event details like title, time, venue, and description.
+
 
 2. **Attendance Management**  
    - QR code-based check-ins for guests.  
