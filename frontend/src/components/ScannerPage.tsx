@@ -86,6 +86,30 @@ const ScannerComponent: React.FC<Props> = ({ setGuest, eventGuests }) => {
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
   const axiosInstance = useAxiosWithAuth();
 
+  const initializeCameraOverride = () => {
+    const originalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(
+      navigator.mediaDevices
+    );
+
+    // Override the default getUserMedia method
+    navigator.mediaDevices.getUserMedia = async (constraints) => {
+      // Modify video constraints to force the front camera
+      const modifiedConstraints = {
+        ...constraints,
+        video: {
+          ...(typeof constraints?.video === "boolean"
+            ? {}
+            : constraints?.video),
+          facingMode: "user",
+        },
+      };
+
+      // Call the original method with modified constraints
+      return originalGetUserMedia(modifiedConstraints);
+    };
+  };
+  initializeCameraOverride();
+
   const handleSwitchCamera = () => {
     setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
   };
