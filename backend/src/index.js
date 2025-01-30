@@ -395,6 +395,41 @@ app.put("/api/guests/:id", async (req, res) => {
   }
 });
 
+// CREATE NEW GUEST
+app.post("/api/guests", async (req, res) => {
+  try {
+    const { eventId, fullName, email, age, attendance_status } = req.body;
+
+    // Check if the event exists
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+    }
+
+    // Create and save the new guest
+    const newGuest = new Guest({
+      fullName,
+      email,
+      age,
+      eventId,
+      attendance_status,
+    });
+    const savedGuest = await newGuest.save();
+
+    // Add the new guest to the event's guest list
+    event.guests.push(savedGuest._id);
+    await event.save();
+
+    // Respond with the saved guest data
+    res.status(201).json({ success: true, data: savedGuest });
+  } catch (error) {
+    console.error("Error in Create Guest:", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
 //DELETE GUEST BY ID
 app.delete("/api/guests/:id", async (req, res) => {
   try {

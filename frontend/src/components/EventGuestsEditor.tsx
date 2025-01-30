@@ -5,6 +5,7 @@ import { SearchIcon } from "./Events";
 import { useNavigate } from "react-router-dom";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { ToastType, useToast } from "./Toasts";
+import { getMailHtml } from "../common/common";
 
 const GuestsWrapper = styled.div`
   width: 70%;
@@ -111,6 +112,7 @@ const ScrollableTable = styled.div`
       background-color: #fff; /* White row background */
       border-bottom: 1px solid #ddd; /* Subtle border between rows */
       vertical-align: middle;
+      text-overflow: ellipsis;
     }
 
     tr:hover {
@@ -289,120 +291,16 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   };
 
   const sendGuestEmail = async (
+    guestName: string,
     toEmail: string,
     qrContent: string,
     eventDetails: Event
   ) => {
     const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
       qrContent
-    )}&size=150x150`;
-    const htmlContent = `
-    <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>Your Event Ticket</title>
-            <style>
+    )}&size=150x150&color=00AFEF&bgcolor=FFFFFF`;
 
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f9f9f9;
-                color: #333;
-                margin: 0;
-                padding: 0;
-            }
-            a {
-                text-decoration: none;
-            }
-            .container {
-                max-width: 600px;
-                margin: 20px auto;
-                background: #ffffff;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                overflow: hidden;
-            }
-
-            .header {
-                background-color: #9370db;
-                color: #fff;
-                text-align: center;
-                padding: 20px;
-                font-size: 1.5rem;
-            }
-
-            /* Event Details */
-            .content {
-                padding: 20px;
-                text-align: center;
-            }
-            .content p {
-                font-size: 1rem;
-                line-height: 1.6;
-                margin: 10px 0;
-            }
-
-            .details {
-                margin: 20px 0;
-            }
-
-            .details strong {
-                color: #9370db;
-            }
-
-            /* QR Code */
-            .qr-code {
-                margin: 20px auto;
-                text-align: center;
-            }
-            .qr-code img {
-                width: 200px;
-                height: 200px;
-                border: 5px solid #f4c430;
-                border-radius: 8px;
-            }
-
-            /* Footer */
-            .footer {
-                background-color: #f4c430;
-                color: #333;
-                text-align: center;
-                padding: 10px;
-                font-size: 0.9rem;
-            }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-
-            <div class="header">
-                🎉 Your Ticket for <strong>${eventDetails.title}</strong>
-            </div>
-
-            <div class="content">
-                <p>${eventDetails.description}</p>
-                <div class="details">
-                <p><strong>Date:</strong> ${new Date(
-                  eventDetails.date
-                ).toLocaleString()}</p>
-                </div>
-
-                <div class="qr-code">
-                <img src="${qrCodeBase64}" alt="Your QR Code" />
-                </div>
-                <p>Please show this QR code at the event for entry.</p>
-            </div>
-
-            <div class="footer">
-                See you there! 🎟 <br />
-                Preemly Team
-            </div>
-            </div>
-        </body>
-        </html>
-    
-    `;
+    const htmlContent = getMailHtml(guestName, qrCodeBase64);
 
     await axiosInstance.post(`/mail`, {
       recipient: toEmail,
@@ -423,7 +321,12 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         const guest = event.guests.find((g) => g._id === guestId);
         if (guest) {
           const qrContent = guest._id.toString();
-          await sendGuestEmail(guest.email, qrContent, event);
+          await sendGuestEmail(
+            guest.fullName,
+            guest.email.toLowerCase(),
+            qrContent,
+            event
+          );
         }
       }
 
@@ -438,6 +341,113 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   };
 
   const saveGuests = async () => {
+    // const hackGuests = [
+    //   { fullName: "Vadym Tovtyn", age: 0, email: "vadimtovtin@gmail.com" },
+    //   { fullName: "Dmytro Levchyk", age: 0, email: "dm.kobek@gmail.com" },
+    //   {
+    //     fullName: "Oleksandr Kostianets",
+    //     age: 0,
+    //     email: "oleksandr.kostianets@student.tuke.sk",
+    //   },
+    //   {
+    //     fullName: "Mykyta Lukianytsia",
+    //     age: 0,
+    //     email: "nikitalukianitcares@gmail.com",
+    //   },
+    //   { fullName: "Dmytro Sachenko", age: 0, email: "zima2908@gmail.com" },
+    //   {
+    //     fullName: "Maximilian Jaroščák",
+    //     age: 0,
+    //     email: "maxi.jaroscak@gmail.com",
+    //   },
+    //   { fullName: "Martin Uhrin", age: 0, email: "martin.uhrin9501@gmail.com" },
+    //   { fullName: "Daniel Keveš", age: 0, email: "Daniel.keves.135@gmail.com" },
+    //   { fullName: "Vladimír Kriško", age: 0, email: "krisko.vlad@gmail.com" },
+    //   { fullName: "Milan Smiesko", age: 0, email: "milansmiesko4@gmail.com" },
+    //   { fullName: "Jakub Jelínek", age: 0, email: "jelinekjakub6@gmail.com" },
+    //   {
+    //     fullName: "Viktor Marusiak",
+    //     age: 0,
+    //     email: "victormarusjak@gmail.com",
+    //   },
+    //   { fullName: "Kost Khrystyna", age: 0, email: "khrystyna2207@gmail.com" },
+    //   { fullName: "Matviienko Tymofii", age: 0, email: "timpimlim2@gmail.com" },
+    //   {
+    //     fullName: "Kirill Krasnov",
+    //     age: 0,
+    //     email: "kirill.krasnov.jr@gmail.com",
+    //   },
+    //   {
+    //     fullName: "Oleksii Kuryliak",
+    //     age: 0,
+    //     email: "kurilyakoleksii12@gmail.com",
+    //   },
+    //   { fullName: "Anton Ivanchikov", age: 0, email: "dasada677@gmail.com" },
+    //   {
+    //     fullName: "Uladzislau Novikau",
+    //     age: 0,
+    //     email: "richard00111010@gmail.com",
+    //   },
+    //   { fullName: "Adam Jankech", age: 0, email: "jankech.adam@gmail.com" },
+    //   { fullName: "Sofiia Krygina", age: 0, email: "krihinasofya@gmail.com" },
+    //   { fullName: "Mykhailo Sytnyk", age: 0, email: "mishasytnik34@gmail.com" },
+    //   {
+    //     fullName: "Mykhailo Kaniuka",
+    //     age: 0,
+    //     email: "m.kwnyuka.m2005@gmail.com",
+    //   },
+    //   { fullName: "Maksym Norokha", age: 0, email: "maxnorohich@gmail.com" },
+    //   { fullName: "Daria Slynko", age: 0, email: "ajxvesorin@gmail.com" },
+    //   { fullName: "Ján Tančibok", age: 0, email: "jan.tancibok@gmail.com" },
+    //   { fullName: "Pavol Tančibok", age: 0, email: "palko@tancibok.sk" },
+    //   {
+    //     fullName: "Jozef Židuliak",
+    //     age: 0,
+    //     email: "Jozefjojo897@protonmail.com",
+    //   },
+    //   {
+    //     fullName: "Lukáš Michalčák",
+    //     age: 0,
+    //     email: "lukasmichalcak04@gmail.com",
+    //   },
+    //   { fullName: "Martin Gregor", age: 0, email: "m123.gregor@gmail.com" },
+    //   { fullName: "Maroš Guráň", age: 0, email: "m.guran123@gmail.com" },
+    //   { fullName: "Frederik Duvač", age: 0, email: "frederik.duvac@gmail.com" },
+    //   {
+    //     fullName: "Martina Tvrdoňová",
+    //     age: 0,
+    //     email: "martina.tvrdonova@egrant.sk",
+    //   },
+    //   { fullName: "Jaroslav Istok", age: 0, email: "jaroslav.istok@gmail.com" },
+    //   {
+    //     fullName: "Zuzana Biloveská",
+    //     age: 0,
+    //     email: "zuzana.biloveska@egrant.sk",
+    //   },
+    //   { fullName: "Daniel Adam Czaja", age: 0, email: "danoczaja12@gmail.com" },
+    //   { fullName: "Jakub Krčmárik", age: 0, email: "mindstormjak@gmail.com" },
+    //   { fullName: "Lucas Ligas", age: 0, email: "lucasligas15@gmail.com" },
+    //   { fullName: "Roman Masár", age: 0, email: "roman@rmnm.dk" },
+    //   { fullName: "Matej Kuka", age: 0, email: "matokuka66@gmail.com" },
+    //   { fullName: "Jakub Marcinát", age: 0, email: "jakub.marcinat@gmail.com" },
+    //   {
+    //     fullName: "Jozef Kaplocky",
+    //     age: 0,
+    //     email: "jozef.kaplocky4@gmail.com",
+    //   },
+    //   { fullName: "Adam Tížik", age: 0, email: "tizikadam@gmail.com" },
+    //   { fullName: "Matúš Koleják", age: 0, email: "matokolejak@gmail.com" },
+    //   {
+    //     fullName: "Darius Horvath",
+    //     age: 0,
+    //     email: "dariushorvath33@gmail.com",
+    //   },
+    //   { fullName: "Gosha", age: 0, email: "heorhid@gmail.com" },
+    //   { fullName: "Peter Hubina", age: 0, email: "peter.hubina1@gmail.com" },
+    //   { fullName: "Jakub Jelínek", age: 0, email: "jelinek@pucwoll.com" },
+    //   { fullName: "Richard Šléher", age: 0, email: "riso.sleher@gmail.com" },
+    //   { fullName: "Lukáš Nemec", age: 0, email: "nemec@pucwoll.com" },
+    // ];
     try {
       await axiosInstance.put(`/events/${event._id}/guests`, {
         guests: newGuests,

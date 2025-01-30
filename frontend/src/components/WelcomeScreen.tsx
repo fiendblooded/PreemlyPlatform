@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import useWebSocket from "../useWebSocket";
-import styled, { keyframes, css } from "styled-components";
+import styled, { keyframes } from "styled-components";
 import ScannerComponent from "./ScannerPage";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { useParams, useNavigate } from "react-router-dom";
@@ -10,6 +10,8 @@ import Dropdown from "./Dropdown";
 import WaveBackground from "./WaveBackground";
 import ManualQR from "../manualqr.png";
 import PresentGuests from "./PresentGuests";
+import React from "react";
+import { ToastType, useToast } from "./Toasts";
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -177,6 +179,10 @@ const ManualQRContainer = styled.img`
 const WelcomeButtonsContainer = styled.div`
   display: flex;
   gap: 12px;
+  width: 100%;
+  margin: auto;
+  margin-top: 10px;
+  justify-content: center;
 `;
 const PrimaryWelcomeButton = styled.div`
   font-size: 16px;
@@ -208,10 +214,36 @@ const SecondaryWelcomeButton = styled.div`
   justify-content: center;
   font-weight: bold;
   min-width: 160px;
+  cursor: pointer;
+  &:hover {
+    background-color: rgb(0, 119, 166);
+  }
 `;
 const OrSC = styled.div`
   font-size: 16px;
   margin: 12px;
+`;
+
+const ManualInputSC = styled.input`
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  color: black;
+  border: 2px solid #f9f9f9;
+  border-radius: 4px;
+  padding: 8px 12px;
+  width: 100%;
+  font-family: Axiforma, sans-serif;
+  font-size: 20px;
+
+  /* Smooth transition for the border */
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #00aef0;
+    outline: none;
+  }
 `;
 
 const wsUrl = import.meta.env.VITE_APP_WS_URL;
@@ -227,7 +259,10 @@ const WelcomeScreen: React.FC = () => {
   const axiosInstance = useAxiosWithAuth();
   const message = useWebSocket(wsUrl);
   const [guest, setGuest] = useState<Guest | null>(null);
-
+  const [isManualCheckInOpen, setManualCheckInOpen] = useState(false);
+  const [manualName, setManualName] = useState("");
+  const [manualEmail, setmanualEmail] = useState("");
+  const { addToast, Toasts } = useToast();
   // Simulate delayed unmount of the spinner
   useEffect(() => {
     if (!loading) {
@@ -263,6 +298,28 @@ const WelcomeScreen: React.FC = () => {
       }
     }
   };
+  const addGuestManually = async () => {
+    if (manualName && manualEmail) {
+      try {
+        // Make the POST request to create a new guest
+        await axiosInstance.post(`/guests`, {
+          fullName: manualName,
+          email: manualEmail,
+          age: 0,
+          eventId: id, // Pass the event ID to associate the guest
+          attendance_status: true,
+        });
+        // Refetch the updated event data and reset form
+        setManualCheckInOpen(false);
+        setManualName(""); // Clear manual input (optional)
+        setmanualEmail(""); // Clear manual input (optional)
+        fetchEvent();
+      } catch (error) {
+        addToast(`Error saving guest: ${error}`, ToastType.ERROR);
+      }
+    }
+  };
+
   useEffect(() => {
     let timeout: NodeJS.Timeout;
 
@@ -311,11 +368,8 @@ const WelcomeScreen: React.FC = () => {
 
   const guestsPresent = event?.guests.filter(
     (guest) => guest.attendance_status === true
-  ).length;
+  );
 
-  const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-    "nevergonnagiveyouup"
-  )}&size=150x150`;
   const eventGuests = event?.guests.map((guest) => guest._id) || [];
   return (
     <WelcomeScreenWrapper>
@@ -350,57 +404,83 @@ const WelcomeScreen: React.FC = () => {
             </GuestDetailsContainer>
           ) : (
             <Container isVisible={guest === null}>
-              <ScannerComponent setGuest={setGuest} eventGuests={eventGuests} />
+              {isManualCheckInOpen ? (
+                <GuestInfoContainer>
+                  <Title>Manual Check-in</Title>
 
-              <GuestInfoContainer>
-                <Title>{event?.title || ""}</Title>
-                <DateTimeSC>
-                  {event?.date ? formatDate(event.date) : ""}
-                </DateTimeSC>
-                <PresentGuests guests={event?.guests || []} />
-                {/* <MessageSC>Naskenujte QR kód z pozvánky pre check-in</MessageSC> */}
-                <MessageSC>Scan your invitation QR code for check-in</MessageSC>
-                <OrSC>or</OrSC>
-                <WelcomeButtonsContainer>
-                  <PrimaryWelcomeButton>
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+                  <ManualInputSC
+                    placeholder="Name and surname"
+                    value={manualName}
+                    onChange={(event) => setManualName(event.target.value)}
+                  />
+
+                  <ManualInputSC
+                    placeholder="Email"
+                    value={manualEmail}
+                    onChange={(event) => setmanualEmail(event.target.value)}
+                  />
+
+                  <WelcomeButtonsContainer>
+                    <SecondaryWelcomeButton
+                      onClick={() => setManualCheckInOpen(false)}
                     >
-                      <path
-                        d="M10 21H6.2C5.0799 21 4.51984 21 4.09202 20.782C3.71569 20.5903 3.40973 20.2843 3.21799 19.908C3 19.4802 3 18.9201 3 17.8V8.2C3 7.0799 3 6.51984 3.21799 6.09202C3.40973 5.71569 3.71569 5.40973 4.09202 5.21799C4.51984 5 5.0799 5 6.2 5H17.8C18.9201 5 19.4802 5 19.908 5.21799C20.2843 5.40973 20.5903 5.71569 20.782 6.09202C21 6.51984 21 7.0799 21 8.2V10M7 3V5M17 3V5M3 9H21M13.5 13.0001L7 13M10 17.0001L7 17M14 21L16.025 20.595C16.2015 20.5597 16.2898 20.542 16.3721 20.5097C16.4452 20.4811 16.5147 20.4439 16.579 20.399C16.6516 20.3484 16.7152 20.2848 16.8426 20.1574L21 16C21.5523 15.4477 21.5523 14.5523 21 14C20.4477 13.4477 19.5523 13.4477 19 14L14.8426 18.1574C14.7152 18.2848 14.6516 18.3484 14.601 18.421C14.5561 18.4853 14.5189 18.5548 14.4903 18.6279C14.458 18.7102 14.4403 18.7985 14.405 18.975L14 21Z"
-                        stroke="white"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                    <div style={{ margin: "auto", marginTop: 2 }}>
-                      Manual Check-in
-                    </div>
-                  </PrimaryWelcomeButton>
-                  {/* <SecondaryWelcomeButton>
-                    Manual Check-in
-                  </SecondaryWelcomeButton> */}
-                </WelcomeButtonsContainer>
-              </GuestInfoContainer>
+                      Back
+                    </SecondaryWelcomeButton>
+                    <PrimaryWelcomeButton onClick={() => addGuestManually()}>
+                      Check-in
+                    </PrimaryWelcomeButton>
+                  </WelcomeButtonsContainer>
+                </GuestInfoContainer>
+              ) : (
+                <>
+                  <ScannerComponent
+                    setGuest={setGuest}
+                    eventGuests={eventGuests}
+                  />
+
+                  <GuestInfoContainer>
+                    <Title>{event?.title || ""}</Title>
+                    <DateTimeSC>
+                      {event?.date ? formatDate(event.date) : ""}
+                    </DateTimeSC>
+                    <PresentGuests guests={guestsPresent || []} />
+                    {/* <MessageSC>Naskenujte QR kód z pozvánky pre check-in</MessageSC> */}
+                    <MessageSC>
+                      Scan your invitation QR code for check-in
+                    </MessageSC>
+                    <OrSC>or</OrSC>
+                    <WelcomeButtonsContainer>
+                      <PrimaryWelcomeButton>
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M10 21H6.2C5.0799 21 4.51984 21 4.09202 20.782C3.71569 20.5903 3.40973 20.2843 3.21799 19.908C3 19.4802 3 18.9201 3 17.8V8.2C3 7.0799 3 6.51984 3.21799 6.09202C3.40973 5.71569 3.71569 5.40973 4.09202 5.21799C4.51984 5 5.0799 5 6.2 5H17.8C18.9201 5 19.4802 5 19.908 5.21799C20.2843 5.40973 20.5903 5.71569 20.782 6.09202C21 6.51984 21 7.0799 21 8.2V10M7 3V5M17 3V5M3 9H21M13.5 13.0001L7 13M10 17.0001L7 17M14 21L16.025 20.595C16.2015 20.5597 16.2898 20.542 16.3721 20.5097C16.4452 20.4811 16.5147 20.4439 16.579 20.399C16.6516 20.3484 16.7152 20.2848 16.8426 20.1574L21 16C21.5523 15.4477 21.5523 14.5523 21 14C20.4477 13.4477 19.5523 13.4477 19 14L14.8426 18.1574C14.7152 18.2848 14.6516 18.3484 14.601 18.421C14.5561 18.4853 14.5189 18.5548 14.4903 18.6279C14.458 18.7102 14.4403 18.7985 14.405 18.975L14 21Z"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                        <div
+                          style={{ margin: "auto", marginTop: 2 }}
+                          onClick={() => setManualCheckInOpen(true)}
+                        >
+                          Manual Check-in
+                        </div>
+                      </PrimaryWelcomeButton>
+                    </WelcomeButtonsContainer>
+                  </GuestInfoContainer>
+                </>
+              )}
             </Container>
           )}
         </>
       ) : (
-        // <>
-        //   <GuestDetailsContainer isVisible={true}>
-        //     <ManualQRContainer src={ManualQR} alt="" />
-
-        //     <div>
-        //       Vitajte, <b>Bohdan Myrinets</b>
-        //     </div>
-        //     <div>myrinets.bohdan@gmail.com</div>
-        //   </GuestDetailsContainer>
-        // </>
         <>
           <svg
             width="120"
@@ -449,6 +529,7 @@ const WelcomeScreen: React.FC = () => {
           </DropdownContainer>
         </>
       )}
+      <Toasts />
     </WelcomeScreenWrapper>
   );
 };

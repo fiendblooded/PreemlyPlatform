@@ -139,16 +139,13 @@ const ScannerComponent: React.FC<Props> = ({ setGuest, eventGuests }) => {
     <Container>
       <ScannerContainer>
         <Scanner
+          key={facingMode} // Forces a re-render when facingMode changes
           classNames={{ container: "scanner", video: "scanner" }}
           components={{ audio: false, torch: true }}
           formats={["qr_code"]}
           onScan={(result) => handleScan(result)}
           constraints={{
-            advanced: [
-              {
-                facingMode: facingMode, // Switch between front and back camera
-              },
-            ],
+            advanced: [{ facingMode: facingMode }],
           }}
           styles={{
             finderBorder: -2,
