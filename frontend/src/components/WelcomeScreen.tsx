@@ -380,6 +380,14 @@ const WelcomeScreen: React.FC = () => {
         });
         // Refetch the updated event data and reset form
         setManualCheckInOpen(false);
+        const guest: Guest = {
+          _id: "000",
+          fullName: manualName,
+          email: manualEmail,
+          attendance_status: true,
+          age: 0,
+        };
+        setGuest(guest);
         setManualName(""); // Clear manual input (optional)
         setmanualEmail(""); // Clear manual input (optional)
         fetchEvent();
