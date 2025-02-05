@@ -15,6 +15,20 @@ const eventSchema = new mongoose.Schema({
     longitude: { type: Number },
     placeId: { type: String }, // Google Maps Place ID
   },
+  tasks: [
+    {
+      title: { type: String },
+      isCompleted: { type: Boolean },
+      dueDate: { type: Date },
+    },
+  ],
+  welcomeScreenParams: {
+    backgroundColor: { type: String },
+    textColor: { type: String },
+    isManualCheckin: { type: Boolean },
+    isGdpr: { type: Boolean },
+    videoUrl: { type: String },
+  },
   _id: {
     type: mongoose.Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),

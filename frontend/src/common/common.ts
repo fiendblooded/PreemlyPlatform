@@ -63,7 +63,26 @@ export function getDateRangeDetails(date1: string, date2: string): string {
   // Return the formatted result
   return `${range} / ${gmtString} / ${duration} left`;
 }
+export function getDateTimeStatus(
+  startDateTime?: string | Date | null,
+  endDateTime?: string | Date | null
+): { type: string; color: string } {
+  if (!startDateTime || !endDateTime) {
+    return { type: "Error", color: "#fcd535" }; // Yellow
+  }
 
+  const now = new Date();
+  const start = new Date(startDateTime);
+  const end = new Date(endDateTime);
+
+  if (now < start) {
+    return { type: "Incoming", color: "#00aef0" }; // Blue
+  } else if (now > end) {
+    return { type: "Past", color: "#FF0000" }; // Red
+  } else {
+    return { type: "Ongoing", color: "#2a9134" }; // Green
+  }
+}
 export const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (typeof window.google !== "undefined") {

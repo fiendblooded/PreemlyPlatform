@@ -11,12 +11,12 @@ import { PrimaryButton, SecondaryButton } from "./EventGuestsEditor";
 const EventDetailsWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  width: 70%;
+  width: 90% !important;
   margin: auto;
   justify-content: space-between;
   margin-top: 0;
 `;
-const StyledDatePickerWrapper = styled.div`
+export const StyledDatePickerWrapper = styled.div`
   color: black;
 
   .react-datepicker {

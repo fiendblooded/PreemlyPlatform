@@ -8,11 +8,12 @@ import { ToastType, useToast } from "./Toasts";
 import { getMailHtml } from "../common/common";
 
 const GuestsWrapper = styled.div`
-  width: 70%;
+  width: 90%;
+  max-height: 450px;
+  overflow: hidden;
   margin: 20px auto;
   display: flex;
   flex-direction: column;
-  height: 500px; /* Adjust to limit height */
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -52,12 +53,10 @@ const SearchInput = styled.input`
 `;
 
 const ScrollableTable = styled.div`
-  max-height: 400px;
   overflow-y: auto;
   border-left: 1px solid #ddd;
   border-radius: 4px;
   color: black;
-  padding: 20px;
   padding-top: 0px;
   margin: 0 auto;
   margin-top: 20px;
@@ -551,8 +550,16 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                   />
                 </td>
                 <td>{guest.fullName}</td>
-                <td>{guest.email}</td>
-                <td>{guest.attendance_status ? "Present" : "Absent"}</td>
+                <td
+                  style={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {guest.email}
+                </td>
+                <td>{guest.attendance_status ? "+" : "-"}</td>
                 <td>
                   <PrimaryButton onClick={() => deleteGuest(guest._id)}>
                     Delete

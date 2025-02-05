@@ -5,6 +5,11 @@ export type Guest = {
   email: string;
   attendance_status?: boolean;
 };
+export type Task = {
+  title: string;
+  isCompleted: boolean;
+  dueDate: string;
+};
 
 export type Event = {
   date: string;
@@ -20,4 +25,11 @@ export type Event = {
     placeId: string;
   };
   endDate: string;
+  welcomeScreenParams: {
+    backgroundColor: string;
+    textColor: string;
+    isManualCheckin: boolean;
+    isGdpr: boolean;
+  };
+  tasks: Task[];
 };

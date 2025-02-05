@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const TopBarContainer = styled.div`
   width: -webkit-fill-available;
-  position: fixed;
+  position: relative;
   display: flex;
   align-items: center;
   height: 64px;

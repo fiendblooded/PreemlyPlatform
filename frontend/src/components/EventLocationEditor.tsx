@@ -10,8 +10,14 @@ const Container = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 16px;
   margin: 16px;
-  width: calc(70% - 32px);
+  width: calc(90% - 32px);
   margin: 20px auto;
+`;
+const InputAndButton = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
 `;
 
 const Title = styled.div`
@@ -26,10 +32,11 @@ const AddressInput = styled.input`
   font-family: Axiforma, sans-serif;
   flex: 1;
   border: 1.5px solid rgb(205, 205, 205);
-  border-radius: 8px;
+  border-radius: 5px;
   background: transparent;
-  font-size: 16px;
-  padding: 8px;
+  font-size: 14px;
+  height: 34px;
+
   color: #333;
   outline: none;
   margin-bottom: 10px;
@@ -213,19 +220,27 @@ const EventLocationEditor: React.FC<{ event: Event; refetch: () => void }> = ({
           Event location
         </div>
       </div>
-      <AddressInput
-        ref={autocompleteRef}
-        type="text"
-        placeholder="Search for a location..."
-        defaultValue={location.address}
-      />
+      <InputAndButton>
+        <AddressInput
+          ref={autocompleteRef}
+          type="text"
+          placeholder="Search for a location..."
+          defaultValue={location.address}
+        />
+
+        <PrimaryButton
+          onClick={handleSaveLocation}
+          disabled={
+            isUpdating ||
+            (event.location.latitude == location.latitude &&
+              event.location.longitude == location.longitude)
+          }
+        >
+          {isUpdating ? "Saving..." : "Save Location"}
+        </PrimaryButton>
+      </InputAndButton>
+
       <MapContainer ref={mapRef}></MapContainer>
-      {event.location.latitude != location.latitude &&
-        event.location.longitude != location.longitude && (
-          <PrimaryButton onClick={handleSaveLocation} disabled={isUpdating}>
-            {isUpdating ? "Saving..." : "Save Location"}
-          </PrimaryButton>
-        )}
     </Container>
   );
 };

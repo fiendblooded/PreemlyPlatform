@@ -179,7 +179,7 @@ const ScannerComponent: React.FC<Props> = ({ setGuest, eventGuests }) => {
         />
       </ScannerContainer>
 
-      <Button onClick={handleSwitchCamera}>
+      {/* <Button onClick={handleSwitchCamera}>
         <svg
           width="24"
           height="24"
@@ -195,7 +195,7 @@ const ScannerComponent: React.FC<Props> = ({ setGuest, eventGuests }) => {
             stroke-linejoin="round"
           />
         </svg>
-      </Button>
+      </Button> */}
     </Container>
   );
 };

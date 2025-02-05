@@ -99,6 +99,14 @@ app.post("/api/events", verifyUser, async (req, res) => {
         longitude: -122.0842499,
         placeId: "ChIJ2eUgeAK6j4ARbn5u_wAGqWA",
       },
+      tasks: [],
+      welcomeScreenParams: {
+        backgroundColor: "",
+        textColor: "",
+        isGdpr: false,
+        isManualCheckin: false,
+        videoUrl: "",
+      },
     });
     await newEvent.save();
 
@@ -322,6 +330,20 @@ app.post("/api/events", verifyUser, async (req, res) => {
       description,
       poster: uploadResult.secure_url,
       ownerId: req.user.sub,
+      tasks: [],
+      location: {
+        address: "1600 Amphitheatre Parkway, Mountain View, CA, USA",
+        latitude: 37.4224764,
+        longitude: -122.0842499,
+        placeId: "ChIJ2eUgeAK6j4ARbn5u_wAGqWA",
+      },
+      welcomeScreenParams: {
+        backgroundColor: "",
+        textColor: "",
+        isGdpr: false,
+        isManualCheckin: false,
+        videoUrl: "",
+      },
     });
 
     await newEvent.save();

@@ -82,9 +82,9 @@ const SearchInput = styled.input`
 
 export const ActiveStatusContainer = styled.div<{ isDetail?: boolean }>`
   margin: 0px;
-  margin-top: 80px;
+  margin-top: 10px;
   display: flex;
-  ${(props) => props.isDetail && "width: 70%; margin: 20px auto;"}
+  ${(props) => props.isDetail && "width: 90%; margin: 20px auto;"}
   gap: 20px;
   border-bottom: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
 `;
@@ -140,7 +140,6 @@ const Events: React.FC = () => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
-  console.log(events);
   const filteredEvents =
     events?.filter(
       (event) =>

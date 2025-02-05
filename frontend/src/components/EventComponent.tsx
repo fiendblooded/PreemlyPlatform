@@ -2,19 +2,20 @@ import styled from "styled-components";
 import { Event } from "../types";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PrimaryButton, SecondaryButton } from "./EventDetail";
+import { getDateTimeStatus } from "../common/common";
 
 interface EventProps {
   event: Event;
 }
 
-const Card = styled.div<{ isPublished: boolean }>`
+const Card = styled.div<{ color: string }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 300px; /* Adjust to control the card size */
   height: 400px; /* Adjust height for the poster */
   // border: 1px solid rgb(214, 214, 214);
-  border-top: 4px solid ${(props) => (props.isPublished ? "#83d4b7" : "grey")};
+  border-top: 4px solid ${(props) => props.color};
   border-radius: 4px;
   background-color: #ffffff;
   color: #f5f5f5;
@@ -107,10 +108,10 @@ const GuestCount = styled.div<{ paddingTop?: number }>`
 const EventComponent: React.FC<EventProps> = ({ event }) => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const dateTimeStatus = getDateTimeStatus(event?.date, event?.endDate);
   return (
     <Card
-      isPublished={!!event.poster}
+      color={dateTimeStatus.color}
       onClick={() =>
         navigate(`/events/${event._id}`, {
           state: { from: location.pathname },
