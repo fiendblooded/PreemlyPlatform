@@ -206,7 +206,7 @@ const Sidebar: React.FC = () => {
             width={"55%"}
           />
         </ImageContainer>
-        {/* <MenuButton onClick={() => navigate("/")} isactive={getPageStatus("")}>
+        <MenuButton onClick={() => navigate("/")} isactive={getPageStatus("")}>
           <svg
             width="20"
             height="20"
@@ -241,7 +241,7 @@ const Sidebar: React.FC = () => {
           </svg>
 
           <MenuButtonText>Dashboard</MenuButtonText>
-        </MenuButton> */}
+        </MenuButton>
         <MenuButton
           onClick={() => navigate("/events")}
           isactive={getPageStatus("events")}

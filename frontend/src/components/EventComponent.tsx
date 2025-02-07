@@ -13,7 +13,7 @@ const Card = styled.div<{ color: string }>`
   flex-direction: column;
   justify-content: space-between;
   width: 300px; /* Adjust to control the card size */
-  height: 400px; /* Adjust height for the poster */
+  height: 300px; /* Adjust height for the poster */
   // border: 1px solid rgb(214, 214, 214);
   border-top: 4px solid ${(props) => props.color};
   border-radius: 4px;
@@ -103,6 +103,10 @@ const GuestCount = styled.div<{ paddingTop?: number }>`
     margin-right: 5px;
   }
 `;
+const Location = styled.div`
+  color: grey;
+  font-size: 0.9rem;
+`;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const EventComponent: React.FC<EventProps> = ({ event }) => {
@@ -128,7 +132,7 @@ const EventComponent: React.FC<EventProps> = ({ event }) => {
       )}
       <Title>{event.title}</Title>
       <GuestCount>{new Date(event.date).toLocaleString()}</GuestCount>
-      <Description>{event.description}</Description>
+      {/* {event.location.address && <Location>{event.location.address}</Location>} */}
       <InfoBar>
         <GuestCount paddingTop={4}>
           <svg

@@ -68,17 +68,17 @@ export function getDateTimeStatus(
   endDateTime?: string | Date | null
 ): { type: string; color: string } {
   if (!startDateTime || !endDateTime) {
-    return { type: "Error", color: "#fcd535" }; // Yellow
+    return { type: "Error", color: "#FF0000" }; // Red
   }
 
   const now = new Date();
   const start = new Date(startDateTime);
   const end = new Date(endDateTime);
-
+  console.log("DATES" + now, start);
   if (now < start) {
     return { type: "Incoming", color: "#00aef0" }; // Blue
   } else if (now > end) {
-    return { type: "Past", color: "#FF0000" }; // Red
+    return { type: "Past", color: "grey" }; // Grey
   } else {
     return { type: "Ongoing", color: "#2a9134" }; // Green
   }

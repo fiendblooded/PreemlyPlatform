@@ -145,7 +145,7 @@ const UserProfile: React.FC = () => {
           <DropdownContainer>
             <UserInfoSection>
               <ProfileImage
-                onClick={() => navigate("/profile")}
+                // onClick={() => navigate("/profile")}
                 src={user?.[`${namespace}picture`]}
                 alt={user?.[`${namespace}name`]}
                 style={{ width: "60px", height: "60px", borderRadius: "50%" }}
@@ -153,15 +153,14 @@ const UserProfile: React.FC = () => {
               <UserName>{user?.[`${namespace}name`]}</UserName>
               <UserEmail>{user?.[`${namespace}email`]}</UserEmail>
 
-              <UpgradeButton>Upgrade to PRO</UpgradeButton>
+              {/* <UpgradeButton>Upgrade to PRO</UpgradeButton> */}
             </UserInfoSection>
             <OptionsSection>
-              <Option onClick={() => navigate("/profile")}>Profile</Option>
+              {/* <Option onClick={() => navigate("/profile")}>Profile</Option> */}
               <Option>Settings</Option>
+              <Option onClick={() => navigate("/help")}>Help</Option>
             </OptionsSection>
-            <FooterSection>
-              <Option>Help</Option>
-            </FooterSection>
+            {/* <FooterSection></FooterSection> */}
             <FooterSection>
               <Option
                 onClick={() =>

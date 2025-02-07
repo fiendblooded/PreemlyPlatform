@@ -16,6 +16,7 @@ import Dashboard from "./components/Dashboard";
 import ChatbotPage from "./components/chatbot/ChatbotPage";
 import useAuthSetup from "./useAuthSetup";
 import Profile from "./components/Profile";
+import PreemlyFAQ from "./components/PreemlyFAQ";
 
 export const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -159,7 +160,7 @@ const AppContent: React.FC = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/events/create-new-event" element={<EventForm />} />
-
+          <Route path="/help" element={<PreemlyFAQ />} />
           {/* <Route path="/scanner" element={<ScannerPage />} /> */}
           <Route
             path="/welcome"

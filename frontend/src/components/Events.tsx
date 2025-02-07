@@ -6,6 +6,7 @@ import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import useAuthSetup from "../useAuthSetup";
 import TopBar from "./TopBar";
 import { useAuth0 } from "@auth0/auth0-react";
+import { getDateTimeStatus } from "../common/common";
 
 export const PageWrapper = styled.div`
   display: flex;
@@ -91,6 +92,7 @@ export const ActiveStatusContainer = styled.div<{ isDetail?: boolean }>`
 export const ActiveStatusButton = styled.div<{
   isActive: boolean;
   marginLeft?: number;
+  borderColor?: string;
 }>`
   color: ${(props) => (props.isActive ? "black" : "rgb(167, 167, 167)")};
   font-size: 16px;
@@ -99,14 +101,15 @@ export const ActiveStatusButton = styled.div<{
   margin-left: ${(props) =>
     props.marginLeft != undefined ? props.marginLeft : 28}px;
   border-bottom: 2px solid
-    ${(props) => (props.isActive ? "#e6bf30" : "transparent")};
+    ${(props) => (props.isActive ? props.borderColor : "transparent")};
 
   /* Add smooth transition */
   transition: color 0.3s ease, border-bottom-color 0.3s ease;
 
   &:hover {
     color: ${(props) => (props.isActive ? "black" : "grey")};
-    border-bottom: 2px solid ${(props) => (props.isActive ? "#e6bf30" : "grey")};
+    border-bottom: 2px solid
+      ${(props) => (props.isActive ? props.borderColor : "grey")};
   }
 `;
 const namespace = "https://custom-claims.preemly.eu/";
@@ -114,7 +117,7 @@ const Events: React.FC = () => {
   useAuthSetup();
   const { user } = useAuth0();
 
-  const [activeStatus, setActiveStatus] = useState(true);
+  const [activeStatus, setActiveStatus] = useState("All");
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const axiosInstance = useAxiosWithAuth();
@@ -140,37 +143,76 @@ const Events: React.FC = () => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
-  const filteredEvents =
-    events?.filter(
-      (event) =>
-        (event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.description
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())) &&
-        !!event.poster === activeStatus
-    ) || [];
+  //getDateTimeStatus(event?.date, event?.endDate);
+  const filterEvents = (filterStatus: string, searchQuery: string) => {
+    let filteredEvents = events;
 
+    if (searchQuery != "") {
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          event.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    if (filterStatus === "All") {
+      return filteredEvents;
+    } else if (filterStatus === "Incoming") {
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          getDateTimeStatus(event?.date, event?.endDate).type === "Incoming"
+      );
+    } else if (filterStatus === "Past") {
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          getDateTimeStatus(event?.date, event?.endDate).type === "Past"
+      );
+    } else if (filterStatus === "Ongoing") {
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          getDateTimeStatus(event?.date, event?.endDate).type === "Ongoing"
+      );
+    }
+    return filteredEvents;
+  };
+  const filteredEvents = filterEvents(activeStatus, searchQuery);
   return (
     <PageWrapper>
       <TopBar sectionTitle="Events" />
 
       <ActiveStatusContainer>
         <ActiveStatusButton
-          isActive={activeStatus}
-          onClick={() => setActiveStatus(true)}
+          isActive={activeStatus === "All"}
+          onClick={() => setActiveStatus("All")}
+          borderColor="#e6bf30"
         >
-          Active Events
+          All Events
         </ActiveStatusButton>
         <ActiveStatusButton
-          isActive={!activeStatus}
-          onClick={() => setActiveStatus(false)}
+          isActive={activeStatus === "Ongoing"}
+          onClick={() => setActiveStatus("Ongoing")}
+          borderColor="#2a9134"
         >
-          Past Events
+          Ongoing
+        </ActiveStatusButton>
+        <ActiveStatusButton
+          isActive={activeStatus === "Incoming"}
+          onClick={() => setActiveStatus("Incoming")}
+          borderColor="#00aef0"
+        >
+          Incoming
+        </ActiveStatusButton>
+        <ActiveStatusButton
+          isActive={activeStatus === "Past"}
+          onClick={() => setActiveStatus("Past")}
+          borderColor="grey"
+        >
+          Past
         </ActiveStatusButton>
       </ActiveStatusContainer>
       <ContentWrapper>
         <Header>
-          {filteredEvents.length} {activeStatus ? "Active" : "Past"} event
+          {filteredEvents.length} {activeStatus != "All" ? activeStatus : null}{" "}
+          event
           {(filteredEvents.length > 1 || filteredEvents.length === 0) && "s"}
           <SearchContainer>
             <SearchIcon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
