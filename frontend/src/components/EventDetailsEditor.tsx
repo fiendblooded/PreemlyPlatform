@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,11 @@ const EventDetailsWrapper = styled.div`
 `;
 export const StyledDatePickerWrapper = styled.div`
   color: black;
-
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 4px;
+  gap: 4px;
   .react-datepicker {
     font-size: 16px;
     background-color: #f9f9f9;
@@ -58,16 +62,30 @@ export const StyledDatePickerWrapper = styled.div`
   }
 
   .react-datepicker__input-container input {
-    background-color: #f9f9f9;
-    border: 2px solid #ddd;
-    border-radius: 4px;
-    padding: 8px 12px;
+    background-color: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px 14px;
     font-size: 16px;
-    transition: border-color 0.3s ease;
-    color: black;
+    font-weight: 500;
+    color: #333;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      border-color: rgba(107, 61, 223, 0.6);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
     &:focus {
       border-color: rgb(107, 61, 223);
       outline: none;
+      box-shadow: 0 4px 12px rgba(107, 61, 223, 0.3);
+    }
+
+    &::placeholder {
+      color: #aaa;
+      font-weight: 400;
     }
   }
 `;
@@ -141,12 +159,69 @@ const StyledTextarea = styled.input`
     outline: none;
   }
 `;
+const EventTypeSelector = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+`;
 
+const SelectorOption = styled.div<{ selected: boolean }>`
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  color: ${({ selected }) => (selected ? "black" : "#555")};
+  background-color: ${({ selected }) => (selected ? "#ffd716" : "#f2f2f2")};
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: ${({ selected }) => (selected ? "#ffcc00" : "#e6e6e6")};
+  }
+
+  input {
+    margin-right: 12px;
+    accent-color: #ffd716;
+    cursor: pointer;
+  }
+`;
+const EventTypeEditor: React.FC<{
+  eventType: string;
+  setEventType: (type: string) => void;
+}> = ({ eventType, setEventType }) => {
+  const options = ["Offline", "Online", "Hybrid"];
+
+  return (
+    <EventTypeSelector>
+      {options.map((option) => (
+        <SelectorOption
+          key={option}
+          selected={eventType === option}
+          onClick={() => setEventType(option)}
+        >
+          <input
+            type="radio"
+            name="event-type"
+            checked={eventType === option}
+            onChange={() => setEventType(option)}
+          />
+          <div style={{ paddingTop: 6 }}>
+            {option === "Offline" ? "In-person" : option}
+          </div>
+        </SelectorOption>
+      ))}
+    </EventTypeSelector>
+  );
+};
 interface Event {
   _id: string;
   description: string;
   date: string | null;
   endDate: string | null;
+  eventType: string;
 }
 
 const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
@@ -159,6 +234,7 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
   const [description, setDescription] = useState(event.description);
   const [startDate, setStartDate] = useState(new Date(event.date || ""));
   const [endDate, setEndDate] = useState(new Date(event.endDate || ""));
+  const [eventType, setEventType] = useState(event.eventType);
 
   const updateDescription = async () => {
     await axiosInstance.put(`/events/${event._id}`, {
@@ -168,6 +244,19 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
     refetch();
     setIsEditingDescription(false);
   };
+  const updateEventType = async () => {
+    await axiosInstance.put(`/events/${event._id}`, {
+      ...event,
+      eventType,
+    });
+    refetch();
+    setIsEditingDescription(false);
+  };
+  useEffect(() => {
+    updateEventType();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventType]);
 
   const updateDateRange = async () => {
     await axiosInstance.put(`/events/${event._id}`, {
@@ -295,6 +384,12 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
             {getDateRangeDetails(event.date || "", event.endDate || "")}
           </div>
         )}
+      </EventDetails>
+      <EventDetails>
+        <div style={{ fontWeight: "bold", fontSize: 18, marginBottom: "4px" }}>
+          Event type
+        </div>
+        <EventTypeEditor eventType={eventType} setEventType={setEventType} />
       </EventDetails>
     </EventDetailsWrapper>
   );

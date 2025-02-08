@@ -145,7 +145,7 @@ const PosterUploadModal: React.FC<PosterUploadModalProps> = ({
         await axiosInstance.put(`/events/${eventId}/poster`, {
           poster: base64Poster,
         });
-        alert("Poster updated successfully!");
+
         onPosterUpdated(); // Notify parent to refresh the data
         onClose(); // Close the modal
       } catch (error) {

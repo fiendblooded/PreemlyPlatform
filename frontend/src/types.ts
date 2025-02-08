@@ -2,8 +2,10 @@ export type Guest = {
   _id: string;
   fullName: string;
   age: number;
+  phoneNumber: string;
   email: string;
   attendance_status?: boolean;
+  email_sent?: boolean;
 };
 export type Task = {
   title: string;
@@ -25,6 +27,7 @@ export type Event = {
     placeId: string;
   };
   endDate: string;
+  eventType: string;
   welcomeScreenParams: {
     backgroundColor: string;
     textColor: string;

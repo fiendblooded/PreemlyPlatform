@@ -28,7 +28,11 @@ export function getDateRangeDetails(date1: string, date2: string): string {
       hour: "2-digit",
       minute: "2-digit",
     });
-    range = `${date}, ${startTime} - ${endTime}`;
+    if (startTime === endTime) {
+      range = `${date}, ${startTime}`;
+    } else {
+      range = `${date}, ${startTime} - ${endTime}`;
+    }
   } else {
     range = `${startDate.toLocaleDateString(
       undefined,
@@ -58,10 +62,12 @@ export function getDateRangeDetails(date1: string, date2: string): string {
   if (hours > 0) durationParts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
   if (minutes > 0)
     durationParts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
-  const duration = durationParts.join(", ");
+  const duration = durationParts.length
+    ? durationParts.join(", ") + " left"
+    : "";
 
   // Return the formatted result
-  return `${range} / ${gmtString} / ${duration} left`;
+  return `${range} ${duration != "" ? `/ ${duration}` : ""}`;
 }
 export function getDateTimeStatus(
   startDateTime?: string | Date | null,
@@ -74,11 +80,11 @@ export function getDateTimeStatus(
   const now = new Date();
   const start = new Date(startDateTime);
   const end = new Date(endDateTime);
-  console.log("DATES" + now, start);
+
   if (now < start) {
     return { type: "Incoming", color: "#00aef0" }; // Blue
   } else if (now > end) {
-    return { type: "Past", color: "grey" }; // Grey
+    return { type: "Past", color: "#6b6b6b" }; // Grey
   } else {
     return { type: "Ongoing", color: "#2a9134" }; // Green
   }

@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import UserProfile from "./auth/UserProfile";
 import { useNavigate } from "react-router-dom";
+import EventForm from "./form/EventForm";
 
 const TopBarContainer = styled.div`
   width: -webkit-fill-available;
@@ -84,6 +85,7 @@ interface TopBarProps {
 
 const TopBar: React.FC<TopBarProps> = ({ sectionTitle, showBackButton }) => {
   const navigate = useNavigate();
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
   return (
     <TopBarContainer>
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -108,7 +110,7 @@ const TopBar: React.FC<TopBarProps> = ({ sectionTitle, showBackButton }) => {
         <Title>{sectionTitle}</Title>
       </div>
       <RightSection>
-        <UpgradeButton onClick={() => navigate("/events/create-new-event")}>
+        <UpgradeButton onClick={() => setIsPopupVisible(true)}>
           <svg
             width="20"
             height="20"
@@ -128,6 +130,11 @@ const TopBar: React.FC<TopBarProps> = ({ sectionTitle, showBackButton }) => {
         </UpgradeButton>
         <UserProfile />
       </RightSection>
+      {isPopupVisible && (
+        <EventForm
+          onClose={() => setIsPopupVisible(false)} // Close popup when done
+        />
+      )}
     </TopBarContainer>
   );
 };

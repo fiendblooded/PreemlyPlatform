@@ -11,6 +11,8 @@ import { getDateTimeStatus } from "../common/common";
 export const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  max-height: 100vh;
+  overflow: hidden;
 `;
 export const ContentWrapper = styled.div<{ marginTop?: number }>`
   margin-top: ${(props) => (props.marginTop ? `${props.marginTop}px` : "0px")};
@@ -21,6 +23,7 @@ export const ContentWrapper = styled.div<{ marginTop?: number }>`
 
 export const Header = styled.div`
   margin-top: 20px;
+  height: 50px;
   color: #061c3a; /* Purple */
   display: flex;
   font-size: 28px;
@@ -68,10 +71,11 @@ export const SearchIcon = styled.svg`
 `;
 
 const SearchInput = styled.input`
+  font-family: Axiforma, sans-serif;
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
   outline: none;
   &:focus {
@@ -112,7 +116,6 @@ export const ActiveStatusButton = styled.div<{
       ${(props) => (props.isActive ? props.borderColor : "grey")};
   }
 `;
-const namespace = "https://custom-claims.preemly.eu/";
 const Events: React.FC = () => {
   useAuthSetup();
   const { user } = useAuth0();
@@ -125,6 +128,7 @@ const Events: React.FC = () => {
     setLoading(true); // Start loading
     try {
       const response = await axiosInstance.get(`/events`);
+      console.log(response.data.data);
       setEvents(response.data.data);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -211,9 +215,11 @@ const Events: React.FC = () => {
       </ActiveStatusContainer>
       <ContentWrapper>
         <Header>
-          {filteredEvents.length} {activeStatus != "All" ? activeStatus : null}{" "}
-          event
-          {(filteredEvents.length > 1 || filteredEvents.length === 0) && "s"}
+          <>
+            {filteredEvents.length}{" "}
+            {activeStatus != "All" ? activeStatus.toLowerCase() : "total"} event
+            {(filteredEvents.length > 1 || filteredEvents.length === 0) && "s"}
+          </>
           <SearchContainer>
             <SearchIcon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <svg

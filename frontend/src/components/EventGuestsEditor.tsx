@@ -193,11 +193,12 @@ export const SecondaryButton = styled.button<{
   }
 `;
 
-export const GuestActionsButtonsContainer = styled.div`
+export const GuestActionsButtonsContainer = styled.div<{ width?: number }>`
   display: flex;
   gap: 6px;
   align-items: center;
   justify-content: start;
+  ${(props) => props.width && `width: ${props.width}px;`}
 `;
 
 const StyledCheckbox = styled.input.attrs({ type: "checkbox" })`
@@ -326,6 +327,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
             qrContent,
             event
           );
+          await axiosInstance.put(`/guests/${guestId}/emailstatus`);
         }
       }
 
@@ -337,116 +339,12 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       console.error("Error sending emails to guests:", error);
       addToast("Failed to send some or all emails.", ToastType.ERROR);
     }
+
+    setSelectedGuests([]);
+    refetch();
   };
 
   const saveGuests = async () => {
-    // const hackGuests = [
-    //   { fullName: "Vadym Tovtyn", age: 0, email: "vadimtovtin@gmail.com" },
-    //   { fullName: "Dmytro Levchyk", age: 0, email: "dm.kobek@gmail.com" },
-    //   {
-    //     fullName: "Oleksandr Kostianets",
-    //     age: 0,
-    //     email: "oleksandr.kostianets@student.tuke.sk",
-    //   },
-    //   {
-    //     fullName: "Mykyta Lukianytsia",
-    //     age: 0,
-    //     email: "nikitalukianitcares@gmail.com",
-    //   },
-    //   { fullName: "Dmytro Sachenko", age: 0, email: "zima2908@gmail.com" },
-    //   {
-    //     fullName: "Maximilian Jaroščák",
-    //     age: 0,
-    //     email: "maxi.jaroscak@gmail.com",
-    //   },
-    //   { fullName: "Martin Uhrin", age: 0, email: "martin.uhrin9501@gmail.com" },
-    //   { fullName: "Daniel Keveš", age: 0, email: "Daniel.keves.135@gmail.com" },
-    //   { fullName: "Vladimír Kriško", age: 0, email: "krisko.vlad@gmail.com" },
-    //   { fullName: "Milan Smiesko", age: 0, email: "milansmiesko4@gmail.com" },
-    //   { fullName: "Jakub Jelínek", age: 0, email: "jelinekjakub6@gmail.com" },
-    //   {
-    //     fullName: "Viktor Marusiak",
-    //     age: 0,
-    //     email: "victormarusjak@gmail.com",
-    //   },
-    //   { fullName: "Kost Khrystyna", age: 0, email: "khrystyna2207@gmail.com" },
-    //   { fullName: "Matviienko Tymofii", age: 0, email: "timpimlim2@gmail.com" },
-    //   {
-    //     fullName: "Kirill Krasnov",
-    //     age: 0,
-    //     email: "kirill.krasnov.jr@gmail.com",
-    //   },
-    //   {
-    //     fullName: "Oleksii Kuryliak",
-    //     age: 0,
-    //     email: "kurilyakoleksii12@gmail.com",
-    //   },
-    //   { fullName: "Anton Ivanchikov", age: 0, email: "dasada677@gmail.com" },
-    //   {
-    //     fullName: "Uladzislau Novikau",
-    //     age: 0,
-    //     email: "richard00111010@gmail.com",
-    //   },
-    //   { fullName: "Adam Jankech", age: 0, email: "jankech.adam@gmail.com" },
-    //   { fullName: "Sofiia Krygina", age: 0, email: "krihinasofya@gmail.com" },
-    //   { fullName: "Mykhailo Sytnyk", age: 0, email: "mishasytnik34@gmail.com" },
-    //   {
-    //     fullName: "Mykhailo Kaniuka",
-    //     age: 0,
-    //     email: "m.kwnyuka.m2005@gmail.com",
-    //   },
-    //   { fullName: "Maksym Norokha", age: 0, email: "maxnorohich@gmail.com" },
-    //   { fullName: "Daria Slynko", age: 0, email: "ajxvesorin@gmail.com" },
-    //   { fullName: "Ján Tančibok", age: 0, email: "jan.tancibok@gmail.com" },
-    //   { fullName: "Pavol Tančibok", age: 0, email: "palko@tancibok.sk" },
-    //   {
-    //     fullName: "Jozef Židuliak",
-    //     age: 0,
-    //     email: "Jozefjojo897@protonmail.com",
-    //   },
-    //   {
-    //     fullName: "Lukáš Michalčák",
-    //     age: 0,
-    //     email: "lukasmichalcak04@gmail.com",
-    //   },
-    //   { fullName: "Martin Gregor", age: 0, email: "m123.gregor@gmail.com" },
-    //   { fullName: "Maroš Guráň", age: 0, email: "m.guran123@gmail.com" },
-    //   { fullName: "Frederik Duvač", age: 0, email: "frederik.duvac@gmail.com" },
-    //   {
-    //     fullName: "Martina Tvrdoňová",
-    //     age: 0,
-    //     email: "martina.tvrdonova@egrant.sk",
-    //   },
-    //   { fullName: "Jaroslav Istok", age: 0, email: "jaroslav.istok@gmail.com" },
-    //   {
-    //     fullName: "Zuzana Biloveská",
-    //     age: 0,
-    //     email: "zuzana.biloveska@egrant.sk",
-    //   },
-    //   { fullName: "Daniel Adam Czaja", age: 0, email: "danoczaja12@gmail.com" },
-    //   { fullName: "Jakub Krčmárik", age: 0, email: "mindstormjak@gmail.com" },
-    //   { fullName: "Lucas Ligas", age: 0, email: "lucasligas15@gmail.com" },
-    //   { fullName: "Roman Masár", age: 0, email: "roman@rmnm.dk" },
-    //   { fullName: "Matej Kuka", age: 0, email: "matokuka66@gmail.com" },
-    //   { fullName: "Jakub Marcinát", age: 0, email: "jakub.marcinat@gmail.com" },
-    //   {
-    //     fullName: "Jozef Kaplocky",
-    //     age: 0,
-    //     email: "jozef.kaplocky4@gmail.com",
-    //   },
-    //   { fullName: "Adam Tížik", age: 0, email: "tizikadam@gmail.com" },
-    //   { fullName: "Matúš Koleják", age: 0, email: "matokolejak@gmail.com" },
-    //   {
-    //     fullName: "Darius Horvath",
-    //     age: 0,
-    //     email: "dariushorvath33@gmail.com",
-    //   },
-    //   { fullName: "Gosha", age: 0, email: "heorhid@gmail.com" },
-    //   { fullName: "Peter Hubina", age: 0, email: "peter.hubina1@gmail.com" },
-    //   { fullName: "Jakub Jelínek", age: 0, email: "jelinek@pucwoll.com" },
-    //   { fullName: "Richard Šléher", age: 0, email: "riso.sleher@gmail.com" },
-    //   { fullName: "Lukáš Nemec", age: 0, email: "nemec@pucwoll.com" },
-    // ];
     try {
       await axiosInstance.put(`/events/${event._id}/guests`, {
         guests: newGuests,
@@ -473,7 +371,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       guest.fullName.toLowerCase().includes(filterText.toLowerCase()) ||
       guest.email.toLowerCase().includes(filterText.toLowerCase())
   );
-
+  console.log(event.guests);
   return (
     <GuestsWrapper>
       <GuestTableHeaderContainer>
@@ -503,12 +401,6 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
           />
         </SearchContainer>
         <GuestActionsButtonsContainer>
-          <SecondaryButton
-            onClick={() => navigate(`/welcome/${event._id}`)}
-            marginTop={20}
-          >
-            Welcome Screen
-          </SecondaryButton>
           <SecondaryButton marginTop={20} onClick={sendEmailsToGuests}>
             Send Emails{" "}
             {selectedGuests.length ? `(${selectedGuests.length})` : null}
@@ -535,6 +427,8 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
               </th>
               <th>Full Name</th>
               <th>Email</th>
+              <th>Email Sent</th>
+              <th>Phone</th>
               <th>Attendance</th>
               <th>Actions</th>
             </tr>
@@ -559,7 +453,17 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                 >
                   {guest.email}
                 </td>
+                <td
+                  style={{
+                    color: guest.email_sent ? "green" : "red",
+                    fontWeight: "semibold",
+                  }}
+                >
+                  {guest.email_sent ? "Sent" : "Not Sent"}
+                </td>
+                <td>{guest.phoneNumber}</td>
                 <td>{guest.attendance_status ? "+" : "-"}</td>
+
                 <td>
                   <PrimaryButton onClick={() => deleteGuest(guest._id)}>
                     Delete
@@ -594,17 +498,21 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                   />
                 </td>
                 <td></td>
+                <td></td>
                 <td>
                   <GuestActionsButtonsContainer>
-                    <PrimaryButton onClick={saveGuests}>Save</PrimaryButton>
+                    <PrimaryButton width={80} onClick={saveGuests}>
+                      Add
+                    </PrimaryButton>
                     <SecondaryButton
+                      width={80}
                       onClick={() => {
                         const reducedGuests = [...newGuests];
                         reducedGuests.splice(index, 1);
                         setNewGuests(reducedGuests);
                       }}
                     >
-                      Delete
+                      Cancel
                     </SecondaryButton>
                   </GuestActionsButtonsContainer>
                 </td>

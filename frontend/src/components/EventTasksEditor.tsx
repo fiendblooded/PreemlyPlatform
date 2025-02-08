@@ -1,21 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import DatePicker from "react-datepicker"; // Assuming you have this installed
 import "react-datepicker/dist/react-datepicker.css";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { StyledDatePickerWrapper } from "./EventDetailsEditor";
 import { PrimaryButton, SecondaryButton } from "./EventDetail";
+import CustomCheckbox from "../common/CustomCheckbox";
 
 // Styled Components
-const EventDetailsWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 90% !important;
-  margin: auto;
-  justify-content: space-between;
-  margin-top: 0;
+const Container = styled.div`
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin: 16px;
+  width: calc(90% - 32px);
+  margin: 20px auto;
 `;
-
 const TaskList = styled.ul`
   list-style: none;
   padding: 0;
@@ -36,7 +37,9 @@ const TaskTitle = styled.div<{ isCompleted: boolean }>`
   font-size: 16px;
   flex: 1;
   margin-right: 16px;
+  margin-left: 6px;
   color: black;
+  padding-top: 4px;
 `;
 
 const TaskActions = styled.div`
@@ -71,7 +74,8 @@ const Input = styled.input`
   border-radius: 4px;
   padding: 8px 12px;
   width: 100%;
-
+  height: 18px;
+  font-family: Axiforma, sans-serif;
   font-size: 16px;
 
   /* Smooth transition for the border */
@@ -88,6 +92,17 @@ const NoTasks = styled.div`
   color: black;
 `;
 
+const Header = styled.div`
+  color: black;
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+
+  align-items: center;
+  line-height: 24px;
+`;
 interface Task {
   title: string;
   isCompleted: boolean;
@@ -106,7 +121,7 @@ const EventTasksEditor: React.FC<{ event: Event; refetch: () => void }> = ({
   const axiosInstance = useAxiosWithAuth();
   const [tasks, setTasks] = useState<Task[]>(event.tasks);
   const [newTaskTitle, setNewTaskTitle] = useState<string>("");
-
+  const [isAddModeOn, setAddModeOn] = useState(false);
   // Add new task
   const addTask = () => {
     if (newTaskTitle.trim()) {
@@ -190,20 +205,40 @@ const EventTasksEditor: React.FC<{ event: Event; refetch: () => void }> = ({
 
     return false; // No changes detected
   }
+  useEffect(() => {
+    if (tasks != event.tasks) setAddModeOn(true);
+  }, [tasks]);
 
   return (
-    <EventDetailsWrapper>
+    <Container>
+      <Header>
+        <div>Event-related tasks</div>
+        <PrimaryButton
+          width={130}
+          onClick={() => {
+            if (isAddModeOn) {
+              saveTasks();
+              setAddModeOn(false);
+            } else {
+              setAddModeOn(true);
+            }
+          }}
+        >
+          {!isAddModeOn ? "Edit" : "Save"}
+        </PrimaryButton>
+      </Header>
       {tasks.length ? (
         <TaskList>
           {tasks.map((task, index) => (
             <TaskItem key={index}>
-              <CircleCheckbox
-                isChecked={task.isCompleted}
-                onClick={() => toggleTaskCompletion(index)}
+              <CustomCheckbox
+                checked={task.isCompleted}
+                onChange={() => toggleTaskCompletion(index)}
               />
               <TaskTitle isCompleted={task.isCompleted}>{task.title}</TaskTitle>
               <TaskActions>
                 <StyledDatePickerWrapper>
+                  Due by:
                   <DatePicker
                     selected={new Date(task.dueDate)}
                     onChange={(date) =>
@@ -211,9 +246,16 @@ const EventTasksEditor: React.FC<{ event: Event; refetch: () => void }> = ({
                     }
                   />
                 </StyledDatePickerWrapper>
-                <SecondaryButton onClick={() => deleteTask(index)}>
-                  Delete
-                </SecondaryButton>
+                {isAddModeOn && (
+                  <SecondaryButton
+                    width={24}
+                    color={"rgb(173, 1, 1)"}
+                    hoverColor={"rgb(255, 212, 212)"}
+                    onClick={() => deleteTask(index)}
+                  >
+                    -
+                  </SecondaryButton>
+                )}
               </TaskActions>
             </TaskItem>
           ))}
@@ -222,23 +264,20 @@ const EventTasksEditor: React.FC<{ event: Event; refetch: () => void }> = ({
         <NoTasks>No tasks recorded. Try adding a new one below...</NoTasks>
       )}
 
-      <AddTaskForm>
-        <Input
-          type="text"
-          placeholder="New task title"
-          value={newTaskTitle}
-          onChange={(e) => setNewTaskTitle(e.target.value)}
-        />
-        <SecondaryButton onClick={addTask}>Add Task</SecondaryButton>
-      </AddTaskForm>
-
-      <PrimaryButton
-        onClick={saveTasks}
-        disabled={!haveTasksChanged(event.tasks, tasks)}
-      >
-        Save
-      </PrimaryButton>
-    </EventDetailsWrapper>
+      {isAddModeOn && (
+        <>
+          <AddTaskForm>
+            <Input
+              type="text"
+              placeholder="New task title"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+            />
+            <SecondaryButton onClick={addTask}>Add Task</SecondaryButton>
+          </AddTaskForm>
+        </>
+      )}
+    </Container>
   );
 };
 

@@ -331,6 +331,7 @@ const WelcomeScreen: React.FC = () => {
   const [isManualCheckInOpen, setManualCheckInOpen] = useState(false);
   const [manualName, setManualName] = useState("");
   const [manualEmail, setmanualEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const { addToast, Toasts } = useToast();
   // Simulate delayed unmount of the spinner
   useEffect(() => {
@@ -375,6 +376,7 @@ const WelcomeScreen: React.FC = () => {
           fullName: manualName,
           email: manualEmail,
           age: 0,
+          phoneNumber: phoneNumber,
           eventId: id, // Pass the event ID to associate the guest
           attendance_status: true,
         });
@@ -386,10 +388,12 @@ const WelcomeScreen: React.FC = () => {
           email: manualEmail,
           attendance_status: true,
           age: 0,
+          phoneNumber: phoneNumber,
         };
         setGuest(guest);
         setManualName(""); // Clear manual input (optional)
         setmanualEmail(""); // Clear manual input (optional)
+        setPhoneNumber("");
         fetchEvent();
       } catch (error) {
         addToast(`Error saving guest: ${error}`, ToastType.ERROR);
@@ -576,6 +580,14 @@ const WelcomeScreen: React.FC = () => {
                       resetInactivityTimer();
                     }}
                   />
+                  <ManualInputSC
+                    placeholder="Phone Number"
+                    value={phoneNumber}
+                    onChange={(event) => {
+                      setPhoneNumber(event.target.value);
+                      resetInactivityTimer();
+                    }}
+                  />
 
                   <WelcomeButtonsContainer>
                     <SecondaryWelcomeButton
@@ -675,29 +687,42 @@ const WelcomeScreen: React.FC = () => {
           </svg>
           <Title>Preemly Event System</Title>
           <SubTitle>
-            Welcome to the check-in screen! Please select your event from the
-            dropdown menu below to begin the check-in process.
+            Welcome to the check-in screen!
+            {events.length ? (
+              "Please select your event from the dropdown menu below to begin the check-in process."
+            ) : (
+              <div>
+                To access this feature, you need to{" "}
+                <a href={"/events"} style={{ cursor: "pointer" }}>
+                  create an event
+                </a>{" "}
+                first.
+              </div>
+            )}
           </SubTitle>
-          <DropdownContainer>
-            <Dropdown
-              options={events.map((event) => event.title)} // Pass event titles as options
-              selected={
-                selectedEventId
-                  ? events.find((e) => e._id === selectedEventId)?.title || null
-                  : null
-              } // Ensure null fallback
-              onSelect={(option) => {
-                const selectedEvent = events.find(
-                  (event) => event.title === option
-                );
-                if (selectedEvent) setSelectedEventId(selectedEvent._id); // Set selectedEventId
-              }}
-            />
+          {events.length ? (
+            <DropdownContainer>
+              <Dropdown
+                options={events.map((event) => event.title)} // Pass event titles as options
+                selected={
+                  selectedEventId
+                    ? events.find((e) => e._id === selectedEventId)?.title ||
+                      null
+                    : null
+                } // Ensure null fallback
+                onSelect={(option) => {
+                  const selectedEvent = events.find(
+                    (event) => event.title === option
+                  );
+                  if (selectedEvent) setSelectedEventId(selectedEvent._id); // Set selectedEventId
+                }}
+              />
 
-            <Button onClick={handleOpenEvent} disabled={!selectedEventId}>
-              Open
-            </Button>
-          </DropdownContainer>
+              <Button onClick={handleOpenEvent} disabled={!selectedEventId}>
+                Open
+              </Button>
+            </DropdownContainer>
+          ) : null}
         </>
       )}
       <Toasts />

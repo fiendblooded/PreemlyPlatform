@@ -32,6 +32,27 @@ const Header = styled.div`
   font-size: 40px;
   align-items: center;
 `;
+const ChangePosterModalButton = styled.div`
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 80px;
+  height: 40px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(107, 61, 223);
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  opacity: 0; /* Initially hidden */
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  &:hover {
+    background-color: rgb(153, 115, 248);
+  }
+`;
 const PosterImage = styled.div<{ imageUrl: string }>`
   width: 90%;
   min-height: 400px;
@@ -41,6 +62,12 @@ const PosterImage = styled.div<{ imageUrl: string }>`
   background-image: url(${(props) => props.imageUrl});
   background-size: cover;
   background-position: center;
+  position: relative;
+
+  &:hover ${ChangePosterModalButton} {
+    opacity: 1; /* Show the button on hover */
+    visibility: visible;
+  }
 `;
 
 const LoadingMessage = styled.p`
@@ -84,7 +111,7 @@ export const PrimaryButton = styled.button<{
 `;
 
 const EventDetailWrapper = styled.div`
-  width: 60%;
+  width: 75%;
   height: 90%;
   max-height: 90%;
   margin: auto;
@@ -104,6 +131,8 @@ const EventDetailWrapper = styled.div`
 export const SecondaryButton = styled.button<{
   marginTop?: number;
   width?: number;
+  color?: string;
+  hoverColor?: string;
 }>`
   width: ${(props) => (props.width ? props.width : 160)}px;
   margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
@@ -113,15 +142,18 @@ export const SecondaryButton = styled.button<{
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #875cf5;
-  color: #875cf5;
+
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   border-radius: 5px;
+  border: 2px solid ${(props) => (props.color ? props.color : "#875cf5")};
+  color: ${(props) => (props.color ? props.color : "#875cf5")};
   transition: background-color 0.3s ease;
   &:hover {
-    background-color: rgb(239, 233, 255);
+    background-color: ${(props) =>
+      props.hoverColor ? props.hoverColor : "rgb(239, 233, 255)"};
+    border: 2px solid ${(props) => (props.color ? props.color : "#875cf5")};
   }
 `;
 const DeleteButton = styled.div`
@@ -130,14 +162,36 @@ const DeleteButton = styled.div`
   height: 40px;
   padding: 0;
   cursor: pointer;
-  border: 1.5px solid rgb(102, 102, 102);
-  color: rgb(102, 102, 102);
+  border: 1.5px solid rgb(173, 1, 1);
+  color: rgb(173, 1, 1);
   border-radius: 6px;
   background-color: transparent;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.3s ease;
   &:hover {
-    background-color: rgb(102, 102, 102);
+    background-color: rgb(173, 1, 1);
+    color: white;
+  }
+`;
+
+const WelcomeScreenButton = styled.div`
+  display: flex;
+  width: 130px;
+  height: 40px;
+  padding: 0;
+  cursor: pointer;
+
+  border-radius: 6px;
+  background-color: transparent;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 1.5px solid #875cf5;
+  color: #875cf5;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: #875cf5;
     color: white;
   }
 `;
@@ -178,6 +232,7 @@ const DateTime = styled.div`
 const SeamlessInput = styled.input`
   font-family: Axiforma, sans-serif;
   font-size: 32px;
+  line-height: 34px;
   font-weight: bold;
   max-width: 90%;
   text-overflow: ellipsis;
@@ -185,9 +240,10 @@ const SeamlessInput = styled.input`
   background-color: transparent;
   border: none;
   outline: none;
-  width: 100%;
+  width: 80%;
   padding: 4px 0;
   margin-bottom: 4px;
+  border-bottom: 1px solid transparent;
   &:focus {
     border-bottom: 1px solid black;
   }
@@ -195,6 +251,10 @@ const SeamlessInput = styled.input`
   &::placeholder {
     color: #aaa; /* Optional: Adjust placeholder color */
   }
+`;
+const HeaderButtonsContainer = styled.div`
+  display: flex;
+  gap: 8px;
 `;
 
 const EventDetail: React.FC = () => {
@@ -205,6 +265,18 @@ const EventDetail: React.FC = () => {
   const [title, setTitle] = useState(event?.title);
   const navigate = useNavigate();
   const [isModalOpen, setModalOpen] = useState(false); // Modal state
+
+  // const [isModalVisible, setIsModalVisible] = useState(false);
+
+  // const handleAnswerOne = () => {
+  //   console.log("Answer One selected");
+  //   setIsModalVisible(false); // Close the modal after handling
+  // };
+
+  // const handleAnswerTwo = () => {
+  //   console.log("Answer Two selected");
+  //   setIsModalVisible(false); // Close the modal after handling
+  // };
 
   const axiosInstance = useAxiosWithAuth();
   const fetchEvent = async () => {
@@ -248,7 +320,13 @@ const EventDetail: React.FC = () => {
     <PageWrapper>
       <TopBar sectionTitle="Events" showBackButton={true} />
       <EventDetailWrapper>
-        {event.poster && <PosterImage imageUrl={`${event.poster}`} />}
+        {event.poster && (
+          <PosterImage imageUrl={`${event.poster}`}>
+            <ChangePosterModalButton onClick={() => setModalOpen(true)}>
+              Edit
+            </ChangePosterModalButton>
+          </PosterImage>
+        )}
         <Header>
           <SeamlessInput
             value={title}
@@ -257,23 +335,45 @@ const EventDetail: React.FC = () => {
               if (title != event?.title) updateTitle();
             }}
           />
-          <DeleteButton onClick={deleteEvent}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          <HeaderButtonsContainer>
+            <WelcomeScreenButton
+              onClick={() => navigate(`/welcome/${event._id}`)}
             >
-              <path
-                d="M8.5 7H15.5M8.5 7H6.5M8.5 7C8.5 7 8.5 3.5 12 3.5C15.5 3.5 15.5 7 15.5 7M15.5 7H17.5M4.5 7H6.5M6.5 7V18.5C6.5 19.6046 7.39543 20.5 8.5 20.5H15.5C16.6046 20.5 17.5 19.6046 17.5 18.5V7M17.5 7H19.5M14 9.5V17.5M10 9.5V17.5"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                strokeLinecap="square"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </DeleteButton>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 12H4.01M8 12H8.01M16 12H16.01M12 12H12.01M20 12H20.01M8.5 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V8.5M15.5 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.07989 20 7.2V8.5M20 15.5V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H15.5M4 15.5V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H8.5"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <div style={{ paddingTop: 4, marginLeft: 2 }}>Check in</div>
+            </WelcomeScreenButton>
+            <DeleteButton onClick={deleteEvent}>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8.5 7H15.5M8.5 7H6.5M8.5 7C8.5 7 8.5 3.5 12 3.5C15.5 3.5 15.5 7 15.5 7M15.5 7H17.5M4.5 7H6.5M6.5 7V18.5C6.5 19.6046 7.39543 20.5 8.5 20.5H15.5C16.6046 20.5 17.5 19.6046 17.5 18.5V7M17.5 7H19.5M14 9.5V17.5M10 9.5V17.5"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  strokeLinecap="square"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </DeleteButton>
+          </HeaderButtonsContainer>
         </Header>
         <DetailsHeader>
           <ActivityStatus color={dateTimeStatus.color}>
@@ -304,30 +404,35 @@ const EventDetail: React.FC = () => {
             marginLeft={0}
             isActive={openSection === "info"}
             onClick={() => setOpenSection("info")}
+            borderColor="#e6bf30"
           >
-            Overview
+            Details
           </ActiveStatusButton>
           <ActiveStatusButton
             isActive={openSection === "tasks"}
             onClick={() => setOpenSection("tasks")}
+            borderColor="#e6bf30"
           >
             Tasks
           </ActiveStatusButton>
           <ActiveStatusButton
             isActive={openSection === "attendance"}
             onClick={() => setOpenSection("attendance")}
+            borderColor="#e6bf30"
           >
             Guests
           </ActiveStatusButton>
           <ActiveStatusButton
             isActive={openSection === "location"}
             onClick={() => setOpenSection("location")}
+            borderColor="#e6bf30"
           >
             Location
           </ActiveStatusButton>
           <ActiveStatusButton
             isActive={openSection === "welcome"}
             onClick={() => setOpenSection("welcome")}
+            borderColor="#e6bf30"
           >
             Welcome Screen
           </ActiveStatusButton>

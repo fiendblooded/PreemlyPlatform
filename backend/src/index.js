@@ -92,6 +92,7 @@ app.post("/api/events", verifyUser, async (req, res) => {
       ownerId: event.ownerId,
       date: event.date,
       endDate: event.date,
+      eventType: "Offline",
       poster: uploadResponse.secure_url,
       location: {
         address: "1600 Amphitheatre Parkway, Mountain View, CA, USA",
@@ -104,7 +105,7 @@ app.post("/api/events", verifyUser, async (req, res) => {
         backgroundColor: "",
         textColor: "",
         isGdpr: false,
-        isManualCheckin: false,
+        isManualCheckin: true,
         videoUrl: "",
       },
     });
@@ -341,7 +342,7 @@ app.post("/api/events", verifyUser, async (req, res) => {
         backgroundColor: "",
         textColor: "",
         isGdpr: false,
-        isManualCheckin: false,
+        isManualCheckin: true,
         videoUrl: "",
       },
     });
@@ -420,7 +421,8 @@ app.put("/api/guests/:id", async (req, res) => {
 // CREATE NEW GUEST
 app.post("/api/guests", async (req, res) => {
   try {
-    const { eventId, fullName, email, age, attendance_status } = req.body;
+    const { eventId, fullName, email, age, attendance_status, phoneNumber } =
+      req.body;
 
     // Check if the event exists
     const event = await Event.findById(eventId);
@@ -435,6 +437,7 @@ app.post("/api/guests", async (req, res) => {
       fullName,
       email,
       age,
+      phoneNumber: phoneNumber,
       eventId,
       attendance_status,
     });
@@ -484,6 +487,26 @@ app.put("/api/guests/:id/attendance", async (req, res) => {
     res.json({ success: true, data: guest });
   } catch (error) {
     console.error("Error in Mark Attendance:", error.message);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
+// Mark Guest Attendance
+app.put("/api/guests/:id/emailstatus", async (req, res) => {
+  try {
+    const guest = await Guest.findById(req.params.id);
+    if (!guest) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Guest not found" });
+    }
+
+    guest.email_sent = true;
+    await guest.save();
+
+    res.json({ success: true, data: guest });
+  } catch (error) {
+    console.error("Error in Mark Email Sent:", error.message);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });

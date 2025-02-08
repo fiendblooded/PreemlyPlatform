@@ -48,15 +48,15 @@ const ContactButton = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
-  border: 2px solid #fcd535;
-  color: #0b0e13; /* Dark text for contrast */
-  background-color: #fcd535; /* Matches the yellow accent color */
 
   border-radius: 2px;
 
   cursor: pointer;
   font-weight: bold;
+  font-size: 16px;
+  border: 2px solid #fcd535;
+  color: #0b0e13; /* Dark text for contrast */
+  background-color: #fcd535; /* Matches the yellow accent color */
 
   &:hover {
     background-color: black; /* Slightly darker shade for hover */

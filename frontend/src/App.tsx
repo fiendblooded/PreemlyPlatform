@@ -159,7 +159,6 @@ const AppContent: React.FC = () => {
           <Route path="/events" element={<Events />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/events/:id" element={<EventDetail />} />
-          <Route path="/events/create-new-event" element={<EventForm />} />
           <Route path="/help" element={<PreemlyFAQ />} />
           {/* <Route path="/scanner" element={<ScannerPage />} /> */}
           <Route

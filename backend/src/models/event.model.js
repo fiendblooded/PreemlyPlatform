@@ -8,6 +8,7 @@ const eventSchema = new mongoose.Schema({
   poster: { type: String },
   guests: [{ type: mongoose.Schema.Types.ObjectId, ref: "Guest" }],
   date: { type: Date, required: true },
+  eventType: { type: String, default: "Offline" },
   endDate: { type: Date, required: true },
   location: {
     address: { type: String }, // Human-readable address

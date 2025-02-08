@@ -5,6 +5,7 @@ const GuestSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true },
   age: { type: Number },
+  phoneNumber: { type: String, default: "" },
   attendance_status: { type: Boolean, default: false },
   email_sent: { type: Boolean, default: false },
   team_id: { type: String },
