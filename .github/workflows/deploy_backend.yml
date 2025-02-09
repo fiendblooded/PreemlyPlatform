@@ -27,14 +27,14 @@ jobs:
         working-directory: ./backend
         run: npm ci
 
-      - name: Build Project
+      - name: Build project
         working-directory: ./backend
         run: npm run build
 
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
-          appdir: "backend/dist"  # Указываем папку dist для деплоя
+          appdir: "backend/dist"
           heroku_api_key: "HRKU-eab5f280-333c-4a4c-a891-4f0203c8d84c"
           heroku_app_name: "preemlybackend"
           heroku_email: "myrinets.bohdan@gmail.com"
