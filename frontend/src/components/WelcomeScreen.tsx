@@ -62,14 +62,18 @@ const BackButton = styled.button`
     height: 16px;
   }
 `;
-const WelcomeScreenWrapper = styled.div`
+const WelcomeScreenWrapper = styled.div<{
+  backgroundColor?: string;
+  textColor?: string;
+}>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  background-color: #2a2768;
-  color: #f5f5f5;
+  background-color: ${(props) =>
+    props.backgroundColor ? props.backgroundColor : "#2a2768"};
+  color: ${(props) => (props.textColor ? props.textColor : "#f5f5f5")};
   font-size: 2rem;
   font-family: Axiforma, sans-serif;
   flex-direction: column;
@@ -130,7 +134,7 @@ const Button = styled.button`
 `;
 const DateTimeSC = styled.div`
   font-size: 20px;
-  color: rgb(207, 207, 207);
+  opacity: 0.6;
 
   margin-top: -10px;
 `;
@@ -482,7 +486,10 @@ const WelcomeScreen: React.FC = () => {
     };
   }, []);
   return (
-    <WelcomeScreenWrapper>
+    <WelcomeScreenWrapper
+      backgroundColor={event?.welcomeScreenParams.backgroundColor}
+      textColor={event?.welcomeScreenParams.textColor}
+    >
       <BackButton onClick={() => navigate(-1)}>
         <svg
           xmlns="http://www.w3.org/2000/svg"

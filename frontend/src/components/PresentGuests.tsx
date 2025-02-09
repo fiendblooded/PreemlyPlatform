@@ -35,7 +35,6 @@ const Container = styled.div`
 `;
 const Description = styled.div`
   display: flex;
-  color: white;
   font-size: 14px;
   margin-top: 10px;
   font-style: italic;

@@ -15,10 +15,8 @@ const app: Application = express();
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = [
-      'https://platform.preemly.eu',
-      'http://localhost:5001',
-    ];
+    const allowedOrigins = ['https://platform.preemly.eu', 'https://localhost:5173', 'http://localhost:5173'];
+
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -28,10 +26,11 @@ const corsOptions: cors.CorsOptions = {
   credentials: true,
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
   optionsSuccessStatus: 204,
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin'],
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));

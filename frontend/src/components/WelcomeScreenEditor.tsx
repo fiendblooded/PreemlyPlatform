@@ -191,8 +191,16 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
 
   const predefinedColors = [
     "#00aef0",
-    "#f54242",
-    "#42f54e",
+    "#2A2768",
+    "#ffffff",
+    "#f5c542",
+    "#6b3ddf",
+  ];
+
+  const predefinedTextColors = [
+    "#000000",
+    "#2A2768",
+    "#ffffff",
     "#f5c542",
     "#6b3ddf",
   ];
@@ -249,7 +257,7 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
             >
               {showTextColorOptions && (
                 <ColorOptionsPanel>
-                  {predefinedColors.map((color) => (
+                  {predefinedTextColors.map((color) => (
                     <OptionCircle
                       key={color}
                       color={color}

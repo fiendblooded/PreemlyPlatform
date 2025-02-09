@@ -143,7 +143,7 @@ const UserProfile: React.FC = () => {
         />
         {isDropdownVisible && (
           <DropdownContainer>
-            <UserInfoSection>
+            <UserInfoSection onClick={() => navigate("/profile")}>
               <ProfileImage
                 // onClick={() => navigate("/profile")}
                 src={user?.[`${namespace}picture`]}

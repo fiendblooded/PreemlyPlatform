@@ -160,6 +160,7 @@ const AppContent: React.FC = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/help" element={<PreemlyFAQ />} />
+          <Route path="/profile" element={<Profile />} />
           {/* <Route path="/scanner" element={<ScannerPage />} /> */}
           <Route
             path="/welcome"
