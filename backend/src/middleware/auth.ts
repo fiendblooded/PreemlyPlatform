@@ -2,9 +2,16 @@ import type { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import jwksRsa from 'jwks-rsa';
 import type { AuthRequest } from '../types/auth.types';
+import dotenv from 'dotenv';
 
-const auth0Domain = process.env.AUTH0_DOMAIN;
-const audience = process.env.AUTH0_AUDIENCE;
+dotenv.config();
+
+const auth0Domain = process.env.AUTH0_M2M_DOMAIN;
+const audience = 'https://api.preemly.eu';
+
+if (!auth0Domain || !audience) {
+  throw new Error('AUTH0_DOMAIN and AUTH0_AUDIENCE must be defined in the environment variables.');
+}
 
 const client = jwksRsa({
   jwksUri: `https://${auth0Domain}/.well-known/jwks.json`,
@@ -21,7 +28,7 @@ export const verifyUser = (req: AuthRequest, res: Response, next: NextFunction) 
   }
 
   const getSigningKey = (header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) => {
-    client.getSigningKey(header.kid, (err, key) => {
+    client.getSigningKey(header.kid as string, (err, key) => {
       if (err) {
         console.error('Error getting signing key:', err);
         return callback(err);
@@ -52,4 +59,3 @@ export const verifyUser = (req: AuthRequest, res: Response, next: NextFunction) 
     },
   );
 };
-

@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { verifyUser } from '../middleware/auth';
 import * as eventController from '../controllers/event.controller';
 import { checkScopes } from '../middleware/check-scopes';
+import { verifyUser } from '../middleware/auth';
 
 const router = Router();
 
