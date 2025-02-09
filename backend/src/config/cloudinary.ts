@@ -22,3 +22,4 @@ export const uploadImage = async (filePath: string, folder = 'default') => {
 };
 
 export default cloudinary;
+
