@@ -17,7 +17,7 @@ const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = [
       'https://platform.preemly.eu',
-      'http://localhost:5001',
+      'http://localhost:5173',
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
