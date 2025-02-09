@@ -26,6 +26,7 @@ export const verifyUser = (req: AuthRequest, res: Response, next: NextFunction) 
     });
   }
 
+
   const getSigningKey = (header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) => {
     client.getSigningKey(header.kid as string, (err, key) => {
       if (err) {
