@@ -51,7 +51,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-const PORT: string | number = process.env.PORT || 3002;
+const PORT: string | number = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   connectDB();
