@@ -1,20 +1,20 @@
-// models/event.model.js
-import mongoose from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
+import type { Event } from '../types/event.types';
 
-const eventSchema = new mongoose.Schema({
+const eventSchema = new Schema<Event>({
   title: { type: String, required: true },
   description: { type: String },
   ownerId: { type: String, required: true },
   poster: { type: String },
-  guests: [{ type: mongoose.Schema.Types.ObjectId, ref: "Guest" }],
+  guests: [{ type: Schema.Types.ObjectId, ref: 'Guest' }],
   date: { type: Date, required: true },
-  eventType: { type: String, default: "Offline" },
+  eventType: { type: String, default: 'Offline' },
   endDate: { type: Date, required: true },
   location: {
-    address: { type: String }, // Human-readable address
-    latitude: { type: Number }, // Coordinates
+    address: { type: String },
+    latitude: { type: Number },
     longitude: { type: Number },
-    placeId: { type: String }, // Google Maps Place ID
+    placeId: { type: String },
   },
   tasks: [
     {
@@ -31,10 +31,10 @@ const eventSchema = new mongoose.Schema({
     videoUrl: { type: String },
   },
   _id: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),
-  }, // Include _id explicitly
+  },
 });
-const Event = mongoose.model("Event", eventSchema);
 
-export default Event;
+export default model<Event>('Event', eventSchema);
+
