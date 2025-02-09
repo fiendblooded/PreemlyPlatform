@@ -1,6 +1,8 @@
 import type { Request, Response } from 'express';
 import axios from 'axios';
+import dotenv from 'dotenv';
 
+dotenv.config();
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const tokenResponse = await axios.post(`https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`, {
@@ -84,4 +86,3 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     });
   }
 };
-
