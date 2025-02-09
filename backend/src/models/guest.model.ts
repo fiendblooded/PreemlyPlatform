@@ -1,7 +1,7 @@
-import { Schema, model } from 'mongoose';
-import { Guest } from '../types/guest.types';
+import mongoose, { Schema } from 'mongoose';
+import type { Guest } from '../types/guest.types';
 
-const guestSchema = new Schema<Guest>({
+const GuestSchema = new Schema<Guest>({
   fullName: { type: String, required: true },
   email: { type: String, required: true },
   age: { type: Number },
@@ -12,5 +12,5 @@ const guestSchema = new Schema<Guest>({
   eventId: { type: Schema.Types.ObjectId, ref: 'Event' },
 });
 
-export default model<Guest>('Guest', guestSchema);
+export default mongoose.model<Guest>('Guest', GuestSchema);
 

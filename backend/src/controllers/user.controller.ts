@@ -3,7 +3,6 @@ import axios from 'axios';
 
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Get the Auth0 Management API access token
     const tokenResponse = await axios.post(`https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`, {
       client_id: process.env.AUTH0_M2M_CLIENT_ID,
       client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
@@ -13,8 +12,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 
     const accessToken = tokenResponse.data.access_token;
 
-    // Fetch users from Auth0 Management API
-    const query = req.query.q || ''; // Optional query parameter for searching
+    const query = req.query.q || '';
     const response = await axios.get(
       `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/users?q=${encodeURIComponent(JSON.stringify(query))}`,
       {
@@ -31,7 +29,6 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 
 export const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Get the Auth0 Management API access token
     const tokenResponse = await axios.post(`https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`, {
       client_id: process.env.AUTH0_M2M_CLIENT_ID,
       client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
@@ -40,9 +37,8 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
     });
 
     const accessToken = tokenResponse.data.access_token;
-    const userId = req.params.id; // User ID (sub) from the URL params
+    const userId = req.params.id;
 
-    // Fetch the specific user from Auth0 Management API
     const response = await axios.get(
       `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/users/${encodeURIComponent(userId)}`,
       {
@@ -62,7 +58,6 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
 
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Get the Auth0 Management API access token
     const tokenResponse = await axios.post(`https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`, {
       client_id: process.env.AUTH0_M2M_CLIENT_ID,
       client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
@@ -71,9 +66,8 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     });
 
     const accessToken = tokenResponse.data.access_token;
-    const userId = req.params.id; // User ID (sub) from the URL params
+    const userId = req.params.id;
 
-    // Delete the user from Auth0 Management API
     await axios.delete(`https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/users/${encodeURIComponent(userId)}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });

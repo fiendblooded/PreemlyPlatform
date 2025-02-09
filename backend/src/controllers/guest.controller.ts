@@ -1,19 +1,18 @@
 import type { Request, Response } from 'express';
 import Guest from '../models/guest.model';
 import Event from '../models/event.model';
+import { ObjectId } from 'mongodb';
 
 export const createGuest = async (req: Request, res: Response): Promise<void> => {
   try {
     const { eventId, fullName, email, age, attendance_status, phoneNumber } = req.body;
 
-    // Check if the event exists
     const event = await Event.findById(eventId);
     if (!event) {
       res.status(404).json({ success: false, message: 'Event not found' });
       return;
     }
 
-    // Create and save the new guest
     const newGuest = new Guest({
       fullName,
       email,
@@ -24,11 +23,9 @@ export const createGuest = async (req: Request, res: Response): Promise<void> =>
     });
     const savedGuest = await newGuest.save();
 
-    // Add the new guest to the event's guest list
-    event.guests.push(savedGuest._id);
+    event.guests.push(savedGuest._id as ObjectId);
     await event.save();
 
-    // Respond with the saved guest data
     res.status(201).json({ success: true, data: savedGuest });
   } catch (error) {
     console.error('Error in Create Guest:', error);

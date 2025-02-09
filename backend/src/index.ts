@@ -7,22 +7,22 @@ import eventRoutes from './routes/event.routes';
 import guestRoutes from './routes/guest.routes';
 import mailRoutes from './routes/mail.routes';
 import userRoutes from './routes/user.routes';
+import guestImportRoutes from './routes/guest-import.routes';
 
 dotenv.config();
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json());
 
-// Routes
 app.use('/api/events', eventRoutes);
 app.use('/api/guests', guestRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/mail', mailRoutes);
+app.use('/api/guest-import', guestImportRoutes);
 
 const PORT = process.env.PORT || 3002;
 

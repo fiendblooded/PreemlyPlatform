@@ -248,13 +248,9 @@ export const updateEventGuests = async (req: Request, res: Response): Promise<vo
   }
 
   try {
-    // Create guest documents
     const createdGuests = await Event.insertMany(guests);
-
-    // Extract ObjectIds of created guests
     const guestIds = createdGuests.map((guest) => guest._id);
 
-    // Update the event with the new guest ObjectIds
     const updatedEvent = await Event.findByIdAndUpdate(
       id,
       { $addToSet: { guests: { $each: guestIds } } },

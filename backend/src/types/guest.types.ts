@@ -1,14 +1,16 @@
-import { Types } from 'mongoose';
+import type { Document } from 'mongoose';
 
-export interface Guest {
-  _id: Types.ObjectId
+export interface GuestData {
   fullName: string
   email: string
+}
+
+export interface Guest extends GuestData, Document {
   age?: number
-  phoneNumber: string
+  phoneNumber?: string
   attendance_status: boolean
   email_sent: boolean
   team_id?: string
-  eventId: Types.ObjectId
+  eventId?: string
 }
 
