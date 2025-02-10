@@ -11,9 +11,14 @@ import { ActiveStatusContainer, ActiveStatusButton } from "./Events";
 import EventLocationEditor from "./EventLocationEditor";
 import EventDetailsEditor from "./EventDetailsEditor";
 import EventGuestsEditor from "./EventGuestsEditor";
-import { getDateRangeDetails, getDateTimeStatus } from "../common/common";
+import {
+  getDateRangeDetails,
+  getDateTimeStatus,
+  isTablet,
+} from "../common/common";
 import WelcomeScreenEditor from "./WelcomeScreenEditor";
 import EventTasksEditor from "./EventTasksEditor";
+import UserSearch from "./UserSearch";
 
 export const PageWrapper = styled.div`
   display: flex;
@@ -110,15 +115,14 @@ export const PrimaryButton = styled.button<{
   }
 `;
 
-const EventDetailWrapper = styled.div`
-  width: 75%;
-  height: 90%;
-  max-height: 90%;
+const EventDetailWrapper = styled.div<{ tabletMode: boolean }>`
+  width: ${(props) => (props.tabletMode ? "100%" : "75%")};
+  height: ${(props) => (props.tabletMode ? "100%" : "90%")};
+  max-height: ${(props) => (props.tabletMode ? "100%" : "90%")};
   margin: auto;
   background-color: white;
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
 
   /* Responsive style for tablet and mobile */
   @media (max-width: 1024px) {
@@ -265,7 +269,7 @@ const EventDetail: React.FC = () => {
   const [title, setTitle] = useState(event?.title);
   const navigate = useNavigate();
   const [isModalOpen, setModalOpen] = useState(false); // Modal state
-
+  const tabletMode = isTablet();
   // const [isModalVisible, setIsModalVisible] = useState(false);
 
   // const handleAnswerOne = () => {
@@ -319,7 +323,7 @@ const EventDetail: React.FC = () => {
   return (
     <PageWrapper>
       <TopBar sectionTitle="Events" showBackButton={true} />
-      <EventDetailWrapper>
+      <EventDetailWrapper tabletMode={tabletMode}>
         {event.poster && (
           <PosterImage imageUrl={`${event.poster}`}>
             <ChangePosterModalButton onClick={() => setModalOpen(true)}>
@@ -436,6 +440,13 @@ const EventDetail: React.FC = () => {
           >
             Welcome Screen
           </ActiveStatusButton>
+          <ActiveStatusButton
+            isActive={openSection === "collaborators"}
+            onClick={() => setOpenSection("collaborators")}
+            borderColor="#e6bf30"
+          >
+            Collaborators
+          </ActiveStatusButton>
         </ActiveStatusContainer>
         {openSection === "info" && (
           <EventDetailsEditor event={event} refetch={fetchEvent} />
@@ -452,6 +463,7 @@ const EventDetail: React.FC = () => {
         {openSection === "tasks" && (
           <EventTasksEditor event={event} refetch={fetchEvent} />
         )}
+        {openSection === "collaborators" && <UserSearch />}
 
         {isModalOpen && (
           <PosterUploadModal

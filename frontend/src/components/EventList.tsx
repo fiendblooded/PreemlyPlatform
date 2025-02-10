@@ -6,14 +6,51 @@ import { useState } from "react";
 
 const Wrapper = styled.div`
   margin-top: 20px;
+  height: 100%;
 `;
 const ListWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: 50px;
-  row-gap: 50px; /* Fixed vertical gap between rows */
-  width: 100%; /* Ensures the grid spans the full container width */
-  padding-bottom: 40px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 equal columns */
+  gap: 6% 2%; /* Adjust as needed */
+
+  // overflow-y: auto;
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(
+      3,
+      1fr
+    ); /* 4 cards per row on medium screens */
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(
+      2,
+      1fr
+    ); /* 2 cards per row on small screens */
+  }
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr; /* Full-width cards on very small screens */
+  }
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #d3d3d3 #f5f5f5; /* Scrollbar thumb and track colors */
+
+  &::-webkit-scrollbar {
+    width: 8px; /* Scrollbar width */
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f5f5f5; /* Light background for the track */
+    border-radius: 4px; /* Rounded corners */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d3d3d3; /* Light grey thumb */
+    border-radius: 4px; /* Rounded corners */
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #b0b0b0; /* Darker grey on hover */
+  }
 `;
 
 const EmptyMessage = styled.div`
@@ -51,20 +88,29 @@ export const CreateLink = styled.a`
 `;
 interface EventListProps {
   events: Event[];
+  isFilterQueue: boolean;
 }
-const EventList: React.FC<EventListProps> = ({ events }) => {
+const EventList: React.FC<EventListProps> = ({ events, isFilterQueue }) => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   return (
     <Wrapper>
       {events.length === 0 ? (
-        <MessageContainer>
-          You don't have any events yet. <br />
-          Click{" "}
-          <CreateLink onClick={() => setIsPopupVisible(true)}>
-            here
-          </CreateLink>{" "}
-          to create your first event!
-        </MessageContainer>
+        <>
+          {isFilterQueue ? (
+            <MessageContainer>
+              You don't have any events yet. <br />
+              Click{" "}
+              <CreateLink onClick={() => setIsPopupVisible(true)}>
+                here
+              </CreateLink>{" "}
+              to create your first event!
+            </MessageContainer>
+          ) : (
+            <MessageContainer>
+              No events found. Try changing filter parameters.
+            </MessageContainer>
+          )}
+        </>
       ) : (
         <ListWrapper>
           {events.map((event) => (

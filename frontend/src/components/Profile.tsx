@@ -6,14 +6,15 @@ import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { useAuth0 } from "@auth0/auth0-react";
 import useAuthSetup from "../useAuthSetup";
 import UserSearch from "./UserSearch";
-import { Tooltip } from "react-tooltip"; // Import a tooltip library or use a custom one
 
 const Profile: React.FC = () => {
   useAuthSetup();
   const { user, logout } = useAuth0();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState(false);
+  const [newName, setNewName] = useState(""); // New state for name input
+  const [deleting, setDeleting] = useState(false); // Existing deletion state
   const axiosInstance = useAxiosWithAuth();
 
   useEffect(() => {
@@ -22,6 +23,7 @@ const Profile: React.FC = () => {
       try {
         const response = await axiosInstance.get(`/users/${user.sub}`);
         setProfile(response.data.data);
+        setNewName(response.data.data.user_metadata.displayName); // Set name for editing
       } catch (error) {
         console.error("Error fetching user profile:", error);
       } finally {
@@ -31,6 +33,21 @@ const Profile: React.FC = () => {
 
     fetchProfile();
   }, [user?.sub]);
+
+  const handleNameUpdate = async () => {
+    if (!user?.sub || !newName || profile.user_metadata.displayName === newName)
+      return;
+
+    try {
+      const response = await axiosInstance.patch(`/users/${user.sub}/name`, {
+        name: newName,
+      });
+      setProfile(response.data.data);
+    } catch (error) {
+      console.error("Error updating name:", error);
+      alert("Failed to update name. Please try again later.");
+    }
+  };
 
   const handleDeleteProfile = async () => {
     if (!user?.sub) return;
@@ -59,46 +76,41 @@ const Profile: React.FC = () => {
 
   return (
     <PageWrapper>
-      <TopBar showBackButton sectionTitle="Profile" />
+      <TopBar sectionTitle="Account Settings" />
       <ContentWrapper marginTop={60}>
         <ProfileContainer>
           <ProfilePictureWrapper>
             <ProfilePicture
               src={profile.picture}
-              alt={`${profile.name}'s profile`}
+              alt={`${profile.user_metadata.name}'s profile`}
             />
-            <Name>
-              {profile.name || "N/A"}
-              {profile.email_verified && (
-                <EmailVerifiedIcon
-                  data-tooltip-id="email-verified-tooltip"
-                  aria-label="Email verified"
-                >
-                  ✅
-                </EmailVerifiedIcon>
-              )}
-            </Name>
-            <ProfileEmail>{profile.email || "N/A"} </ProfileEmail>
+
+            <SeamlessInput
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onBlur={() => handleNameUpdate()}
+            />
             {profile.email_verified && (
-              <Tooltip
-                id="email-verified-tooltip"
-                content={
-                  profile.email_verified
-                    ? "Your email has been verified."
-                    : "Your email has not been verified."
-                }
-              />
+              <EmailVerifiedIcon
+                data-tooltip-id="email-verified-tooltip"
+                aria-label="Email verified"
+              >
+                ✅
+              </EmailVerifiedIcon>
             )}
+
+            <ProfileEmail>{profile.email || "N/A"}</ProfileEmail>
           </ProfilePictureWrapper>
 
           <ProfileDetails>
             <SectionTitle>Personal Information</SectionTitle>
             <DetailItem>
-              <strong>Nickname:</strong> {profile.nickname || "N/A"}
+              <strong>Username:</strong> {profile.nickname || "N/A"}
             </DetailItem>
-            <DetailItem>
+            {/* <DetailItem>
               <strong>User ID:</strong> {profile.user_id || "N/A"}
-            </DetailItem>
+            </DetailItem> */}
 
             <SectionTitle>Activity</SectionTitle>
             <DetailItem>
@@ -180,18 +192,16 @@ const ProfilePicture = styled.img`
   margin-bottom: 20px;
 `;
 
-const Name = styled.h2`
-  font-size: 24px;
-  font-weight: 600;
-  color: #222;
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
 `;
 
 const ProfileEmail = styled.p`
   font-size: 16px;
   color: #666;
   margin-top: 4px;
-  display: flex;
-  align-items: center;
 `;
 
 const ProfileDetails = styled.div`
@@ -222,55 +232,57 @@ const DetailItem = styled.div`
   }
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
-`;
-
-const ButtonBase = styled.button`
-  padding: 12px 24px;
+const LogoutButton = styled.button`
+  background-color: #6c63ff;
+  color: white;
   border: none;
+  padding: 12px 24px;
   border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  }
-
-  &:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  &:disabled {
-    background-color: #ccc;
-    color: #666;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-  }
-`;
-
-const LogoutButton = styled(ButtonBase)`
-  background-color: #6c63ff;
-  color: white;
 
   &:hover {
     background-color: #574bff;
   }
 `;
 
-const DeleteButton = styled(ButtonBase)`
+const DeleteButton = styled.button`
   background-color: #ff4d4f;
   color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
 
   &:hover {
     background-color: #e43e3e;
+  }
+`;
+const SeamlessInput = styled.input`
+  font-family: Axiforma, sans-serif;
+  font-size: 28px;
+  line-height: 30px;
+  font-weight: bold;
+  max-width: 90%;
+  text-overflow: ellipsis;
+  color: black;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  width: 80%;
+  padding: 4px 0;
+  margin-bottom: 4px;
+  border-bottom: 1px solid transparent;
+  &:focus {
+    border-bottom: 1px solid black;
+  }
+
+  &::placeholder {
+    color: #aaa; /* Optional: Adjust placeholder color */
   }
 `;

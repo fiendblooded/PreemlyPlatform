@@ -5,7 +5,6 @@ import {
   useLocation,
 } from "react-router-dom";
 import EventDetail from "./components/EventDetail";
-import EventForm from "./components/form/EventForm";
 import styled, { createGlobalStyle } from "styled-components";
 import Sidebar from "./components/SideBar";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -17,6 +16,7 @@ import ChatbotPage from "./components/chatbot/ChatbotPage";
 import useAuthSetup from "./useAuthSetup";
 import Profile from "./components/Profile";
 import PreemlyFAQ from "./components/PreemlyFAQ";
+import { isTablet } from "./common/common";
 
 export const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -137,7 +137,7 @@ const ContentWrapper = styled.div<{ fullWidth: boolean; fullHeight: boolean }>`
 
 const AppContent: React.FC = () => {
   const location = useLocation();
-
+  const tabletMode = isTablet();
   // Define routes where the sidebar should not be displayed
   const noSidebarRoutes = ["/login", "/welcome"];
   const isFullWidth =
@@ -152,7 +152,10 @@ const AppContent: React.FC = () => {
           <Sidebar />
         </ProtectedRoute>
       )}
-      <ContentWrapper fullWidth={isFullWidth} fullHeight={isFullWidth}>
+      <ContentWrapper
+        fullWidth={isFullWidth || tabletMode}
+        fullHeight={isFullWidth}
+      >
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<Dashboard />} />

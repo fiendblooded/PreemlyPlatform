@@ -92,12 +92,12 @@ export const StyledDatePickerWrapper = styled.div`
 
 const EventDetails = styled.div`
   flex: 1;
-  margin-top: 20px;
+  margin-top: 10px;
   background-color: white;
   color: black;
   padding: 15px;
   border-radius: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   position: relative;
 `;
@@ -161,13 +161,14 @@ const StyledTextarea = styled.input`
 `;
 const EventTypeSelector = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  justify-content: space-between;
   margin-top: 10px;
 `;
 
 const SelectorOption = styled.div<{ selected: boolean }>`
   display: flex;
+  width: 25%;
   align-items: center;
   padding: 12px 20px;
   font-size: 16px;

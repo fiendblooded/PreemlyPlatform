@@ -89,6 +89,14 @@ export function getDateTimeStatus(
     return { type: "Ongoing", color: "#2a9134" }; // Green
   }
 }
+export function isTablet(): boolean {
+  // Define a typical tablet screen size range
+  const width = window.innerWidth;
+
+  // Check if the width falls in the common tablet range (between mobile and desktop)
+  return width >= 600 && width <= 1200;
+}
+
 export const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (typeof window.google !== "undefined") {

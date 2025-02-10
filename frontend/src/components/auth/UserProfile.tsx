@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import styled from "styled-components";
-import useAuthSetup from "../../useAuthSetup";
 import { useNavigate } from "react-router-dom";
-
 const ProfileContainer = styled.div`
   display: flex;
   align-items: center;
@@ -57,21 +55,21 @@ const UserEmail = styled.div`
   color: #666;
 `;
 
-const UpgradeButton = styled.button`
-  color: #0b0e13; /* Dark text for contrast */
-  background-color: #fcd535; /* Matches the yellow accent color */
-  font-size: 14px;
-  padding: 10px;
-  border: none;
-  border-radius: 20px;
-  width: 100%;
-  cursor: pointer;
-  font-weight: bold;
+// const UpgradeButton = styled.button`
+//   color: #0b0e13; /* Dark text for contrast */
+//   background-color: #fcd535; /* Matches the yellow accent color */
+//   font-size: 14px;
+//   padding: 10px;
+//   border: none;
+//   border-radius: 20px;
+//   width: 100%;
+//   cursor: pointer;
+//   font-weight: bold;
 
-  &:hover {
-    background-color: #e6bf30; /* Slightly darker shade for hover */
-  }
-`;
+//   &:hover {
+//     background-color: #e6bf30; /* Slightly darker shade for hover */
+//   }
+// `;
 
 const OptionsSection = styled.div`
   display: flex;
@@ -119,10 +117,9 @@ const namespace = "https://custom-claims.preemly.eu/";
 
 const UserProfile: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth0();
-
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  useAuthSetup();
   const navigate = useNavigate();
+
   if (!isAuthenticated) return null;
 
   const toggleDropdown = () => {
@@ -139,28 +136,23 @@ const UserProfile: React.FC = () => {
       <ProfileContainer onClick={toggleDropdown}>
         <ProfileImage
           src={user?.[`${namespace}picture`]}
-          alt={user?.[`${namespace}name`]}
+          alt={user?.[`${namespace}displayName`]}
         />
         {isDropdownVisible && (
           <DropdownContainer>
             <UserInfoSection onClick={() => navigate("/profile")}>
               <ProfileImage
-                // onClick={() => navigate("/profile")}
                 src={user?.[`${namespace}picture`]}
-                alt={user?.[`${namespace}name`]}
+                alt={user?.[`${namespace}displayName`]}
                 style={{ width: "60px", height: "60px", borderRadius: "50%" }}
               />
-              <UserName>{user?.[`${namespace}name`]}</UserName>
+              <UserName>{user?.[`${namespace}displayName`]}</UserName>
               <UserEmail>{user?.[`${namespace}email`]}</UserEmail>
-
-              {/* <UpgradeButton>Upgrade to PRO</UpgradeButton> */}
             </UserInfoSection>
             <OptionsSection>
-              {/* <Option onClick={() => navigate("/profile")}>Profile</Option> */}
               <Option>Settings</Option>
               <Option onClick={() => navigate("/help")}>Help</Option>
             </OptionsSection>
-            {/* <FooterSection></FooterSection> */}
             <FooterSection>
               <Option
                 onClick={() =>

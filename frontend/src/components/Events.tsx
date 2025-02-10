@@ -59,8 +59,7 @@ const SearchContainer = styled.div`
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 8px 12px;
-  width: 100%;
-  max-width: 400px;
+  width: calc(18.4% - 26px);
 `;
 
 export const SearchIcon = styled.svg`
@@ -273,7 +272,10 @@ const Events: React.FC = () => {
             <Spinner />{" "}
           </SpinnerContainer>
         ) : (
-          <EventList events={filteredEvents} />
+          <EventList
+            events={filteredEvents}
+            isFilterQueue={searchQuery === ""}
+          />
         )}
       </ContentWrapper>
     </PageWrapper>

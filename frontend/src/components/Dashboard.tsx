@@ -4,14 +4,14 @@ import TopBar from "./TopBar";
 import { PageWrapper, Spinner, SpinnerContainer } from "./Events";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { Event } from "../types";
-import { getDateTimeStatus } from "../common/common";
+import { getDateTimeStatus, isTablet } from "../common/common";
 import { useNavigate } from "react-router-dom";
 import TaskList from "./TaskList";
 import CalendarBox from "./CalendarBox";
 import { MessageContainer, CreateLink } from "./EventList";
 import EventForm from "./form/EventForm";
 
-const DashboardContainer = styled.div`
+const DashboardContainer = styled.div<{ tabletMode: boolean }>`
   width: 100%;
   height: 100%;
   font-family: Axiforma, sans-serif;
@@ -20,9 +20,10 @@ const DashboardContainer = styled.div`
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  ${(props) => !props.tabletMode && "justify-content: center;"}
 
   overflow-y: auto; /* Use auto instead of scroll */
+  overflow-x: hidden;
   text-overflow: ellipsis;
   /* Scrollbar styling */
   scrollbar-width: thin; /* For Firefox */
@@ -47,13 +48,17 @@ const DashboardContainer = styled.div`
   }
 `;
 
-const HeaderStats = styled.div`
+const HeaderStats = styled.div<{ tabletMode: boolean }>`
   display: flex;
+  flex-wrap: wrap; /* Allow wrapping */
   justify-content: space-between;
-  margin: 0px auto;
+  margin: 0 auto;
   margin-bottom: 30px;
-  width: calc(90% + 40px);
+  width: calc(90% + 40px); /* Simplified from calc */
+  gap: 16px;
+  ${(props) => props.tabletMode && "margin-top: 20px;"}
 `;
+
 const StatBox = styled.div<{ color: string }>`
   background-color: ${(props) => props.color};
   color: white;
@@ -64,13 +69,24 @@ const StatBox = styled.div<{ color: string }>`
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   text-align: center;
-  width: 20%;
-  height: 60%;
+  width: calc(20% - 16px); /* Adjust for gap */
   font-weight: bold;
   align-items: center;
+
+  /* Responsive adjustments */
+  @media (max-width: 1200px) {
+    width: calc(25% - 12px); /* 4 items per row */
+  }
+
+  @media (max-width: 900px) {
+    width: calc(50% - 60px); /* 2 items per row */
+  }
+
+  @media (max-width: 600px) {
+    width: 100%; /* Full-width on small screens */
+  }
 `;
 
-//Stats
 const StatBoxContent = styled.div`
   display: flex;
   flex-direction: column;
@@ -81,15 +97,17 @@ const StatBoxContent = styled.div`
   margin-left: 12px;
   padding-top: 4px;
 `;
+
 const StatValue = styled.div`
-  font-size: 26px;
-  line-height: 26px;
+  font-size: 20px;
+  line-height: 24px;
 `;
+
 const StatTitle = styled.div`
   font-size: 15px;
-  color: white;
   font-weight: 500;
-  line-height: 15px;
+  line-height: 18px;
+  color: white;
 `;
 
 const GraphSection = styled.div<{
@@ -217,7 +235,7 @@ const Dashboard: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const axiosInstance = useAxiosWithAuth();
-
+  const tabletMode = isTablet();
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -298,9 +316,9 @@ const Dashboard: React.FC = () => {
             <Spinner />
           </SpinnerContainer>
         ) : (
-          <DashboardContainer>
+          <DashboardContainer tabletMode={tabletMode}>
             {/* <h1>Welcome back, Username 👋</h1> */}
-            <HeaderStats>
+            <HeaderStats tabletMode={tabletMode}>
               <StatBox color={"#4581FA"}>
                 <SvgContainer>
                   <svg

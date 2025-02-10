@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { Event } from "../types";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PrimaryButton, SecondaryButton } from "./EventDetail";
-import { getDateTimeStatus } from "../common/common";
+import { getDateTimeStatus, isTablet } from "../common/common";
 
 interface EventProps {
   event: Event;
@@ -12,19 +12,23 @@ const Card = styled.div<{ color: string }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 300px; /* Adjust to control the card size */
-  height: 300px; /* Adjust height for the poster */
+  background-color: #ffffff;
   border-top: 6px solid ${(props) => props.color};
   border-radius: 4px;
-  background-color: #ffffff;
-  color: #f5f5f5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   padding: 15px;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
+  /* Allow the height to naturally adjust */
+  height: auto;
+  min-height: 300px; /* Optional: Enforce a minimum height */
+  overflow: hidden;
+
   &:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
+
   &:active {
     border-color: #f4c430;
   }
@@ -92,7 +96,7 @@ const InfoBar = styled.div`
 const GuestCount = styled.div<{ paddingTop?: number }>`
   display: flex;
   align-items: center;
-  line-height: 100px;
+
   font-size: 0.9rem;
   color: black;
   height: 38px;
@@ -112,6 +116,11 @@ const EventComponent: React.FC<EventProps> = ({ event }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const dateTimeStatus = getDateTimeStatus(event?.date, event?.endDate);
+  const tabletMode = isTablet();
+  const guestCount = `${event.guests.length} ${
+    event.guests.length != 1 ? "Guests" : "Guest"
+  }`;
+
   return (
     <Card
       color={dateTimeStatus.color}
@@ -149,13 +158,10 @@ const EventComponent: React.FC<EventProps> = ({ event }) => {
               stroke-linejoin="round"
             />
           </svg>
-          <div>
-            {event.guests.length}{" "}
-            {event.guests.length != 1 ? "Guests" : "Guest"}
-          </div>
+          {guestCount}
         </GuestCount>
         <PrimaryButton
-          width={130}
+          width={tabletMode ? 38 : 130}
           onClick={(clickEvent: React.MouseEvent) => {
             clickEvent.stopPropagation();
             navigate(`/welcome/${event._id}`);
@@ -164,6 +170,7 @@ const EventComponent: React.FC<EventProps> = ({ event }) => {
           <svg
             width="24"
             height="24"
+            style={{ minWidth: "24px", minHeight: "24px" }}
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -176,7 +183,9 @@ const EventComponent: React.FC<EventProps> = ({ event }) => {
               stroke-linejoin="round"
             />
           </svg>
-          <div style={{ paddingTop: 2, marginLeft: 2 }}>Check in</div>
+          {!tabletMode && (
+            <div style={{ paddingTop: 2, marginLeft: 2 }}>Check in</div>
+          )}
         </PrimaryButton>
       </InfoBar>
     </Card>

@@ -1,6 +1,7 @@
 import styled, { createGlobalStyle } from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
 import Logo from "../logo.png";
+import { isTablet } from "../common/common";
 const GlobalStyle = createGlobalStyle`
   @font-face {
     font-family: 'Axiforma';
@@ -107,11 +108,18 @@ const GlobalStyle = createGlobalStyle`
     color: #f5f5f5;
   }
 `;
-const SidebarWrapper = styled.div`
-  position: sticky;
+const SidebarTopContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+`;
 
+const SidebarWrapper = styled.div<{ tablet: boolean }>`
+  position: sticky;
   height: 100vh;
-  background-color: rgb(11, 14, 19); /* Dark background */
+  background-color: rgb(11, 14, 19);
   display: flex;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   flex-direction: column;
@@ -122,34 +130,39 @@ const SidebarWrapper = styled.div`
   top: 0;
   left: 0;
   font-family: Axiforma, sans-serif !important;
-  width: 250px !important;
+  width: ${(props) =>
+    props.tablet ? "80px" : "250px"}; /* Shrink width on tablets */
+  transition: width 0.3s ease;
 `;
-const SidebarTopContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-`;
-const MenuButton = styled.button<{ isactive: boolean }>`
-  background-color: ${(props) =>
-    props.isactive ? "#f4c430" : "transparent"}; /* Yellow */
+
+const MenuButton = styled.button<{ isactive: boolean; tablet: boolean }>`
+  background-color: ${(props) => (props.isactive ? "#f4c430" : "transparent")};
   color: ${(props) => (props.isactive ? "black" : "white")};
   border: 1px solid transparent;
   border-radius: 6px;
   height: 36px;
-  width: 85%;
-  font-family: Axiforma, sans-serif !important;
+  width: ${(props) => (props.tablet ? "70%" : "85%")};
   display: flex;
   cursor: pointer;
   gap: 6px;
   align-items: center;
-  padding: 8px 0px 8px 12px;
+  padding: 8px ${(props) => (props.tablet ? "0" : "12px")};
+  justify-content: ${(props) => (props.tablet ? "center" : "flex-start")};
+  transition: padding 0.3s ease;
+
   &:hover {
     background-color: ${(props) => (props.isactive ? "#f4c430" : "#524C2D")};
     color: ${(props) => (props.isactive ? "black" : "#f4c430")};
     border-color: ${(props) => (props.isactive ? "transparent" : "#f4c430")};
   }
 `;
+
+const MenuButtonText = styled.div<{ tablet: boolean }>`
+  display: ${(props) => (props.tablet ? "none" : "block")};
+  font-size: 15px;
+  padding-top: 4px;
+`;
+
 export const CTAButton = styled.button`
   background-color: #f4c430; /* Yellow */
   color: #121212; /* Dark text */
@@ -168,11 +181,7 @@ export const CTAButton = styled.button`
     background-color: #b28600; /* Bright yellow on hover */
   }
 `;
-export const MenuButtonText = styled.div`
-  padding-top: 4px;
-  text-align: left;
-  font-size: 15px;
-`;
+
 export const ImageContainer = styled.div`
   width: 100%;
   padding: 10px 0;
@@ -187,29 +196,34 @@ export const ImageContainer = styled.div`
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isTabletDevice = isTablet();
+
   function getPageStatus(page: string) {
-    if (location.pathname.split("/")[1] === page) {
-      return true;
-    } else {
-      return false;
-    }
+    return location.pathname.split("/")[1] === page;
   }
+
   return (
-    <SidebarWrapper>
-      <GlobalStyle />
+    <SidebarWrapper tablet={isTabletDevice}>
       <SidebarTopContainer>
         <ImageContainer>
           <img
             src={Logo}
             onClick={() => navigate("/")}
             alt="logo"
-            width={"55%"}
+            width={isTabletDevice ? "50%" : "55%"}
           />
         </ImageContainer>
-        <MenuButton onClick={() => navigate("/")} isactive={getPageStatus("")}>
+        <MenuButton
+          onClick={() => navigate("/")}
+          isactive={getPageStatus("")}
+          tablet={isTabletDevice}
+        >
           <svg
             width="20"
             height="20"
+            style={
+              isTabletDevice ? { minWidth: "26px", minHeight: "26px" } : {}
+            }
             viewBox="0 0 20 20"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -239,16 +253,19 @@ const Sidebar: React.FC = () => {
               strokeLinejoin="round"
             />
           </svg>
-
-          <MenuButtonText>Dashboard</MenuButtonText>
+          <MenuButtonText tablet={isTabletDevice}>Dashboard</MenuButtonText>
         </MenuButton>
         <MenuButton
           onClick={() => navigate("/events")}
           isactive={getPageStatus("events")}
+          tablet={isTabletDevice}
         >
           <svg
             width="20"
             height="20"
+            style={
+              isTabletDevice ? { minWidth: "26px", minHeight: "26px" } : {}
+            }
             viewBox="0 0 20 20"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -260,36 +277,19 @@ const Sidebar: React.FC = () => {
               strokeLinejoin="round"
             />
           </svg>
-
-          <MenuButtonText>Events</MenuButtonText>
+          <MenuButtonText tablet={isTabletDevice}>Events</MenuButtonText>
         </MenuButton>
-        {/* <MenuButton
-          onClick={() => navigate("/scanner")}
-          isactive={getPageStatus("scanner")}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M3.33203 10.0007H3.34036M6.66536 10.0007H6.6737M13.332 10.0007H13.3404M9.9987 10.0007H10.007M16.6654 10.0007H16.6737M7.08203 3.33398H5.9987C5.06528 3.33398 4.59857 3.33398 4.24205 3.51564C3.92844 3.67543 3.67348 3.9304 3.51369 4.244C3.33203 4.60052 3.33203 5.06723 3.33203 6.00065V7.08398M12.9154 3.33398H13.9987C14.9321 3.33398 15.3988 3.33398 15.7553 3.51564C16.069 3.67543 16.3239 3.9304 16.4837 4.244C16.6654 4.60052 16.6654 5.06723 16.6654 6.00065V7.08398M16.6654 12.9173V14.0007C16.6654 14.9341 16.6654 15.4008 16.4837 15.7573C16.3239 16.0709 16.069 16.3259 15.7553 16.4857C15.3988 16.6673 14.9321 16.6673 13.9987 16.6673H12.9154M3.33203 12.9173V14.0007C3.33203 14.9341 3.33203 15.4008 3.51369 15.7573C3.67348 16.0709 3.92844 16.3259 4.24205 16.4857C4.59857 16.6673 5.06528 16.6673 5.9987 16.6673H7.08203"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <MenuButtonText>Scanner</MenuButtonText>
-        </MenuButton> */}
         <MenuButton
           onClick={() => navigate("/welcome")}
           isactive={getPageStatus("welcome")}
+          tablet={isTabletDevice}
         >
           <svg
             width="20"
             height="20"
+            style={
+              isTabletDevice ? { minWidth: "26px", minHeight: "26px" } : {}
+            }
             viewBox="0 0 20 20"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -300,29 +300,10 @@ const Sidebar: React.FC = () => {
               strokeLinecap="round"
             />
           </svg>
-          <MenuButtonText>Welcome screen</MenuButtonText>
+          <MenuButtonText tablet={isTabletDevice}>
+            Welcome screen
+          </MenuButtonText>
         </MenuButton>
-        {/* <MenuButton
-          onClick={() => navigate("/preembot")}
-          isactive={getPageStatus("preembot")}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6.66732 8.75H13.334M6.66732 12.0833H9.16732M17.5039 10C17.5039 14.1421 14.146 17.5 10.0039 17.5C8.3069 17.5 2.50451 17.5 2.50451 17.5C2.50451 17.5 3.80384 14.3801 3.28383 13.334C2.78462 12.3297 2.50391 11.1976 2.50391 10C2.50391 5.85786 5.86177 2.5 10.0039 2.5C14.146 2.5 17.5039 5.85786 17.5039 10Z"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-
-          <MenuButtonText>PreemBot</MenuButtonText>
-        </MenuButton> */}
       </SidebarTopContainer>
     </SidebarWrapper>
   );
