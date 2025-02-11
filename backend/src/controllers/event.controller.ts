@@ -5,6 +5,7 @@ import axios from 'axios';
 import { AuthRequest } from '../types/auth.types';
 import cloudinary from '../config/cloudinary';
 import { extractPublicId } from '../utils/helpers';
+import { isValidObjectId } from 'mongoose';
 
 export const createEvent = async (req: AuthRequest, res: Response): Promise<void> => {
   const event = req.body;
@@ -139,21 +140,29 @@ export const getEventById = async (req: Request, res: Response): Promise<void> =
 
 export const updateEvent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const updatedEvent = await Event.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedEvent) {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ success: false, message: 'Invalid event ID' });
+      return;
+    }
+
+    const event = await Event.findById(id);
+    if (!event) {
       res.status(404).json({ success: false, message: 'Event not found' });
       return;
     }
+
+    Object.assign(event, req.body);
+
+    const updatedEvent = await event.save();
+
     res.json({ success: true, data: updatedEvent });
   } catch (error) {
-    console.error('Error in Update Event:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({ success: false, message: 'Server Error', error });
   }
 };
+
 
 export const updateEventPoster = async (req: Request, res: Response): Promise<void> => {
   const { poster } = req.body;
