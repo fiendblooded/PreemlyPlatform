@@ -7,7 +7,6 @@ export const createGuest = async (req: Request, res: Response): Promise<void> =>
   try {
     const { eventId, fullName, email, age, attendance_status, phoneNumber } = req.body;
 
-    // Log the received data
     console.log('Received data:', { eventId, fullName, email, age, attendance_status, phoneNumber });
 
     const event = await Event.findById(eventId);
@@ -37,9 +36,8 @@ export const createGuest = async (req: Request, res: Response): Promise<void> =>
     res.status(201).json({ success: true, data: savedGuest });
   } catch (error) {
     console.error('Error in Create Guest:', error);
-    // Log the full error object
     console.error('Full error object:', JSON.stringify(error, null, 2));
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ success: false, message: 'Server Error', error });
   }
 };
 
