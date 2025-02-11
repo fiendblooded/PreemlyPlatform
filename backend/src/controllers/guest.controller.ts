@@ -47,6 +47,7 @@ export const createGuest = async (req: Request, res: Response): Promise<void> =>
     res.status(201).json({ success: true, data: savedGuest });
   } catch (error) {
     console.error('Error in Create Guest:', error);
+    res.status(400).json({ success: false, message: 'Error creating', error });
   }
 };
 
@@ -66,6 +67,7 @@ export const updateGuest = async (req: Request, res: Response): Promise<void> =>
     res.json({ success: true, data: updatedGuest });
   } catch (error) {
     console.error('Error in Update Guest:', error);
+    res.status(400).json({ success: false, message: 'Error updating', error });
   }
 };
 
@@ -83,7 +85,6 @@ export const deleteGuest = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Remove guest from the associated event
     await Event.updateOne({ _id: deletedGuest.eventId }, { $pull: { guests: deletedGuest._id } });
 
     res.status(204).send();
