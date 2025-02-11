@@ -23,11 +23,11 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
     });
 
     const newEvent = new Event({
-      title: event.title,
+      title: 'event.title',
       description: event.description,
-      ownerId: req.user?.sub,
-      date: event.date,
-      endDate: event.date,
+      ownerId: 'google-oauth2|109612865255128408897',
+      date: '2025-03-20T23:00:23.000+00:00',
+      endDate: '2025-03-20T23:00:23.000+00:00',
       eventType: 'Offline',
       poster: uploadResponse.secure_url,
       location: {
@@ -154,6 +154,27 @@ export const updateEvent = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+// app.put("/api/events/:id", async (req, res) => {
+//   try {
+//     const updatedEvent = await Event.findByIdAndUpdate(
+//       req.params.id,
+//       req.body,
+//       {
+//         new: true,
+//       }
+//     );
+//     if (!updatedEvent) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Event not found" });
+//     }
+//     res.json({ success: true, data: updatedEvent });
+//   } catch (error) {
+//     console.error("Error in Update Event:", error.message);
+//     res.status(500).json({ success: false, message: "Server Error" });
+//   }
+// });
 
 export const updateEventPoster = async (req: Request, res: Response): Promise<void> => {
   const { poster } = req.body;
