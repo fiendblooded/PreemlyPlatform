@@ -3,7 +3,7 @@ import * as guestController from '../controllers/guest.controller';
 
 const router = Router();
 
-router.post('/', guestController.createGuest);
+router.put('/', guestController.createGuest);
 router.put('/:id', guestController.updateGuest);
 router.delete('/:id', guestController.deleteGuest);
 router.put('/:id/attendance', guestController.markAttendance);
