@@ -12,6 +12,7 @@ router.put('/:id', eventController.updateEvent);
 router.put('/:id/poster', eventController.updateEventPoster);
 router.delete('/:id', eventController.deleteEvent);
 router.put('/:id/guests', eventController.updateEventGuests);
+router.put('/:id/guests/import', eventController.uploadGuestsFromExcel);
 
 export default router;
 
