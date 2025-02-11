@@ -7,7 +7,6 @@ import eventRoutes from './routes/event.routes';
 import guestRoutes from './routes/guest.routes';
 import mailRoutes from './routes/mail.routes';
 import userRoutes from './routes/user.routes';
-import guestImportRoutes from './routes/guest-import.routes';
 
 dotenv.config();
 
