@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Event from '../models/event.model';
+import Guest from '../models/guest.model';
 import { uploadImage } from '../config/cloudinary';
 import axios from 'axios';
 import { AuthRequest } from '../types/auth.types';
@@ -269,7 +270,7 @@ export const updateEventGuests = async (req: Request, res: Response): Promise<vo
   }
 
   try {
-    const createdGuests = await Event.insertMany(guests);
+    const createdGuests = await Guest.insertMany(guests);
     const guestIds = createdGuests.map((guest) => guest._id);
 
     const updatedEvent = await Event.findByIdAndUpdate(
