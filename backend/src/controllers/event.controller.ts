@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from 'express';
 import Event from '../models/event.model';
 import Guest from '../models/guest.model';
@@ -7,6 +8,7 @@ import { AuthRequest } from '../types/auth.types';
 import cloudinary from '../config/cloudinary';
 import { extractPublicId } from '../utils/helpers';
 import xlsx from 'xlsx';
+import multer from 'multer';
 
 export const createEvent = async (req: AuthRequest, res: Response): Promise<void> => {
   const event = req.body;
@@ -157,27 +159,6 @@ export const updateEvent = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-// app.put("/api/events/:id", async (req, res) => {
-//   try {
-//     const updatedEvent = await Event.findByIdAndUpdate(
-//       req.params.id,
-//       req.body,
-//       {
-//         new: true,
-//       }
-//     );
-//     if (!updatedEvent) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Event not found" });
-//     }
-//     res.json({ success: true, data: updatedEvent });
-//   } catch (error) {
-//     console.error("Error in Update Event:", error.message);
-//     res.status(500).json({ success: false, message: "Server Error" });
-//   }
-// });
-
 export const updateEventPoster = async (req: Request, res: Response): Promise<void> => {
   const { poster } = req.body;
 
@@ -295,53 +276,53 @@ export const updateEventGuests = async (req: Request, res: Response): Promise<vo
   }
 };
 
+const upload = multer({ storage: multer.memoryStorage() });
+
 export const uploadGuestsFromExcel = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  if (!req.file) {
-    res.status(400).json({
-      success: false,
-      message: 'No file uploaded',
-    });
-    return;
-  }
-
-  try {
-    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
-
-    const guests = data
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((row: any) => row.length >= 2)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((row: any) => ({
-        fullName: row[0] || '',
-        email: row[1] || '',
-        age: row[2] || 0,
-      }));
-
-    const createdGuests = await Guest.insertMany(guests);
-    const guestIds = createdGuests.map((guest) => guest._id);
-
-    const updatedEvent = await Event.findByIdAndUpdate(
-      id,
-      { $addToSet: { guests: { $each: guestIds } } },
-      { new: true }
-    ).populate('guests');
-
-    if (!updatedEvent) {
-      res.status(404).json({ success: false, message: 'Event not found' });
+  upload.single('file')(req, res, async (err) => {
+    if (err) {
+      res.status(400).json({ success: false, message: 'File upload error' });
       return;
     }
 
-    res.json({
-      success: true,
-      data: updatedEvent,
-    });
-  } catch (error) {
-    console.error('Error uploading guests from Excel:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
-  }
+    const { id } = req.params;
+    if (!req.file) {
+      res.status(400).json({ success: false, message: 'No file uploaded' });
+      return;
+    }
+
+    try {
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+
+      const guests = data
+        .filter((row: any) => row.length >= 2)
+        .map((row: any) => ({
+          fullName: row[0] || '',
+          email: row[1] || '',
+          age: row[2] || 0,
+        }));
+
+      const createdGuests = await Guest.insertMany(guests);
+      const guestIds = createdGuests.map((guest) => guest._id);
+
+      const updatedEvent = await Event.findByIdAndUpdate(
+        id,
+        { $addToSet: { guests: { $each: guestIds } } },
+        { new: true }
+      ).populate('guests');
+
+      if (!updatedEvent) {
+        res.status(404).json({ success: false, message: 'Event not found' });
+        return;
+      }
+
+      res.json({ success: true, data: updatedEvent });
+    } catch (error) {
+      console.error('Error uploading guests from Excel:', error);
+      res.status(500).json({ success: false, message: 'Server Error' });
+    }
+  });
 };
