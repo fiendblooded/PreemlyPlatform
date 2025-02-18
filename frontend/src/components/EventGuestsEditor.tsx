@@ -300,7 +300,13 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       qrContent
     )}&size=150x150&color=00AFEF&bgcolor=FFFFFF`;
 
-    const htmlContent = getMailHtml(guestName, qrCodeBase64);
+    const htmlContent = getMailHtml(
+      guestName,
+      qrCodeBase64,
+      eventDetails.title,
+      eventDetails.description,
+      eventDetails.date
+    );
 
     await axiosInstance.post(`/mail`, {
       recipient: toEmail,

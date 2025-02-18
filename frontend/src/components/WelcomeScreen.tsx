@@ -12,7 +12,7 @@ import ManualQR from "../manualqr.png";
 import PresentGuests from "./PresentGuests";
 import React from "react";
 import { ToastType, useToast } from "./Toasts";
-import AnimatedBackground from "./AnimatedBackground";
+// import AnimatedBackground from "./AnimatedBackground";
 import PreemlyLogo from "../logo.png";
 import HacknimeLogo from "../hacknimelogo.png";
 const fadeIn = keyframes`
@@ -458,33 +458,33 @@ const WelcomeScreen: React.FC = () => {
   const eventGuests = event?.guests.map((guest) => guest._id) || [];
 
   //BUBBLES
-  const [showBubbles, setShowBubbles] = useState(false);
-  let inactivityTimer: NodeJS.Timeout;
+  // const [showBubbles, setShowBubbles] = useState(false);
+  // let inactivityTimer: NodeJS.Timeout;
 
-  const resetInactivityTimer = () => {
-    clearTimeout(inactivityTimer);
-    setShowBubbles(false); // Reset to show the main content
-    inactivityTimer = setTimeout(() => setShowBubbles(true), 45000); // Show bubbles after 45 seconds of inactivity
-  };
+  // const resetInactivityTimer = () => {
+  //   clearTimeout(inactivityTimer);
+  //   setShowBubbles(false); // Reset to show the main content
+  //   inactivityTimer = setTimeout(() => setShowBubbles(true), 45000); // Show bubbles after 45 seconds of inactivity
+  // };
 
-  useEffect(() => {
-    // Attach event listeners to detect user interaction
-    const events = ["mousemove", "keydown", "mousedown", "touchstart"];
-    events.forEach((event) =>
-      window.addEventListener(event, resetInactivityTimer)
-    );
+  // useEffect(() => {
+  //   // Attach event listeners to detect user interaction
+  //   const events = ["mousemove", "keydown", "mousedown", "touchstart"];
+  //   events.forEach((event) =>
+  //     window.addEventListener(event, resetInactivityTimer)
+  //   );
 
-    // Set the initial inactivity timer
-    inactivityTimer = setTimeout(() => setShowBubbles(true), 45000);
+  //   // Set the initial inactivity timer
+  //   inactivityTimer = setTimeout(() => setShowBubbles(true), 45000);
 
-    // Cleanup: Remove event listeners and clear timer on component unmount
-    return () => {
-      clearTimeout(inactivityTimer);
-      events.forEach((event) =>
-        window.removeEventListener(event, resetInactivityTimer)
-      );
-    };
-  }, []);
+  //   // Cleanup: Remove event listeners and clear timer on component unmount
+  //   return () => {
+  //     clearTimeout(inactivityTimer);
+  //     events.forEach((event) =>
+  //       window.removeEventListener(event, resetInactivityTimer)
+  //     );
+  //   };
+  // }, []);
   return (
     <WelcomeScreenWrapper
       backgroundColor={event?.welcomeScreenParams.backgroundColor}
@@ -511,13 +511,13 @@ const WelcomeScreen: React.FC = () => {
         <Spinner isVisible={loading} />
       ) : id ? (
         <>
-          {showBubbles && <AnimatedBackground />}
+          {/* {showBubbles && <AnimatedBackground />} */}
 
           {guest ? (
             <GuestWelcomeScreen isVisible={guest !== null}>
               <GuestDetailsContainer>
                 <div>
-                  <b>Let's hack it!</b>
+                  <b>Welcome to the event</b>
                 </div>
                 <ManualQRContainer src={ManualQR} alt="" />
 
@@ -575,7 +575,7 @@ const WelcomeScreen: React.FC = () => {
                     value={manualName}
                     onChange={(event) => {
                       setManualName(event.target.value);
-                      resetInactivityTimer();
+                      // resetInactivityTimer();
                     }}
                   />
 
@@ -584,7 +584,7 @@ const WelcomeScreen: React.FC = () => {
                     value={manualEmail}
                     onChange={(event) => {
                       setmanualEmail(event.target.value);
-                      resetInactivityTimer();
+                      // resetInactivityTimer();
                     }}
                   />
                   <ManualInputSC
@@ -592,7 +592,7 @@ const WelcomeScreen: React.FC = () => {
                     value={phoneNumber}
                     onChange={(event) => {
                       setPhoneNumber(event.target.value);
-                      resetInactivityTimer();
+                      // resetInactivityTimer();
                     }}
                   />
 
@@ -600,7 +600,7 @@ const WelcomeScreen: React.FC = () => {
                     <SecondaryWelcomeButton
                       onClick={() => {
                         setManualCheckInOpen(false);
-                        resetInactivityTimer();
+                        // resetInactivityTimer();
                       }}
                     >
                       Back
@@ -608,7 +608,7 @@ const WelcomeScreen: React.FC = () => {
                     <PrimaryWelcomeButton
                       onClick={() => {
                         addGuestManually();
-                        resetInactivityTimer();
+                        // resetInactivityTimer();
                       }}
                     >
                       Check-in
@@ -655,7 +655,7 @@ const WelcomeScreen: React.FC = () => {
                               style={{ margin: "auto", marginTop: 2 }}
                               onClick={() => {
                                 setManualCheckInOpen(true);
-                                resetInactivityTimer();
+                                // resetInactivityTimer();
                               }}
                             >
                               Manual Check-in

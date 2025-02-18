@@ -27,7 +27,7 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
     });
 
     const newEvent = new Event({
-      title: 'event.title',
+      title: event.title,
       description: event.description,
       ownerId: 'google-oauth2|109612865255128408897',
       date: '2025-03-20T23:00:23.000+00:00',
@@ -70,26 +70,20 @@ export const getEvents = async (req: AuthRequest, res: Response): Promise<void> 
           const imageResponse = await axios.get(event.poster, {
             responseType: 'arraybuffer',
           });
-          const imageBase64 = Buffer.from(
-            imageResponse.data,
-            'binary'
-          ).toString('base64');
+          const imageBase64 = Buffer.from(imageResponse.data, 'binary').toString('base64');
 
           return {
             ...event.toObject(),
             posterImage: `data:image/jpeg;base64,${imageBase64}`,
           };
         } catch (err) {
-          console.error(
-            `Error fetching image for event ${event._id}:`,
-            err
-          );
+          console.error(`Error fetching image for event ${event._id}:`, err);
           return {
             ...event.toObject(),
             posterImage: null,
           };
         }
-      })
+      }),
     );
 
     res.json({ success: true, data: eventsWithImages });
@@ -111,9 +105,7 @@ export const getEventById = async (req: Request, res: Response): Promise<void> =
       const imageResponse = await axios.get(event.poster, {
         responseType: 'arraybuffer',
       });
-      const imageBase64 = Buffer.from(imageResponse.data, 'binary').toString(
-        'base64'
-      );
+      const imageBase64 = Buffer.from(imageResponse.data, 'binary').toString('base64');
 
       res.json({
         success: true,
@@ -123,10 +115,7 @@ export const getEventById = async (req: Request, res: Response): Promise<void> =
         },
       });
     } catch (err) {
-      console.error(
-        `Error fetching image for event ${event._id}:`,
-        err
-      );
+      console.error(`Error fetching image for event ${event._id}:`, err);
       res.json({
         success: true,
         data: {
@@ -143,11 +132,7 @@ export const getEventById = async (req: Request, res: Response): Promise<void> =
 
 export const updateEvent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const updatedEvent = await Event.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedEvent) {
       res.status(404).json({ success: false, message: 'Event not found' });
       return;
@@ -180,15 +165,10 @@ export const updateEventPoster = async (req: Request, res: Response): Promise<vo
     if (existingEvent.poster) {
       try {
         const posterPublicId = extractPublicId(existingEvent.poster);
-        const deleteResponse = await cloudinary.uploader.destroy(
-          'events_posters/' + posterPublicId
-        );
+        const deleteResponse = await cloudinary.uploader.destroy('events_posters/' + posterPublicId);
         console.log('Image delete response:', deleteResponse);
       } catch (cloudinaryError) {
-        console.error(
-          'Error deleting old image from Cloudinary:',
-          cloudinaryError
-        );
+        console.error('Error deleting old image from Cloudinary:', cloudinaryError);
       }
     }
 
@@ -197,7 +177,7 @@ export const updateEventPoster = async (req: Request, res: Response): Promise<vo
     const updatedEvent = await Event.findByIdAndUpdate(
       req.params.id,
       { poster: uploadResponse.secure_url },
-      { new: true }
+      { new: true },
     );
 
     res.json({ success: true, data: updatedEvent });
@@ -218,15 +198,10 @@ export const deleteEvent = async (req: Request, res: Response): Promise<void> =>
     if (eventToDelete.poster) {
       try {
         const posterPublicId = extractPublicId(eventToDelete.poster);
-        const deleteResponse = await cloudinary.uploader.destroy(
-          'events_posters/' + posterPublicId
-        );
+        const deleteResponse = await cloudinary.uploader.destroy('events_posters/' + posterPublicId);
         console.log('Image delete response:', deleteResponse);
       } catch (cloudinaryError) {
-        console.error(
-          'Error deleting image from Cloudinary:',
-          cloudinaryError
-        );
+        console.error('Error deleting image from Cloudinary:', cloudinaryError);
       }
     }
 
@@ -258,7 +233,7 @@ export const updateEventGuests = async (req: Request, res: Response): Promise<vo
     const updatedEvent = await Event.findByIdAndUpdate(
       id,
       { $addToSet: { guests: { $each: guestIds } } },
-      { new: true }
+      { new: true },
     ).populate('guests');
 
     if (!updatedEvent) {
@@ -311,7 +286,7 @@ export const uploadGuestsFromExcel = async (req: Request, res: Response): Promis
       const updatedEvent = await Event.findByIdAndUpdate(
         id,
         { $addToSet: { guests: { $each: guestIds } } },
-        { new: true }
+        { new: true },
       ).populate('guests');
 
       if (!updatedEvent) {
