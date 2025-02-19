@@ -163,7 +163,7 @@ const GuestInfoContainer = styled.div`
   align-items: center;
 `;
 const ManualQRContainer = styled.img`
-  width: 80%;
+  height: 60%;
   border-radius: 8px;
 `;
 const WelcomeButtonsContainer = styled.div`
@@ -241,6 +241,7 @@ const LogosContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center; /* Center vertically */
+  margin-top: 10px;
 `;
 
 const LogoContainer = styled.img`
@@ -262,8 +263,8 @@ const HorizontalDelimiter = styled.div`
 `;
 
 const GuestDetailsContainer = styled.div`
-  width: 25%;
-  height: 100%;
+  width: 35%;
+  height: 95%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -273,6 +274,7 @@ const GuestDetailsContainer = styled.div`
   background-color: #00aef0;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  padding: 20px;
 `;
 const ProgramContainer = styled.div`
   height: 100%;
@@ -303,7 +305,7 @@ const ScheduleContainer = styled.div`
 `;
 const ScheduleSection = styled.div`
   height: 25%;
-  width: 90%;
+  width: 70%;
   display: flex;
   font-size: 40px;
   justify-content: space-between;
@@ -485,6 +487,7 @@ const WelcomeScreen: React.FC = () => {
   //     );
   //   };
   // }, []);
+
   return (
     <WelcomeScreenWrapper
       backgroundColor={event?.welcomeScreenParams.backgroundColor}
@@ -511,58 +514,23 @@ const WelcomeScreen: React.FC = () => {
         <Spinner isVisible={loading} />
       ) : id ? (
         <>
-          {/* {showBubbles && <AnimatedBackground />} */}
+          {/* {showBubbles && <AnimatedBackground />} - this stays commented out for now*/}
 
           {guest ? (
             <GuestWelcomeScreen isVisible={guest !== null}>
               <GuestDetailsContainer>
-                <div>
-                  <b>Welcome to the event</b>
+                <div style={{ fontSize: 40, textAlign: "center" }}>
+                  Welcome to the <b>{event?.title}</b>
                 </div>
                 <ManualQRContainer src={ManualQR} alt="" />
 
-                <div style={{ fontSize: 36, textAlign: "center" }}>
+                <div style={{ fontSize: 44, textAlign: "center" }}>
                   <b>{guest.fullName}</b>
                 </div>
                 <LogosContainer>
-                  <LogoContainer src={HacknimeLogo} width={200} />
                   <LogoContainer src={PreemlyLogo} />
                 </LogosContainer>
               </GuestDetailsContainer>
-              <VerticalDelimiter />
-              <ProgramContainer>
-                <Title>What's next?</Title>
-                <ScheduleContainer>
-                  <ScheduleSection>
-                    <ScheduleInfo>
-                      <ScheduleSectionTitle>Grand Opening</ScheduleSectionTitle>
-                      <div></div>
-                    </ScheduleInfo>
-                    <div>9:00</div>
-                  </ScheduleSection>
-                  <HorizontalDelimiter />
-                  <ScheduleSection>
-                    <ScheduleInfo>
-                      <ScheduleSectionTitle>
-                        Explanation of the challenge
-                      </ScheduleSectionTitle>
-                      <div></div>
-                    </ScheduleInfo>
-                    <div>9:30</div>
-                  </ScheduleSection>
-                  <HorizontalDelimiter />
-                  <ScheduleSection>
-                    <ScheduleInfo>
-                      <ScheduleSectionTitle>
-                        Introduction of the mentors
-                      </ScheduleSectionTitle>
-                      <div></div>
-                    </ScheduleInfo>
-                    <div>9:50</div>
-                  </ScheduleSection>
-                  <HorizontalDelimiter />
-                </ScheduleContainer>
-              </ProgramContainer>
             </GuestWelcomeScreen>
           ) : (
             <Container isVisible={guest === null}>
