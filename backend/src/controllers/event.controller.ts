@@ -29,7 +29,7 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
     const newEvent = new Event({
       title: event.title,
       description: event.description,
-      ownerId: 'google-oauth2|109612865255128408897',
+      ownerId: req?.user?.sub,
       date: '2025-03-20T23:00:23.000+00:00',
       endDate: '2025-03-20T23:00:23.000+00:00',
       eventType: 'Offline',
