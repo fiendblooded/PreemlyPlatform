@@ -137,6 +137,8 @@ export function getMailHtml(
   eventLocation: string,
   bodyOnly?: boolean
 ): string {
+  console.log(eventLogoImageSrc);
+  const imageLink = "https://platform.preemly.eu/logosmall.png";
   const bodyContent = `
   <table width='100%' height="100%" border='0' cellspacing='0' cellpadding='0' style='background-color: #EEEDF2; min-height: 100vh;'>
         <tr>
@@ -144,7 +146,7 @@ export function getMailHtml(
                 <table width='700' border='0' cellspacing='0'  style='background-color: #ffffff; border-radius: 10px; margin:20px auto;'>
                     <tr>
                         <td align='center' style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px;'>
-                           <img src="https://platform.preemly.eu/logosmall.svg" alt="Icon description" />
+                           <img src='${imageLink}' alt="Icon description" />
                         </td>
                     </tr>
                     <tr>

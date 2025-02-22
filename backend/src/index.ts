@@ -34,7 +34,12 @@ app.options('*', cors(corsOptions));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json());
-
+app.use((req, res, next) => {
+  if (req.url.endsWith('.svg')) {
+    res.setHeader('Content-Type', 'image/svg+xml');
+  }
+  next();
+});
 app.use('/api/events', eventRoutes);
 app.use('/api/guests', guestRoutes);
 app.use('/api/users', userRoutes);
