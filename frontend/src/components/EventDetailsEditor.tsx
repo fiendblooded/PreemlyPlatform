@@ -92,6 +92,9 @@ export const StyledDatePickerWrapper = styled.div`
 
 const EventDetails = styled.div`
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   margin-top: 10px;
   background-color: white;
   color: black;
@@ -99,6 +102,7 @@ const EventDetails = styled.div`
   border-radius: 8px;
   margin-bottom: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
   position: relative;
 `;
 const GuestActionsButtonsContainer = styled.div`
@@ -107,7 +111,6 @@ const GuestActionsButtonsContainer = styled.div`
   align-items: center;
   justify-content: start;
   margin-top: 6px;
-  margin-left: 2px;
 `;
 
 const EditButton = styled.button`
@@ -138,19 +141,16 @@ const EditButton = styled.button`
 `;
 
 const StyledTextarea = styled.input`
-  margin: auto;
-  display: flex;
-  align-items: center;
   background-color: #f9f9f9;
   color: black;
   border: 2px solid #ddd;
   border-radius: 4px;
   padding: 8px 12px;
-  width: 97%;
-
+  width: 100%;
+  max-width: 100%;
   margin-top: 10px;
   font-size: 16px;
-
+  box-sizing: border-box;
   /* Smooth transition for the border */
   transition: border-color 0.3s ease;
 
@@ -293,7 +293,7 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
           About this event
         </div>
         {isEditingDescription ? (
-          <div>
+          <>
             <StyledTextarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -304,9 +304,20 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
                 Cancel
               </SecondaryButton>
             </GuestActionsButtonsContainer>
-          </div>
-        ) : (
+          </>
+        ) : event.description ? (
           <div>{event.description}</div>
+        ) : (
+          <div style={{ color: "#8f8f8f" }}>
+            No description provided. Click{" "}
+            <a
+              onClick={() => setIsEditingDescription(true)}
+              style={{ cursor: "pointer" }}
+            >
+              here
+            </a>{" "}
+            to edit.
+          </div>
         )}
       </EventDetails>
 

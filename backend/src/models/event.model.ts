@@ -30,6 +30,20 @@ const eventSchema = new Schema<Event>({
     isGdpr: { type: Boolean },
     videoUrl: { type: String },
   },
+  emailParams: {
+    parking: {
+      enabled: { type: Boolean },
+      content: { type: String },
+    },
+    scheduleSrc: {
+      enabled: { type: Boolean },
+      content: { type: String },
+    },
+    dining: {
+      enabled: { type: Boolean },
+      content: { type: String },
+    },
+  },
   _id: {
     type: Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),
@@ -37,4 +51,3 @@ const eventSchema = new Schema<Event>({
 });
 
 export default model<Event>('Event', eventSchema);
-

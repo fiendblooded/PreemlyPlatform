@@ -7,7 +7,7 @@ import PosterUploadModal from "./PosterUploadModal";
 // import CSVUploader from "./CSVUploader";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import TopBar from "./TopBar";
-import { ActiveStatusContainer, ActiveStatusButton } from "./Events";
+import { ActiveStatusButton } from "./Events";
 import EventLocationEditor from "./EventLocationEditor";
 import EventDetailsEditor from "./EventDetailsEditor";
 import EventGuestsEditor from "./EventGuestsEditor";
@@ -19,15 +19,28 @@ import {
 import WelcomeScreenEditor from "./WelcomeScreenEditor";
 import EventTasksEditor from "./EventTasksEditor";
 import UserSearch from "./UserSearch";
+import EmailTemplateEditor from "./EmailTemplateEditor";
+import BasicTemplate from "./templates/BasicTemplate";
+import { CloseButton } from "./form/EventForm";
+import GeneralSettingsIcon from "./icons/GeneralSettingsIcon";
+import TasksSettingsIcon from "./icons/TasksSettingsIcon";
+import GuestsSettingsIcon from "./icons/GuestsSettingsIcon";
+import EmailSettingsIcon from "./icons/EmailSettingsIcon";
+import LocationSettingsIcon from "./icons/LocationSettingsIcon";
+import WelcomeScreenSettingsIcon from "./icons/WelcomeScreenSettingsIcon";
 
-export const PageWrapper = styled.div`
+export const PageWrapper = styled.div<{ tabletMode: boolean }>`
+  width: ${(props) => (props.tabletMode ? "100%" : "70%")};
+  height: ${(props) => (props.tabletMode ? "100%" : "100%")};
   display: flex;
   flex-direction: column;
+  margin: auto;
 `;
 
 const Header = styled.div`
   width: 90%;
   margin: 0px auto;
+  margin-top: 32px;
   color: black; /* Yellow */
   display: flex;
   justify-content: space-between;
@@ -37,6 +50,28 @@ const Header = styled.div`
   font-size: 40px;
   align-items: center;
 `;
+const ActiveStatusContainer = styled.div<{ isDetail?: boolean }>`
+  margin: 0px;
+  margin-top: 10px;
+  display: flex;
+  ${(props) => props.isDetail && "width: 90%; margin: 20px auto;"}
+  gap: 20px;
+  max-width: 80vw;
+  overflow: scroll;
+  border-bottom: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
+
+  /* Hide scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for Firefox */
+  scrollbar-width: none;
+
+  /* Hide scrollbar for IE and Edge */
+  -ms-overflow-style: none;
+`;
+
 const ChangePosterModalButton = styled.div`
   position: absolute;
   bottom: 10px;
@@ -63,6 +98,7 @@ const PosterImage = styled.div<{ imageUrl: string }>`
   min-height: 400px;
   max-height: 40%;
   margin: 20px auto;
+  margin-top: 40px;
   border-radius: 6px;
   background-image: url(${(props) => props.imageUrl});
   background-size: cover;
@@ -116,14 +152,39 @@ export const PrimaryButton = styled.button<{
 `;
 
 const EventDetailWrapper = styled.div<{ tabletMode: boolean }>`
-  width: ${(props) => (props.tabletMode ? "100%" : "75%")};
+  width: ${(props) => (props.tabletMode ? "100%" : "100%")};
   height: ${(props) => (props.tabletMode ? "100%" : "90%")};
   max-height: ${(props) => (props.tabletMode ? "100%" : "90%")};
   margin: auto;
   background-color: white;
-  border-radius: 6px;
+  border-radius: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  overflow: auto;
+  scrollbar-gutter: stable;
+  /* Subtle Scrollbar Styling */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #c8c8c8 #f7f7f7; /* Thumb and Track colors for Firefox */
 
+  ::-webkit-scrollbar {
+    width: 8px; /* Slimmer scrollbar */
+    position: absolute;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #c8c8c8; /* Soft grey thumb */
+    border-radius: 4px; /* Rounded corners for thumb */
+    border: 1px solid #f7f7f7; /* Light border to blend into the track */
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #b5b5b5; /* Slightly darker grey on hover */
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: #f7f7f7; /* Very light grey track */
+    border-radius: 4px;
+  }
+  position: relative;
   /* Responsive style for tablet and mobile */
   @media (max-width: 1024px) {
     width: 100%;
@@ -137,6 +198,7 @@ export const SecondaryButton = styled.button<{
   width?: number;
   color?: string;
   hoverColor?: string;
+  disabled?: boolean;
 }>`
   width: ${(props) => (props.width ? props.width : 160)}px;
   margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
@@ -149,17 +211,36 @@ export const SecondaryButton = styled.button<{
 
   font-size: 14px;
   font-weight: bold;
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   border-radius: 5px;
-  border: 2px solid ${(props) => (props.color ? props.color : "#875cf5")};
-  color: ${(props) => (props.color ? props.color : "#875cf5")};
-  transition: background-color 0.3s ease;
+  border: 2px solid
+    ${(props) =>
+      props.disabled ? "#ccc" : props.color ? props.color : "#875cf5"};
+  color: ${(props) =>
+    props.disabled ? "#999" : props.color ? props.color : "#875cf5"};
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    color 0.3s ease;
+  opacity: ${(props) => (props.disabled ? 0.6 : 1)};
+
   &:hover {
     background-color: ${(props) =>
-      props.hoverColor ? props.hoverColor : "rgb(239, 233, 255)"};
-    border: 2px solid ${(props) => (props.color ? props.color : "#875cf5")};
+      props.disabled
+        ? "white"
+        : props.hoverColor
+        ? props.hoverColor
+        : "rgb(239, 233, 255)"};
+    border: 2px solid
+      ${(props) =>
+        props.disabled ? "#ccc" : props.color ? props.color : "#875cf5"};
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: ${(props) =>
+      props.disabled ? "none" : "0 0 0 2px rgba(135, 92, 245, 0.2)"};
   }
 `;
+
 const DeleteButton = styled.div`
   display: flex;
   width: 40px;
@@ -212,9 +293,10 @@ const DetailsHeader = styled.div`
   font-size: 36px;
   align-items: center;
   margin: 0px auto;
+  margin-bottom: 20px;
 `;
 
-const ActivityStatus = styled.div<{ color: string }>`
+export const ActivityStatus = styled.div<{ color: string }>`
   color: ${(props) => props.color};
   font-size: 14px;
   width: 80px;
@@ -270,6 +352,7 @@ const EventDetail: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setModalOpen] = useState(false); // Modal state
   const tabletMode = isTablet();
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
   // const [isModalVisible, setIsModalVisible] = useState(false);
 
   // const handleAnswerOne = () => {
@@ -321,9 +404,10 @@ const EventDetail: React.FC = () => {
   if (loading) return <LoadingMessage>Loading event details...</LoadingMessage>;
   if (!event) return <LoadingMessage>Event not found.</LoadingMessage>;
   return (
-    <PageWrapper>
-      <TopBar sectionTitle="Events" showBackButton={true} />
+    <PageWrapper tabletMode={tabletMode}>
+      {/* <TopBar sectionTitle="Events" showBackButton={true} /> */}
       <EventDetailWrapper tabletMode={tabletMode}>
+        <CloseButton onClick={() => navigate(-1)}>&times;</CloseButton>
         {event.poster && (
           <PosterImage imageUrl={`${event.poster}`}>
             <ChangePosterModalButton onClick={() => setModalOpen(true)}>
@@ -410,13 +494,15 @@ const EventDetail: React.FC = () => {
             onClick={() => setOpenSection("info")}
             borderColor="#e6bf30"
           >
-            Details
+            <GeneralSettingsIcon color={"currentColor"} />
+            General
           </ActiveStatusButton>
           <ActiveStatusButton
             isActive={openSection === "tasks"}
             onClick={() => setOpenSection("tasks")}
             borderColor="#e6bf30"
           >
+            <TasksSettingsIcon color={"currentColor"} />
             Tasks
           </ActiveStatusButton>
           <ActiveStatusButton
@@ -424,13 +510,23 @@ const EventDetail: React.FC = () => {
             onClick={() => setOpenSection("attendance")}
             borderColor="#e6bf30"
           >
+            <GuestsSettingsIcon color={"currentColor"} />
             Guests
+          </ActiveStatusButton>
+          <ActiveStatusButton
+            isActive={openSection === "email"}
+            onClick={() => setOpenSection("email")}
+            borderColor="#e6bf30"
+          >
+            <EmailSettingsIcon color={"currentColor"} />
+            Email
           </ActiveStatusButton>
           <ActiveStatusButton
             isActive={openSection === "location"}
             onClick={() => setOpenSection("location")}
             borderColor="#e6bf30"
           >
+            <LocationSettingsIcon color={"currentColor"} />
             Location
           </ActiveStatusButton>
           <ActiveStatusButton
@@ -438,7 +534,8 @@ const EventDetail: React.FC = () => {
             onClick={() => setOpenSection("welcome")}
             borderColor="#e6bf30"
           >
-            Welcome Screen
+            <WelcomeScreenSettingsIcon color={"currentColor"} />
+            Welcome
           </ActiveStatusButton>
           <ActiveStatusButton
             isActive={openSection === "collaborators"}
@@ -464,7 +561,9 @@ const EventDetail: React.FC = () => {
           <EventTasksEditor event={event} refetch={fetchEvent} />
         )}
         {openSection === "collaborators" && <UserSearch />}
-
+        {openSection === "email" && (
+          <EmailTemplateEditor event={event} refetch={fetchEvent} />
+        )}
         {isModalOpen && (
           <PosterUploadModal
             eventId={id!}
@@ -474,6 +573,20 @@ const EventDetail: React.FC = () => {
           />
         )}
       </EventDetailWrapper>
+      {/* {isPopupVisible && (
+        <PopupOverlay
+          visible={isPopupVisible}
+          onClose={() => setIsPopupVisible(false)}
+        >
+          <BasicTemplate
+            onSave={console.log}
+            eventTitle={event.title}
+            eventDescription={event.description}
+            guestName={"Anthony"}
+            QRCodeImg={"zzz"}
+          />
+        </PopupOverlay>
+      )} */}
     </PageWrapper>
   );
 };

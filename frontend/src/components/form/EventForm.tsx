@@ -83,9 +83,10 @@ const PopupContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: auto;
 `;
 
-const CloseButton = styled.button`
+export const CloseButton = styled.button`
   position: absolute;
   top: 10px;
   right: 10px;

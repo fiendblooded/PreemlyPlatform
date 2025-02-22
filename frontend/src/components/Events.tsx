@@ -7,6 +7,9 @@ import useAuthSetup from "../useAuthSetup";
 import TopBar from "./TopBar";
 import { useAuth0 } from "@auth0/auth0-react";
 import { getDateTimeStatus } from "../common/common";
+import { useNavigate, useParams } from "react-router-dom";
+import EventDetail from "./EventDetail";
+import PopupOverlay from "./form/PopupOverlay";
 
 export const PageWrapper = styled.div`
   display: flex;
@@ -90,17 +93,36 @@ export const ActiveStatusContainer = styled.div<{ isDetail?: boolean }>`
   display: flex;
   ${(props) => props.isDetail && "width: 90%; margin: 20px auto;"}
   gap: 20px;
+  max-width: 100%;
+  overflow: scroll;
   border-bottom: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
+
+  /* Hide scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for Firefox */
+  scrollbar-width: none;
+
+  /* Hide scrollbar for IE and Edge */
+  -ms-overflow-style: none;
 `;
+
 export const ActiveStatusButton = styled.div<{
   isActive: boolean;
   marginLeft?: number;
   borderColor?: string;
 }>`
+  display: flex;
+  align-items: flex-end;
   color: ${(props) => (props.isActive ? "black" : "rgb(167, 167, 167)")};
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
+  line-height: 20px;
+  padding-bottom: 4px;
+  gap: 4px;
   margin-left: ${(props) =>
     props.marginLeft != undefined ? props.marginLeft : 28}px;
   border-bottom: 2px solid
@@ -118,11 +140,12 @@ export const ActiveStatusButton = styled.div<{
 const Events: React.FC = () => {
   useAuthSetup();
   const { user } = useAuth0();
-
+  const { id } = useParams<{ id: string }>();
   const [activeStatus, setActiveStatus] = useState("All");
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const axiosInstance = useAxiosWithAuth();
+  const navigate = useNavigate();
   const fetchEvents = async () => {
     setLoading(true); // Start loading
     try {
@@ -179,106 +202,118 @@ const Events: React.FC = () => {
   };
   const filteredEvents = filterEvents(activeStatus, searchQuery);
   return (
-    <PageWrapper>
-      <TopBar sectionTitle="Events" />
+    <>
+      <PageWrapper>
+        <TopBar sectionTitle="Events" />
 
-      <ActiveStatusContainer>
-        <ActiveStatusButton
-          isActive={activeStatus === "All"}
-          onClick={() => setActiveStatus("All")}
-          borderColor="#e6bf30"
-        >
-          All Events
-        </ActiveStatusButton>
-        <ActiveStatusButton
-          isActive={activeStatus === "Ongoing"}
-          onClick={() => setActiveStatus("Ongoing")}
-          borderColor="#2a9134"
-        >
-          Ongoing
-        </ActiveStatusButton>
-        <ActiveStatusButton
-          isActive={activeStatus === "Incoming"}
-          onClick={() => setActiveStatus("Incoming")}
-          borderColor="#00aef0"
-        >
-          Incoming
-        </ActiveStatusButton>
-        <ActiveStatusButton
-          isActive={activeStatus === "Past"}
-          onClick={() => setActiveStatus("Past")}
-          borderColor="grey"
-        >
-          Past
-        </ActiveStatusButton>
-      </ActiveStatusContainer>
-      <ContentWrapper>
-        <Header>
-          <>
-            {filteredEvents.length}{" "}
-            {activeStatus != "All" ? activeStatus.toLowerCase() : "total"} event
-            {(filteredEvents.length > 1 || filteredEvents.length === 0) && "s"}
-          </>
-          <SearchContainer>
-            <SearchIcon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
+        <ActiveStatusContainer>
+          <ActiveStatusButton
+            isActive={activeStatus === "All"}
+            onClick={() => setActiveStatus("All")}
+            borderColor="#e6bf30"
+          >
+            All Events
+          </ActiveStatusButton>
+          <ActiveStatusButton
+            isActive={activeStatus === "Ongoing"}
+            onClick={() => setActiveStatus("Ongoing")}
+            borderColor="#2a9134"
+          >
+            Ongoing
+          </ActiveStatusButton>
+          <ActiveStatusButton
+            isActive={activeStatus === "Incoming"}
+            onClick={() => setActiveStatus("Incoming")}
+            borderColor="#00aef0"
+          >
+            Incoming
+          </ActiveStatusButton>
+          <ActiveStatusButton
+            isActive={activeStatus === "Past"}
+            onClick={() => setActiveStatus("Past")}
+            borderColor="grey"
+          >
+            Past
+          </ActiveStatusButton>
+        </ActiveStatusContainer>
+        <ContentWrapper>
+          <Header>
+            <>
+              {filteredEvents.length}{" "}
+              {activeStatus != "All" ? activeStatus.toLowerCase() : "total"}{" "}
+              event
+              {(filteredEvents.length > 1 || filteredEvents.length === 0) &&
+                "s"}
+            </>
+            <SearchContainer>
+              <SearchIcon
                 xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
               >
-                <path
-                  d="M14.9536 14.9458L21 21M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
-                  stroke="rgb(137, 137, 137)"
-                  stroke-width="2"
-                  strokeLinecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </SearchIcon>
-            <SearchInput
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={handleSearchChange}
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M14.9536 14.9458L21 21M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+                    stroke="rgb(137, 137, 137)"
+                    stroke-width="2"
+                    strokeLinecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </SearchIcon>
+              <SearchInput
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+
+              {searchQuery != "" && (
+                <svg
+                  onClick={() => {
+                    setSearchQuery("");
+                  }}
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 9L15 15M15 9L9 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                    stroke="rgb(137, 137, 137)"
+                    stroke-width="1.5"
+                    strokeLinecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              )}
+            </SearchContainer>
+          </Header>
+
+          {loading ? (
+            <SpinnerContainer>
+              <Spinner />{" "}
+            </SpinnerContainer>
+          ) : (
+            <EventList
+              events={filteredEvents}
+              isFilterQueue={searchQuery === ""}
             />
-
-            {searchQuery != "" && (
-              <svg
-                onClick={() => {
-                  setSearchQuery("");
-                }}
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9 9L15 15M15 9L9 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                  stroke="rgb(137, 137, 137)"
-                  stroke-width="1.5"
-                  strokeLinecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            )}
-          </SearchContainer>
-        </Header>
-
-        {loading ? (
-          <SpinnerContainer>
-            <Spinner />{" "}
-          </SpinnerContainer>
-        ) : (
-          <EventList
-            events={filteredEvents}
-            isFilterQueue={searchQuery === ""}
-          />
-        )}
-      </ContentWrapper>
-    </PageWrapper>
+          )}
+        </ContentWrapper>
+      </PageWrapper>
+      {id && (
+        <PopupOverlay visible={true} onClose={() => navigate(-1)}>
+          <EventDetail />
+        </PopupOverlay>
+      )}
+    </>
   );
 };
 

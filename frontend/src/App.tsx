@@ -4,7 +4,6 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import EventDetail from "./components/EventDetail";
 import styled, { createGlobalStyle } from "styled-components";
 import Sidebar from "./components/SideBar";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -17,6 +16,8 @@ import useAuthSetup from "./useAuthSetup";
 import Profile from "./components/Profile";
 import PreemlyFAQ from "./components/PreemlyFAQ";
 import { isTablet } from "./common/common";
+// import VirtualSpace from "./components/VirtualSpace";
+import EventDetail from "./components/EventDetail";
 
 export const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -139,12 +140,11 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const tabletMode = isTablet();
   // Define routes where the sidebar should not be displayed
-  const noSidebarRoutes = ["/login", "/welcome"];
+  const noSidebarRoutes = ["/login", "/welcome", "/preembot"];
   const isFullWidth =
     noSidebarRoutes.includes(location.pathname) ||
     location.pathname.startsWith("/welcome/");
 
-  console.log(location.pathname);
   return (
     <AppWrapper>
       {!isFullWidth && (
@@ -161,10 +161,14 @@ const AppContent: React.FC = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/events" element={<Events />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/events/:id" element={<EventDetail />} />
+          <Route
+            path="/events/:id"
+            element={tabletMode ? <EventDetail /> : <Events />}
+          />
           <Route path="/help" element={<PreemlyFAQ />} />
           <Route path="/profile" element={<Profile />} />
           {/* <Route path="/scanner" element={<ScannerPage />} /> */}
+          {/* <Route path="/space/:id" element={<VirtualSpace />} /> */}
           <Route
             path="/welcome"
             element={
@@ -181,7 +185,14 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/preembot" element={<ChatbotPage />} />
+          <Route
+            path="/preembot"
+            element={
+              <ProtectedRoute>
+                <ChatbotPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </ContentWrapper>
     </AppWrapper>

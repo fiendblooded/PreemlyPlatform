@@ -1,3 +1,5 @@
+import { css, styled } from "styled-components";
+import LogoSmall from "../assets/logosmall.svg";
 export function getDateRangeDetails(date1: string, date2: string): string {
   const startDate = new Date(date1);
   const endDate = new Date(date2);
@@ -41,12 +43,12 @@ export function getDateRangeDetails(date1: string, date2: string): string {
   }
 
   // Get timezone in GMT+x (City) format
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const timeZoneOffset = startDate.getTimezoneOffset(); // Offset in minutes
-  const gmtOffset = -timeZoneOffset / 60; // Convert to hours
-  const gmtString = `GMT${
-    gmtOffset >= 0 ? `+${gmtOffset}` : gmtOffset
-  } (${timeZone})`;
+  // const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  // const timeZoneOffset = startDate.getTimezoneOffset(); // Offset in minutes
+  // const gmtOffset = -timeZoneOffset / 60; // Convert to hours
+  // const gmtString = `GMT${
+  //   gmtOffset >= 0 ? `+${gmtOffset}` : gmtOffset
+  // } (${timeZone})`;
 
   // Calculate the duration
   const durationMs = endDate.getTime() - startDate.getTime();
@@ -116,108 +118,156 @@ export const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
   });
 };
 
-export const getMailHtml = (
+type EmailExtraModule = {
+  enabled: boolean;
+  content: string;
+};
+
+export function getMailHtml(
   guestName: string,
-  qrContent: string,
+  qrCodeImageSrc: string,
   eventTitle: string,
+  eventLogoImageSrc: string,
   eventDescription: string,
-  eventDate: string
-) => {
-  const htmlContentNew = `
-  <!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Your Event Ticket</title>
-          <style>
-          body {
-              font-family: Arial, sans-serif;
-              background-color: #f9f9f9;
-              color: #333;
-              margin: 0;
-              padding: 0;
-          }
-          a {
-              text-decoration: none;
-          }
-          .container {
-              max-width: 600px;
-              margin: 20px auto;
-              background: #ffffff;
-              border-radius: 10px;
-              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-              overflow: hidden;
-          }
-          .header {
-              background-color: #9370db;
-              color: #fff;
-              text-align: center;
-              padding: 20px;
-              font-size: 1.5rem;
-          }
-          /* Event Details */
-          .content {
-              padding: 20px;
-              text-align: center;
-          }
-          .content p {
-              font-size: 1rem;
-              line-height: 1.6;
-              margin: 10px 0;
-          }
-          .details {
-              margin: 20px 0;
-          }
-          .details strong {
-              color: #9370db;
-          }
-          /* QR Code */
-          .qr-code {
-              margin: 20px auto;
-              text-align: center;
-          }
-          .qr-code img {
-              width: 200px;
-              height: 200px;
-              border: 5px solid #f4c430;
-              border-radius: 8px;
-          }
-          /* Footer */
-          .footer {
-              background-color: #f4c430;
-              color: #333;
-              text-align: center;
-              padding: 10px;
-              font-size: 0.9rem;
-          }
-          </style>
-      </head>
-      <body>
-          <div class="container">
-          <div class="header">
-              🎉 ${guestName}, here is your Preem Ticket for <strong>${eventTitle}</strong>
-          </div>
-          <div class="content">
-              <p>${eventDescription}</p>
-              <div class="details">
-              <p><strong>Date:</strong> ${new Date(
-                eventDate
-              ).toLocaleString()}</p>
-              </div>
-              <div class="qr-code">
-              <img src="${qrContent}" alt="Your QR Code" />
-              </div>
-              <p>Please show this QR code at the event for entry.</p>
-          </div>
-          <div class="footer">
-              See you there! 🎟 <br />
-              Preemly Team
-          </div>
-          </div>
-      </body>
-      </html>
-  
+  eventDate: string,
+  eventEndDate: string,
+  parkingOptions: EmailExtraModule,
+  scheduleImageSrc: EmailExtraModule,
+  diningOptions: EmailExtraModule,
+  eventLocation: string,
+  bodyOnly?: boolean
+): string {
+  const bodyContent = `
+  <table width='100%' height="100%" border='0' cellspacing='0' cellpadding='0' style='background-color: #EEEDF2; min-height: 100vh;'>
+        <tr>
+            <td align='center'>
+                <table width='700' border='0' cellspacing='0'  style='background-color: #ffffff; border-radius: 10px; margin:20px auto;'>
+                    <tr>
+                        <td align='center' style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px;'>
+                           <img src="https://platform.preemly.eu/logosmall.svg" alt="Icon description" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align='center' style='font-size: 28px; font-weight: bold; color: #333; padding-top:20px;'>You're invited, ${guestName}!</td>
+                    </tr>
+                    <tr  >
+                        <td align='center' style='padding: 20px;'>
+                            <img src='${eventLogoImageSrc}' alt='Event Logo' style='width: 100%; max-height: 400px; border-radius: 8px; object-fit: cover; object-position: center;'>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align='center' style='font-size: 24px; font-weight: bold; color: #333;'>${eventTitle}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td style='font-size: 18px; text-align: left; padding: 20px;'>
+                            <p style='font-weight: bold; color: #333;'>📅 Date & Time</p>
+                            <p style='color: #666;'>${getDateRangeDetails(
+                              eventDate,
+                              eventEndDate
+                            )}</p>
+                            <p style='font-weight: bold; color: #333;'>📍 Location</p>
+                            <p style='color: #666;'>${eventLocation}</p>
+                            ${
+                              parkingOptions.enabled
+                                ? `
+                            <p style='font-weight: bold; color: #333;'>🚗 Parking Information</p>
+                            <p style='color: #666;'>${parkingOptions.content}</p>
+                            `
+                                : ""
+                            }
+                            ${
+                              scheduleImageSrc.enabled
+                                ? `
+                            <p style='font-weight: bold; color: #333;'>📅 Event Schedule</p>
+                            <p style='color: #666;'>${scheduleImageSrc.content}</p>
+                            `
+                                : ""
+                            }
+                            ${
+                              diningOptions.enabled
+                                ? `
+                            <p style='font-weight: bold; color: #333;'>🍽 Dining Options</p>
+                            <p style='color: #666;'>${diningOptions.content}</p>
+                            `
+                                : ""
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align='center' style='font-size: 14px; color: #666;'>
+                            ${eventDescription}
+                        </td>
+                    </tr>
+                   
+                    <tr>
+                        <td align='center' style='font-size: 24px; font-weight: bold; color: #333;'>🎟 Your Invitation QR Code</td>
+                    </tr>
+                    <tr>
+                        <td align='center'>
+                            <img src='${qrCodeImageSrc}' alt='QR Code' style='max-width: 250px;'>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align='center' style='font-size: 16px; color: #666;'>Please present this QR code at the entrance for a smooth check-in process.</td>
+                    </tr>
+                    
+                    
+                    
+                    <tr>
+                        <td align='center' style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px;'>
+                            Follow us on: 
+                            <a href='https://x.com/trypreemly' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>Twitter</a> |
+                            <a href='https://www.linkedin.com/company/106173934' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>LinkedIn</a>
+                            <br>
+                            Visit our website: <a href='https://preemly.eu' style='color: #FFCC32; text-decoration: none;'><b>preemly.eu</b></a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
   `;
-  return htmlContentNew;
+  if (bodyOnly) {
+    return bodyContent;
+  } else {
+    return `<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>${eventTitle} - Preemly</title>
+    </head>
+    <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #EEEDF2;'>
+        ${bodyContent}
+    </body>
+    </html>`;
+  }
+}
+
+export const SvgSC = styled.svg<{
+  size?: number;
+  verticalAlign?: boolean;
+  paddingRight?: number;
+  paddingTop?: number;
+}>`
+  ${(props) =>
+    props.size
+      ? css`
+          height: ${props.size}px;
+          width: ${props.size}px;
+        `
+      : ""}
+  vertical-align : ${(props) => (props.verticalAlign ? "sub" : "baseline")};
+  padding-right: ${(props) =>
+    props.paddingRight ? props.paddingRight + "px" : "auto"};
+  padding-top: ${(props) =>
+    props.paddingTop ? props.paddingTop + "px" : "auto"};
+`;
+export type IconProps = {
+  color?: string;
+  size?: number;
+  active?: boolean;
+  paddingRight?: number;
+  paddingTop?: number;
 };

@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Event } from "../types";
 import { SearchIcon } from "./Events";
-import { useNavigate } from "react-router-dom";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { ToastType, useToast } from "./Toasts";
-import { getMailHtml } from "../common/common";
+import { getMailHtml, SvgSC } from "../common/common";
+import { ActivityStatus } from "./EventDetail";
 
 const GuestsWrapper = styled.div`
   width: 90%;
-  max-height: 450px;
+
   overflow: hidden;
   margin: 20px auto;
   display: flex;
@@ -17,6 +17,7 @@ const GuestsWrapper = styled.div`
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
 `;
 
 const SearchContainer = styled.div`
@@ -27,7 +28,7 @@ const SearchContainer = styled.div`
   border-radius: 4px;
   padding: 8px 12px;
   width: 100%;
-  max-width: 400px;
+  max-width: 300px;
   margin-top: 20px;
 
   /* Smooth transition for the border */
@@ -60,7 +61,6 @@ const ScrollableTable = styled.div`
   padding-top: 0px;
   margin: 0 auto;
   margin-top: 20px;
-
   /* Subtle Scrollbar Styling */
   scrollbar-width: thin; /* For Firefox */
   scrollbar-color: #c8c8c8 #f7f7f7; /* Thumb and Track colors for Firefox */
@@ -96,26 +96,25 @@ const ScrollableTable = styled.div`
     }
 
     th {
-      background-color: #f7f7f7; /* Light grey header background */
+      background-color: #f9fbfc; /* Light grey header background */
       position: sticky;
       top: 0;
       z-index: 900;
       font-weight: bold;
-      color: #333; /* Dark grey text */
+      color: #56626c; /* Dark grey text */
       text-transform: uppercase;
       font-size: 0.85rem;
       border-bottom: 1px solid #ddd; /* Subtle border for separation */
     }
 
     td {
-      background-color: #fff; /* White row background */
       border-bottom: 1px solid #ddd; /* Subtle border between rows */
       vertical-align: middle;
       text-overflow: ellipsis;
     }
 
     tr:hover {
-      background-color: #f3f3f3; /* Slightly darker grey on hover */
+      background-color: rgb(249, 244, 253); /* Ensure hover color applies */
     }
 
     td input {
@@ -191,6 +190,11 @@ export const SecondaryButton = styled.button<{
   &:hover {
     background-color: rgb(239, 233, 255);
   }
+  &:disabled {
+    opacity: 0.8;
+    border: 2px solid rgb(103, 103, 103);
+    color: rgb(103, 103, 103);
+  }
 `;
 
 export const GuestActionsButtonsContainer = styled.div<{ width?: number }>`
@@ -242,7 +246,45 @@ const StyledCheckbox = styled.input.attrs({ type: "checkbox" })`
     border-color: rgb(0, 119, 166);
   }
 `;
+const DeleteButton = styled.div`
+  display: flex;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  cursor: pointer;
 
+  background-color: rgb(173, 1, 1);
+  color: white;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: rgb(234, 141, 141);
+  }
+`;
+const SeletedGuestsSC = styled.div`
+  height: 38px;
+  color: black;
+
+  display: flex;
+  align-items: center;
+`;
+export const Panel = styled.div`
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  z-index: 1000;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+`;
 type Props = {
   event: Event;
   refetch: () => void;
@@ -251,27 +293,27 @@ type Props = {
 const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   const axiosInstance = useAxiosWithAuth();
   const { addToast, Toasts } = useToast();
-  const [newGuests, setNewGuests] = useState<
-    { fullName: string; age: number; email: string }[]
-  >([]);
+  const [newGuests, setNewGuests] = useState<{
+    fullName: string;
+    age: number;
+    email: string;
+  } | null>(null);
   const [filterText, setFilterText] = useState<string>("");
   const [selectedGuests, setSelectedGuests] = useState<string[]>([]); // Selected guest IDs
 
   const addNewGuestRow = () => {
-    setNewGuests([...newGuests, { fullName: "", age: 0, email: "" }]);
+    if (newGuests === null) {
+      setNewGuests({ fullName: "", age: 0, email: "" });
+    }
   };
 
-  const handleGuestChange = (
-    index: number,
-    field: keyof (typeof newGuests)[0],
-    value: string | number
-  ) => {
-    const updatedGuests = [...newGuests];
-    updatedGuests[index] = {
-      ...updatedGuests[index],
-      [field]: value,
-    };
-    setNewGuests(updatedGuests);
+  const handleGuestChange = (field: string, value: string | number) => {
+    if (newGuests != null) {
+      setNewGuests({
+        ...newGuests,
+        [field]: value,
+      });
+    }
   };
 
   const toggleGuestSelection = (guestId: string) => {
@@ -298,14 +340,20 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   ) => {
     const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
       qrContent
-    )}&size=150x150&color=00AFEF&bgcolor=FFFFFF`;
+    )}&size=320x320&color=000000&bgcolor=FFFFFF`;
 
     const htmlContent = getMailHtml(
       guestName,
       qrCodeBase64,
       eventDetails.title,
+      event.poster || "",
       eventDetails.description,
-      eventDetails.date
+      eventDetails.date,
+      eventDetails.endDate,
+      eventDetails.emailParams.parking,
+      eventDetails.emailParams.scheduleSrc,
+      eventDetails.emailParams.dining,
+      event.location.address || ""
     );
 
     await axiosInstance.post(`/mail`, {
@@ -350,13 +398,32 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     refetch();
   };
 
+  const deleteSelectedGuests = async () => {
+    try {
+      for (const guestId of selectedGuests) {
+        deleteGuest(guestId);
+      }
+
+      addToast(
+        `${selectedGuests.length} Guests deleted successfully!`,
+        ToastType.SUCCESS
+      );
+    } catch (error) {
+      console.error("Error deleting some guests:", error);
+      addToast("Error deleting some guests.", ToastType.ERROR);
+    }
+
+    setSelectedGuests([]);
+    refetch();
+  };
+
   const saveGuests = async () => {
     try {
       await axiosInstance.put(`/events/${event._id}/guests`, {
-        guests: newGuests,
+        guests: [newGuests],
       });
       refetch();
-      setNewGuests([]);
+      setNewGuests(null);
     } catch (error) {
       console.error("Error saving guests:", error);
     }
@@ -371,13 +438,11 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     }
   };
 
-  const navigate = useNavigate();
   const filteredGuests = event?.guests.filter(
     (guest) =>
       guest.fullName.toLowerCase().includes(filterText.toLowerCase()) ||
       guest.email.toLowerCase().includes(filterText.toLowerCase())
   );
-  console.log(event.guests);
   return (
     <GuestsWrapper>
       <GuestTableHeaderContainer>
@@ -406,14 +471,13 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
             onChange={(e) => setFilterText(e.target.value)}
           />
         </SearchContainer>
+
         <GuestActionsButtonsContainer>
-          <SecondaryButton marginTop={20} onClick={sendEmailsToGuests}>
-            Send Emails{" "}
-            {selectedGuests.length ? `(${selectedGuests.length})` : null}
-          </SecondaryButton>
-          <PrimaryButton marginTop={20} onClick={addNewGuestRow}>
-            + Add Guest
-          </PrimaryButton>
+          {newGuests === null && (
+            <PrimaryButton marginTop={20} onClick={addNewGuestRow}>
+              + Add Guest
+            </PrimaryButton>
+          )}
         </GuestActionsButtonsContainer>
       </GuestTableHeaderContainer>
 
@@ -440,13 +504,58 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
             </tr>
           </thead>
           <tbody>
+            {newGuests != null && (
+              <tr>
+                <td>
+                  <StyledCheckbox type="checkbox" disabled />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={newGuests.fullName}
+                    onChange={(e) =>
+                      handleGuestChange("fullName", e.target.value)
+                    }
+                  />
+                </td>
+                <td>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={newGuests.email}
+                    onChange={(e) => handleGuestChange("email", e.target.value)}
+                  />
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                  <GuestActionsButtonsContainer>
+                    <PrimaryButton width={80} onClick={saveGuests}>
+                      Add
+                    </PrimaryButton>
+                    <SecondaryButton
+                      width={80}
+                      onClick={() => {
+                        setNewGuests(null);
+                      }}
+                    >
+                      Cancel
+                    </SecondaryButton>
+                  </GuestActionsButtonsContainer>
+                </td>
+              </tr>
+            )}
             {filteredGuests?.map((guest) => (
-              <tr key={guest._id}>
+              <tr
+                key={guest._id}
+                onClick={() => toggleGuestSelection(guest._id)}
+              >
                 <td>
                   <StyledCheckbox
                     type="checkbox"
                     checked={selectedGuests.includes(guest._id)}
-                    onChange={() => toggleGuestSelection(guest._id)}
                   />
                 </td>
                 <td>{guest.fullName}</td>
@@ -465,62 +574,34 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                     fontWeight: "semibold",
                   }}
                 >
-                  {guest.email_sent ? "Sent" : "Not Sent"}
+                  <ActivityStatus
+                    color={guest.email_sent ? "#2a9134" : "#e40000"}
+                  >
+                    {guest.email_sent ? "Sent" : "Not Sent"}
+                  </ActivityStatus>
                 </td>
-                <td>{guest.phoneNumber}</td>
+                <td>{guest.phoneNumber || "-"}</td>
                 <td>{guest.attendance_status ? "+" : "-"}</td>
 
                 <td>
-                  <PrimaryButton onClick={() => deleteGuest(guest._id)}>
-                    Delete
-                  </PrimaryButton>
-                </td>
-              </tr>
-            ))}
-
-            {newGuests.map((guest, index) => (
-              <tr key={`new-${index}`}>
-                <td>
-                  <StyledCheckbox type="checkbox" disabled />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    value={guest.fullName}
-                    onChange={(e) =>
-                      handleGuestChange(index, "fullName", e.target.value)
-                    }
-                  />
-                </td>
-                <td>
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    value={guest.email}
-                    onChange={(e) =>
-                      handleGuestChange(index, "email", e.target.value)
-                    }
-                  />
-                </td>
-                <td></td>
-                <td></td>
-                <td>
-                  <GuestActionsButtonsContainer>
-                    <PrimaryButton width={80} onClick={saveGuests}>
-                      Add
-                    </PrimaryButton>
-                    <SecondaryButton
-                      width={80}
-                      onClick={() => {
-                        const reducedGuests = [...newGuests];
-                        reducedGuests.splice(index, 1);
-                        setNewGuests(reducedGuests);
-                      }}
+                  <DeleteButton onClick={() => deleteGuest(guest._id)}>
+                    <SvgSC
+                      width="24"
+                      height="24"
+                      size={24}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      Cancel
-                    </SecondaryButton>
-                  </GuestActionsButtonsContainer>
+                      <path
+                        d="M8.5 7H15.5M8.5 7H6.5M8.5 7C8.5 7 8.5 3.5 12 3.5C15.5 3.5 15.5 7 15.5 7M15.5 7H17.5M4.5 7H6.5M6.5 7V18.5C6.5 19.6046 7.39543 20.5 8.5 20.5H15.5C16.6046 20.5 17.5 19.6046 17.5 18.5V7M17.5 7H19.5M14 9.5V17.5M10 9.5V17.5"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                        strokeLinecap="square"
+                        strokeLinejoin="round"
+                      />
+                    </SvgSC>
+                  </DeleteButton>
                 </td>
               </tr>
             ))}
@@ -528,6 +609,28 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         </table>
       </ScrollableTable>
       <Toasts />
+      {selectedGuests.length ? (
+        <Panel>
+          <SeletedGuestsSC>
+            <b>{selectedGuests.length}</b>&nbsp;
+            {selectedGuests.length > 1 ? "guests" : "guest"}&nbsp;selected
+          </SeletedGuestsSC>
+
+          <SecondaryButton
+            onClick={deleteSelectedGuests}
+            disabled={selectedGuests.length === 0}
+          >
+            Delete selected
+          </SecondaryButton>
+
+          <SecondaryButton
+            onClick={sendEmailsToGuests}
+            disabled={selectedGuests.length === 0}
+          >
+            Email selected
+          </SecondaryButton>
+        </Panel>
+      ) : null}
     </GuestsWrapper>
   );
 };

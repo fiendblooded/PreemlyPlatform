@@ -7,7 +7,7 @@ const Overlay = styled.div<{ visible: boolean }>`
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
   display: ${(props) => (props.visible ? "flex" : "none")};
   align-items: center;
   justify-content: center;
@@ -17,8 +17,8 @@ const Overlay = styled.div<{ visible: boolean }>`
 const PopupContent = styled.div`
   padding: 30px;
   border-radius: 8px;
-  width: 90%;
-  max-width: 800px; /* Set a max-width to control layout on larger screens */
+  width: 100%;
+  height: 100%;
 
   display: flex;
   flex-direction: column;
@@ -37,7 +37,12 @@ const PopupOverlay: React.FC<PopupOverlayProps> = ({
   children,
 }) => {
   return (
-    <Overlay visible={visible} onClick={onClose}>
+    <Overlay
+      visible={visible}
+      onClick={() => {
+        console.log("cl");
+      }}
+    >
       <PopupContent onClick={(e) => e.stopPropagation()}>
         {children}
       </PopupContent>

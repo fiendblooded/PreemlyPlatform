@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { PrimaryButton } from "./EventDetail";
@@ -37,17 +37,12 @@ const Preview = styled.div<{ backgroundcolor: string; textcolor: string }>`
   border-radius: 6px;
   background-color: ${(props) => props.backgroundcolor};
   color: ${(props) => props.textcolor};
+  border: 2px solid black;
 `;
 
 const Label = styled.label`
   font-weight: bold;
   margin-bottom: 8px;
-`;
-
-const InputGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  position: relative;
 `;
 
 const ColorCircle = styled.div<{ color: string }>`
@@ -80,12 +75,13 @@ const OptionCircle = styled.div<{ color: string }>`
   border-radius: 4px;
   background-color: ${(props) => props.color};
   cursor: pointer;
+  border: 2px solid black;
   &:hover {
     opacity: 0.8;
   }
 `;
 
-const ToggleContainer = styled.div`
+export const ToggleContainer = styled.div`
   text-align: center;
   width: 100%;
   display: flex;
@@ -94,11 +90,11 @@ const ToggleContainer = styled.div`
   justify-content: space-between;
 `;
 
-const ToggleLabel = styled.span`
+export const ToggleLabel = styled.span`
   font-weight: bold;
 `;
 
-const ToggleSwitch = styled.input.attrs({ type: "checkbox" })`
+export const ToggleSwitch = styled.input.attrs({ type: "checkbox" })`
   width: 40px;
   height: 20px;
   appearance: none;
@@ -229,7 +225,10 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
             <Label>Background Color</Label>
             <ColorCircle
               color={backgroundColor}
-              onClick={() => setShowBgColorOptions(!showBgColorOptions)}
+              onClick={() => {
+                setShowBgColorOptions(!showBgColorOptions);
+                setShowTextColorOptions(false);
+              }}
             >
               {" "}
               {showBgColorOptions && (
@@ -253,7 +252,10 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
             <Label>Text Color</Label>
             <ColorCircle
               color={textColor}
-              onClick={() => setShowTextColorOptions(!showTextColorOptions)}
+              onClick={() => {
+                setShowTextColorOptions(!showTextColorOptions);
+                setShowBgColorOptions(false);
+              }}
             >
               {showTextColorOptions && (
                 <ColorOptionsPanel>

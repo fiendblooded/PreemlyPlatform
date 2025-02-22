@@ -34,5 +34,19 @@ export type Event = {
     isManualCheckin: boolean;
     isGdpr: boolean;
   };
+  emailParams: {
+    parking: {
+      enabled: boolean;
+      content: string;
+    };
+    scheduleSrc: {
+      enabled: boolean;
+      content: string;
+    };
+    dining: {
+      enabled: boolean;
+      content: string;
+    };
+  };
   tasks: Task[];
 };

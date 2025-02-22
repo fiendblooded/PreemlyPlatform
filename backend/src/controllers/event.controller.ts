@@ -48,6 +48,20 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
         isManualCheckin: true,
         videoUrl: '',
       },
+      emailParams: {
+        scheduleSrc: {
+          enabled: false,
+          content: '',
+        },
+        parking: {
+          enabled: false,
+          content: '',
+        },
+        dining: {
+          enabled: false,
+          content: '',
+        },
+      },
     });
     await newEvent.save();
 
