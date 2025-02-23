@@ -92,8 +92,11 @@ const Title = styled.div`
 const SubTitle = styled.div`
   font-size: 1.2rem;
   width: 60%;
-  margin-top: 10px;
+  margin: 10px auto 20px auto;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `;
 
 const MessageSC = styled.div`
@@ -665,7 +668,8 @@ const WelcomeScreen: React.FC = () => {
           </svg>
           <Title>Preemly Event System</Title>
           <SubTitle>
-            Welcome to the check-in screen!
+            <div>Welcome to the check-in screen!</div>
+
             {events.length ? (
               "Please select your event from the dropdown menu below to begin the check-in process."
             ) : (

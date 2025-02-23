@@ -133,29 +133,33 @@ const EventForm: React.FC<EventFormProps> = ({ onClose }) => {
     setError("");
 
     try {
-      // Convert file to base64 if needed before sending to the backend
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64Poster = reader.result;
+      let base64Poster = "";
 
-        const response = await axiosInstance.post(`/events`, {
-          title,
-          description: "",
-          ownerId: user?.sub || "random",
-          poster: base64Poster,
-          guests: [],
-          date: new Date().toISOString(),
+      if (poster) {
+        // Convert file to base64 if a poster is present
+        base64Poster = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(poster);
         });
+      }
 
-        const eventId = response.data.message._id;
-        navigate(`/events/${eventId}`);
-        setSuccess(true);
-        setTitle("");
-        setPoster(null);
-        onClose();
-      };
+      const response = await axiosInstance.post(`/events`, {
+        title,
+        description: "",
+        ownerId: user?.sub || "random",
+        poster: base64Poster,
+        guests: [],
+        date: new Date().toISOString(),
+      });
 
-      if (poster) reader.readAsDataURL(poster);
+      const eventId = response.data.message._id;
+      navigate(`/events/${eventId}`);
+      setSuccess(true);
+      setTitle("");
+      setPoster(null);
+      onClose();
     } catch (err) {
       console.error("Error creating event:", err);
       setError("Failed to create event. Please try again.");
@@ -166,7 +170,7 @@ const EventForm: React.FC<EventFormProps> = ({ onClose }) => {
 
   return (
     <PopupOverlay visible={true} onClose={onClose}>
-      <PopupContent>
+      <PopupContent onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={onClose}>&times;</CloseButton>
         <FormTitle>Create New Event</FormTitle>
         <FormContainer onSubmit={handleSubmit}>
@@ -182,7 +186,7 @@ const EventForm: React.FC<EventFormProps> = ({ onClose }) => {
             onFileDrop={handleFileDrop}
             onRemoveFile={handleRemoveFile}
             accept="image/*"
-            message="Drag & Drop poster image here or click to browse"
+            message="Drag & Drop poster image here or click to browse. (Optional)"
             hoverMessage="Drop the image here!"
           />
 
@@ -194,7 +198,7 @@ const EventForm: React.FC<EventFormProps> = ({ onClose }) => {
             />
           )}
 
-          <Button type="submit" disabled={loading || !poster}>
+          <Button type="submit" disabled={loading}>
             {loading ? "Creating..." : "Create Event"}
           </Button>
         </FormContainer>

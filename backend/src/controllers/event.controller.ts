@@ -13,27 +13,33 @@ import multer from 'multer';
 export const createEvent = async (req: AuthRequest, res: Response): Promise<void> => {
   const event = req.body;
 
-  if (!event || !event?.title || !event?.poster) {
+  if (!event || !event?.title) {
     res.status(400).json({
       success: false,
-      message: 'Please provide all fields, including poster',
+      message: 'Please provide all required fields',
     });
     return;
   }
 
   try {
-    const uploadResponse = await cloudinary.uploader.upload(event.poster, {
-      folder: 'events_posters',
-    });
+    let posterUrl = '';
+
+    // Only upload to Cloudinary if a poster is provided
+    if (event.poster && event.poster.trim() !== '') {
+      const uploadResponse = await cloudinary.uploader.upload(event.poster, {
+        folder: 'events_posters',
+      });
+      posterUrl = uploadResponse.secure_url;
+    }
 
     const newEvent = new Event({
       title: event.title,
-      description: event.description,
+      description: event.description || '',
       ownerId: req?.user?.sub,
       date: '2025-03-20T23:00:23.000+00:00',
       endDate: '2025-03-20T23:00:23.000+00:00',
       eventType: 'Offline',
-      poster: uploadResponse.secure_url,
+      poster: posterUrl,
       location: {
         address: '1600 Amphitheatre Parkway, Mountain View, CA, USA',
         latitude: 37.4224764,

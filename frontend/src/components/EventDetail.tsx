@@ -113,6 +113,35 @@ const PosterImage = styled.div<{ imageUrl: string }>`
     visibility: visible;
   }
 `;
+const PosterPlaceholder = styled.div`
+  width: 90%;
+  min-height: 400px;
+  max-height: 40%;
+  margin: 20px auto;
+  margin-top: 40px;
+  border-radius: 6px;
+  background-color: #2c2c2c;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: relative;
+
+  &:hover {
+    background-color: #3c3c3c;
+  }
+
+  &:hover ${ChangePosterModalButton} {
+    opacity: 1;
+    visibility: visible;
+  }
+`;
 
 const LoadingMessage = styled.p`
   color: #bbb;
@@ -376,6 +405,7 @@ const ErrorNotYourEvent = styled.div`
   font-size: 20px;
   color: black;
 `;
+
 const EventDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
@@ -433,12 +463,16 @@ const EventDetail: React.FC = () => {
 
         {!(event && user && event.ownerId != user.sub) ? (
           <>
-            {event.poster && (
+            {event.poster ? (
               <PosterImage imageUrl={`${event.poster}`}>
                 <ChangePosterModalButton onClick={() => setModalOpen(true)}>
                   Edit
                 </ChangePosterModalButton>
               </PosterImage>
+            ) : (
+              <PosterPlaceholder onClick={() => setModalOpen(true)}>
+                No poster provided. Click here to upload
+              </PosterPlaceholder>
             )}
             <Header>
               <SeamlessInput

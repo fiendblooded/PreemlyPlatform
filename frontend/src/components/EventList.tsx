@@ -53,18 +53,6 @@ const ListWrapper = styled.div`
   }
 `;
 
-const EmptyMessage = styled.div`
-  color: black;
-  font-size: 1.3rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-
-  a {
-    color: purple;
-    text-decoration: underline;
-  }
-`;
 export const MessageContainer = styled.div`
   width: 40%;
   margin: auto;
