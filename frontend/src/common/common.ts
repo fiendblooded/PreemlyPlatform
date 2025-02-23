@@ -1,5 +1,4 @@
 import { css, styled } from "styled-components";
-import LogoSmall from "../assets/logosmall.svg";
 export function getDateRangeDetails(date1: string, date2: string): string {
   const startDate = new Date(date1);
   const endDate = new Date(date2);
@@ -137,7 +136,6 @@ export function getMailHtml(
   bodyOnly?: boolean
 ): string {
   const lightModeLogoLink = "https://platform.preemly.eu/logosmall.png";
-  const darkModeLogoLink = "https://platform.preemly.eu/logosmalldark.png";
 
   const bodyContent = `
   <table width='100%' height="100%" border='0' cellspacing='0' cellpadding='0' style='background-color: #EEEDF2; min-height: 100vh;'>
@@ -238,18 +236,8 @@ export function getMailHtml(
         <meta charset='UTF-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
         <title>${eventTitle} - Preemly</title>
-        <style>
-          @media (prefers-color-scheme: dark) {
-            .header, .footer {
-              background-color: black !important;
-            }
-            .logo-image {
-              content: url("${darkModeLogoLink}");
-            }
-          }
-        </style>
     </head>
-    <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #EEEDF2;'>
+    <body style='margin: 0; padding: 0; font-family: Axiforma, sans-serif; background-color: #EEEDF2;'>
         ${bodyContent}
     </body>
     </html>`;
