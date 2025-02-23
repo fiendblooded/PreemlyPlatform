@@ -143,8 +143,8 @@ export function getMailHtml(
             <td align='center'>
                 <table width='700' border='0' cellspacing='0'  style='background-color: #ffffff; border-radius: 10px; margin:20px auto;'>
                     <tr>
-                        <td align='center' class="header" style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px;'>
-                           <img src='${lightModeLogoLink}' alt="Preemly Logo" class="logo-image" />
+                        <td align='center' class="header" style='color: #ffffff; font-size: 14px;'>
+                           <img src='${lightModeLogoLink}' alt="Preemly Logo" class="logo-image"/>
                         </td>
                     </tr>
                     <tr>
@@ -201,7 +201,7 @@ export function getMailHtml(
                     </tr>
                    
                     <tr>
-                        <td align='center' style='font-size: 24px; font-weight: bold; color: #333;'>🎟 Your Invitation QR Code</td>
+                        <td align='center' style='font-size: 24px; font-weight: bold; color: #333;'>Your Invitation QR Code</td>
                     </tr>
                     <tr>
                         <td align='center'>
