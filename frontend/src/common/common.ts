@@ -122,7 +122,6 @@ type EmailExtraModule = {
   enabled: boolean;
   content: string;
 };
-
 export function getMailHtml(
   guestName: string,
   qrCodeImageSrc: string,
@@ -137,22 +136,23 @@ export function getMailHtml(
   eventLocation: string,
   bodyOnly?: boolean
 ): string {
-  console.log(eventLogoImageSrc);
-  const imageLink = "https://platform.preemly.eu/logosmall.png";
+  const lightModeLogoLink = "https://platform.preemly.eu/logosmall.png";
+  const darkModeLogoLink = "https://platform.preemly.eu/logosmalldark.png";
+
   const bodyContent = `
   <table width='100%' height="100%" border='0' cellspacing='0' cellpadding='0' style='background-color: #EEEDF2; min-height: 100vh;'>
         <tr>
             <td align='center'>
                 <table width='700' border='0' cellspacing='0'  style='background-color: #ffffff; border-radius: 10px; margin:20px auto;'>
                     <tr>
-                        <td align='center' style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px;'>
-                           <img src='${imageLink}' alt="Icon description" />
+                        <td align='center' class="header" style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px;'>
+                           <img src='${lightModeLogoLink}' alt="Preemly Logo" class="logo-image" />
                         </td>
                     </tr>
                     <tr>
                         <td align='center' style='font-size: 28px; font-weight: bold; color: #333; padding-top:20px;'>You're invited, ${guestName}!</td>
                     </tr>
-                    <tr  >
+                    <tr>
                         <td align='center' style='padding: 20px;'>
                             <img src='${eventLogoImageSrc}' alt='Event Logo' style='width: 100%; max-height: 400px; border-radius: 8px; object-fit: cover; object-position: center;'>
                         </td>
@@ -214,10 +214,8 @@ export function getMailHtml(
                         <td align='center' style='font-size: 16px; color: #666;'>Please present this QR code at the entrance for a smooth check-in process.</td>
                     </tr>
                     
-                    
-                    
                     <tr>
-                        <td align='center' style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px;'>
+                        <td align='center' class="footer" style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px;'>
                             Follow us on: 
                             <a href='https://x.com/trypreemly' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>Twitter</a> |
                             <a href='https://www.linkedin.com/company/106173934' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>LinkedIn</a>
@@ -230,6 +228,7 @@ export function getMailHtml(
         </tr>
     </table>
   `;
+
   if (bodyOnly) {
     return bodyContent;
   } else {
@@ -239,6 +238,16 @@ export function getMailHtml(
         <meta charset='UTF-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
         <title>${eventTitle} - Preemly</title>
+        <style>
+          @media (prefers-color-scheme: dark) {
+            .header, .footer {
+              background-color: black !important;
+            }
+            .logo-image {
+              content: url("${darkModeLogoLink}");
+            }
+          }
+        </style>
     </head>
     <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #EEEDF2;'>
         ${bodyContent}
