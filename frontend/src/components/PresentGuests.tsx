@@ -78,7 +78,8 @@ const PresentGuests: React.FC<Props> = ({ guests }) => {
               ? `and ${totalRemainingCount} more are present`
               : `${firstNames.length === 1 ? "is" : "are"} present`
           }`}
-        {firstNames.length === 0 && "No one is present yet"}
+        {firstNames.length === 0 &&
+          `No one is present yet out of ${guests.length} guests`}
       </Description>
     </Container>
   );

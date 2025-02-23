@@ -17,6 +17,7 @@ export type Event = {
   date: string;
   _id: string;
   title: string;
+  ownerId: string;
   description: string;
   guests: Guest[];
   poster: string | null;

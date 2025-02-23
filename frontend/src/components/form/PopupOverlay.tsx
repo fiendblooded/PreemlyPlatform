@@ -40,12 +40,10 @@ const PopupOverlay: React.FC<PopupOverlayProps> = ({
     <Overlay
       visible={visible}
       onClick={() => {
-        console.log("cl");
+        onClose();
       }}
     >
-      <PopupContent onClick={(e) => e.stopPropagation()}>
-        {children}
-      </PopupContent>
+      <PopupContent>{children}</PopupContent>
     </Overlay>
   );
 };

@@ -96,12 +96,11 @@ const Header = styled.div`
   color: black;
   font-weight: bold;
   font-size: 18px;
+  line-height: 24px;
   margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
-
   align-items: center;
-  line-height: 24px;
 `;
 interface Task {
   title: string;

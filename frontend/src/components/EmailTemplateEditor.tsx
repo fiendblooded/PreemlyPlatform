@@ -38,6 +38,10 @@ const EmailSectionsContainer = styled.div<{ isTablet: boolean }>`
   justify-content: space-between;
   gap: 20px;
   flex-direction: column;
+  color: black;
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 24px;
 `;
 const IframeContainer = styled.div<{ isTablet: boolean }>`
   ${(props) => (props.isTablet ? "width: 100%;" : "flex: 3; height: 100%;")}
@@ -134,7 +138,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
     schedule,
     dining,
     event.location.address || "",
-    true
+    false
   );
 
   const handleSave = async () => {
@@ -177,6 +181,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
         <StyledIframe dangerouslySetInnerHTML={{ __html: htmlContent }} />
       </IframeContainer>
       <EmailSectionsContainer isTablet={tabletMode}>
+        Set up additional sections
         <EmailSection
           icon={<ParkingIcon />}
           title={"Parking"}

@@ -210,7 +210,7 @@ const Sidebar: React.FC = () => {
             src={Logo}
             onClick={() => navigate("/")}
             alt="logo"
-            width={isTabletDevice ? "50%" : "55%"}
+            width={isTabletDevice ? "50%" : "80%"}
           />
         </ImageContainer>
         <MenuButton

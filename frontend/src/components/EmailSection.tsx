@@ -5,13 +5,18 @@ const SectionContainer = styled.div<{ isEnabled: boolean }>`
   display: flex;
   flex-direction: column;
   flex: 1;
-  border: 1px solid ${(props) => (props.isEnabled ? "#875cf5" : "#ddd")};
+  border: 2px solid #ddd;
   border-radius: 10px;
   padding: 15px;
   box-sizing: border-box;
   width: 100%;
-  background-color: ${(props) =>
-    props.isEnabled ? "rgb(239,233,255)" : "#fff"};
+  cursor: pointer;
+  ${(props) =>
+    props.isEnabled ? "background-color: rgb(245, 241, 255);" : null}
+
+  &:hover {
+    border: 2px solid rgb(107, 61, 223);
+  }
 `;
 
 const Header = styled.div`
@@ -72,16 +77,19 @@ const EmailSection: React.FC<EmailSectionProps> = ({
   setContent,
 }) => {
   return (
-    <SectionContainer isEnabled={enable}>
+    <SectionContainer isEnabled={enable} onClick={() => setEnable(!enable)}>
       <Header>
         {icon}
         <Title>{title}</Title>
-        <ToggleSwitch checked={enable} onChange={() => setEnable(!enable)} />
+        <ToggleSwitch checked={enable} />
       </Header>
 
       {enable && (
         <ContentArea
           value={content}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
           onChange={(e) => setContent(e.target.value)}
           placeholder={`Enter ${title.toLowerCase()} details...`}
         />

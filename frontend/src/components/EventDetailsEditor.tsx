@@ -161,62 +161,78 @@ const StyledTextarea = styled.input`
 `;
 const EventTypeSelector = styled.div`
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
-  margin-top: 10px;
+  gap: 12px;
+  background-color: #f7f7f7;
+  border-radius: 12px;
+  padding: 8px;
 `;
 
-const SelectorOption = styled.div<{ selected: boolean }>`
+const SelectorOption = styled.label<{ selected: boolean }>`
+  flex: 1;
   display: flex;
-  width: 25%;
   align-items: center;
-  padding: 12px 20px;
+  justify-content: center;
+  padding: 12px 16px;
   font-size: 16px;
   font-weight: 500;
-  color: ${({ selected }) => (selected ? "black" : "#555")};
-  background-color: ${({ selected }) => (selected ? "#ffd716" : "#f2f2f2")};
+  color: ${({ selected }) => (selected ? "black" : "#555555")};
+  background-color: ${({ selected }) => (selected ? "#ffd716" : "transparent")};
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: ${({ selected }) =>
+    selected ? "0 4px 10px rgba(255, 215, 22, 0.3)" : "none"};
 
   &:hover {
-    background-color: ${({ selected }) => (selected ? "#ffcc00" : "#e6e6e6")};
+    background-color: ${({ selected }) => (selected ? "#ffcc00" : "#eeeeee")};
   }
 
   input {
-    margin-right: 12px;
-    accent-color: #ffd716;
+    position: absolute;
+    opacity: 0;
     cursor: pointer;
+    height: 0;
+    width: 0;
   }
 `;
+
+const EventTypeIcon = styled.span`
+  margin-right: 8px;
+  font-size: 18px;
+`;
+
 const EventTypeEditor: React.FC<{
   eventType: string;
   setEventType: (type: string) => void;
 }> = ({ eventType, setEventType }) => {
-  const options = ["Offline", "Online", "Hybrid"];
+  const options = [
+    { value: "Offline", label: "In-person", icon: "🏢" },
+    { value: "Online", label: "Online", icon: "💻" },
+    { value: "Hybrid", label: "Hybrid", icon: "🌐" },
+  ];
 
   return (
     <EventTypeSelector>
       {options.map((option) => (
         <SelectorOption
-          key={option}
-          selected={eventType === option}
-          onClick={() => setEventType(option)}
+          key={option.value}
+          selected={eventType === option.value}
         >
           <input
             type="radio"
             name="event-type"
-            checked={eventType === option}
-            onChange={() => setEventType(option)}
+            checked={eventType === option.value}
+            onChange={() => setEventType(option.value)}
           />
-          <div style={{ paddingTop: 6 }}>
-            {option === "Offline" ? "In-person" : option}
-          </div>
+          <EventTypeIcon>{option.icon}</EventTypeIcon>
+          {option.label}
         </SelectorOption>
       ))}
     </EventTypeSelector>
   );
 };
+
 interface Event {
   _id: string;
   description: string;
@@ -339,34 +355,8 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
             />
           </svg>
         </EditButton>
-        <div
-          style={{
-            fontWeight: "bold",
-            fontSize: 18,
-            marginBottom: "4px",
-            display: "flex",
-            alignItems: "end",
-            lineHeight: "24px",
-          }}
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M3 9H21M7 3V5M17 3V5M6 13H8M6 17H8M11 13H13M11 17H13M16 13H18M16 17H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z"
-              stroke="black"
-              stroke-width="2"
-              strokeLinecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <div style={{ marginBottom: "-2px", marginLeft: "4px" }}>
-            Date and Time
-          </div>
+        <div style={{ fontWeight: "bold", fontSize: 18, marginBottom: "4px" }}>
+          Date and time
         </div>
         {isEditingDate ? (
           <div>

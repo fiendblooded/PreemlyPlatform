@@ -78,6 +78,7 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
 export const getEvents = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const events = await Event.find({ ownerId: req.user?.sub });
+
     const eventsWithImages = await Promise.all(
       events.map(async (event) => {
         try {

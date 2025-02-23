@@ -370,11 +370,18 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       return;
     }
 
-    try {
-      for (const guestId of selectedGuests) {
-        const guest = event.guests.find((g) => g._id === guestId);
-        if (guest) {
-          const qrContent = guest._id.toString();
+    const results: Array<{
+      guestId: string;
+      status: "success" | "failure";
+      name: string;
+      error?: string;
+    }> = [];
+
+    for (const guestId of selectedGuests) {
+      const guest = event.guests.find((g) => g._id === guestId);
+      if (guest) {
+        const qrContent = guest._id.toString();
+        try {
           await sendGuestEmail(
             guest.fullName,
             guest.email.toLowerCase(),
@@ -382,16 +389,40 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
             event
           );
           await axiosInstance.put(`/guests/${guestId}/emailstatus`);
+          results.push({ guestId, status: "success", name: guest.fullName });
+        } catch (error) {
+          console.error(
+            `Failed to send email to ${guest.fullName} (${guest.email}):`,
+            error
+          );
+          results.push({
+            guestId,
+            status: "failure",
+            name: guest.fullName,
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       }
+    }
 
+    const successes = results.filter((r) => r.status === "success");
+    const failures = results.filter((r) => r.status === "failure");
+
+    console.log("Email sending results:");
+    console.log("Successes:", successes);
+    console.log("Failures:", failures);
+
+    if (failures.length > 0) {
+      const failedNames = failures.map((f) => f.name).join(", ");
       addToast(
-        "Emails sent successfully to selected guests!",
+        `${failures.length} email(s) failed to send: ${failedNames}. Check the console for details.`,
+        ToastType.ERROR
+      );
+    } else {
+      addToast(
+        "Emails sent successfully to all selected guests!",
         ToastType.SUCCESS
       );
-    } catch (error) {
-      console.error("Error sending emails to guests:", error);
-      addToast("Failed to send some or all emails.", ToastType.ERROR);
     }
 
     setSelectedGuests([]);
@@ -506,9 +537,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
           <tbody>
             {newGuests != null && (
               <tr>
-                <td>
-                  <StyledCheckbox type="checkbox" disabled />
-                </td>
+                <td></td>
                 <td>
                   <input
                     type="text"
@@ -584,7 +613,12 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                 <td>{guest.attendance_status ? "+" : "-"}</td>
 
                 <td>
-                  <DeleteButton onClick={() => deleteGuest(guest._id)}>
+                  <DeleteButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteGuest(guest._id);
+                    }}
+                  >
                     <SvgSC
                       width="24"
                       height="24"

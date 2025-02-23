@@ -20,28 +20,34 @@ const InputAndButton = styled.div`
   gap: 10px;
 `;
 
-const Title = styled.div`
-  margin-bottom: 4px;
-  color: black;
-  font-weight: bold;
-  font-size: 18px;
-`;
-
 const AddressInput = styled.input`
   width: calc(100% - 16px);
   font-family: Axiforma, sans-serif;
   flex: 1;
-  border: 1.5px solid rgb(205, 205, 205);
+
   border-radius: 5px;
   background: transparent;
   font-size: 14px;
-  height: 34px;
+  height: 38px;
 
   color: #333;
   outline: none;
   margin-bottom: 10px;
   &::placeholder {
     color: #aaa;
+  }
+
+  background-color: #f9f9f9;
+  color: black;
+  border: 2px solid #ddd;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  /* Smooth transition for the border */
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: rgb(107, 61, 223);
+    outline: none;
   }
 `;
 

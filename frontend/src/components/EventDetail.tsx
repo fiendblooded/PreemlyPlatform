@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { Event } from "../types";
-// import QRCode from "qrcode";
+
 import PosterUploadModal from "./PosterUploadModal";
-// import CSVUploader from "./CSVUploader";
+
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
-import TopBar from "./TopBar";
+
 import { ActiveStatusButton } from "./Events";
 import EventLocationEditor from "./EventLocationEditor";
 import EventDetailsEditor from "./EventDetailsEditor";
@@ -18,9 +18,9 @@ import {
 } from "../common/common";
 import WelcomeScreenEditor from "./WelcomeScreenEditor";
 import EventTasksEditor from "./EventTasksEditor";
-import UserSearch from "./UserSearch";
+
 import EmailTemplateEditor from "./EmailTemplateEditor";
-import BasicTemplate from "./templates/BasicTemplate";
+
 import { CloseButton } from "./form/EventForm";
 import GeneralSettingsIcon from "./icons/GeneralSettingsIcon";
 import TasksSettingsIcon from "./icons/TasksSettingsIcon";
@@ -28,6 +28,9 @@ import GuestsSettingsIcon from "./icons/GuestsSettingsIcon";
 import EmailSettingsIcon from "./icons/EmailSettingsIcon";
 import LocationSettingsIcon from "./icons/LocationSettingsIcon";
 import WelcomeScreenSettingsIcon from "./icons/WelcomeScreenSettingsIcon";
+import { useAuth0 } from "@auth0/auth0-react";
+
+import ErrorBigIcon from "./icons/ErrorBigIcon";
 
 export const PageWrapper = styled.div<{ tabletMode: boolean }>`
   width: ${(props) => (props.tabletMode ? "100%" : "70%")};
@@ -184,6 +187,10 @@ const EventDetailWrapper = styled.div<{ tabletMode: boolean }>`
     background-color: #f7f7f7; /* Very light grey track */
     border-radius: 4px;
   }
+  .pac-container {
+    z-index: 10000;
+    display: flex;
+  }
   position: relative;
   /* Responsive style for tablet and mobile */
   @media (max-width: 1024px) {
@@ -192,7 +199,20 @@ const EventDetailWrapper = styled.div<{ tabletMode: boolean }>`
     height: 100%;
   }
 `;
-
+const ContactButton = styled.a`
+  margin: 20px 0;
+  border: 2px solid #ff8c00;
+  color: #ff8c00;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 18px;
+  text-decoration: none;
+  font-weight: bold;
+  &:hover {
+    background-color: rgb(255, 245, 233);
+    color: #ff8c00;
+  }
+`;
 export const SecondaryButton = styled.button<{
   marginTop?: number;
   width?: number;
@@ -342,7 +362,20 @@ const HeaderButtonsContainer = styled.div`
   display: flex;
   gap: 8px;
 `;
+const ErrorNotYourEvent = styled.div`
+  width: 60%;
+  height: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 
+  font-family: Axiforma, sans-serif;
+  font-size: 20px;
+  color: black;
+`;
 const EventDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
@@ -352,18 +385,8 @@ const EventDetail: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setModalOpen] = useState(false); // Modal state
   const tabletMode = isTablet();
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
-  // const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // const handleAnswerOne = () => {
-  //   console.log("Answer One selected");
-  //   setIsModalVisible(false); // Close the modal after handling
-  // };
-
-  // const handleAnswerTwo = () => {
-  //   console.log("Answer Two selected");
-  //   setIsModalVisible(false); // Close the modal after handling
-  // };
+  const { user } = useAuth0();
 
   const axiosInstance = useAxiosWithAuth();
   const fetchEvent = async () => {
@@ -404,189 +427,192 @@ const EventDetail: React.FC = () => {
   if (loading) return <LoadingMessage>Loading event details...</LoadingMessage>;
   if (!event) return <LoadingMessage>Event not found.</LoadingMessage>;
   return (
-    <PageWrapper tabletMode={tabletMode}>
-      {/* <TopBar sectionTitle="Events" showBackButton={true} /> */}
+    <PageWrapper tabletMode={tabletMode} onClick={(e) => e.stopPropagation()}>
       <EventDetailWrapper tabletMode={tabletMode}>
         <CloseButton onClick={() => navigate(-1)}>&times;</CloseButton>
-        {event.poster && (
-          <PosterImage imageUrl={`${event.poster}`}>
-            <ChangePosterModalButton onClick={() => setModalOpen(true)}>
-              Edit
-            </ChangePosterModalButton>
-          </PosterImage>
-        )}
-        <Header>
-          <SeamlessInput
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={() => {
-              if (title != event?.title) updateTitle();
-            }}
-          />
-          <HeaderButtonsContainer>
-            <WelcomeScreenButton
-              onClick={() => navigate(`/welcome/${event._id}`)}
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4 12H4.01M8 12H8.01M16 12H16.01M12 12H12.01M20 12H20.01M8.5 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V8.5M15.5 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.07989 20 7.2V8.5M20 15.5V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H15.5M4 15.5V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H8.5"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <div style={{ paddingTop: 4, marginLeft: 2 }}>Check in</div>
-            </WelcomeScreenButton>
-            <DeleteButton onClick={deleteEvent}>
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M8.5 7H15.5M8.5 7H6.5M8.5 7C8.5 7 8.5 3.5 12 3.5C15.5 3.5 15.5 7 15.5 7M15.5 7H17.5M4.5 7H6.5M6.5 7V18.5C6.5 19.6046 7.39543 20.5 8.5 20.5H15.5C16.6046 20.5 17.5 19.6046 17.5 18.5V7M17.5 7H19.5M14 9.5V17.5M10 9.5V17.5"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                  strokeLinecap="square"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </DeleteButton>
-          </HeaderButtonsContainer>
-        </Header>
-        <DetailsHeader>
-          <ActivityStatus color={dateTimeStatus.color}>
-            {dateTimeStatus.type}
-          </ActivityStatus>
-          <DateTime>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M17 11C14.2386 11 12 13.2386 12 16C12 18.7614 14.2386 21 17 21C19.7614 21 22 18.7614 22 16C22 13.2386 19.7614 11 17 11ZM17 11V9M2 9V15.8C2 16.9201 2 17.4802 2.21799 17.908C2.40973 18.2843 2.71569 18.5903 3.09202 18.782C3.51984 19 4.0799 19 5.2 19H13M2 9V8.2C2 7.0799 2 6.51984 2.21799 6.09202C2.40973 5.71569 2.71569 5.40973 3.09202 5.21799C3.51984 5 4.0799 5 5.2 5H13.8C14.9201 5 15.4802 5 15.908 5.21799C16.2843 5.40973 16.5903 5.71569 16.782 6.09202C17 6.51984 17 7.0799 17 8.2V9M2 9H17M5 3V5M14 3V5M15 16H17M17 16H19M17 16V14M17 16V18"
-                stroke="rgb(98, 98, 98)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            {getDateRangeDetails(event.date || "", event.endDate || "")}
-          </DateTime>
-        </DetailsHeader>
 
-        <ActiveStatusContainer isDetail>
-          <ActiveStatusButton
-            marginLeft={0}
-            isActive={openSection === "info"}
-            onClick={() => setOpenSection("info")}
-            borderColor="#e6bf30"
-          >
-            <GeneralSettingsIcon color={"currentColor"} />
-            General
-          </ActiveStatusButton>
-          <ActiveStatusButton
-            isActive={openSection === "tasks"}
-            onClick={() => setOpenSection("tasks")}
-            borderColor="#e6bf30"
-          >
-            <TasksSettingsIcon color={"currentColor"} />
-            Tasks
-          </ActiveStatusButton>
-          <ActiveStatusButton
-            isActive={openSection === "attendance"}
-            onClick={() => setOpenSection("attendance")}
-            borderColor="#e6bf30"
-          >
-            <GuestsSettingsIcon color={"currentColor"} />
-            Guests
-          </ActiveStatusButton>
-          <ActiveStatusButton
-            isActive={openSection === "email"}
-            onClick={() => setOpenSection("email")}
-            borderColor="#e6bf30"
-          >
-            <EmailSettingsIcon color={"currentColor"} />
-            Email
-          </ActiveStatusButton>
-          <ActiveStatusButton
-            isActive={openSection === "location"}
-            onClick={() => setOpenSection("location")}
-            borderColor="#e6bf30"
-          >
-            <LocationSettingsIcon color={"currentColor"} />
-            Location
-          </ActiveStatusButton>
-          <ActiveStatusButton
-            isActive={openSection === "welcome"}
-            onClick={() => setOpenSection("welcome")}
-            borderColor="#e6bf30"
-          >
-            <WelcomeScreenSettingsIcon color={"currentColor"} />
-            Welcome
-          </ActiveStatusButton>
-          <ActiveStatusButton
+        {!(event && user && event.ownerId != user.sub) ? (
+          <>
+            {event.poster && (
+              <PosterImage imageUrl={`${event.poster}`}>
+                <ChangePosterModalButton onClick={() => setModalOpen(true)}>
+                  Edit
+                </ChangePosterModalButton>
+              </PosterImage>
+            )}
+            <Header>
+              <SeamlessInput
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={() => {
+                  if (title != event?.title) updateTitle();
+                }}
+              />
+              <HeaderButtonsContainer>
+                <WelcomeScreenButton
+                  onClick={() => navigate(`/welcome/${event._id}`)}
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M4 12H4.01M8 12H8.01M16 12H16.01M12 12H12.01M20 12H20.01M8.5 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V8.5M15.5 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.07989 20 7.2V8.5M20 15.5V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H15.5M4 15.5V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H8.5"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  <div style={{ paddingTop: 4, marginLeft: 2 }}>Check in</div>
+                </WelcomeScreenButton>
+                <DeleteButton onClick={deleteEvent}>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8.5 7H15.5M8.5 7H6.5M8.5 7C8.5 7 8.5 3.5 12 3.5C15.5 3.5 15.5 7 15.5 7M15.5 7H17.5M4.5 7H6.5M6.5 7V18.5C6.5 19.6046 7.39543 20.5 8.5 20.5H15.5C16.6046 20.5 17.5 19.6046 17.5 18.5V7M17.5 7H19.5M14 9.5V17.5M10 9.5V17.5"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                      strokeLinecap="square"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </DeleteButton>
+              </HeaderButtonsContainer>
+            </Header>
+            <DetailsHeader>
+              <ActivityStatus color={dateTimeStatus.color}>
+                {dateTimeStatus.type}
+              </ActivityStatus>
+              <DateTime>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M17 11C14.2386 11 12 13.2386 12 16C12 18.7614 14.2386 21 17 21C19.7614 21 22 18.7614 22 16C22 13.2386 19.7614 11 17 11ZM17 11V9M2 9V15.8C2 16.9201 2 17.4802 2.21799 17.908C2.40973 18.2843 2.71569 18.5903 3.09202 18.782C3.51984 19 4.0799 19 5.2 19H13M2 9V8.2C2 7.0799 2 6.51984 2.21799 6.09202C2.40973 5.71569 2.71569 5.40973 3.09202 5.21799C3.51984 5 4.0799 5 5.2 5H13.8C14.9201 5 15.4802 5 15.908 5.21799C16.2843 5.40973 16.5903 5.71569 16.782 6.09202C17 6.51984 17 7.0799 17 8.2V9M2 9H17M5 3V5M14 3V5M15 16H17M17 16H19M17 16V14M17 16V18"
+                    stroke="rgb(98, 98, 98)"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                {getDateRangeDetails(event.date || "", event.endDate || "")}
+              </DateTime>
+            </DetailsHeader>
+
+            <ActiveStatusContainer isDetail>
+              <ActiveStatusButton
+                marginLeft={0}
+                isActive={openSection === "info"}
+                onClick={() => setOpenSection("info")}
+                borderColor="#e6bf30"
+              >
+                <GeneralSettingsIcon color={"currentColor"} />
+                General
+              </ActiveStatusButton>
+              <ActiveStatusButton
+                isActive={openSection === "tasks"}
+                onClick={() => setOpenSection("tasks")}
+                borderColor="#e6bf30"
+              >
+                <TasksSettingsIcon color={"currentColor"} />
+                Tasks
+              </ActiveStatusButton>
+              <ActiveStatusButton
+                isActive={openSection === "attendance"}
+                onClick={() => setOpenSection("attendance")}
+                borderColor="#e6bf30"
+              >
+                <GuestsSettingsIcon color={"currentColor"} />
+                Guests
+              </ActiveStatusButton>
+              <ActiveStatusButton
+                isActive={openSection === "email"}
+                onClick={() => setOpenSection("email")}
+                borderColor="#e6bf30"
+              >
+                <EmailSettingsIcon color={"currentColor"} />
+                Email
+              </ActiveStatusButton>
+              <ActiveStatusButton
+                isActive={openSection === "location"}
+                onClick={() => setOpenSection("location")}
+                borderColor="#e6bf30"
+              >
+                <LocationSettingsIcon color={"currentColor"} />
+                Location
+              </ActiveStatusButton>
+              <ActiveStatusButton
+                isActive={openSection === "welcome"}
+                onClick={() => setOpenSection("welcome")}
+                borderColor="#e6bf30"
+              >
+                <WelcomeScreenSettingsIcon color={"currentColor"} />
+                Welcome
+              </ActiveStatusButton>
+              {/* <ActiveStatusButton
             isActive={openSection === "collaborators"}
             onClick={() => setOpenSection("collaborators")}
             borderColor="#e6bf30"
           >
             Collaborators
-          </ActiveStatusButton>
-        </ActiveStatusContainer>
-        {openSection === "info" && (
-          <EventDetailsEditor event={event} refetch={fetchEvent} />
-        )}
-        {openSection === "attendance" && (
-          <EventGuestsEditor event={event} refetch={fetchEvent} />
-        )}
-        {openSection === "location" && (
-          <EventLocationEditor event={event} refetch={fetchEvent} />
-        )}
-        {openSection === "welcome" && (
-          <WelcomeScreenEditor event={event} refetch={fetchEvent} />
-        )}
-        {openSection === "tasks" && (
-          <EventTasksEditor event={event} refetch={fetchEvent} />
-        )}
-        {openSection === "collaborators" && <UserSearch />}
-        {openSection === "email" && (
-          <EmailTemplateEditor event={event} refetch={fetchEvent} />
-        )}
-        {isModalOpen && (
-          <PosterUploadModal
-            eventId={id!}
-            initialPoster={event.poster}
-            onClose={() => setModalOpen(false)}
-            onPosterUpdated={fetchEvent}
-          />
+          </ActiveStatusButton> */}
+            </ActiveStatusContainer>
+            {openSection === "info" && (
+              <EventDetailsEditor event={event} refetch={fetchEvent} />
+            )}
+            {openSection === "attendance" && (
+              <EventGuestsEditor event={event} refetch={fetchEvent} />
+            )}
+            {openSection === "location" && (
+              <EventLocationEditor event={event} refetch={fetchEvent} />
+            )}
+            {openSection === "welcome" && (
+              <WelcomeScreenEditor event={event} refetch={fetchEvent} />
+            )}
+            {openSection === "tasks" && (
+              <EventTasksEditor event={event} refetch={fetchEvent} />
+            )}
+            {/* {openSection === "collaborators" && <UserSearch />} */}
+            {openSection === "email" && (
+              <EmailTemplateEditor event={event} refetch={fetchEvent} />
+            )}
+            {isModalOpen && (
+              <PosterUploadModal
+                eventId={id!}
+                initialPoster={event.poster}
+                onClose={() => setModalOpen(false)}
+                onPosterUpdated={fetchEvent}
+              />
+            )}
+          </>
+        ) : (
+          <ErrorNotYourEvent>
+            <ErrorBigIcon color="#FF8C00" />
+            <div>
+              You don't have <b>permission</b> to access this event. If you
+              believe this is an error, please contact the event administrator
+              or our support team.
+            </div>
+            <ContactButton href="mailto:info@preemly.eu?subject=Event Access Issue">
+              Contact Support
+            </ContactButton>
+            <SecondaryButton onClick={() => navigate(-1)}>Back</SecondaryButton>
+          </ErrorNotYourEvent>
         )}
       </EventDetailWrapper>
-      {/* {isPopupVisible && (
-        <PopupOverlay
-          visible={isPopupVisible}
-          onClose={() => setIsPopupVisible(false)}
-        >
-          <BasicTemplate
-            onSave={console.log}
-            eventTitle={event.title}
-            eventDescription={event.description}
-            guestName={"Anthony"}
-            QRCodeImg={"zzz"}
-          />
-        </PopupOverlay>
-      )} */}
     </PageWrapper>
   );
 };

@@ -36,7 +36,7 @@ const fadeOut = keyframes`
     transform: translateY(-10px);
   }
 `;
-const BackButton = styled.button`
+const BackButton = styled.button<{ color: string }>`
   position: absolute;
   top: 14px;
   left: 10px;
@@ -46,7 +46,7 @@ const BackButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  color: white;
+  color: ${(props) => props.color};
   font-size: 14px;
   font-weight: 500;
   padding: 8px 12px;
@@ -493,7 +493,10 @@ const WelcomeScreen: React.FC = () => {
       backgroundColor={event?.welcomeScreenParams.backgroundColor}
       textColor={event?.welcomeScreenParams.textColor}
     >
-      <BackButton onClick={() => navigate(-1)}>
+      <BackButton
+        onClick={() => navigate(-1)}
+        color={event?.welcomeScreenParams.textColor || "white"}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

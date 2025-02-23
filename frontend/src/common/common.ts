@@ -121,6 +121,42 @@ type EmailExtraModule = {
   enabled: boolean;
   content: string;
 };
+function generateGoogleCalendarUrl(
+  title: string,
+  description: string,
+  startDate: string,
+  endDate: string,
+  location: string
+): string {
+  const encodedTitle = encodeURIComponent(title);
+  const encodedDescription = encodeURIComponent(description);
+  const encodedLocation = encodeURIComponent(location);
+  const formattedStartDate = new Date(startDate)
+    .toISOString()
+    .replace(/-|:|\.\d+/g, "");
+  const formattedEndDate = new Date(endDate)
+    .toISOString()
+    .replace(/-|:|\.\d+/g, "");
+
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${formattedStartDate}%2F${formattedEndDate}&details=${encodedDescription}&location=${encodedLocation}&text=${encodedTitle}`;
+}
+
+function generateOutlookCalendarUrl(
+  title: string,
+  description: string,
+  startDate: string,
+  endDate: string,
+  location: string
+): string {
+  const encodedTitle = encodeURIComponent(title);
+  const encodedDescription = encodeURIComponent(description);
+  const encodedLocation = encodeURIComponent(location);
+  const formattedStartDate = new Date(startDate).toISOString().slice(0, 19);
+  const formattedEndDate = new Date(endDate).toISOString().slice(0, 19);
+
+  return `https://outlook.live.com/calendar/0/action/compose?allday=false&body=${encodedDescription}&enddt=${formattedEndDate}&location=${encodedLocation}&path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt=${formattedStartDate}&subject=${encodedTitle}`;
+}
+
 export function getMailHtml(
   guestName: string,
   qrCodeImageSrc: string,
@@ -148,7 +184,8 @@ export function getMailHtml(
                         </td>
                     </tr>
                     <tr>
-                        <td align='center' style='font-size: 28px; font-weight: bold; color: #333; padding-top:20px;'>You're invited, ${guestName}!</td>
+                        <td align='center' style='font-size: 28px; font-weight: bold; color: #333; padding-top:20px;
+                        '>You're invited, ${guestName}!</td>
                     </tr>
                     <tr>
                         <td align='center' style='padding: 20px;'>
@@ -158,9 +195,14 @@ export function getMailHtml(
                     <tr>
                         <td align='center' style='font-size: 24px; font-weight: bold; color: #333;'>${eventTitle}</td>
                     </tr>
+                     <tr>
+                        <td align='center' style='font-size: 16px; color: #666;'>
+                            ${eventDescription}
+                        </td>
+                    </tr>
                     
                     <tr>
-                        <td style='font-size: 18px; text-align: left; padding: 20px;'>
+                        <td style='font-size: 18px; text-align: center; padding: 20px;'>
                             <p style='font-weight: bold; color: #333;'>📅 Date & Time</p>
                             <p style='color: #666;'>${getDateRangeDetails(
                               eventDate,
@@ -194,11 +236,7 @@ export function getMailHtml(
                             }
                         </td>
                     </tr>
-                    <tr>
-                        <td align='center' style='font-size: 14px; color: #666;'>
-                            ${eventDescription}
-                        </td>
-                    </tr>
+                   
                    
                     <tr>
                         <td align='center' style='font-size: 24px; font-weight: bold; color: #333;'>Your Invitation QR Code</td>
@@ -209,9 +247,41 @@ export function getMailHtml(
                         </td>
                     </tr>
                     <tr>
-                        <td align='center' style='font-size: 16px; color: #666;'>Please present this QR code at the entrance for a smooth check-in process.</td>
+                        <td align='center' style='font-size: 16px; color: #666; padding-bottom: 20px;'>Please present this QR code at the entrance for a smooth check-in process.</td>
                     </tr>
-                    
+                   <tr>
+                      <td align='center' style='padding: 20px; padding-bottom: 40px;'>
+                        <table border='0' cellspacing='0' cellpadding='0'>
+                          <tr>
+                            <td align='center' style='padding-right: 10px;'>
+                              <a href="${generateGoogleCalendarUrl(
+                                eventTitle,
+                                eventDescription,
+                                eventDate,
+                                eventEndDate,
+                                eventLocation
+                              )}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #4285F4; color: #4285F4; padding: 14px 24px; text-decoration: none; font-size: 16px; border-radius: 5px; font-weight: bold; display: inline-block;">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Calendar_icon_%282020%29.svg/2048px-Google_Calendar_icon_%282020%29.svg.png" alt="Google Calendar" style="vertical-align: middle; margin-right: 8px; width: 20px; height: 20px;">
+                                Add to Google Calendar
+                              </a>
+                            </td>
+                            <td align='center' style='padding-left: 10px;'>
+                              <a href="${generateOutlookCalendarUrl(
+                                eventTitle,
+                                eventDescription,
+                                eventDate,
+                                eventEndDate,
+                                eventLocation
+                              )}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #0078D4; color: #0078D4; padding: 14px 24px; text-decoration: none; font-size: 16px; border-radius: 5px; font-weight: bold; display: inline-block;">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg/1101px-Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg.png" alt="Outlook Calendar" style="vertical-align: middle; margin-right: 8px; width: 20px; height: 20px;">
+                                Add to Outlook Calendar
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+
                     <tr>
                         <td align='center' class="footer" style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px;'>
                             Follow us on: 

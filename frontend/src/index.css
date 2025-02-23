@@ -61,3 +61,10 @@ button:hover {
     background-color: #f9f9f9;
   }
 }
+.pac-container {
+  z-index: 9999999 !important;
+  font-family: Axiforma, sans-serif;
+}
+.pac-item:hover {
+  background-color: #e8eaff;
+}
