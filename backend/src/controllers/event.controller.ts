@@ -298,7 +298,8 @@ export const uploadGuestsFromExcel = async (req: Request, res: Response): Promis
         .map((row: any) => ({
           fullName: row[0] || '',
           email: row[1] || '',
-          age: row[2] || 0,
+          phoneNumber: row[2] || '',
+          age: 0,
         }));
 
       const createdGuests = await Guest.insertMany(guests);
