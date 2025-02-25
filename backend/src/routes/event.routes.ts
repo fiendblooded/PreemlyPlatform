@@ -13,6 +13,6 @@ router.put('/:id/poster', verifyUser, eventController.updateEventPoster);
 router.delete('/:id', eventController.deleteEvent);
 router.put('/:id/guests', verifyUser, eventController.updateEventGuests);
 router.put('/:id/guests/import', verifyUser, eventController.uploadGuestsFromExcel);
-router.put('/:id/guests/export', verifyUser, eventController.downloadGuestsToExcel);
+router.get('/:id/guests/export', verifyUser, eventController.downloadGuestsToExcel);
 
 export default router;
