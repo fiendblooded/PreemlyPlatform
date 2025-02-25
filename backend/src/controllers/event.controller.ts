@@ -10,6 +10,8 @@ import { extractPublicId } from '../utils/helpers';
 import xlsx from 'xlsx';
 import multer from 'multer';
 
+const upload = multer({ storage: multer.memoryStorage() });
+
 export const createEvent = async (req: AuthRequest, res: Response): Promise<void> => {
   const event = req.body;
 
@@ -272,8 +274,6 @@ export const updateEventGuests = async (req: Request, res: Response): Promise<vo
   }
 };
 
-const upload = multer({ storage: multer.memoryStorage() });
-
 export const uploadGuestsFromExcel = async (req: Request, res: Response): Promise<void> => {
   upload.single('file')(req, res, async (err) => {
     if (err) {
@@ -322,4 +322,42 @@ export const uploadGuestsFromExcel = async (req: Request, res: Response): Promis
       res.status(500).json({ success: false, message: 'Server Error' });
     }
   });
+};
+
+export const downloadGuestsToExcel = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+
+  try {
+    const event = await Event.findById(id).populate('guests');
+    if (!event) {
+      res.status(404).json({ success: false, message: 'Event not found' });
+      return;
+    }
+
+    const guests = event.guests;
+
+    const data = guests.map((guest: any) => ({
+      'Full Name': guest.fullName,
+      'Email': guest.email,
+      'Phone Number': guest.phoneNumber,
+      'Age': guest.age,
+      'Attendance Status': guest.attendance_status,
+      'Email Sent': guest.email_sent,
+    }));
+
+    const worksheet = xlsx.utils.json_to_sheet(data);
+
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Guests');
+
+    const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    res.setHeader('Content-Disposition', 'attachment; filename=guests.xlsx');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+    res.send(buffer);
+  } catch (error) {
+    console.error('Error downloading guests to Excel:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
 };
