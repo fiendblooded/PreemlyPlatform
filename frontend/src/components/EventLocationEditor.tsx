@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { loadGoogleMapsScript } from "../common/common";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
-import { PrimaryButton } from "./EventDetail";
+import { PrimaryButton } from "./EventGuestsEditor";
 
 const Container = styled.div`
   background-color: white;

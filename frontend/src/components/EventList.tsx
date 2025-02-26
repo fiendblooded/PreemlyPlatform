@@ -1,17 +1,63 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { Event } from "../types";
 import EventComponent from "./EventComponent";
 import EventForm from "./form/EventForm";
 import { useState } from "react";
 
+const fadeInRight = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 const Wrapper = styled.div`
-  margin-top: 20px;
+  margin-top: 32px;
   height: 100%;
+  padding: 0 24px;
 `;
 const ListWrapper = styled.div`
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 5 equal columns */
-  gap: 6% 2%; /* Adjust as needed */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+
+  & > * {
+    animation: ${fadeInRight} 0.4s ease-out backwards;
+  }
+
+  & > *:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  & > *:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  & > *:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  & > *:nth-child(4) {
+    animation-delay: 0.25s;
+  }
+  & > *:nth-child(5) {
+    animation-delay: 0.3s;
+  }
+  & > *:nth-child(n + 6) {
+    animation-delay: 0.35s;
+  }
 
   // overflow-y: auto;
   @media (max-width: 900px) {
@@ -54,23 +100,30 @@ const ListWrapper = styled.div`
 `;
 
 export const MessageContainer = styled.div`
-  width: 40%;
-  margin: auto;
-  justify-content: center;
-  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 64px auto;
+  padding: 32px;
   text-align: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  animation: ${fadeIn} 0.5s ease-out;
 
-  font-family: Axiforma, sans-serif;
-  font-size: 18px;
-  color: #555;
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
 `;
 
 export const CreateLink = styled.a`
-  color: #007bff;
-  font-weight: bold;
+  color: rgb(107, 61, 223);
+  font-weight: 500;
   cursor: pointer;
   text-decoration: none;
+  transition: all 0.2s ease;
+
   &:hover {
+    color: rgb(87, 41, 203);
     text-decoration: underline;
   }
 `;

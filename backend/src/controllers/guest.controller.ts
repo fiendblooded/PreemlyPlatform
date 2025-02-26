@@ -97,3 +97,22 @@ export const markEmailSent = async (req: Request, res: Response): Promise<void> 
   }
 };
 
+export const updateReminderEmailDate = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { reminderDate } = req.body;
+
+    const guest = await Guest.findById(req.params.id);
+    if (!guest) {
+      res.status(404).json({ success: false, message: 'Guest not found' });
+      return;
+    }
+
+    guest.reminder_email_date = reminderDate ? new Date(reminderDate) : undefined;
+    await guest.save();
+
+    res.json({ success: true, data: guest });
+  } catch (error) {
+    console.error('Error in Update Reminder Email Date:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};

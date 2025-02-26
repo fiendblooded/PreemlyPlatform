@@ -4,7 +4,7 @@ export function getDateRangeDetails(date1: string, date2: string): string {
   const endDate = new Date(date2);
 
   // Validate the dates
-  if (isNaN(startDate.getTime()) && isNaN(endDate.getTime())) {
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
     throw new Error("Invalid date format.");
   }
 
@@ -17,58 +17,34 @@ export function getDateRangeDetails(date1: string, date2: string): string {
 
   // Get human-readable range
   let range: string;
-  const options = { year: "numeric", month: "long", day: "numeric" } as const;
+  const dateOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  } as const;
+  const timeOptions = { hour: "2-digit", minute: "2-digit" } as const;
 
   if (isSameDay) {
-    const date = startDate.toLocaleDateString(undefined, options);
-    const startTime = startDate.toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    const endTime = endDate.toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    if (startTime === endTime) {
-      range = `${date}, ${startTime}`;
-    } else {
-      range = `${date}, ${startTime} - ${endTime}`;
-    }
+    const date = startDate.toLocaleDateString(undefined, dateOptions);
+    const startTime = startDate.toLocaleTimeString(undefined, timeOptions);
+    const endTime = endDate.toLocaleTimeString(undefined, timeOptions);
+
+    range = `${date}, ${startTime} - ${endTime}`;
   } else {
-    range = `${startDate.toLocaleDateString(
+    const startDateTime = `${startDate.toLocaleDateString(
       undefined,
-      options
-    )} - ${endDate.toLocaleDateString(undefined, options)}`;
+      dateOptions
+    )} ${startDate.toLocaleTimeString(undefined, timeOptions)}`;
+    const endDateTime = `${endDate.toLocaleDateString(
+      undefined,
+      dateOptions
+    )} ${endDate.toLocaleTimeString(undefined, timeOptions)}`;
+
+    range = `${startDateTime} - ${endDateTime}`;
   }
 
-  // Get timezone in GMT+x (City) format
-  // const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  // const timeZoneOffset = startDate.getTimezoneOffset(); // Offset in minutes
-  // const gmtOffset = -timeZoneOffset / 60; // Convert to hours
-  // const gmtString = `GMT${
-  //   gmtOffset >= 0 ? `+${gmtOffset}` : gmtOffset
-  // } (${timeZone})`;
-
-  // Calculate the duration
-  const durationMs = endDate.getTime() - startDate.getTime();
-  const days = Math.floor(durationMs / (1000 * 60 * 60 * 24));
-  const hours = Math.floor(
-    (durationMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-  );
-  const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-
-  // Build the duration string, excluding 0 values
-  const durationParts = [];
-  if (days > 0) durationParts.push(`${days} day${days > 1 ? "s" : ""}`);
-  if (hours > 0) durationParts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
-  if (minutes > 0)
-    durationParts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
-  const duration = durationParts.length
-    ? durationParts.join(", ") + " left"
-    : "";
-
-  // Return the formatted result
-  return `${range} ${duration != "" ? `/ ${duration}` : ""}`;
+  // Return the formatted result without any "days left" information
+  return range;
 }
 export function getDateTimeStatus(
   startDateTime?: string | Date | null,
@@ -176,61 +152,60 @@ export function getMailHtml(
   const bodyContent = `
   <table width='100%' height="100%" border='0' cellspacing='0' cellpadding='0' style='background-color: #EEEDF2; min-height: 100vh;'>
         <tr>
-            <td align='center'>
-                <table width='700' border='0' cellspacing='0'  style='background-color: #ffffff; border-radius: 10px; margin:20px auto;'>
+            <td align='center' style='padding:0;'>
+                <table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color: #ffffff; border-radius: 10px; margin:0 auto; width:100%; max-width:700px;'>
                     <tr>
-                        <td align='center' class="header" style='color: #ffffff; font-size: 14px;'>
-                           <img src='${lightModeLogoLink}' alt="Preemly Logo" class="logo-image"/>
+                        <td align='center' style='padding:0; margin:0; background-color:#ffffff; border-radius:10px 10px 0 0; line-height:0; font-size:0;'>
+                           <img src='${lightModeLogoLink}' alt="Preemly Logo" style='display:block; width:100%; height:auto; border-radius:10px 10px 0 0; margin:0; padding:0;'/>
                         </td>
                     </tr>
                     <tr>
-                        <td align='center' style='font-size: 28px; font-weight: bold; color: #333; padding-top:20px;
-                        '>You're invited, ${guestName}!</td>
+                        <td align='center' style='font-size: 24px; font-weight: bold; color: #333; padding-top:20px; padding-left: 20px; padding-right: 20px;'>You're invited, ${guestName}!</td>
                     </tr>
                     <tr>
                         <td align='center' style='padding: 20px;'>
-                            <img src='${eventLogoImageSrc}' alt='Event Logo' style='width: 100%; max-height: 400px; border-radius: 8px; object-fit: cover; object-position: center;'>
+                            <img src='${eventLogoImageSrc}' alt='Event Logo' style='display:block; width:100%; height:auto; max-height:400px; border-radius:8px; object-fit:cover; object-position:center;'>
                         </td>
                     </tr>
                     <tr>
-                        <td align='center' style='font-size: 24px; font-weight: bold; color: #333;'>${eventTitle}</td>
+                        <td align='center' style='font-size: 22px; font-weight: bold; color: #333; padding-left: 20px; padding-right: 20px;'>${eventTitle}</td>
                     </tr>
                      <tr>
-                        <td align='center' style='font-size: 16px; color: #666;'>
+                        <td align='center' style='font-size: 16px; color: #666; padding: 10px 20px 20px 20px;'>
                             ${eventDescription}
                         </td>
                     </tr>
                     
                     <tr>
-                        <td style='font-size: 18px; text-align: center; padding: 20px;'>
-                            <p style='font-weight: bold; color: #333;'>📅 Date & Time</p>
-                            <p style='color: #666;'>${getDateRangeDetails(
+                        <td style='text-align: center; padding: 20px;'>
+                            <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>📅 Date & Time</p>
+                            <p style='color: #666; margin-top: 0; font-size: 16px;'>${getDateRangeDetails(
                               eventDate,
                               eventEndDate
                             )}</p>
-                            <p style='font-weight: bold; color: #333;'>📍 Location</p>
-                            <p style='color: #666;'>${eventLocation}</p>
+                            <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>📍 Location</p>
+                            <p style='color: #666; margin-top: 0; font-size: 16px;'>${eventLocation}</p>
                             ${
                               parkingOptions.enabled
                                 ? `
-                            <p style='font-weight: bold; color: #333;'>🚗 Parking Information</p>
-                            <p style='color: #666;'>${parkingOptions.content}</p>
+                            <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>🚗 Parking Information</p>
+                            <p style='color: #666; margin-top: 0; font-size: 16px;'>${parkingOptions.content}</p>
                             `
                                 : ""
                             }
                             ${
                               scheduleImageSrc.enabled
                                 ? `
-                            <p style='font-weight: bold; color: #333;'>📅 Event Schedule</p>
-                            <p style='color: #666;'>${scheduleImageSrc.content}</p>
+                            <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>📅 Event Schedule</p>
+                            <p style='color: #666; margin-top: 0; font-size: 16px;'>${scheduleImageSrc.content}</p>
                             `
                                 : ""
                             }
                             ${
                               diningOptions.enabled
                                 ? `
-                            <p style='font-weight: bold; color: #333;'>🍽 Dining Options</p>
-                            <p style='color: #666;'>${diningOptions.content}</p>
+                            <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>🍽 Dining Options</p>
+                            <p style='color: #666; margin-top: 0; font-size: 16px;'>${diningOptions.content}</p>
                             `
                                 : ""
                             }
@@ -239,40 +214,42 @@ export function getMailHtml(
                    
                    
                     <tr>
-                        <td align='center' style='font-size: 24px; font-weight: bold; color: #333;'>Your Invitation QR Code</td>
+                        <td align='center' style='font-size: 22px; font-weight: bold; color: #333; padding-top: 10px;'>Your Invitation QR Code</td>
                     </tr>
                     <tr>
-                        <td align='center'>
-                            <img src='${qrCodeImageSrc}' alt='QR Code' style='max-width: 250px;'>
+                        <td align='center' style='padding: 15px 0;'>
+                            <img src='${qrCodeImageSrc}' alt='QR Code' style='display:block; max-width: 250px; width:100%; height:auto; margin:0 auto;'>
                         </td>
                     </tr>
                     <tr>
-                        <td align='center' style='font-size: 16px; color: #666; padding-bottom: 20px;'>Please present this QR code at the entrance for a smooth check-in process.</td>
+                        <td align='center' style='font-size: 16px; color: #666; padding: 0 20px 20px 20px;'>Please present this QR code at the entrance for a smooth check-in process.</td>
                     </tr>
                    <tr>
                       <td align='center' style='padding: 20px; padding-bottom: 40px;'>
-                        <table border='0' cellspacing='0' cellpadding='0'>
+                        <table border='0' cellspacing='0' cellpadding='0' width='100%'>
                           <tr>
-                            <td align='center' style='padding-right: 10px;'>
+                            <td align='center' style='padding: 0 10px 10px 10px;'>
                               <a href="${generateGoogleCalendarUrl(
                                 eventTitle,
                                 eventDescription,
                                 eventDate,
                                 eventEndDate,
                                 eventLocation
-                              )}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #4285F4; color: #4285F4; padding: 14px 24px; text-decoration: none; font-size: 16px; border-radius: 5px; font-weight: bold; display: inline-block;">
+                              )}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #4285F4; color: #4285F4; padding: 12px 16px; text-decoration: none; font-size: 15px; border-radius: 5px; font-weight: bold; display: inline-block; width:100%; max-width:300px; text-align: center; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Calendar_icon_%282020%29.svg/2048px-Google_Calendar_icon_%282020%29.svg.png" alt="Google Calendar" style="vertical-align: middle; margin-right: 8px; width: 20px; height: 20px;">
                                 Add to Google Calendar
                               </a>
                             </td>
-                            <td align='center' style='padding-left: 10px;'>
+                          </tr>
+                          <tr>
+                            <td align='center' style='padding: 0 10px;'>
                               <a href="${generateOutlookCalendarUrl(
                                 eventTitle,
                                 eventDescription,
                                 eventDate,
                                 eventEndDate,
                                 eventLocation
-                              )}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #0078D4; color: #0078D4; padding: 14px 24px; text-decoration: none; font-size: 16px; border-radius: 5px; font-weight: bold; display: inline-block;">
+                              )}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #0078D4; color: #0078D4; padding: 12px 16px; text-decoration: none; font-size: 15px; border-radius: 5px; font-weight: bold; display: inline-block; width:100%; max-width:300px; text-align: center; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg/1101px-Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg.png" alt="Outlook Calendar" style="vertical-align: middle; margin-right: 8px; width: 20px; height: 20px;">
                                 Add to Outlook Calendar
                               </a>
@@ -283,7 +260,7 @@ export function getMailHtml(
                     </tr>
 
                     <tr>
-                        <td align='center' class="footer" style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px;'>
+                        <td align='center' style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;'>
                             Follow us on: 
                             <a href='https://x.com/trypreemly' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>Twitter</a> |
                             <a href='https://www.linkedin.com/company/106173934' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>LinkedIn</a>
@@ -306,8 +283,36 @@ export function getMailHtml(
         <meta charset='UTF-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
         <title>${eventTitle} - Preemly</title>
+        <style type="text/css">
+            @media screen and (max-width: 620px) {
+                .main-table {
+                    width: 100% !important;
+                }
+                .content {
+                    padding: 10px !important;
+                }
+                .header-text {
+                    font-size: 22px !important;
+                }
+                .event-title {
+                    font-size: 20px !important;
+                }
+                .description {
+                    font-size: 15px !important;
+                }
+                .section-title {
+                    font-size: 17px !important;
+                }
+                .section-content {
+                    font-size: 15px !important;
+                }
+                .button-text {
+                    font-size: 14px !important;
+                }
+            }
+        </style>
     </head>
-    <body style='margin: 0; padding: 0; font-family: Axiforma, sans-serif; background-color: #EEEDF2;'>
+    <body style='margin: 0; padding: 0; font-family: Axiforma, Arial, sans-serif; background-color: #EEEDF2;'>
         ${bodyContent}
     </body>
     </html>`;

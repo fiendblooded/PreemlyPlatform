@@ -6,6 +6,7 @@ import useAxiosWithAuth from "../auth/useAxiosWithAuth";
 import useAuthSetup from "../../useAuthSetup";
 import FileDropArea from "../FileDropArea";
 import PopupOverlay from "./PopupOverlay";
+import { PrimaryButton } from "../EventGuestsEditor";
 
 const FormTitle = styled.h2`
   color: black;
@@ -198,9 +199,9 @@ const EventForm: React.FC<EventFormProps> = ({ onClose }) => {
             />
           )}
 
-          <Button type="submit" disabled={loading}>
+          <PrimaryButton type="submit" disabled={loading}>
             {loading ? "Creating..." : "Create Event"}
-          </Button>
+          </PrimaryButton>
         </FormContainer>
         {success && (
           <SuccessMessage>Event created successfully!</SuccessMessage>

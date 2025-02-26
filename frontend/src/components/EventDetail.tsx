@@ -38,30 +38,33 @@ export const PageWrapper = styled.div<{ tabletMode: boolean }>`
   display: flex;
   flex-direction: column;
   margin: auto;
+  transition: width 0.3s ease;
 `;
 
 const Header = styled.div`
   width: 90%;
   margin: 0px auto;
   margin-top: 32px;
-  color: black; /* Yellow */
+  color: black;
   display: flex;
   justify-content: space-between;
   text-align: left;
   font-weight: bold;
-  display: flex;
   font-size: 40px;
   align-items: center;
+  transition: all 0.2s ease;
 `;
+
 const ActiveStatusContainer = styled.div<{ isDetail?: boolean }>`
   margin: 0px;
   margin-top: 10px;
   display: flex;
   ${(props) => props.isDetail && "width: 90%; margin: 20px auto;"}
-  gap: 20px;
+  gap: 16px;
   max-width: 80vw;
   overflow: scroll;
-  border-bottom: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
+  border-bottom: 1.5px solid rgba(205, 205, 205, 0.5);
+  padding-bottom: 12px;
 
   /* Hide scrollbar for Webkit browsers (Chrome, Safari, Edge) */
   &::-webkit-scrollbar {
@@ -77,11 +80,11 @@ const ActiveStatusContainer = styled.div<{ isDetail?: boolean }>`
 
 const ChangePosterModalButton = styled.div`
   position: absolute;
-  bottom: 10px;
-  right: 10px;
+  bottom: 16px;
+  right: 16px;
   width: 80px;
   height: 40px;
-  border-radius: 6px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -89,37 +92,49 @@ const ChangePosterModalButton = styled.div`
   color: white;
   cursor: pointer;
   font-weight: bold;
-  opacity: 0; /* Initially hidden */
+  opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease,
+    background-color 0.2s ease;
+  box-shadow: 0 4px 12px rgba(107, 61, 223, 0.3);
+
   &:hover {
-    background-color: rgb(153, 115, 248);
+    background-color: rgb(123, 81, 236);
   }
 `;
+
 const PosterImage = styled.div<{ imageUrl: string }>`
   width: 90%;
   min-height: 400px;
   max-height: 40%;
   margin: 20px auto;
   margin-top: 40px;
-  border-radius: 6px;
+  border-radius: 12px;
   background-image: url(${(props) => props.imageUrl});
   background-size: cover;
   background-position: center;
   position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 
-  &:hover ${ChangePosterModalButton} {
-    opacity: 1; /* Show the button on hover */
-    visibility: visible;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+
+    ${ChangePosterModalButton} {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 `;
+
 const PosterPlaceholder = styled.div`
   width: 90%;
   min-height: 400px;
   max-height: 40%;
   margin: 20px auto;
   margin-top: 40px;
-  border-radius: 6px;
+  border-radius: 12px;
   background-color: #2c2c2c;
   color: #ffffff;
   display: flex;
@@ -130,56 +145,47 @@ const PosterPlaceholder = styled.div`
   font-size: 18px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 
   &:hover {
     background-color: #3c3c3c;
-  }
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
 
-  &:hover ${ChangePosterModalButton} {
-    opacity: 1;
-    visibility: visible;
+    ${ChangePosterModalButton} {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 `;
 
 const LoadingMessage = styled.p`
-  color: #bbb;
-  font-size: 1rem;
+  color: #888;
+  font-size: 1.1rem;
   text-align: center;
-`;
-
-export const PrimaryButton = styled.button<{
-  marginTop?: number;
-  width?: number;
-}>`
-  width: ${(props) => (props.width ? props.width : 160)}px;
-  margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
-  background-color: rgb(107, 61, 223);
-  border: none;
-  height: 38px;
+  margin-top: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
+  gap: 12px;
 
-  &:hover {
-    background-color: rgb(155, 119, 249);
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ddd;
+    border-top-color: #6b3ddf;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
   }
 
-  &:disabled {
-    background-color: rgb(
-      169,
-      169,
-      169
-    ); /* Light gray background for disabled */
-    cursor: not-allowed; /* Change cursor to indicate it's disabled */
-    opacity: 0.6; /* Optional: Reduce opacity */
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -190,37 +196,42 @@ const EventDetailWrapper = styled.div<{ tabletMode: boolean }>`
   margin: auto;
   background-color: white;
   border-radius: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   overflow: auto;
   scrollbar-gutter: stable;
+  transition: all 0.3s ease;
+
   /* Subtle Scrollbar Styling */
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #c8c8c8 #f7f7f7; /* Thumb and Track colors for Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #c8c8c8 #f7f7f7;
 
   ::-webkit-scrollbar {
-    width: 8px; /* Slimmer scrollbar */
+    width: 8px;
     position: absolute;
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: #c8c8c8; /* Soft grey thumb */
-    border-radius: 4px; /* Rounded corners for thumb */
-    border: 1px solid #f7f7f7; /* Light border to blend into the track */
+    background-color: #c8c8c8;
+    border-radius: 4px;
+    border: 1px solid #f7f7f7;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: #b5b5b5; /* Slightly darker grey on hover */
+    background-color: #b5b5b5;
   }
 
   ::-webkit-scrollbar-track {
-    background-color: #f7f7f7; /* Very light grey track */
+    background-color: #f7f7f7;
     border-radius: 4px;
   }
+
   .pac-container {
     z-index: 10000;
     display: flex;
   }
+
   position: relative;
+
   /* Responsive style for tablet and mobile */
   @media (max-width: 1024px) {
     width: 100%;
@@ -228,20 +239,30 @@ const EventDetailWrapper = styled.div<{ tabletMode: boolean }>`
     height: 100%;
   }
 `;
+
 const ContactButton = styled.a`
   margin: 20px 0;
   border: 2px solid #ff8c00;
   color: #ff8c00;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
   font-size: 18px;
   text-decoration: none;
   font-weight: bold;
+  transition: all 0.2s ease;
+
   &:hover {
     background-color: rgb(255, 245, 233);
     color: #ff8c00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
+
 export const SecondaryButton = styled.button<{
   marginTop?: number;
   width?: number;
@@ -253,22 +274,20 @@ export const SecondaryButton = styled.button<{
   margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
   background-color: white;
   border: none;
-  height: 38px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 14px;
   font-weight: bold;
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
-  border-radius: 5px;
+  border-radius: 8px;
   border: 2px solid
     ${(props) =>
       props.disabled ? "#ccc" : props.color ? props.color : "#875cf5"};
   color: ${(props) =>
     props.disabled ? "#999" : props.color ? props.color : "#875cf5"};
-  transition: background-color 0.3s ease, border-color 0.3s ease,
-    color 0.3s ease;
+  transition: all 0.2s ease;
   opacity: ${(props) => (props.disabled ? 0.6 : 1)};
 
   &:hover {
@@ -281,6 +300,14 @@ export const SecondaryButton = styled.button<{
     border: 2px solid
       ${(props) =>
         props.disabled ? "#ccc" : props.color ? props.color : "#875cf5"};
+    transform: ${(props) => (props.disabled ? "none" : "translateY(-2px)")};
+    box-shadow: ${(props) =>
+      props.disabled ? "none" : "0 4px 12px rgba(135, 92, 245, 0.15)"};
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
   }
 
   &:focus {
@@ -298,14 +325,22 @@ const DeleteButton = styled.div`
   cursor: pointer;
   border: 1.5px solid rgb(173, 1, 1);
   color: rgb(173, 1, 1);
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: transparent;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
+
   &:hover {
     background-color: rgb(173, 1, 1);
     color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(173, 1, 1, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
   }
 `;
 
@@ -315,30 +350,34 @@ const WelcomeScreenButton = styled.div`
   height: 40px;
   padding: 0;
   cursor: pointer;
-
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: transparent;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   border: 1.5px solid #875cf5;
   color: #875cf5;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
+
   &:hover {
     background-color: #875cf5;
     color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(135, 92, 245, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
   }
 `;
 
 const DetailsHeader = styled.div`
   width: 90%;
-
-  color: rgb(98, 98, 98); /* Yellow */
+  color: rgb(98, 98, 98);
   display: flex;
   gap: 10px;
   text-align: center;
-
-  display: flex;
   font-size: 36px;
   align-items: center;
   margin: 0px auto;
@@ -351,19 +390,36 @@ export const ActivityStatus = styled.div<{ color: string }>`
   width: 80px;
   font-weight: 600;
   text-align: center;
-  border-radius: 4px;
-  padding: 4px;
-  background-color: ${(props) => props.color}33; /* 20% opacity */
+  border-radius: 6px;
+  padding: 4px 8px;
+  background-color: ${(props) => props.color}20; /* 12% opacity */
+  box-shadow: 0 2px 4px ${(props) => props.color}10; /* 6% opacity */
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${(props) => props.color}30; /* 18% opacity */
+  }
 `;
+
 const DateTime = styled.div`
   display: flex;
   align-items: end;
   font-weight: 500;
   justify-content: center;
-  gap: 4px;
+  gap: 8px;
   font-size: 14px;
   line-height: 100%;
+  transition: all 0.2s ease;
+
+  svg {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover svg {
+    transform: scale(1.1);
+  }
 `;
+
 const SeamlessInput = styled.input`
   font-family: Axiforma, sans-serif;
   font-size: 32px;
@@ -379,18 +435,22 @@ const SeamlessInput = styled.input`
   padding: 4px 0;
   margin-bottom: 4px;
   border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+
   &:focus {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid #6b3ddf;
   }
 
   &::placeholder {
-    color: #aaa; /* Optional: Adjust placeholder color */
+    color: #aaa;
   }
 `;
+
 const HeaderButtonsContainer = styled.div`
   display: flex;
-  gap: 8px;
+  gap: 12px;
 `;
+
 const ErrorNotYourEvent = styled.div`
   width: 60%;
   height: 100%;
@@ -400,10 +460,20 @@ const ErrorNotYourEvent = styled.div`
   justify-content: center;
   align-items: center;
   text-align: center;
-
   font-family: Axiforma, sans-serif;
   font-size: 20px;
   color: black;
+  gap: 24px;
+  padding: 40px 0;
+
+  svg {
+    margin-bottom: 16px;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover svg {
+    transform: scale(1.05);
+  }
 `;
 
 const EventDetail: React.FC = () => {

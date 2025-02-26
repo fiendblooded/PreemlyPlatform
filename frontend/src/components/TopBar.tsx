@@ -11,16 +11,18 @@ const TopBarContainer = styled.div`
   align-items: center;
   height: 64px;
   justify-content: space-between;
-  background-color: white; /* Updated to match the dark background */
-  padding: 0px 10px;
-  border-bottom: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
+  background-color: white;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 `;
 
 const Title = styled.h1`
   font-size: 22px;
   font-weight: 600;
-  padding-left: 18px;
-  color: black; /* White text for visibility */
+  color: #2c2c2c;
+  margin: 0;
+  padding: 0;
 `;
 
 const RightSection = styled.div`
@@ -31,23 +33,32 @@ const RightSection = styled.div`
 
 const UpgradeButton = styled.button`
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  gap: 5px;
-  text-align: center;
-  width: 180px;
-  padding: 5px 10px;
-  padding-top: 6px;
+  gap: 8px;
+  padding: 8px 16px;
   font-size: 14px;
   font-weight: 500;
-  color: #0b0e13; /* Dark text for contrast */
-  background-color: #fcd535; /* Matches the yellow accent color */
+  color: white;
+  background-color: rgb(107, 61, 223);
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  line-height: 24px;
+  transition: all 0.2s ease;
+
   &:hover {
-    background-color: #e6bf30; /* Slightly darker shade for hover */
+    background-color: rgb(87, 41, 203);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(107, 61, 223, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
   }
 `;
 const ButtonText = styled.div`

@@ -7,7 +7,7 @@ import GuestsSettingsIcon from "./icons/GuestsSettingsIcon";
 import ScheduleIcon from "./icons/ScheduleIcon";
 import DiningIcon from "./icons/DiningIcon";
 import ParkingIcon from "./icons/ParkingIcon";
-import { PrimaryButton, SecondaryButton } from "./EventDetail";
+import { PrimaryButton, SecondaryButton } from "./EventGuestsEditor";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { Panel } from "./EventGuestsEditor";
 

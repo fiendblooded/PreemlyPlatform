@@ -8,6 +8,5 @@ router.put('/:id', guestController.updateGuest);
 router.delete('/:id', guestController.deleteGuest);
 router.put('/:id/attendance', guestController.markAttendance);
 router.put('/:id/emailstatus', guestController.markEmailSent);
-
+router.put('/:id/reminder-date', guestController.updateReminderEmailDate);
 export default router;
-

@@ -4,8 +4,9 @@ import DatePicker from "react-datepicker"; // Assuming you have this installed
 import "react-datepicker/dist/react-datepicker.css";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { StyledDatePickerWrapper } from "./EventDetailsEditor";
-import { PrimaryButton, SecondaryButton } from "./EventDetail";
+
 import CustomCheckbox from "../common/CustomCheckbox";
+import { PrimaryButton, SecondaryButton } from "./EventGuestsEditor";
 
 // Styled Components
 const Container = styled.div`
@@ -249,7 +250,6 @@ const EventTasksEditor: React.FC<{ event: Event; refetch: () => void }> = ({
                   <SecondaryButton
                     width={24}
                     color={"rgb(173, 1, 1)"}
-                    hoverColor={"rgb(255, 212, 212)"}
                     onClick={() => deleteTask(index)}
                   >
                     -

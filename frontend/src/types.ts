@@ -6,6 +6,7 @@ export type Guest = {
   email: string;
   attendance_status?: boolean;
   email_sent?: boolean;
+  reminder_email_date?: string; // Add this field
 };
 export type Task = {
   title: string;

@@ -8,9 +8,9 @@ const GuestSchema = new Schema<Guest>({
   phoneNumber: { type: String, default: '' },
   attendance_status: { type: Boolean, default: false },
   email_sent: { type: Boolean, default: false },
+  reminder_email_date: { type: Date, default: null }, // Add this field
   team_id: { type: String },
   eventId: { type: Schema.Types.ObjectId, ref: 'Event' },
 });
 
 export default mongoose.model<Guest>('Guest', GuestSchema);
-

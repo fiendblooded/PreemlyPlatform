@@ -1,8 +1,9 @@
 import styled from "styled-components";
 import { Event } from "../types";
 import { useLocation, useNavigate } from "react-router-dom";
-import { PrimaryButton, SecondaryButton } from "./EventDetail";
+
 import { getDateTimeStatus, isTablet } from "../common/common";
+import { PrimaryButton } from "./EventGuestsEditor";
 
 interface EventProps {
   event: Event;

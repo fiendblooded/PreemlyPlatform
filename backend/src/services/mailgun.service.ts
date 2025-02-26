@@ -29,6 +29,7 @@ const sendEmail = async (
   recipient: string | string[],
   subject: string,
   htmlContent: string,
+  scheduledTime?: Date,
 ): Promise<EmailResponse> => {
   if (Array.isArray(recipient)) {
     for (const email of recipient) {
@@ -47,6 +48,12 @@ const sendEmail = async (
       subject: subject,
       html: htmlContent,
     };
+
+    // Add scheduling if a future date is provided
+    if (scheduledTime && scheduledTime > new Date()) {
+      // Mailgun expects the 'o:deliverytime' parameter in Unix timestamp format
+      emailPayload['o:deliverytime'] = Math.floor(scheduledTime.getTime() / 1000).toString();
+    }
 
     const response = await mg.messages.create('mail.preemly.eu', emailPayload);
     return response as EmailResponse;

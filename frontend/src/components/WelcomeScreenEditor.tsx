@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
-import { PrimaryButton } from "./EventDetail";
+import { PrimaryButton } from "./EventGuestsEditor";
 
 // Styled components
 const Container = styled.div`
@@ -13,85 +13,115 @@ const Container = styled.div`
   width: calc(90% - 32px);
   margin: 20px auto;
 `;
+
 const ContentContainer = styled.div`
   display: flex;
-  justify-content: space-between;
+  gap: 32px;
+  align-items: stretch;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const Form = styled.div`
   display: flex;
-  width: 30%;
+  width: 35%;
   flex-direction: column;
-  gap: 16px;
-  color: black;
-  margin-bottom: 10px;
-  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  background: #f8f9fc;
+  border-radius: 12px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
-const Preview = styled.div<{ backgroundcolor: string; textcolor: string }>`
-  width: 65%;
-  height: 340px;
+
+const Preview = styled.div<{
+  backgroundcolor: string;
+  textcolor: string;
+}>`
+  flex: 1;
+  min-height: 400px;
   display: flex;
-  font-size: 28px;
+  font-size: 32px;
+  font-weight: 600;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 12px;
   background-color: ${(props) => props.backgroundcolor};
   color: ${(props) => props.textcolor};
-  border: 2px solid black;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, color 0.3s ease;
 `;
 
 const Label = styled.label`
-  font-weight: bold;
-  margin-bottom: 8px;
+  font-weight: 500;
+  color: #2c2c2c;
+  margin-bottom: 12px;
+  display: block;
 `;
 
-const ColorCircle = styled.div<{ color: string }>`
-  width: 90%;
-  height: 36px;
-  border-radius: 4px;
-  background-color: ${(props) => props.color};
+const ThemeGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const ThemeButton = styled.button<{
+  bgColor: string;
+  textColor: string;
+  isSelected: boolean;
+}>`
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
   cursor: pointer;
   position: relative;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-`;
+  overflow: hidden;
+  border: 3px solid ${(props) => (props.isSelected ? "#6b3ddf" : "transparent")};
+  box-shadow: ${(props) =>
+    props.isSelected
+      ? "0 4px 8px rgba(107, 61, 223, 0.3)"
+      : "0 2px 4px rgba(0, 0, 0, 0.1)"};
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
-const ColorOptionsPanel = styled.div`
-  position: absolute;
-  top: 50px;
-  right: 0;
-  background-color: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  padding: 8px;
-  display: flex;
-  gap: 8px;
-  z-index: 10403603460346;
-`;
-
-const OptionCircle = styled.div<{ color: string }>`
-  width: 36px;
-  height: 36px;
-  border-radius: 4px;
-  background-color: ${(props) => props.color};
-  cursor: pointer;
-  border: 2px solid black;
   &:hover {
-    opacity: 0.8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      135deg,
+      ${(props) => props.bgColor} 0%,
+      ${(props) => props.bgColor} 50%,
+      ${(props) => props.textColor} 50%,
+      ${(props) => props.textColor} 100%
+    );
   }
 `;
 
 export const ToggleContainer = styled.div`
-  text-align: center;
-  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
+  gap: 8px;
 `;
 
 export const ToggleLabel = styled.span`
-  font-weight: bold;
+  font-weight: 500;
+  color: #2c2c2c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 export const ToggleSwitch = styled.input.attrs({ type: "checkbox" })`
@@ -128,6 +158,36 @@ export const ToggleSwitch = styled.input.attrs({ type: "checkbox" })`
   }
 `;
 
+const SectionTitle = styled.div`
+  font-weight: 600;
+  font-size: 20px;
+  color: #2c2c2c;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    color: rgb(107, 61, 223);
+  }
+`;
+
+// Helper function to calculate luminance for contrast
+const getLuminance = (hexColor: string) => {
+  // Remove # if present
+  const hex = hexColor.replace("#", "");
+
+  // Convert to RGB
+  const r = parseInt(hex.substr(0, 2), 16) / 255;
+  const g = parseInt(hex.substr(2, 2), 16) / 255;
+  const b = parseInt(hex.substr(4, 2), 16) / 255;
+
+  // Calculate luminance
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+
 interface Event {
   _id: string;
   welcomeScreenParams: {
@@ -137,6 +197,17 @@ interface Event {
     isGdpr: boolean;
   };
 }
+
+// Define color themes with good contrast
+const colorThemes = [
+  { name: "Blue & White", bgColor: "#1E88E5", textColor: "#FFFFFF" },
+  { name: "Dark Green & Yellow", bgColor: "#1B5E20", textColor: "#FFEB3B" },
+  { name: "Purple & White", bgColor: "#2A2768", textColor: "#FFFFFF" },
+  { name: "Dark & Light", bgColor: "#212121", textColor: "#F5F5F5" },
+  { name: "Teal & White", bgColor: "#00897B", textColor: "#FFFFFF" },
+  { name: "Orange & Black", bgColor: "#FF9800", textColor: "#212121" },
+  { name: "Red & White", bgColor: "#D32F2F", textColor: "#FFFFFF" },
+];
 
 // Component
 const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
@@ -155,11 +226,18 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
     event.welcomeScreenParams.isManualCheckin
   );
   const [isGdpr, setGdpr] = useState(event.welcomeScreenParams.isGdpr);
-
-  const [showBgColorOptions, setShowBgColorOptions] = useState(false);
-  const [showTextColorOptions, setShowTextColorOptions] = useState(false);
-
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Find the selected theme index
+  const selectedThemeIndex = colorThemes.findIndex(
+    (theme) =>
+      theme.bgColor === backgroundColor && theme.textColor === textColor
+  );
+
+  const handleThemeSelect = (bgColor: string, textColor: string) => {
+    setBackgroundColor(bgColor);
+    setTextColor(textColor);
+  };
 
   const handleSaveLocation = async () => {
     setIsUpdating(true);
@@ -185,94 +263,44 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
     refetch();
   };
 
-  const predefinedColors = [
-    "#00aef0",
-    "#2A2768",
-    "#ffffff",
-    "#f5c542",
-    "#6b3ddf",
-  ];
-
-  const predefinedTextColors = [
-    "#000000",
-    "#2A2768",
-    "#ffffff",
-    "#f5c542",
-    "#6b3ddf",
-  ];
-
   return (
     <Container>
-      <div
-        style={{
-          fontWeight: "bold",
-          fontSize: 18,
-          marginBottom: "10px",
-          display: "flex",
-          alignItems: "end",
-          lineHeight: "24px",
-          color: "black",
-        }}
-      >
+      <SectionTitle>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M12 16V8M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
         Welcome Screen Settings
-      </div>
+      </SectionTitle>
       <ContentContainer>
         <Preview backgroundcolor={backgroundColor} textcolor={textColor}>
           Welcome, User1
         </Preview>
         <Form>
-          <ToggleContainer>
-            <Label>Background Color</Label>
-            <ColorCircle
-              color={backgroundColor}
-              onClick={() => {
-                setShowBgColorOptions(!showBgColorOptions);
-                setShowTextColorOptions(false);
-              }}
-            >
-              {" "}
-              {showBgColorOptions && (
-                <ColorOptionsPanel>
-                  {predefinedColors.map((color) => (
-                    <OptionCircle
-                      key={color}
-                      color={color}
-                      onClick={() => {
-                        setBackgroundColor(color);
-                        setShowBgColorOptions(false);
-                      }}
-                    />
-                  ))}
-                </ColorOptionsPanel>
-              )}
-            </ColorCircle>
-          </ToggleContainer>
-
-          <ToggleContainer>
-            <Label>Text Color</Label>
-            <ColorCircle
-              color={textColor}
-              onClick={() => {
-                setShowTextColorOptions(!showTextColorOptions);
-                setShowBgColorOptions(false);
-              }}
-            >
-              {showTextColorOptions && (
-                <ColorOptionsPanel>
-                  {predefinedTextColors.map((color) => (
-                    <OptionCircle
-                      key={color}
-                      color={color}
-                      onClick={() => {
-                        setTextColor(color);
-                        setShowTextColorOptions(false);
-                      }}
-                    />
-                  ))}
-                </ColorOptionsPanel>
-              )}
-            </ColorCircle>
-          </ToggleContainer>
+          <div>
+            <Label>Choose a Theme</Label>
+            <ThemeGrid>
+              {colorThemes.map((theme, index) => (
+                <ThemeButton
+                  key={index}
+                  bgColor={theme.bgColor}
+                  textColor={theme.textColor}
+                  isSelected={
+                    theme.bgColor === backgroundColor &&
+                    theme.textColor === textColor
+                  }
+                  onClick={() =>
+                    handleThemeSelect(theme.bgColor, theme.textColor)
+                  }
+                  title={theme.name}
+                />
+              ))}
+            </ThemeGrid>
+          </div>
 
           <ToggleContainer>
             <ToggleLabel>Manual Check-in</ToggleLabel>

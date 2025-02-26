@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Event } from "../types";
-import { SearchIcon } from "./Events";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { ToastType, useToast } from "./Toasts";
 import { getMailHtml, SvgSC } from "../common/common";
-import { ActivityStatus } from "./EventDetail";
+// import { ActivityStatus } from "./EventDetail";
 
 const GuestsWrapper = styled.div`
   width: 90%;
-
   overflow: hidden;
   margin: 20px auto;
+  margin-bottom: 80px;
   display: flex;
   flex-direction: column;
   background-color: white;
@@ -20,131 +19,187 @@ const GuestsWrapper = styled.div`
   box-sizing: border-box;
 `;
 
-const SearchContainer = styled.div`
+const GuestTableHeaderContainer = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  background-color: #f9f9f9;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  padding: 8px 12px;
-  width: 100%;
-  max-width: 300px;
-  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 16px 20px 0;
+  flex-wrap: wrap;
+`;
 
-  /* Smooth transition for the border */
-  transition: border-color 0.3s ease;
-
-  /* Highlight the container when the input inside is focused */
-  &:focus-within {
-    border-color: rgb(107, 61, 223); /* Yellow border */
-  }
+const SearchContainer = styled.div`
+  position: relative;
+  width: 300px;
 `;
 
 const SearchInput = styled.input`
-  flex: 1;
-  border: none;
-  background: transparent;
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   font-size: 14px;
-  color: #333;
-  outline: none;
+  transition: all 0.2s;
+  background-color: #f9f9f9;
 
-  &::placeholder {
-    color: #aaa;
+  &:focus {
+    border-color: rgb(107, 61, 223);
+    box-shadow: 0 0 0 3px rgba(107, 61, 223, 0.1);
+    outline: none;
+    background-color: white;
+  }
+`;
+
+const SearchIcon = styled.svg`
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #888;
+  pointer-events: none;
+`;
+
+const StyledCheckbox = styled.input.attrs({ type: "checkbox" })`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: rgb(107, 61, 223);
+  background-color: white;
+  border: 1.5px solid #aaa;
+  color-scheme: light; /* Force light mode appearance */
+
+  &:not(:checked) {
+    background-color: transparent;
   }
 `;
 
 const ScrollableTable = styled.div`
-  overflow-y: auto;
-  border-left: 1px solid #ddd;
-  border-radius: 4px;
-  color: black;
-  padding-top: 0px;
-  margin: 0 auto;
-  margin-top: 20px;
-  /* Subtle Scrollbar Styling */
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #c8c8c8 #f7f7f7; /* Thumb and Track colors for Firefox */
-
-  ::-webkit-scrollbar {
-    width: 8px; /* Slimmer scrollbar */
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: #c8c8c8; /* Soft grey thumb */
-    border-radius: 4px; /* Rounded corners for thumb */
-    border: 1px solid #f7f7f7; /* Light border to blend into the track */
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: #b5b5b5; /* Slightly darker grey on hover */
-  }
-
-  ::-webkit-scrollbar-track {
-    background-color: #f7f7f7; /* Very light grey track */
-    border-radius: 4px;
-  }
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
   table {
     width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
 
     th,
     td {
-      padding: 12px 16px;
+      padding: 14px 16px;
       text-align: left;
+      vertical-align: middle;
     }
 
     th {
-      background-color: #f9fbfc; /* Light grey header background */
+      background-color: #f8f9fa;
+      color: #495057;
+      font-weight: 600;
+      border-bottom: 2px solid #e9ecef;
       position: sticky;
       top: 0;
-      z-index: 900;
-      font-weight: bold;
-      color: #56626c; /* Dark grey text */
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      border-bottom: 1px solid #ddd; /* Subtle border for separation */
+      z-index: 10;
+      white-space: nowrap;
+
+      &:first-child {
+        border-top-left-radius: 8px;
+      }
+
+      &:last-child {
+        border-top-right-radius: 8px;
+      }
+    }
+
+    tr {
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: rgba(107, 61, 223, 0.03);
+      }
+
+      &:not(:last-child) td {
+        border-bottom: 1px solid #e9ecef;
+      }
     }
 
     td {
-      border-bottom: 1px solid #ddd; /* Subtle border between rows */
-      vertical-align: middle;
-      text-overflow: ellipsis;
-    }
+      color: #333;
 
-    tr:hover {
-      background-color: rgb(249, 244, 253); /* Ensure hover color applies */
-    }
+      input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
 
-    td input {
-      color: black;
-      padding: 8px;
-      border: 1px solid #ccc; /* Subtle grey border */
-      border-radius: 4px;
-      font-size: 0.9rem;
-      background-color: #f9f9f9; /* Light grey background for inputs */
-    }
-
-    td input[type="checkbox"] {
-      padding: 0;
-    }
-
-    /* First column specific width */
-    th:first-child,
-    td:first-child {
-      width: 24px;
-      padding-bottom: 8px;
+        &:focus {
+          border-color: rgb(107, 61, 223);
+          box-shadow: 0 0 0 3px rgba(107, 61, 223, 0.1);
+          outline: none;
+        }
+      }
     }
   }
 `;
 
-const GuestTableHeaderContainer = styled.div`
-  padding: 0px 20px;
+const DeleteButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  width: 40px;
+  height: 40px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: rgb(184, 28, 10);
+    background-color: rgba(237, 72, 54, 0.1);
+  }
 `;
+
+const ActivityStatus = styled.div<{ color: string }>`
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: ${(props) => props.color};
+  background-color: ${(props) => props.color}15; /* 10% opacity */
+`;
+
+const ReminderStatus = styled.div<{ color: string }>`
+  color: ${(props) => props.color};
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  border-radius: 4px;
+  padding: 6px 8px;
+  background-color: ${(props) => props.color}33; /* 20% opacity */
+  max-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .status-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .date-time {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+`;
+
 export const PrimaryButton = styled.button<{
   marginTop?: number;
   width?: number;
@@ -159,13 +214,27 @@ export const PrimaryButton = styled.button<{
   justify-content: center;
   color: white;
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(107, 61, 223, 0.2);
 
   &:hover {
-    background-color: rgb(155, 119, 249);
+    background-color: rgb(126, 87, 231);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(107, 61, 223, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(107, 61, 223, 0.2);
+  }
+
+  &:disabled {
+    background-color: #c5c5c5;
+    cursor: not-allowed;
+    box-shadow: none;
   }
 `;
 export const SecondaryButton = styled.button<{
@@ -175,25 +244,34 @@ export const SecondaryButton = styled.button<{
   width: ${(props) => (props.width ? props.width : 160)}px;
   margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
   background-color: white;
-  border: none;
+  border: 2px solid rgb(107, 61, 223);
   height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #875cf5;
-  color: #875cf5;
+  color: rgb(107, 61, 223);
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
   &:hover {
-    background-color: rgb(239, 233, 255);
+    background-color: rgba(107, 61, 223, 0.05);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(107, 61, 223, 0.15);
   }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
   &:disabled {
-    opacity: 0.8;
-    border: 2px solid rgb(103, 103, 103);
-    color: rgb(103, 103, 103);
+    border-color: #c5c5c5;
+    color: #c5c5c5;
+    cursor: not-allowed;
+    box-shadow: none;
   }
 `;
 
@@ -205,70 +283,21 @@ export const GuestActionsButtonsContainer = styled.div<{ width?: number }>`
   ${(props) => props.width && `width: ${props.width}px;`}
 `;
 
-const StyledCheckbox = styled.input.attrs({ type: "checkbox" })`
-  appearance: none;
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 2px solid #00aef0;
-  border-radius: 4px;
-  outline: none;
-  cursor: pointer;
-
-  background-color: transparent;
-
-  &::after {
-    content: "✓";
-    width: 18px;
-    height: 18px;
-    color: white;
-    font-size: 14px;
-    line-height: 18px;
-  }
-
-  &:checked {
-    background-color: #00aef0;
-    border-color: #00aef0;
-  }
-
-  &:checked::after {
-    width: 18px;
-    height: 18px;
-    content: "✓";
-    color: white;
-    font-size: 14px;
-    display: block;
-    text-align: center;
-    line-height: 18px;
-  }
-
-  &:hover {
-    border-color: rgb(0, 119, 166);
-  }
-`;
-const DeleteButton = styled.div`
-  display: flex;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  cursor: pointer;
-
-  background-color: rgb(173, 1, 1);
-  color: white;
-  border-radius: 6px;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s ease;
-  &:hover {
-    background-color: rgb(234, 141, 141);
-  }
-`;
 const SeletedGuestsSC = styled.div`
   height: 38px;
-  color: black;
-
+  color: #333;
   display: flex;
   align-items: center;
+  padding: 0 12px;
+  background-color: rgba(107, 61, 223, 0.08);
+  border-radius: 8px;
+  font-size: 15px;
+
+  b {
+    color: rgb(107, 61, 223);
+    margin-right: 4px;
+    font-size: 16px;
+  }
 `;
 export const Panel = styled.div`
   position: fixed;
@@ -276,15 +305,142 @@ export const Panel = styled.div`
   left: 50%;
   transform: translateX(-50%);
   background: white;
-  padding: 12px 20px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  gap: 16px;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
   z-index: 1000;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(107, 61, 223, 0.1);
+
+  /* Add a subtle animation when the panel appears */
+  animation: slideUp 0.3s ease-out;
+
+  @keyframes slideUp {
+    from {
+      transform: translate(-50%, 20px);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+  }
+
+  /* Add a subtle hover effect */
+  &:hover {
+    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.18);
+  }
 `;
+
+const DialogOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+`;
+
+const DialogContent = styled.div`
+  background-color: white;
+  padding: 28px;
+  border-radius: 8px;
+  width: 450px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(20px);
+  animation: slideUp 0.3s forwards;
+
+  @keyframes slideUp {
+    to {
+      transform: translateY(0);
+    }
+  }
+`;
+
+const DialogTitle = styled.h3`
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+`;
+
+const DialogDescription = styled.p`
+  color: #555;
+  font-size: 15px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+`;
+
+const DialogButtons = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+`;
+
+const InputGroup = styled.div`
+  margin-bottom: 20px;
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+  font-size: 15px;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #333;
+  font-family: "Axiforma", sans-serif;
+  background-color: #f9f9f9;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  &:focus {
+    border-color: rgb(107, 61, 223);
+    box-shadow: 0 0 0 3px rgba(107, 61, 223, 0.1);
+    outline: none;
+    background-color: white;
+  }
+`;
+
+const ReminderPreview = styled.div`
+  background-color: rgba(107, 61, 223, 0.05);
+  border: 1px solid rgba(107, 61, 223, 0.2);
+  border-radius: 6px;
+  padding: 14px;
+  margin-top: 16px;
+  color: #333;
+  font-size: 15px;
+
+  strong {
+    color: rgb(107, 61, 223);
+    font-weight: 600;
+  }
+`;
+
 type Props = {
   event: Event;
   refetch: () => void;
@@ -300,6 +456,12 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   } | null>(null);
   const [filterText, setFilterText] = useState<string>("");
   const [selectedGuests, setSelectedGuests] = useState<string[]>([]); // Selected guest IDs
+
+  const [showReminderDialog, setShowReminderDialog] = useState(false);
+  const [daysBefore, setDaysBefore] = useState(1);
+  const [reminderTime, setReminderTime] = useState("12:00"); // Default to noon
+  const [showSendEmailDialog, setShowSendEmailDialog] = useState(false);
+  const [showDeleteGuestsDialog, setShowDeleteGuestsDialog] = useState(false);
 
   const addNewGuestRow = () => {
     if (newGuests === null) {
@@ -361,6 +523,30 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       subject: `Your ticket for ${eventDetails.title}`,
       htmlContent: htmlContent,
     });
+  };
+
+  const openSendEmailDialog = () => {
+    if (selectedGuests.length === 0) {
+      addToast("No guests selected to send emails to.", ToastType.INFO);
+      return;
+    }
+    setShowSendEmailDialog(true);
+  };
+
+  const closeSendEmailDialog = () => {
+    setShowSendEmailDialog(false);
+  };
+
+  const openDeleteGuestsDialog = () => {
+    if (selectedGuests.length === 0) {
+      addToast("No guests selected to delete.", ToastType.INFO);
+      return;
+    }
+    setShowDeleteGuestsDialog(true);
+  };
+
+  const closeDeleteGuestsDialog = () => {
+    setShowDeleteGuestsDialog(false);
   };
 
   const sendEmailsToGuests = async () => {
@@ -427,6 +613,153 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
 
     setSelectedGuests([]);
     refetch();
+    closeSendEmailDialog();
+  };
+
+  const isEventInPast = () => {
+    const eventDate = new Date(event.date);
+    const now = new Date();
+    return eventDate < now;
+  };
+
+  const calculateReminderDate = () => {
+    const eventDate = new Date(event.date);
+    const reminderDate = new Date(eventDate);
+    reminderDate.setDate(eventDate.getDate() - daysBefore);
+
+    // Set the time from the time input
+    const [hours, minutes] = reminderTime.split(":").map(Number);
+    reminderDate.setHours(hours, minutes, 0, 0);
+
+    return reminderDate;
+  };
+
+  // Open reminder dialog
+  const openReminderDialog = () => {
+    if (selectedGuests.length === 0) {
+      addToast(
+        "No guests selected to schedule reminder emails for.",
+        ToastType.INFO
+      );
+      return;
+    }
+    setShowReminderDialog(true);
+  };
+
+  // Close reminder dialog
+  const closeReminderDialog = () => {
+    setShowReminderDialog(false);
+  };
+
+  // Schedule reminder emails with the calculated date
+  const scheduleReminderEmails = async () => {
+    if (!selectedGuests.length) {
+      console.warn("No guests selected to schedule reminder emails for.");
+      addToast(
+        "No guests selected to schedule reminder emails for.",
+        ToastType.INFO
+      );
+      return;
+    }
+
+    const reminderDate = calculateReminderDate();
+
+    // Check if reminder date is in the past
+    if (reminderDate < new Date()) {
+      addToast("Reminder date cannot be in the past.", ToastType.ERROR);
+      return;
+    }
+
+    // Prepare email data for each selected guest
+    const emailsData = selectedGuests
+      .map((guestId) => {
+        const guest = event.guests.find((g) => g._id === guestId);
+        if (!guest) return null;
+
+        const qrContent = guest._id.toString();
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+          qrContent
+        )}&size=320x320&color=000000&bgcolor=FFFFFF`;
+
+        // Generate HTML content for this guest
+        const htmlContent = getMailHtml(
+          guest.fullName,
+          qrCodeUrl,
+          event.title,
+          event.poster || "",
+          event.description,
+          event.date,
+          event.endDate,
+          event.emailParams.parking,
+          event.emailParams.scheduleSrc,
+          event.emailParams.dining,
+          event.location.address || ""
+        );
+
+        return {
+          recipient: guest.email.toLowerCase(),
+          htmlContent,
+        };
+      })
+      .filter(Boolean); // Remove any null entries
+
+    try {
+      // Send the request to schedule reminder emails
+      await axiosInstance.post("/mail/schedule-reminders", {
+        eventId: event._id,
+        guests: selectedGuests.map((id) => ({ guestId: id })),
+        reminderTime: reminderDate.toISOString(),
+        emailSubject: `Reminder: Your event "${event.title}" is coming up!`,
+        emailsData,
+      });
+
+      // Update reminder_email_date for each guest
+      for (const guestId of selectedGuests) {
+        await axiosInstance.put(`/guests/${guestId}/reminder-date`, {
+          reminderDate: reminderDate.toISOString(),
+        });
+      }
+
+      addToast(
+        `Reminder emails scheduled for ${
+          selectedGuests.length
+        } guests on ${reminderDate.toLocaleDateString()}`,
+        ToastType.SUCCESS
+      );
+      setSelectedGuests([]);
+      closeReminderDialog();
+      refetch();
+    } catch (error) {
+      console.error("Error scheduling reminder emails:", error);
+      addToast("Failed to schedule reminder emails.", ToastType.ERROR);
+    }
+  };
+
+  // Format reminder date for display
+  const formatReminderDate = (dateString?: string) => {
+    if (!dateString) {
+      return { status: "Not set", dateTime: "" };
+    }
+
+    const reminderDate = new Date(dateString);
+    const now = new Date();
+
+    const dateTimeStr = `${reminderDate.toLocaleDateString()} ${reminderDate.toLocaleTimeString(
+      [],
+      { hour: "2-digit", minute: "2-digit" }
+    )}`;
+
+    if (reminderDate < now) {
+      return {
+        status: "Sent on",
+        dateTime: dateTimeStr,
+      };
+    } else {
+      return {
+        status: "Will be sent on",
+        dateTime: dateTimeStr,
+      };
+    }
   };
 
   const deleteSelectedGuests = async () => {
@@ -446,6 +779,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
 
     setSelectedGuests([]);
     refetch();
+    closeDeleteGuestsDialog();
   };
 
   const saveGuests = async () => {
@@ -478,22 +812,16 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     <GuestsWrapper>
       <GuestTableHeaderContainer>
         <SearchContainer>
-          <SearchIcon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M14.9536 14.9458L21 21M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
-                stroke="rgb(137, 137, 137)"
-                stroke-width="2"
-                strokeLinecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
+          <SearchIcon
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </SearchIcon>
           <SearchInput
             type="text"
@@ -503,13 +831,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
           />
         </SearchContainer>
 
-        <GuestActionsButtonsContainer>
-          {newGuests === null && (
-            <PrimaryButton marginTop={20} onClick={addNewGuestRow}>
-              + Add Guest
-            </PrimaryButton>
-          )}
-        </GuestActionsButtonsContainer>
+        <PrimaryButton onClick={addNewGuestRow}>+ Add Guest</PrimaryButton>
       </GuestTableHeaderContainer>
 
       <ScrollableTable>
@@ -518,7 +840,6 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
             <tr>
               <th>
                 <StyledCheckbox
-                  type="checkbox"
                   checked={
                     selectedGuests.length === event.guests.length &&
                     event.guests.length > 0
@@ -529,6 +850,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
               <th>Full Name</th>
               <th>Email</th>
               <th>Email Sent</th>
+              <th>Reminder Email</th>
               <th>Phone</th>
               <th>Attendance</th>
               <th>Actions</th>
@@ -559,6 +881,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                 <td></td>
                 <td></td>
                 <td></td>
+                <td></td>
                 <td>
                   <GuestActionsButtonsContainer>
                     <PrimaryButton width={80} onClick={saveGuests}>
@@ -583,7 +906,6 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
               >
                 <td>
                   <StyledCheckbox
-                    type="checkbox"
                     checked={selectedGuests.includes(guest._id)}
                   />
                 </td>
@@ -608,6 +930,30 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                   >
                     {guest.email_sent ? "Sent" : "Not Sent"}
                   </ActivityStatus>
+                </td>
+                <td>
+                  {guest.reminder_email_date ? (
+                    <ReminderStatus
+                      color={
+                        new Date(guest.reminder_email_date) < new Date()
+                          ? "#2a9134" // Green for sent
+                          : "#00aef0" // Blue for scheduled
+                      }
+                    >
+                      <span className="status-text">
+                        {formatReminderDate(guest.reminder_email_date).status}
+                      </span>
+                      <span className="date-time">
+                        {formatReminderDate(guest.reminder_email_date).dateTime}
+                      </span>
+                    </ReminderStatus>
+                  ) : (
+                    <ReminderStatus color="#e40000">
+                      {" "}
+                      {/* Red for not set */}
+                      <span className="status-text">Not set</span>
+                    </ReminderStatus>
+                  )}
                 </td>
                 <td>{guest.phoneNumber || "-"}</td>
                 <td>{guest.attendance_status ? "+" : "-"}</td>
@@ -643,28 +989,141 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         </table>
       </ScrollableTable>
       <Toasts />
-      {selectedGuests.length ? (
+      {/* Reminder Dialog */}
+      {showReminderDialog && (
+        <DialogOverlay onClick={closeReminderDialog}>
+          <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogTitle>Schedule Reminder Emails</DialogTitle>
+            <DialogDescription>
+              Set when reminder emails should be sent to your guests. Choose how
+              many days before the event and at what time.
+            </DialogDescription>
+
+            <InputGroup>
+              <Label htmlFor="daysBefore">Days before event:</Label>
+              <Input
+                id="daysBefore"
+                type="number"
+                min="1"
+                max="30"
+                value={daysBefore}
+                onChange={(e) => setDaysBefore(parseInt(e.target.value) || 1)}
+              />
+            </InputGroup>
+
+            <InputGroup>
+              <Label htmlFor="reminderTime">Time of day:</Label>
+              <Input
+                id="reminderTime"
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+              />
+            </InputGroup>
+
+            <ReminderPreview>
+              Reminder emails will be sent on:{" "}
+              <strong>{calculateReminderDate().toLocaleDateString()}</strong> at{" "}
+              <strong>
+                {calculateReminderDate().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </strong>
+            </ReminderPreview>
+
+            <DialogButtons>
+              <SecondaryButton onClick={closeReminderDialog} width={120}>
+                Cancel
+              </SecondaryButton>
+              <PrimaryButton onClick={scheduleReminderEmails} width={180}>
+                Schedule Reminders
+              </PrimaryButton>
+            </DialogButtons>
+          </DialogContent>
+        </DialogOverlay>
+      )}
+      {selectedGuests.length > 0 && (
         <Panel>
           <SeletedGuestsSC>
-            <b>{selectedGuests.length}</b>&nbsp;
-            {selectedGuests.length > 1 ? "guests" : "guest"}&nbsp;selected
+            <b>{selectedGuests.length}</b>
+            {selectedGuests.length > 1 ? " guests" : " guest"} selected
           </SeletedGuestsSC>
 
           <SecondaryButton
-            onClick={deleteSelectedGuests}
+            onClick={openDeleteGuestsDialog}
             disabled={selectedGuests.length === 0}
           >
             Delete selected
           </SecondaryButton>
 
           <SecondaryButton
-            onClick={sendEmailsToGuests}
+            onClick={openSendEmailDialog}
             disabled={selectedGuests.length === 0}
           >
             Email selected
           </SecondaryButton>
+
+          {!isEventInPast() && (
+            <SecondaryButton
+              onClick={openReminderDialog}
+              disabled={selectedGuests.length === 0}
+              width={180}
+            >
+              Set reminders
+            </SecondaryButton>
+          )}
         </Panel>
-      ) : null}
+      )}
+      {showSendEmailDialog && (
+        <DialogOverlay onClick={closeSendEmailDialog}>
+          <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogTitle>Send Emails to Selected Guests</DialogTitle>
+            <DialogDescription>
+              You are about to send event invitation emails to{" "}
+              {selectedGuests.length} selected{" "}
+              {selectedGuests.length === 1 ? "guest" : "guests"}. Each guest
+              will receive a personalized email with event details and their
+              unique QR code ticket.
+            </DialogDescription>
+
+            <DialogButtons>
+              <SecondaryButton onClick={closeSendEmailDialog} width={120}>
+                Cancel
+              </SecondaryButton>
+              <PrimaryButton onClick={sendEmailsToGuests} width={180}>
+                Send Emails
+              </PrimaryButton>
+            </DialogButtons>
+          </DialogContent>
+        </DialogOverlay>
+      )}
+      {showDeleteGuestsDialog && (
+        <DialogOverlay onClick={closeDeleteGuestsDialog}>
+          <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogTitle>Delete Selected Guests</DialogTitle>
+            <DialogDescription>
+              You are about to delete {selectedGuests.length} selected{" "}
+              {selectedGuests.length === 1 ? "guest" : "guests"} from this
+              event. This action cannot be undone. Any scheduled emails for
+              these guests will also be canceled.
+            </DialogDescription>
+
+            <DialogButtons>
+              <SecondaryButton onClick={closeDeleteGuestsDialog} width={120}>
+                Cancel
+              </SecondaryButton>
+              <PrimaryButton
+                onClick={deleteSelectedGuests}
+                width={180}
+                style={{ backgroundColor: "rgb(220, 53, 69)" }} // Red color for delete button
+              >
+                Delete Guests
+              </PrimaryButton>
+            </DialogButtons>
+          </DialogContent>
+        </DialogOverlay>
+      )}
     </GuestsWrapper>
   );
 };

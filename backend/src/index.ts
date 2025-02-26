@@ -7,6 +7,7 @@ import eventRoutes from './routes/event.routes';
 import guestRoutes from './routes/guest.routes';
 import mailRoutes from './routes/mail.routes';
 import userRoutes from './routes/user.routes';
+import { startEmailScheduler } from './services/emailScheduler.service';
 
 dotenv.config();
 
@@ -58,4 +59,8 @@ const PORT = process.env.PORT;
 app.listen(PORT, () => {
   connectDB();
   console.log(`Server is running on PORT:${PORT}`);
+
+  // Start the email scheduler
+  startEmailScheduler();
+  console.log('Email scheduler started');
 });

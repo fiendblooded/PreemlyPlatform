@@ -121,7 +121,7 @@ export const GlobalStyle = createGlobalStyle`
     font-family: Axiforma, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #E9F0F2;
+    background-color: #F8F9FC;
     color: #f5f5f5;
   }
 `;

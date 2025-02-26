@@ -1,193 +1,377 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import TopBar from "./TopBar";
-import { PageWrapper, Spinner, SpinnerContainer } from "./Events";
-import useAxiosWithAuth from "./auth/useAxiosWithAuth";
-import { Event } from "../types";
-import { getDateTimeStatus, isTablet } from "../common/common";
+import React, { useState, useEffect } from "react";
+import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
-import TaskList from "./TaskList";
+import TopBar from "./TopBar";
+import useAxiosWithAuth from "./auth/useAxiosWithAuth";
+
 import CalendarBox from "./CalendarBox";
-import { MessageContainer, CreateLink } from "./EventList";
+import TaskList from "./TaskList";
+import Spinner from "./Spinner";
+import { isTablet, getDateTimeStatus } from "../common/common";
 import EventForm from "./form/EventForm";
 
-const DashboardContainer = styled.div<{ tabletMode: boolean }>`
-  width: 100%;
-  height: 100%;
-  font-family: Axiforma, sans-serif;
-  color: black;
-  max-height: 100%;
+// Types
+interface Event {
+  _id: string;
+  title: string;
+  date: string;
+  endDate: string;
+  poster: string;
+  guests: {
+    _id: string;
+    name: string;
+    email: string;
+    attendance_status: boolean;
+  }[];
+  tasks: {
+    _id: string;
+    title: string;
+    isCompleted: boolean;
+    dueDate: string;
+  }[];
+}
 
+// Add these new keyframe animations near the top with other styled components
+const fadeInDown = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const bounceIn = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+`;
+
+// Styled Components
+const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  ${(props) => !props.tabletMode && "justify-content: center;"}
-
-  overflow-y: auto; /* Use auto instead of scroll */
-  overflow-x: hidden;
-  text-overflow: ellipsis;
-  /* Scrollbar styling */
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #d3d3d3 #f5f5f5; /* Scrollbar thumb and track colors */
-
-  &::-webkit-scrollbar {
-    width: 8px; /* Scrollbar width */
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f5f5f5; /* Light background for the track */
-    border-radius: 4px; /* Rounded corners */
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #d3d3d3; /* Light grey thumb */
-    border-radius: 4px; /* Rounded corners */
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: #b0b0b0; /* Darker grey on hover */
-  }
+  min-height: 100vh;
+  background-color: #f8f9fc;
 `;
 
-const HeaderStats = styled.div<{ tabletMode: boolean }>`
+const SpinnerContainer = styled.div`
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping */
-  justify-content: space-between;
-  margin: 0 auto;
-  margin-bottom: 30px;
-  width: calc(90% + 40px); /* Simplified from calc */
-  gap: 16px;
-  ${(props) => props.tabletMode && "margin-top: 20px;"}
-`;
-
-const StatBox = styled.div<{ color: string }>`
-  background-color: ${(props) => props.color};
-  color: white;
-  display: flex;
-  flex-direction: row;
-  padding: 20px;
-  padding-left: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  width: calc(20% - 16px); /* Adjust for gap */
-  font-weight: bold;
+  justify-content: center;
   align-items: center;
+  height: 100%;
+  width: 100%;
+`;
 
-  /* Responsive adjustments */
-  @media (max-width: 1200px) {
-    width: calc(25% - 12px); /* 4 items per row */
+const DashboardContainer = styled.div<{ tabletMode: boolean }>`
+  padding: ${(props) => (props.tabletMode ? "20px" : "30px")};
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: #333;
+    animation: ${fadeInDown} 0.6s ease-out;
   }
+`;
 
-  @media (max-width: 900px) {
-    width: calc(50% - 60px); /* 2 items per row */
+const MessageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+  line-height: 1.6;
+`;
+
+const CreateLink = styled.span`
+  color: rgb(107, 61, 223);
+  cursor: pointer;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+  width: 100%;
+  padding: 0 1px;
+  box-sizing: border-box;
+  animation: ${bounceIn} 0.6s ease-out 0.3s both;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   @media (max-width: 600px) {
-    width: 100%; /* Full-width on small screens */
+    grid-template-columns: 1fr;
   }
 `;
 
-const StatBoxContent = styled.div`
+const StatCard = styled.div`
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  text-align: left;
-  margin: auto 0px;
-  gap: 4px;
-  margin-left: 12px;
-  padding-top: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
 `;
 
-const StatValue = styled.div`
-  font-size: 20px;
-  line-height: 24px;
+const StatHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 `;
 
 const StatTitle = styled.div`
   font-size: 15px;
   font-weight: 500;
-  line-height: 18px;
-  color: white;
+  color: #666;
 `;
 
-const GraphSection = styled.div<{
-  width: number;
-  height?: number;
-  noMargin?: boolean;
-}>`
-  width: ${(props) => props.width}%;
-  ${(props) => !props.noMargin && "margin: 0px auto;"}
-
-  height: ${(props) => (props.height ? props.height : "25")}%;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  margin-bottom: 30px;
+const StatIconWrapper = styled.div<{ color: string }>`
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: ${(props) => `${props.color}15`};
   display: flex;
-  flex-direction: column;
-`;
-
-const GraphTitle = styled.div`
-  font-weight: bold;
-  font-size: 24px;
-  margin-bottom: 8px;
-`;
-
-const ReelContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  overflow-x: auto;
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  overflow-y: hidden;
-  border-radius: 8px;
-  white-space: nowrap;
-  color: black;
-  scroll-snap-type: x mandatory; /* Optional for smooth snapping */
-`;
-
-const EventBox = styled.div`
-  flex: 0 0 22%; /* Each EventBox takes 22% of the width */
-  height: 90%;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  overflow: hidden;
-  padding: 10px;
-  scroll-snap-align: start; /* Optional for snapping effect */
-  border: 3px solid transparent;
-  cursor: pointer;
-  transition: ease all 0.3s;
-  &: hover {
-    border-color: #f4c430;
-    background-color: rgb(255, 243, 206);
+  justify-content: center;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    stroke: ${(props) => props.color};
+    stroke-width: 2px;
   }
 `;
 
-const EventPoster = styled.img`
-  width: 100%;
-  height: 150px; /* Fixed height for the poster */
-  object-fit: cover; /* Maintain aspect ratio and crop if needed */
-  border-radius: 8px;
-  margin-bottom: 10px;
+const StatValueWrapper = styled.div`
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
 `;
-const EventDetailWrapper = styled.div`
+
+const StatValue = styled.div`
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1;
+`;
+
+const StatChange = styled.div<{ positive?: boolean }>`
+  font-size: 13px;
+  font-weight: 500;
+  color: ${(props) => (props.positive ? "#00BC8A" : "#E30D8E")};
+  display: flex;
+  align-items: center;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 2px;
+  }
+`;
+
+const DashboardSection = styled.div<{
+  width: number;
+  height?: number;
+  noMargin?: boolean;
+  delay?: number;
+}>`
+  width: ${(props) => props.width}%;
+  ${(props) => !props.noMargin && "margin: 0 auto;"};
+  height: ${(props) => (props.height ? props.height : "auto")};
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  animation: ${bounceIn} 0.6s ease-out ${(props) => props.delay || 0}s both;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+
+  svg {
+    margin-right: 8px;
+    color: rgb(107, 61, 223);
+  }
+`;
+
+const EventsCarousel = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  display: flex;
+  gap: 16px;
+  padding: 4px 0 16px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+  }
+
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+`;
+
+const EventCard = styled.div`
+  flex: 0 0 280px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  border: 1px solid #eee;
+  scroll-snap-align: start;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    border-color: rgba(107, 61, 223, 0.3);
+  }
+`;
+
+const EventPoster = styled.div<{ imageUrl: string }>`
+  height: 140px;
+  background-image: url(${(props) =>
+    props.imageUrl || "https://via.placeholder.com/280x140"});
+  background-size: cover;
+  background-position: center;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  }
+`;
+
+const EventDetails = styled.div`
+  padding: 16px;
+`;
+
+const EventName = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #333;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+`;
+
+const EventDate = styled.div`
+  font-size: 14px;
+  color: #666;
+  display: flex;
+  align-items: center;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    color: rgb(107, 61, 223);
+  }
+`;
+
+const EventMeta = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #666;
+`;
+
+const EventMetaItem = styled.div`
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+    color: #888;
+  }
+`;
+
+const DashboardRow = styled.div`
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+  }
+`;
+
+const ContentWrapper = styled.div`
   width: 75%;
   height: 90%;
   margin: auto;
   background-color: white;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 
-  /* Responsive style for tablet and mobile */
   @media (max-width: 1024px) {
     width: 100%;
     max-height: 100%;
@@ -195,47 +379,68 @@ const EventDetailWrapper = styled.div`
   }
 `;
 
-const EventName = styled.div`
-  max-width: 100%;
-  color: black;
-  // overflow: auto;
-  // overflow-wrap: break-word;
-  // flex-wrap: wrap;
-  // text-overflow: ellipsis;
-  flex-wrap: wrap;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
-`;
+const CalendarWrapper = styled.div`
+  .react-calendar {
+    width: 100%;
+    border: none;
+    background: white;
+    font-family: inherit;
 
-const EventDate = styled.div`
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 10px;
-`;
+    .react-calendar__tile {
+      padding: 1em 0.5em;
+      height: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 4px;
 
-const SvgContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 50%; /* Use 50% for a perfect circle */
-  width: 56px; /* Example fixed width */
-  height: 56px; /* Ensure height matches width */
-`;
-const GraphRow = styled.div`
-  display: flex;
-  margin: 0px auto;
-  height: 54%;
-  width: calc(90% + 40px);
-  justify-content: space-between;
+      &--now {
+        background: rgba(107, 61, 223, 0.1);
+      }
+
+      &--active {
+        background: rgb(107, 61, 223) !important;
+        color: white;
+      }
+    }
+
+    .react-calendar__month-view__days__day--weekend {
+      color: #d10000;
+    }
+
+    .react-calendar__navigation {
+      margin-bottom: 1em;
+      height: 40px;
+
+      button {
+        min-width: 40px;
+        background: none;
+
+        &:enabled:hover,
+        &:enabled:focus {
+          background-color: rgba(107, 61, 223, 0.1);
+        }
+      }
+    }
+
+    .react-calendar__month-view__weekdays {
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: bold;
+      font-size: 0.8em;
+    }
+  }
 `;
 
 const Dashboard: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
   const axiosInstance = useAxiosWithAuth();
   const tabletMode = isTablet();
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -252,7 +457,8 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const calculateStats = () => {
-    if (events.length === 0) return null; // Return early if no events are loaded
+    if (events.length === 0) return null;
+
     const upcomingEvents = events
       .filter(
         (currentEvent) =>
@@ -275,7 +481,7 @@ const Dashboard: React.FC = () => {
 
     return {
       totalEvents,
-      upcomingEvents: upcomingEvents,
+      upcomingEvents,
       pastEvents,
       totalGuests,
       checkedInGuests,
@@ -300,113 +506,177 @@ const Dashboard: React.FC = () => {
       : Math.round((checkedInGuests / totalGuests) * 100);
   };
 
-  // Only calculate stats when not loading and events are available
   const stats = !loading ? calculateStats() : null;
-  console.log({ stats });
   const averageAttendance = !loading ? calculateAverageAttendance() : 0;
-  const navigate = useNavigate();
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
+
   return (
     <PageWrapper>
       <TopBar sectionTitle="Dashboard" />
 
-      <EventDetailWrapper>
+      <ContentWrapper>
         {loading ? (
           <SpinnerContainer>
-            <Spinner />
+            <Spinner isVisible={true} />
           </SpinnerContainer>
         ) : (
           <DashboardContainer tabletMode={tabletMode}>
-            {/* <h1>Welcome back, Username 👋</h1> */}
-            <HeaderStats tabletMode={tabletMode}>
-              <StatBox color={"#4581FA"}>
-                <SvgContainer>
-                  <svg
-                    width="37"
-                    height="36"
-                    viewBox="0 0 37 36"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M4.58203 13.5H31.582M13.582 22.5L16.582 25.5L22.582 19.5M10.582 4.5V7.5M25.582 4.5V7.5M9.38203 31.5H26.782C28.4622 31.5 29.3023 31.5 29.944 31.173C30.5085 30.8854 30.9674 30.4265 31.2551 29.862C31.582 29.2202 31.582 28.3802 31.582 26.7V12.3C31.582 10.6198 31.582 9.77976 31.2551 9.13803C30.9674 8.57354 30.5085 8.1146 29.944 7.82698C29.3023 7.5 28.4622 7.5 26.782 7.5H9.38203C7.70187 7.5 6.86179 7.5 6.22006 7.82698C5.65557 8.1146 5.19663 8.57354 4.90901 9.13803C4.58203 9.77976 4.58203 10.6198 4.58203 12.3V26.7C4.58203 28.3802 4.58203 29.2202 4.90901 29.862C5.19663 30.4265 5.65557 30.8854 6.22006 31.173C6.86179 31.5 7.70187 31.5 9.38203 31.5Z"
-                      stroke="white"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </SvgContainer>
-                <StatBoxContent>
+            <h1>Welcome to your Dashboard</h1>
+
+            <StatsGrid>
+              <StatCard>
+                <StatHeader>
+                  <StatTitle>Events Created</StatTitle>
+                  <StatIconWrapper color="#4581FA">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 18.8856 21 19.8284 20.4142 20.4142C19.8284 21 18.8856 21 17 21H7C5.11438 21 4.17157 21 3.58579 20.4142C3 19.8284 3 18.8856 3 17V8.5C3 6.61438 3 5.67157 3.58579 5.08579C4.17157 4.5 5.11438 4.5 7 4.5H17C18.8856 4.5 19.8284 4.5 20.4142 5.08579C21 5.67157 21 6.61438 21 8.5Z"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </StatIconWrapper>
+                </StatHeader>
+                <StatValueWrapper>
                   <StatValue>{stats?.totalEvents || 0}</StatValue>
-                  <StatTitle>Events created</StatTitle>
-                </StatBoxContent>
-              </StatBox>
-              <StatBox color={"#00BC8A"}>
-                <SvgContainer>
-                  <svg
-                    width="36"
-                    height="36"
-                    viewBox="0 0 36 36"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M9.00146 6H9.01647M4.75781 15C5.37557 13.2522 7.04243 12 9.00175 12C10.9611 12 12.6279 13.2522 13.2457 15M9.00146 22.5H9.01647M4.75781 31.5C5.37557 29.7522 7.04243 28.5 9.00175 28.5C10.9611 28.5 12.6279 29.7522 13.2457 31.5M20.4015 12.75H29.1015C29.9415 12.75 30.3616 12.75 30.6825 12.5865C30.9647 12.4427 31.1942 12.2132 31.338 11.931C31.5015 11.6101 31.5015 11.1901 31.5015 10.35V9.15C31.5015 8.30992 31.5015 7.88988 31.338 7.56901C31.1942 7.28677 30.9647 7.0573 30.6825 6.91349C30.3616 6.75 29.9415 6.75 29.1015 6.75H20.4015C19.5614 6.75 19.1413 6.75 18.8205 6.91349C18.5382 7.0573 18.3088 7.28677 18.165 7.56901C18.0015 7.88988 18.0015 8.30992 18.0015 9.15V10.35C18.0015 11.1901 18.0015 11.6101 18.165 11.931C18.3088 12.2132 18.5382 12.4427 18.8205 12.5865C19.1413 12.75 19.5614 12.75 20.4015 12.75ZM20.4015 29.25H29.1015C29.9415 29.25 30.3616 29.25 30.6825 29.0865C30.9647 28.9427 31.1942 28.7132 31.338 28.431C31.5015 28.1101 31.5015 27.6901 31.5015 26.85V25.65C31.5015 24.8099 31.5015 24.3899 31.338 24.069C31.1942 23.7868 30.9647 23.5573 30.6825 23.4135C30.3616 23.25 29.9415 23.25 29.1015 23.25H20.4015C19.5614 23.25 19.1413 23.25 18.8205 23.4135C18.5382 23.5573 18.3088 23.7868 18.165 24.069C18.0015 24.3899 18.0015 24.8099 18.0015 25.65V26.85C18.0015 27.6901 18.0015 28.1101 18.165 28.431C18.3088 28.7132 18.5382 28.9427 18.8205 29.0865C19.1413 29.25 19.5614 29.25 20.4015 29.25ZM10.5015 6C10.5015 6.82843 9.82989 7.5 9.00146 7.5C8.17304 7.5 7.50146 6.82843 7.50146 6C7.50146 5.17157 8.17304 4.5 9.00146 4.5C9.82989 4.5 10.5015 5.17157 10.5015 6ZM10.5015 22.5C10.5015 23.3284 9.82989 24 9.00146 24C8.17304 24 7.50146 23.3284 7.50146 22.5C7.50146 21.6716 8.17304 21 9.00146 21C9.82989 21 10.5015 21.6716 10.5015 22.5Z"
-                      stroke="white"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </SvgContainer>
-                <StatBoxContent>
+                  {stats && stats.totalEvents > 0 && (
+                    <StatChange positive={true}>
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 19V5M5 12L12 5L19 12"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      New
+                    </StatChange>
+                  )}
+                </StatValueWrapper>
+              </StatCard>
+
+              <StatCard>
+                <StatHeader>
+                  <StatTitle>Guests Invited</StatTitle>
+                  <StatIconWrapper color="#00BC8A">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M17 8C17 10.7614 14.7614 13 12 13C9.23858 13 7 10.7614 7 8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8Z"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M3 21C3 16.5817 6.58172 13 11 13H13C17.4183 13 21 16.5817 21 21"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </StatIconWrapper>
+                </StatHeader>
+                <StatValueWrapper>
                   <StatValue>{stats?.totalGuests || 0}</StatValue>
-                  <StatTitle>Guests invited</StatTitle>
-                </StatBoxContent>
-              </StatBox>
-              <StatBox color={"#E30D8E"}>
-                <SvgContainer>
-                  <svg
-                    width="37"
-                    height="36"
-                    viewBox="0 0 37 36"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M18.1694 13.5H18.1844M22.6694 28.5L25.6694 31.5L31.6694 25.5M13.9258 22.5C14.5435 20.7522 16.2104 19.5 18.1697 19.5C20.1291 19.5 21.7959 20.7522 22.4137 22.5M30.168 19.5V10.8C30.168 9.11984 30.168 8.27976 29.841 7.63803C29.5534 7.07354 29.0944 6.6146 28.5299 6.32698C27.8882 6 27.0481 6 25.368 6H10.968C9.28781 6 8.44773 6 7.806 6.32698C7.24151 6.6146 6.78257 7.07354 6.49495 7.63803C6.16797 8.27976 6.16797 9.11984 6.16797 10.8V25.2C6.16797 26.8802 6.16797 27.7202 6.49495 28.362C6.78257 28.9265 7.24151 29.3854 7.806 29.673C8.44773 30 9.28781 30 10.968 30H16.6694M19.6694 13.5C19.6694 14.3284 18.9979 15 18.1694 15C17.341 15 16.6694 14.3284 16.6694 13.5C16.6694 12.6716 17.341 12 18.1694 12C18.9979 12 19.6694 12.6716 19.6694 13.5Z"
-                      stroke="white"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </SvgContainer>
-                <StatBoxContent>
-                  <StatValue>{averageAttendance}%</StatValue>
+                  {stats && stats.checkedInGuests > 0 && (
+                    <StatChange positive={true}>
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 19V5M5 12L12 5L19 12"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      {stats.checkedInGuests} checked in
+                    </StatChange>
+                  )}
+                </StatValueWrapper>
+              </StatCard>
+
+              <StatCard>
+                <StatHeader>
                   <StatTitle>Average Attendance</StatTitle>
-                </StatBoxContent>
-              </StatBox>
-              <StatBox color={"#8E7BFB"}>
-                <SvgContainer>
-                  <svg
-                    width="36"
-                    height="36"
-                    viewBox="0 0 36 36"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 10.5H18M22.5 22.5H24M12 16.5H24M12 24L13.5 25.5L16.5 22.5M10.8 31.5H25.2C26.8802 31.5 27.7202 31.5 28.362 31.173C28.9265 30.8854 29.3854 30.4265 29.673 29.862C30 29.2202 30 28.3802 30 26.7V9.3C30 7.61984 30 6.77976 29.673 6.13803C29.3854 5.57354 28.9265 5.1146 28.362 4.82698C27.7202 4.5 26.8802 4.5 25.2 4.5H10.8C9.11984 4.5 8.27976 4.5 7.63803 4.82698C7.07354 5.1146 6.6146 5.57354 6.32698 6.13803C6 6.77976 6 7.61984 6 9.3V26.7C6 28.3802 6 29.2202 6.32698 29.862C6.6146 30.4265 7.07354 30.8854 7.63803 31.173C8.27976 31.5 9.11984 31.5 10.8 31.5Z"
-                      stroke="white"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </SvgContainer>
-                <StatBoxContent>
+                  <StatIconWrapper color="#E30D8E">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M16 8H8M16 16H8M9 20H15C16.8856 20 17.8284 20 18.4142 19.4142C19 18.8284 19 17.8856 19 16V8C19 6.11438 19 5.17157 18.4142 4.58579C17.8284 4 16.8856 4 15 4H9C7.11438 4 6.17157 4 5.58579 4.58579C5 5.17157 5 6.11438 5 8V16C5 17.8856 5 18.8284 5.58579 19.4142C6.17157 20 7.11438 20 9 20Z"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </StatIconWrapper>
+                </StatHeader>
+                <StatValueWrapper>
+                  <StatValue>{averageAttendance}%</StatValue>
+                  {averageAttendance > 0 && (
+                    <StatChange positive={averageAttendance > 50}>
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        {averageAttendance > 50 ? (
+                          <path
+                            d="M12 19V5M5 12L12 5L19 12"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        ) : (
+                          <path
+                            d="M12 5V19M19 12L12 19L5 12"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        )}
+                      </svg>
+                      {averageAttendance > 50 ? "Good" : "Low"}
+                    </StatChange>
+                  )}
+                </StatValueWrapper>
+              </StatCard>
+
+              <StatCard>
+                <StatHeader>
+                  <StatTitle>Tasks Completed</StatTitle>
+                  <StatIconWrapper color="#8E7BFB">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M9 11L12 14L20 6M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </StatIconWrapper>
+                </StatHeader>
+                <StatValueWrapper>
                   <StatValue>
                     {events.reduce(
                       (sum, event) =>
@@ -414,64 +684,256 @@ const Dashboard: React.FC = () => {
                         event.tasks.filter((task) => task.isCompleted).length,
                       0
                     )}
-
                     {" / "}
                     {events.reduce((sum, event) => sum + event.tasks.length, 0)}
                   </StatValue>
-                  <StatTitle>Tasks completed/created</StatTitle>
-                </StatBoxContent>
-              </StatBox>
-            </HeaderStats>
-            <GraphSection width={90}>
-              <GraphTitle>Upcoming Events</GraphTitle>
-              {stats?.upcomingEvents.length ? (
-                <ReelContainer>
-                  {stats?.upcomingEvents.map((event, index) => (
-                    <EventBox
-                      key={index}
+                  {events.length > 0 &&
+                    events.reduce((sum, event) => sum + event.tasks.length, 0) >
+                      0 && (
+                      <StatChange
+                        positive={
+                          events.reduce(
+                            (sum, event) =>
+                              sum +
+                              event.tasks.filter((task) => task.isCompleted)
+                                .length,
+                            0
+                          ) /
+                            events.reduce(
+                              (sum, event) => sum + event.tasks.length,
+                              0
+                            ) >
+                          0.5
+                        }
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          {events.reduce(
+                            (sum, event) =>
+                              sum +
+                              event.tasks.filter((task) => task.isCompleted)
+                                .length,
+                            0
+                          ) /
+                            events.reduce(
+                              (sum, event) => sum + event.tasks.length,
+                              0
+                            ) >
+                          0.5 ? (
+                            <path
+                              d="M12 19V5M5 12L12 5L19 12"
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          ) : (
+                            <path
+                              d="M12 5V19M19 12L12 19L5 12"
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          )}
+                        </svg>
+                        {Math.round(
+                          (events.reduce(
+                            (sum, event) =>
+                              sum +
+                              event.tasks.filter((task) => task.isCompleted)
+                                .length,
+                            0
+                          ) /
+                            events.reduce(
+                              (sum, event) => sum + event.tasks.length,
+                              0
+                            )) *
+                            100
+                        )}
+                        %
+                      </StatChange>
+                    )}
+                </StatValueWrapper>
+              </StatCard>
+            </StatsGrid>
+
+            <DashboardSection width={100} delay={0.6}>
+              <SectionTitle>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M21 10H3M16 2V6M8 2V6M7.8 22H16.2C17.8802 22 18.7202 22 19.362 21.673C19.9265 21.3854 20.3854 20.9265 20.673 20.362C21 19.7202 21 18.8802 21 17.2V8.8C21 7.11984 21 6.27976 20.673 5.63803C20.3854 5.07354 19.9265 4.6146 19.362 4.32698C18.7202 4 17.8802 4 16.2 4H7.8C6.11984 4 5.27976 4 4.63803 4.32698C4.07354 4.6146 3.6146 5.07354 3.32698 5.63803C3 6.27976 3 7.11984 3 8.8V17.2C3 18.8802 3 19.7202 3.32698 20.362C3.6146 20.9265 4.07354 21.3854 4.63803 21.673C5.27976 22 6.11984 22 7.8 22Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Upcoming Events
+              </SectionTitle>
+
+              {stats?.upcomingEvents && stats.upcomingEvents.length > 0 ? (
+                <EventsCarousel>
+                  {stats.upcomingEvents.map((event) => (
+                    <EventCard
+                      key={event._id}
                       onClick={() => navigate(`./events/${event._id}`)}
                     >
-                      <EventPoster
-                        src={
-                          event.poster || "https://via.placeholder.com/200x150"
-                        }
-                        alt={event.title}
-                      />
-                      <EventName>{event.title}</EventName>
-                      <EventDate>
-                        {new Date(event.date).toLocaleDateString()}
-                      </EventDate>
-                    </EventBox>
+                      <EventPoster imageUrl={event.poster} />
+                      <EventDetails>
+                        <EventName>{event.title}</EventName>
+                        <EventDate>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 18.8856 21 19.8284 20.4142 20.4142C19.8284 21 18.8856 21 17 21H7C5.11438 21 4.17157 21 3.58579 20.4142C3 19.8284 3 18.8856 3 17V8.5C3 6.61438 3 5.67157 3.58579 5.08579C4.17157 4.5 5.11438 4.5 7 4.5H17C18.8856 4.5 19.8284 4.5 20.4142 5.08579C21 5.67157 21 6.61438 21 8.5Z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          {new Date(event.date).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </EventDate>
+                        <EventMeta>
+                          <EventMetaItem>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M17 8C17 10.7614 14.7614 13 12 13C9.23858 13 7 10.7614 7 8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8Z"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M3 21C3 16.5817 6.58172 13 11 13H13C17.4183 13 21 16.5817 21 21"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            {event.guests.length} guests
+                          </EventMetaItem>
+                          <EventMetaItem>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M9 11L12 14L20 6M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            {
+                              event.tasks.filter((task) => task.isCompleted)
+                                .length
+                            }
+                            /{event.tasks.length}
+                          </EventMetaItem>
+                        </EventMeta>
+                      </EventDetails>
+                    </EventCard>
                   ))}
-                </ReelContainer>
+                </EventsCarousel>
               ) : (
                 <MessageContainer>
-                  You don't have any events yet. <br />
-                  Click{" "}
+                  You don't have any upcoming events yet. <br />
                   <CreateLink onClick={() => setIsPopupVisible(true)}>
-                    here
-                  </CreateLink>{" "}
-                  to create your first event!
+                    Create your first event
+                  </CreateLink>
                 </MessageContainer>
               )}
-            </GraphSection>
-            <GraphRow>
-              <GraphSection width={67} height={90} noMargin>
-                <GraphTitle>Event Calendar</GraphTitle>
-                <CalendarBox events={events} />
-              </GraphSection>
-              <GraphSection width={25} height={90} noMargin>
-                <TaskList events={events} />
-              </GraphSection>
-            </GraphRow>
+            </DashboardSection>
+
+            <DashboardRow>
+              <DashboardSection width={65} height={400} noMargin delay={0.8}>
+                <SectionTitle>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M21 10H3M16 2V6M8 2V6M7.8 22H16.2C17.8802 22 18.7202 22 19.362 21.673C19.9265 21.3854 20.3854 20.9265 20.673 20.362C21 19.7202 21 18.8802 21 17.2V8.8C21 7.11984 21 6.27976 20.673 5.63803C20.3854 5.07354 19.9265 4.6146 19.362 4.32698C18.7202 4 17.8802 4 16.2 4H7.8C6.11984 4 5.27976 4 4.63803 4.32698C4.07354 4.6146 3.6146 5.07354 3.32698 5.63803C3 6.27976 3 7.11984 3 8.8V17.2C3 18.8802 3 19.7202 3.32698 20.362C3.6146 20.9265 4.07354 21.3854 4.63803 21.673C5.27976 22 6.11984 22 7.8 22Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Event Calendar
+                </SectionTitle>
+                <CalendarWrapper>
+                  <CalendarBox events={events} />
+                </CalendarWrapper>
+              </DashboardSection>
+
+              <DashboardSection width={30} height={400} noMargin delay={0.9}>
+                <SectionTitle>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M9 11L12 14L20 6M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Tasks
+                </SectionTitle>
+                <TaskList
+                  events={events.map((event) => ({
+                    ...event,
+                    tasks: event.tasks.map((task) => ({
+                      ...task,
+                      dueDate: new Date().toISOString(),
+                    })),
+                  }))}
+                />
+              </DashboardSection>
+            </DashboardRow>
           </DashboardContainer>
         )}
-      </EventDetailWrapper>
-      {isPopupVisible && (
-        <EventForm
-          onClose={() => setIsPopupVisible(false)} // Close popup when done
-        />
-      )}
+      </ContentWrapper>
+
+      {isPopupVisible && <EventForm onClose={() => setIsPopupVisible(false)} />}
     </PageWrapper>
   );
 };

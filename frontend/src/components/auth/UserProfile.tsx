@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
@@ -14,9 +14,10 @@ const ProfileImage = styled.img`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border 1.5px solid transparent;
+  transition: transform 0.2s ease;
+
   &:hover {
-    border 1.5px solid black;
+    transform: scale(1.05);
   }
 `;
 
@@ -43,6 +44,14 @@ const UserInfoSection = styled.div`
   align-items: center;
   text-align: center;
   gap: 8px;
+  padding: 12px 0;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f8f8f8;
+  }
 `;
 
 const UserName = styled.div`
@@ -54,22 +63,6 @@ const UserEmail = styled.div`
   font-size: 14px;
   color: #666;
 `;
-
-// const UpgradeButton = styled.button`
-//   color: #0b0e13; /* Dark text for contrast */
-//   background-color: #fcd535; /* Matches the yellow accent color */
-//   font-size: 14px;
-//   padding: 10px;
-//   border: none;
-//   border-radius: 20px;
-//   width: 100%;
-//   cursor: pointer;
-//   font-weight: bold;
-
-//   &:hover {
-//     background-color: #e6bf30; /* Slightly darker shade for hover */
-//   }
-// `;
 
 const OptionsSection = styled.div`
   display: flex;
@@ -84,11 +77,16 @@ const OptionsSection = styled.div`
 const Option = styled.div`
   cursor: pointer;
   margin: auto 0;
-  padding: 8px;
-  padding-left: 10px;
+  padding: 8px 12px;
   border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
   &:hover {
-    background-color: rgb(215, 215, 215);
+    background-color: #f5f5f5;
+    transform: translateX(2px);
   }
 `;
 
@@ -150,7 +148,6 @@ const UserProfile: React.FC = () => {
               <UserEmail>{user?.[`${namespace}email`]}</UserEmail>
             </UserInfoSection>
             <OptionsSection>
-              <Option>Settings</Option>
               <Option onClick={() => navigate("/help")}>Help</Option>
             </OptionsSection>
             <FooterSection>
