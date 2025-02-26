@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { ContentWrapper, PageWrapper } from "./Events";
+import { PageWrapper } from "./Events";
 import TopBar from "./TopBar";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -12,6 +12,7 @@ const ProfileLayout = styled.div`
   display: flex;
   width: 100%;
   gap: 24px;
+  min-height: min-content;
 
   @media (max-width: 1024px) {
     flex-direction: column;
@@ -33,6 +34,7 @@ const ProfileSidebar = styled.div`
 const ProfileContent = styled.div`
   flex: 1;
   min-width: 0;
+  overflow-y: visible;
 `;
 
 const ProfilePictureSection = styled.div`
@@ -434,6 +436,7 @@ const FormInput = styled.input`
   font-size: 14px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
+  box-sizing: border-box;
   background-color: ${(props) => (props.disabled ? "#f9f9f9" : "white")};
   color: ${(props) => (props.disabled ? "#888" : "#333")};
   transition: all 0.2s ease;
@@ -504,6 +507,14 @@ const LoadingSpinner = styled.div`
       transform: rotate(360deg);
     }
   }
+`;
+
+const ContentWrapper = styled.div`
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  height: calc(100vh - 64px);
+  box-sizing: border-box;
 `;
 
 const Profile: React.FC = () => {
@@ -577,7 +588,7 @@ const Profile: React.FC = () => {
   return (
     <PageWrapper>
       <TopBar sectionTitle="Account Settings" />
-      <ContentWrapper marginTop={60}>
+      <ContentWrapper>
         <ProfileLayout>
           <ProfileSidebar>
             <ProfilePictureSection>

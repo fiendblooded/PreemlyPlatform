@@ -7,7 +7,7 @@ import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import CalendarBox from "./CalendarBox";
 import TaskList from "./TaskList";
 import Spinner from "./Spinner";
-import { isTablet, getDateTimeStatus } from "../common/common";
+import { isTablet, getDateTimeStatus, SvgSC } from "../common/common";
 import EventForm from "./form/EventForm";
 
 // Types
@@ -527,18 +527,18 @@ const Dashboard: React.FC = () => {
                 <StatHeader>
                   <StatTitle>Events Created</StatTitle>
                   <StatIconWrapper color="#4581FA">
-                    <svg
+                    <SvgSC
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 18.8856 21 19.8284 20.4142 20.4142C19.8284 21 18.8856 21 17 21H7C5.11438 21 4.17157 21 3.58579 20.4142C3 19.8284 3 18.8856 3 17V8.5C3 6.61438 3 5.67157 3.58579 5.08579C4.17157 4.5 5.11438 4.5 7 4.5H17C18.8856 4.5 19.8284 4.5 20.4142 5.08579C21 5.67157 21 6.61438 21 8.5Z"
-                        stroke="currentColor"
+                        stroke="black"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
-                    </svg>
+                    </SvgSC>
                   </StatIconWrapper>
                 </StatHeader>
                 <StatValueWrapper>
@@ -552,7 +552,7 @@ const Dashboard: React.FC = () => {
                       >
                         <path
                           d="M12 19V5M5 12L12 5L19 12"
-                          stroke="currentColor"
+                          stroke="black"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
@@ -574,13 +574,13 @@ const Dashboard: React.FC = () => {
                     >
                       <path
                         d="M17 8C17 10.7614 14.7614 13 12 13C9.23858 13 7 10.7614 7 8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8Z"
-                        stroke="currentColor"
+                        stroke="black"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
                       <path
                         d="M3 21C3 16.5817 6.58172 13 11 13H13C17.4183 13 21 16.5817 21 21"
-                        stroke="currentColor"
+                        stroke="black"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
@@ -598,7 +598,7 @@ const Dashboard: React.FC = () => {
                       >
                         <path
                           d="M12 19V5M5 12L12 5L19 12"
-                          stroke="currentColor"
+                          stroke="black"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
@@ -620,7 +620,7 @@ const Dashboard: React.FC = () => {
                     >
                       <path
                         d="M16 8H8M16 16H8M9 20H15C16.8856 20 17.8284 20 18.4142 19.4142C19 18.8284 19 17.8856 19 16V8C19 6.11438 19 5.17157 18.4142 4.58579C17.8284 4 16.8856 4 15 4H9C7.11438 4 6.17157 4 5.58579 4.58579C5 5.17157 5 6.11438 5 8V16C5 17.8856 5 18.8284 5.58579 19.4142C6.17157 20 7.11438 20 9 20Z"
-                        stroke="currentColor"
+                        stroke="black"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
@@ -669,7 +669,7 @@ const Dashboard: React.FC = () => {
                     >
                       <path
                         d="M9 11L12 14L20 6M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                        stroke="currentColor"
+                        stroke="black"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
@@ -877,7 +877,7 @@ const Dashboard: React.FC = () => {
             <DashboardRow>
               <DashboardSection width={65} height={400} noMargin delay={0.8}>
                 <SectionTitle>
-                  <svg
+                  <SvgSC
                     width="20"
                     height="20"
                     viewBox="0 0 24 24"
@@ -891,7 +891,7 @@ const Dashboard: React.FC = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
-                  </svg>
+                  </SvgSC>
                   Event Calendar
                 </SectionTitle>
                 <CalendarWrapper>

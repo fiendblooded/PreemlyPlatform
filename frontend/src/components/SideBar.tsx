@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
 import Logo from "../logo.png";
 import { isTablet } from "../common/common";
-
+import IpadLogo from "../ipadlogo.png";
 const SidebarTopContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -116,10 +116,10 @@ const Sidebar: React.FC = () => {
       <SidebarTopContainer>
         <ImageContainer>
           <img
-            src={Logo}
+            src={isTabletDevice ? IpadLogo : Logo}
             onClick={() => navigate("/")}
             alt="logo"
-            width={isTabletDevice ? "50%" : "80%"}
+            width={isTabletDevice ? "60%" : "80%"}
           />
         </ImageContainer>
         <TooltipWrapper>

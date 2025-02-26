@@ -37,29 +37,46 @@ const fadeOut = keyframes`
 
 const ToastContainer = styled.div`
   position: fixed;
-  top: 70px;
-  right: 1rem;
+  top: 24px;
+  right: 24px;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 12px;
   z-index: 1000;
 `;
 
 const ToastMessage = styled.div<{ isExiting: boolean; type: ToastType }>`
-  background-color: #323232; /* Dark background */
-  color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-size: 1rem;
-  border: 5px solid;
-  border-color: ${({ type }) =>
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: white;
+  color: #2c2c2c;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 300px;
+  max-width: 400px;
+  border-left: 4px solid;
+  border-left-color: ${({ type }) =>
     type === ToastType.SUCCESS
-      ? "#4CAF50"
+      ? "rgb(107, 61, 223)"
       : type === ToastType.ERROR
-      ? "#F44336"
-      : "#2196F3"};
+      ? "#dc3545"
+      : "#00aef0"};
   animation: ${({ isExiting }) => (isExiting ? fadeOut : fadeIn)} 0.3s forwards;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    color: ${({ type }) =>
+      type === ToastType.SUCCESS
+        ? "rgb(107, 61, 223)"
+        : type === ToastType.ERROR
+        ? "#dc3545"
+        : "#00aef0"};
+  }
 `;
 
 let toastId = 0;
@@ -91,6 +108,54 @@ export const useToast = () => {
     <ToastContainer>
       {toasts.map(({ id, message, type }) => (
         <ToastMessage key={id} isExiting={isExiting} type={type}>
+          {type === ToastType.SUCCESS && (
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <path
+                d="M8 12L11 15L16 9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+          {type === ToastType.ERROR && (
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          )}
+          {type === ToastType.INFO && (
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          )}
           {message}
         </ToastMessage>
       ))}
