@@ -5,6 +5,7 @@ const router = Router();
 
 router.post('/', guestController.createGuest);
 router.put('/:id', guestController.updateGuest);
+router.patch('/:id', guestController.updateGuest);
 router.delete('/:id', guestController.deleteGuest);
 router.put('/:id/attendance', guestController.markAttendance);
 router.put('/:id/emailstatus', guestController.markEmailSent);

@@ -13,4 +13,5 @@ export interface Guest extends GuestData, Document {
   reminder_email_date?: Date;
   team_id?: string;
   eventId?: string;
+  gdpr_consent?: boolean;
 }

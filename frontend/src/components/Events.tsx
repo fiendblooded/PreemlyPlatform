@@ -14,7 +14,7 @@ import PopupOverlay from "./form/PopupOverlay";
 export const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  max-height: 100vh;
+  height: 100vh;
   overflow: hidden;
 `;
 export const ContentWrapper = styled.div<{ marginTop?: number }>`
@@ -22,6 +22,9 @@ export const ContentWrapper = styled.div<{ marginTop?: number }>`
   padding: 0px 25px;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  height: calc(100vh - 140px);
 `;
 
 export const Header = styled.div`
@@ -31,6 +34,7 @@ export const Header = styled.div`
   display: flex;
   font-size: 28px;
   justify-content: space-between;
+  flex-shrink: 0;
 `;
 
 export const SpinnerContainer = styled.div`
@@ -137,6 +141,14 @@ export const ActiveStatusButton = styled.div<{
       ${(props) => (props.isActive ? props.borderColor : "grey")};
   }
 `;
+
+// Make sure the EventList container has room to grow
+const EventListContainer = styled.div`
+  flex: 1;
+  padding: 24px 0;
+  overflow-y: auto;
+`;
+
 const Events: React.FC = () => {
   useAuthSetup();
   const { user } = useAuth0();
@@ -301,10 +313,12 @@ const Events: React.FC = () => {
               <Spinner />{" "}
             </SpinnerContainer>
           ) : (
-            <EventList
-              events={filteredEvents}
-              isFilterQueue={searchQuery === ""}
-            />
+            <EventListContainer>
+              <EventList
+                events={filteredEvents}
+                isFilterQueue={searchQuery === ""}
+              />
+            </EventListContainer>
           )}
         </ContentWrapper>
       </PageWrapper>

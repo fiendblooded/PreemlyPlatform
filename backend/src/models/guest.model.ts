@@ -11,6 +11,10 @@ const GuestSchema = new Schema<Guest>({
   reminder_email_date: { type: Date, default: null }, // Add this field
   team_id: { type: String },
   eventId: { type: Schema.Types.ObjectId, ref: 'Event' },
+  gdpr_consent: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 export default mongoose.model<Guest>('Guest', GuestSchema);

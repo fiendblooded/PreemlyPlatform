@@ -112,9 +112,9 @@ const ScannerComponent: React.FC<Props> = ({ setGuest, eventGuests }) => {
     initializeCameraOverride(facingMode);
   }, [facingMode]);
 
-  const handleSwitchCamera = () => {
-    setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
-  };
+  // const handleSwitchCamera = () => {
+  //   setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
+  // };
 
   const handleScan = async (result: IDetectedBarcode[]) => {
     const guestId = result[0]?.rawValue;

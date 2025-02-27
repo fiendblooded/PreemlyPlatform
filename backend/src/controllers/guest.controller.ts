@@ -5,8 +5,8 @@ import { ObjectId } from 'mongodb';
 
 export const createGuest = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { eventId, fullName, email, age, attendance_status, phoneNumber } = req.body;
-
+    const { eventId, fullName, email, age, attendance_status, phoneNumber, gdpr_consent } = req.body;
+    console.log({ gdpr_consent });
     const event = await Event.findById(eventId);
     if (!event) {
       res.status(404).json({ success: false, message: 'Event not found' });
@@ -20,6 +20,7 @@ export const createGuest = async (req: Request, res: Response): Promise<void> =>
       phoneNumber,
       eventId,
       attendance_status,
+      gdpr_consent,
     });
     const savedGuest = await newGuest.save();
 

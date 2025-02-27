@@ -15,6 +15,8 @@ import { ToastType, useToast } from "./Toasts";
 // import AnimatedBackground from "./AnimatedBackground";
 import PreemlyLogo from "../logo.png";
 import HacknimeLogo from "../hacknimelogo.png";
+import { PrimaryButton } from "./EventGuestsEditor";
+import SuccessAnimation from "./SuccessAnimation";
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -143,7 +145,8 @@ const DateTimeSC = styled.div`
 `;
 const Container = styled.div<{ isVisible: boolean }>`
   width: 80%;
-  height: 80%;
+  height: auto;
+  min-height: 50vh;
   display: flex;
   gap: 20px;
   margin: auto;
@@ -193,20 +196,23 @@ const PrimaryWelcomeButton = styled.button`
   }
 `;
 
-const SecondaryWelcomeButton = styled.div`
+const SecondaryWelcomeButton = styled.button`
   font-size: 16px;
   border-radius: 24px;
   padding: 12px 20px;
   border: 2px solid #00aef0;
+  background: transparent;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  min-width: 160px;
+  gap: 8px;
   cursor: pointer;
+  transition: all 0.3s ease;
+
   &:hover {
-    background-color: rgb(0, 119, 166);
+    background-color: rgba(0, 174, 240, 0.1);
   }
 `;
 const OrSC = styled.div`
@@ -267,6 +273,9 @@ const ManualCheckInForm = ({
   setPhoneNumber,
   onBack,
   onSubmit,
+  gdprConsent,
+  setGdprConsent,
+  event,
 }: {
   manualName: string;
   setManualName: (value: string) => void;
@@ -276,91 +285,208 @@ const ManualCheckInForm = ({
   setPhoneNumber: (value: string) => void;
   onBack: () => void;
   onSubmit: () => void;
+  gdprConsent: boolean;
+  setGdprConsent: (value: boolean) => void;
+  event: Event | null;
 }) => (
-  <GuestInfoContainer>
-    <Title>Manual Check-in</Title>
+  <ManualCheckInContainer>
+    <FormHeader>
+      <FormTitle>Manual Check-in</FormTitle>
+      <FormSubtitle>{event?.title}</FormSubtitle>
+    </FormHeader>
 
-    <InputGroup>
-      <InputLabel>Full Name</InputLabel>
-      <ManualInputSC
-        placeholder="Enter your full name"
-        value={manualName}
-        onChange={(event) => setManualName(event.target.value)}
-      />
-    </InputGroup>
+    <FormContent>
+      <div className="input-row">
+        <InputGroup>
+          <InputLabel color={event?.welcomeScreenParams.textColor}>
+            Full Name
+          </InputLabel>
+          <ManualInput
+            placeholder="Enter your full name"
+            value={manualName}
+            onChange={(event) => setManualName(event.target.value)}
+            textColor={event?.welcomeScreenParams.textColor}
+          />
+        </InputGroup>
 
-    <InputGroup>
-      <InputLabel>Email Address</InputLabel>
-      <ManualInputSC
-        placeholder="Enter your email"
-        type="email"
-        value={manualEmail}
-        onChange={(event) => setManualEmail(event.target.value)}
-      />
-    </InputGroup>
+        <InputGroup>
+          <InputLabel color={event?.welcomeScreenParams.textColor}>
+            Phone Number (Optional)
+          </InputLabel>
+          <ManualInput
+            placeholder="Enter your phone number"
+            type="tel"
+            value={phoneNumber}
+            onChange={(event) => setPhoneNumber(event.target.value)}
+            textColor={event?.welcomeScreenParams.textColor}
+          />
+        </InputGroup>
+      </div>
 
-    <InputGroup>
-      <InputLabel>Phone Number (Optional)</InputLabel>
-      <ManualInputSC
-        placeholder="Enter your phone number"
-        type="tel"
-        value={phoneNumber}
-        onChange={(event) => setPhoneNumber(event.target.value)}
-      />
-    </InputGroup>
+      <InputGroup className="full-width">
+        <InputLabel color={event?.welcomeScreenParams.textColor}>
+          Email Address
+        </InputLabel>
+        <ManualInput
+          placeholder="Enter your email"
+          type="email"
+          value={manualEmail}
+          onChange={(event) => setManualEmail(event.target.value)}
+          textColor={event?.welcomeScreenParams.textColor}
+        />
+      </InputGroup>
 
-    <WelcomeButtonsContainer>
+      {event?.welcomeScreenParams.isGdpr && (
+        <GDPRCheckboxContainer>
+          <Checkbox
+            type="checkbox"
+            checked={gdprConsent}
+            onChange={() => setGdprConsent(!gdprConsent)}
+            id="gdpr-consent"
+          />
+          <GDPRLabel
+            htmlFor="gdpr-consent"
+            color={event?.welcomeScreenParams.textColor}
+          >
+            I consent to the processing of my personal data according to the
+            GDPR policy
+          </GDPRLabel>
+        </GDPRCheckboxContainer>
+      )}
+    </FormContent>
+
+    <ButtonContainer>
       <SecondaryWelcomeButton onClick={onBack}>
         <BackIcon />
         Back
       </SecondaryWelcomeButton>
       <PrimaryWelcomeButton
         onClick={onSubmit}
-        disabled={!manualName || !manualEmail}
+        disabled={
+          !manualName ||
+          !manualEmail ||
+          (event?.welcomeScreenParams.isGdpr && !gdprConsent)
+        }
       >
         <CheckIcon />
         Check-in
       </PrimaryWelcomeButton>
-    </WelcomeButtonsContainer>
-  </GuestInfoContainer>
+    </ButtonContainer>
+  </ManualCheckInContainer>
 );
 
-// New styled components
-const InputGroup = styled.div`
+// Updated styled components
+const ManualCheckInContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
   width: 100%;
-  margin-bottom: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 32px;
+  gap: 24px;
+  margin: 0 auto;
+
+  // Add max-height to prevent taking up full height
+  max-height: 90vh;
+  height: auto;
+
+  @media (min-width: 768px) {
+    padding: 40px;
+    width: 90%;
+  }
 `;
 
-const InputLabel = styled.label`
+const FormHeader = styled.div`
+  text-align: center;
+  margin-bottom: 24px;
+`;
+
+const FormTitle = styled.h1`
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 8px;
+`;
+
+const FormSubtitle = styled.h2`
+  font-size: 20px;
+  opacity: 0.8;
+  font-weight: 500;
+`;
+
+const FormContent = styled.div`
+  display: grid;
+  gap: 20px;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 3fr 2fr; // Name takes more space than phone
+      gap: 32px;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+  }
+`;
+
+const InputLabel = styled.label<{ color?: string }>`
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: ${(props) => props.color || "#f5f5f5"};
 `;
 
-const ManualInputSC = styled.input`
-  margin: 0;
-  display: flex;
-  align-items: center;
-  background-color: #f9f9f9;
-  color: black;
-  border: 2px solid #f9f9f9;
-  border-radius: 8px;
-  padding: 12px 16px;
+const ManualInput = styled.input<{ textColor?: string }>`
   width: 100%;
-  font-family: Axiforma, sans-serif;
-  font-size: 18px;
-  transition: all 0.3s ease;
+  padding: 10px 16px;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: ${(props) => props.textColor || "#f5f5f5"};
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
 
   &:focus {
-    border-color: #00aef0;
-    box-shadow: 0 0 0 3px rgba(0, 174, 240, 0.2);
     outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
   }
 
   &::placeholder {
-    color: #aaa;
+    color: rgba(255, 255, 255, 0.5);
+  }
+`;
+
+const GDPRLabel = styled.label<{ color?: string }>`
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: ${(props) => props.color || "#f5f5f5"};
+  cursor: pointer;
+  padding-top: 2px;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 8px;
+
+  @media (min-width: 768px) {
+    gap: 20px;
+
+    > button {
+      flex: 1;
+      max-width: 200px; // Prevent buttons from getting too wide
+    }
   }
 `;
 
@@ -403,8 +529,8 @@ const CheckIcon = () => (
 
 const GuestWelcomeView = ({
   guest,
-  event,
-}: {
+}: // event,
+{
   guest: Guest;
   event: Event | null;
 }) => (
@@ -412,64 +538,72 @@ const GuestWelcomeView = ({
     <WelcomeCard>
       <ConfettiEffect />
 
-      {/* Event Logo */}
-      {event?.poster && (
-        <EventLogoContainer>
-          <EventLogo src={event.poster} alt={`${event?.title} logo`} />
-        </EventLogoContainer>
-      )}
+      <WelcomeSection>
+        <SuccessAnimation animated />
+        <WelcomeBanner>Check-in Successful</WelcomeBanner>
+        <GuestName>{guest.fullName}</GuestName>
 
-      <WelcomeContent>
-        <WelcomeBanner>
-          <span>Welcome</span>
-        </WelcomeBanner>
+        {/* <PreemlyLogoContainer>
+          <PreemlyLogoImage src={PreemlyLogo} alt="Preemly" />
+        </PreemlyLogoContainer> */}
+      </WelcomeSection>
 
-        <GuestName>{guest.fullName}!</GuestName>
-
-        <EventTitle>{event?.title}</EventTitle>
-
-        {/* Date and Time */}
-        {event?.date && (
-          <EventDateTime>
-            <CalendarIcon />
-            {formatDate(event.date)}
-            {event.endDate && ` - ${formatDate(event.endDate)}`}
-          </EventDateTime>
-        )}
-
-        {/* Schedule Content */}
-        {event?.emailParams?.scheduleSrc?.enabled &&
-          event?.emailParams?.scheduleSrc?.content && (
-            <ScheduleContent
-              dangerouslySetInnerHTML={{
-                __html: event.emailParams.scheduleSrc.content,
-              }}
-            />
-          )}
-      </WelcomeContent>
-
-      {/* Preemly Logo */}
-      <PreemlyLogoContainer>
-        <PreemlyLogoImage src={PreemlyLogo} alt="Preemly" />
-      </PreemlyLogoContainer>
+      <ScheduleSection>
+        <ScheduleTitle>What's next?</ScheduleTitle>
+        <ScheduleItem>
+          <ScheduleEvent>Registrácia účastníkov + ranná káva</ScheduleEvent>
+          <ScheduleTime>8:00</ScheduleTime>
+        </ScheduleItem>
+        <ScheduleItem>
+          <ScheduleEvent>Slávnostné otvorenie</ScheduleEvent>
+          <ScheduleTime>9:00</ScheduleTime>
+        </ScheduleItem>
+        <ScheduleItem>
+          <ScheduleEvent>Vysvetlenie zadania a výzvy</ScheduleEvent>
+          <ScheduleTime>9:30</ScheduleTime>
+        </ScheduleItem>
+        <ScheduleItem>
+          <ScheduleEvent>Predstavenie mentorov</ScheduleEvent>
+          <ScheduleTime>9:50</ScheduleTime>
+        </ScheduleItem>
+        <ScheduleItem>
+          <ScheduleEvent>Workshop - Ako vyhrať hackathon</ScheduleEvent>
+          <ScheduleTime>10:00</ScheduleTime>
+        </ScheduleItem>
+      </ScheduleSection>
     </WelcomeCard>
   </GuestWelcomeScreen>
 );
 
 // Confetti animation component
-const ConfettiEffect = () => (
-  <ConfettiContainer>
-    {Array.from({ length: 50 }).map((_, i) => (
-      <ConfettiPiece
-        key={i}
-        color={confettiColors[i % confettiColors.length]}
-        size={Math.random() * 0.7 + 0.3}
-        left={`${Math.random() * 100}%`}
-        delay={Math.random() * 5}
-      />
-    ))}
-  </ConfettiContainer>
-);
+const ConfettiEffect = () => {
+  // Generate confetti pieces only once using useMemo to prevent re-renders
+  const confettiPieces = React.useMemo(
+    () =>
+      Array.from({ length: 50 }).map((_, i) => ({
+        key: i,
+        color: confettiColors[i % confettiColors.length],
+        size: Math.random() * 0.7 + 0.3,
+        left: `${Math.random() * 100}%`,
+        delay: Math.random() * 5,
+      })),
+    []
+  );
+
+  return (
+    <ConfettiContainer>
+      {confettiPieces.map((piece) => (
+        <ConfettiPiece
+          key={piece.key}
+          color={piece.color}
+          size={piece.size}
+          left={piece.left}
+          delay={piece.delay}
+        />
+      ))}
+    </ConfettiContainer>
+  );
+};
 
 // Confetti colors
 const confettiColors = [
@@ -495,15 +629,6 @@ const confettiFall = keyframes`
   }
 `;
 
-const shimmer = keyframes`
-  0% {
-    background-position: -100% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-`;
-
 // Styled components
 const GuestWelcomeScreen = styled.div<{ isVisible: boolean }>`
   display: flex;
@@ -511,13 +636,14 @@ const GuestWelcomeScreen = styled.div<{ isVisible: boolean }>`
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
   animation: ${({ isVisible }) => (isVisible ? fadeIn : fadeOut)} 0.5s
     ease-in-out forwards;
   z-index: 100;
   padding: 40px;
-  overflow: hidden;
   position: relative;
+  height: auto;
+  max-height: 90vh;
+  box-sizing: border-box;
 `;
 
 const ConfettiContainer = styled.div`
@@ -529,6 +655,8 @@ const ConfettiContainer = styled.div`
   pointer-events: none;
   z-index: 10;
   overflow: hidden;
+  will-change: transform; /* Optimize for animations */
+  transform: translateZ(0); /* Force GPU acceleration */
 `;
 
 const ConfettiPiece = styled.div<{
@@ -547,83 +675,129 @@ const ConfettiPiece = styled.div<{
   animation: ${confettiFall} ${(props) => 5 + props.delay}s linear infinite;
   animation-delay: ${(props) => props.delay}s;
   z-index: 10;
+  will-change: transform; /* Optimize for animations */
+  transform: translateZ(0); /* Force GPU acceleration */
 `;
 
 const WelcomeCard = styled.div`
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   background: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
-  border-radius: 30px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  position: relative;
-  padding-bottom: 70px; /* Space for the logo at bottom */
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  z-index: 5;
-`;
-
-const EventLogoContainer = styled.div`
-  width: 100%;
-  max-height: 320px;
-
-  display: flex;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.2);
-`;
-
-const EventLogo = styled.img`
-  width: 100%;
-  object-fit: cover;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-`;
-
-const WelcomeContent = styled.div`
+  border-radius: 24px;
   padding: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const WelcomeBanner = styled.div`
-  font-size: 64px;
-  font-weight: 800;
-  text-transform: uppercase;
-  margin-bottom: 20px;
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0 auto;
+  height: auto;
+  max-height: 90vh;
+  box-sizing: border-box;
+  z-index: 20; /* Ensure it's above the confetti */
+  transform: translateZ(0); /* Force GPU acceleration */
 
-  span {
-    background: linear-gradient(90deg, #00aef0, #ff3e6c, #ffcc00, #00aef0);
-    background-size: 300% 100%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-fill-color: transparent;
-    animation: ${shimmer} 4s linear infinite;
-    display: inline-block;
-    padding: 0 10px;
-    text-shadow: 0 0 20px rgba(0, 174, 240, 0.5);
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 32px;
   }
 `;
 
-const GuestName = styled.div`
-  font-size: 56px;
-  font-weight: bold;
+const WelcomeSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  margin-bottom: 20px;
-  color: white;
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  padding-right: 40px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 768px) {
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 32px;
+  }
 `;
 
-const EventTitle = styled.div`
-  font-size: 36px;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 30px;
-  color: rgba(255, 255, 255, 0.9);
+const ScheduleSection = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
+
+const ScheduleTitle = styled.h2`
+  font-size: 32px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 24px;
+`;
+
+const ScheduleItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const ScheduleTime = styled.div`
+  font-size: 20px;
+  font-weight: 500;
+  color: #00aef0;
+`;
+
+const ScheduleEvent = styled.div`
+  font-size: 20px;
+  color: white;
+`;
+
+const WelcomeBanner = styled.div`
+  font-size: 28px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  text-align: center;
+  color: #00aef0;
+`;
+
+const GuestName = styled.div`
+  font-size: 48px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: white;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
+    0 0 20px rgba(255, 255, 255, 0.3);
+  animation: glow 1.5s ease-in-out infinite alternate;
+
+  @keyframes glow {
+    from {
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    to {
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.7),
+        0 0 30px rgba(255, 255, 255, 0.5), 0 0 40px rgba(0, 174, 240, 0.4);
+    }
+  }
+`;
+
+// const PreemlyLogoContainer = styled.div`
+//   width: 100%;
+//   display: flex;
+//   justify-content: center;
+// `;
+
+// const PreemlyLogoImage = styled.img`
+//   height: 45px;
+//   width: auto;
+// `;
 
 const CalendarIcon = () => (
   <svg
@@ -647,74 +821,15 @@ const CalendarIcon = () => (
 const EventDateTime = styled.div`
   display: flex;
   align-items: center;
-  font-size: 24px;
+  justify-content: center;
+  font-size: 20px;
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   font-weight: 500;
   padding: 12px 24px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-`;
-
-const ScheduleContent = styled.div`
-  width: 100%;
-  max-width: 700px;
-  margin: 0 auto;
-  font-size: 18px;
-  line-height: 1.6;
-  text-align: center;
-
-  /* Style for HTML content that might come from the schedule */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin-top: 16px;
-    margin-bottom: 8px;
-  }
-
-  p {
-    margin-bottom: 16px;
-  }
-
-  ul,
-  ol {
-    margin-bottom: 16px;
-    padding-left: 24px;
-    text-align: left;
-  }
-
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-bottom: 16px;
-  }
-
-  th,
-  td {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 8px 12px;
-  }
-
-  th {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-`;
-
-const PreemlyLogoContainer = styled.div`
-  position: absolute;
-  bottom: 20px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-`;
-
-const PreemlyLogoImage = styled.img`
-  height: 56px;
-  width: auto;
 `;
 
 const ScannerView = ({
@@ -724,14 +839,8 @@ const ScannerView = ({
   setGuest,
   setManualCheckInOpen,
   formatDate,
-}: {
-  event: Event | null;
-  guestsPresent: Guest[] | undefined;
-  eventGuests: string[];
-  setGuest: (guest: Guest | null) => void;
-  setManualCheckInOpen: (open: boolean) => void;
-  formatDate: (date: string) => string;
-}) => (
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+any) => (
   <>
     <ScannerComponent setGuest={setGuest} eventGuests={eventGuests} />
 
@@ -830,6 +939,165 @@ const EventSelectionView = ({
   </>
 );
 
+const GDPRConsentView = ({
+  guest,
+  onAccept,
+  onDecline,
+}: {
+  guest: Guest;
+  onAccept: () => void;
+  onDecline: () => void;
+}) => (
+  <ConsentContainer>
+    <ConsentCard>
+      <h2>GDPR Consent Required</h2>
+      <p>
+        Dear {guest.fullName}, before proceeding with the check-in, we need your
+        consent for processing your personal data in accordance with our GDPR
+        policy.
+      </p>
+
+      <ConsentButtons>
+        <DeclineButton onClick={onDecline}>Decline</DeclineButton>
+        <AcceptButton onClick={onAccept}>I Accept</AcceptButton>
+      </ConsentButtons>
+    </ConsentCard>
+  </ConsentContainer>
+);
+
+const ConsentContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+`;
+
+const ConsentCard = styled.div`
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  padding: 40px;
+  border-radius: 24px;
+  max-width: 90%;
+  width: 500px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  h2 {
+    margin-bottom: 24px;
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  p {
+    margin-bottom: 32px;
+    line-height: 1.6;
+    font-size: 16px;
+    opacity: 0.9;
+  }
+
+  @media (max-width: 768px) {
+    padding: 24px;
+    width: 90%;
+
+    h2 {
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 15px;
+    }
+  }
+`;
+
+const ConsentButtons = styled.div`
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+`;
+
+const ConsentButtonBase = styled(PrimaryButton)`
+  min-width: 140px;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 500;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const AcceptButton = styled(ConsentButtonBase)`
+  background-color: #4caf50;
+  &:hover {
+    background-color: #43a047;
+  }
+`;
+
+const DeclineButton = styled(ConsentButtonBase)`
+  background-color: #f44336;
+  &:hover {
+    background-color: #e53935;
+  }
+`;
+
+const GDPRCheckboxContainer = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 8px 0;
+  padding: 8px 0;
+`;
+
+const Checkbox = styled.input`
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  position: relative;
+  margin-top: 2px;
+  transition: all 0.2s ease;
+
+  &:checked {
+    background: #00aef0;
+    border-color: #00aef0;
+  }
+
+  &:checked::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  &:hover {
+    border-color: #00aef0;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #00aef0;
+  }
+`;
+
+const InputGroup = styled.div`
+  width: 100%;
+`;
+
 const WelcomeScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
@@ -846,6 +1114,9 @@ const WelcomeScreen: React.FC = () => {
   const [manualEmail, setmanualEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const { addToast, Toasts } = useToast();
+  const [gdprConsent, setGdprConsent] = useState(false);
+  const [showGdprConsent, setShowGdprConsent] = useState(false);
+  const [pendingGuest, setPendingGuest] = useState<Guest | null>(null);
 
   useEffect(() => {
     if (!loading) {
@@ -892,6 +1163,7 @@ const WelcomeScreen: React.FC = () => {
           phoneNumber: phoneNumber,
           eventId: id,
           attendance_status: true,
+          gdpr_consent: gdprConsent,
         });
 
         setManualCheckInOpen(false);
@@ -902,11 +1174,13 @@ const WelcomeScreen: React.FC = () => {
           attendance_status: true,
           age: 0,
           phoneNumber: phoneNumber,
+          gdpr_consent: gdprConsent,
         };
         setGuest(guest);
         setManualName("");
         setmanualEmail("");
         setPhoneNumber("");
+        setGdprConsent(false);
         fetchEvent();
       } catch (error) {
         addToast(`Error saving guest: ${error}`, ToastType.ERROR);
@@ -947,6 +1221,54 @@ const WelcomeScreen: React.FC = () => {
 
   const eventGuests = event?.guests.map((guest) => guest._id) || [];
 
+  const handleGuestScan = (scannedGuest: Guest) => {
+    if (!event?.welcomeScreenParams.isGdpr || scannedGuest.gdpr_consent) {
+      setGuest(scannedGuest);
+    } else {
+      setPendingGuest(scannedGuest);
+      setShowGdprConsent(true);
+    }
+  };
+
+  const handleGdprAccept = async () => {
+    if (pendingGuest) {
+      try {
+        const response = await axiosInstance.patch(
+          `/guests/${pendingGuest._id}`,
+          {
+            gdpr_consent: true,
+          }
+        );
+        if (response.data.success) {
+          setGuest({ ...pendingGuest, gdpr_consent: true });
+        } else {
+          throw new Error("Failed to update GDPR consent");
+        }
+      } catch (error) {
+        console.error("GDPR update error:", error);
+        addToast("Failed to update GDPR consent", ToastType.ERROR);
+      }
+    }
+    setShowGdprConsent(false);
+    setPendingGuest(null);
+  };
+
+  const handleGdprDecline = async () => {
+    if (pendingGuest) {
+      try {
+        await axiosInstance.patch(`/guests/${pendingGuest._id}`, {
+          attendance_status: false,
+          gdpr_consent: false,
+        });
+      } catch (error) {
+        console.error("Failed to update attendance status:", error);
+      }
+    }
+    setShowGdprConsent(false);
+    setPendingGuest(null);
+    addToast("Check-in cancelled - GDPR consent required", ToastType.ERROR);
+  };
+  console.log({ gdprConsent });
   return (
     <WelcomeScreenWrapper
       backgroundColor={event?.welcomeScreenParams.backgroundColor}
@@ -960,14 +1282,10 @@ const WelcomeScreen: React.FC = () => {
         {id ? "Back" : "Exit"}
       </BackButton>
 
-      <WaveBackground
-        color={event?.welcomeScreenParams.textColor}
-        isVisible={guest === null}
-      />
       {/* <GuestWelcomeView
         guest={{
           _id: "000",
-          fullName: "John Doe",
+          fullName: "LongNamee LongSurnammee",
           email: "john.doe@example.com",
           attendance_status: true,
           age: 0,
@@ -975,6 +1293,10 @@ const WelcomeScreen: React.FC = () => {
         }}
         event={event}
       /> */}
+      <WaveBackground
+        color={"#00AEF0"}
+        isVisible={guest === null && !isManualCheckInOpen}
+      />
       {showSpinner ? (
         <Spinner isVisible={loading} />
       ) : id ? (
@@ -983,7 +1305,13 @@ const WelcomeScreen: React.FC = () => {
             <GuestWelcomeView guest={guest} event={event} />
           ) : (
             <Container isVisible={guest === null}>
-              {isManualCheckInOpen ? (
+              {showGdprConsent && pendingGuest ? (
+                <GDPRConsentView
+                  guest={pendingGuest}
+                  onAccept={handleGdprAccept}
+                  onDecline={handleGdprDecline}
+                />
+              ) : isManualCheckInOpen ? (
                 <ManualCheckInForm
                   manualName={manualName}
                   setManualName={setManualName}
@@ -993,13 +1321,16 @@ const WelcomeScreen: React.FC = () => {
                   setPhoneNumber={setPhoneNumber}
                   onBack={() => setManualCheckInOpen(false)}
                   onSubmit={addGuestManually}
+                  gdprConsent={gdprConsent}
+                  setGdprConsent={setGdprConsent}
+                  event={event}
                 />
               ) : (
                 <ScannerView
                   event={event}
                   guestsPresent={guestsPresent}
                   eventGuests={eventGuests}
-                  setGuest={setGuest}
+                  setGuest={handleGuestScan}
                   setManualCheckInOpen={setManualCheckInOpen}
                   formatDate={formatDate}
                 />

@@ -7,6 +7,7 @@ export type Guest = {
   attendance_status?: boolean;
   email_sent?: boolean;
   reminder_email_date?: string; // Add this field
+  gdpr_consent?: boolean; // Add this field
 };
 export type Task = {
   title: string;

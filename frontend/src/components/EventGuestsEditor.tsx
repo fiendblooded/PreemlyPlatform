@@ -808,6 +808,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       guest.fullName.toLowerCase().includes(filterText.toLowerCase()) ||
       guest.email.toLowerCase().includes(filterText.toLowerCase())
   );
+  console.log(event.guests);
   return (
     <GuestsWrapper>
       <GuestTableHeaderContainer>
@@ -853,6 +854,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
               <th>Reminder Email</th>
               <th>Phone</th>
               <th>Attendance</th>
+              <th>GDPR Consent</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -878,6 +880,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                     onChange={(e) => handleGuestChange("email", e.target.value)}
                   />
                 </td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -957,7 +960,15 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                 </td>
                 <td>{guest.phoneNumber || "-"}</td>
                 <td>{guest.attendance_status ? "+" : "-"}</td>
-
+                <td>
+                  <div style={{ textAlign: "center" }}>
+                    {guest.gdpr_consent ? (
+                      <span style={{ color: "#4caf50" }}>Yes</span>
+                    ) : (
+                      <span style={{ color: "#f44336" }}>No</span>
+                    )}
+                  </div>
+                </td>
                 <td>
                   <DeleteButton
                     onClick={(e) => {

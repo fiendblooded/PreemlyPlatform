@@ -133,10 +133,10 @@ const MetaItem = styled.div`
   }
 `;
 
-const StatusBadge = styled.div<{ color: string }>`
+const StatusBadge = styled.div<{ color: string; isOngoing: boolean }>`
   position: absolute;
-  bottom: 12px;
-  left: 12px;
+  bottom: 14px;
+  left: 6px;
   padding: 8px 16px;
   background-color: ${(props) => props.color};
   color: white;
@@ -151,27 +151,29 @@ const StatusBadge = styled.div<{ color: string }>`
   gap: 6px;
   z-index: 1;
 
-  &::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: white;
-    animation: pulse 2s infinite;
-  }
+  ${(props) =>
+    props.isOngoing &&
+    `
+    &::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      line-height: 15px;
+      border-radius: 50%;
+      background-color: white;
+      animation: pulse 1.5s infinite;
+    }
+  `}
 
   @keyframes pulse {
     0% {
       opacity: 1;
-      transform: scale(1);
     }
     50% {
       opacity: 0.5;
-      transform: scale(1.2);
     }
     100% {
       opacity: 1;
-      transform: scale(1);
     }
   }
 `;
@@ -215,7 +217,9 @@ const EventComponent: React.FC<EventProps> = ({ event }) => {
         ) : (
           <PosterPlaceholder>No poster available</PosterPlaceholder>
         )}
-        <StatusBadge color={status.color}>{status.type}</StatusBadge>
+        <StatusBadge color={status.color} isOngoing={status.type === "Ongoing"}>
+          {status.type}
+        </StatusBadge>
       </PosterWrapper>
 
       <Title>{event.title}</Title>
