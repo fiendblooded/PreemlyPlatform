@@ -603,7 +603,7 @@ const Profile: React.FC = () => {
                   onChange={(e) => setNewName(e.target.value)}
                   onBlur={() => handleNameUpdate()}
                 />
-                {profile.email_verified && (
+                {/* {profile.email_verified && (
                   <VerifiedBadge title="Email verified">
                     <svg
                       viewBox="0 0 24 24"
@@ -619,7 +619,7 @@ const Profile: React.FC = () => {
                       />
                     </svg>
                   </VerifiedBadge>
-                )}
+                )} */}
               </ProfileNameWrapper>
               <ProfileEmail>{profile.email || "N/A"}</ProfileEmail>
             </ProfilePictureSection>

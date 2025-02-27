@@ -2,7 +2,12 @@ import styled from "styled-components";
 import { Event } from "../types";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { getDateTimeStatus, isTablet } from "../common/common";
+import {
+  getDateTimeStatus,
+  isTablet,
+  formatDateTime,
+  SvgSC,
+} from "../common/common";
 import { PrimaryButton } from "./EventGuestsEditor";
 
 interface EventProps {
@@ -14,199 +19,293 @@ const Card = styled.div<{ color: string }>`
   flex-direction: column;
   justify-content: space-between;
   background-color: #ffffff;
-  border-top: 6px solid ${(props) => props.color};
-  border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 20px;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-  /* Allow the height to naturally adjust */
+  transition: all 0.2s ease;
   height: auto;
-  min-height: 300px; /* Optional: Enforce a minimum height */
+  min-height: 300px;
   overflow: hidden;
+  border: 1px solid #eee;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: ${(props) => props.color};
+    border-radius: 12px 12px 0 0;
+  }
 
   &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   }
+`;
 
-  &:active {
-    border-color: #f4c430;
-  }
+const PosterWrapper = styled.div`
+  position: relative;
+  margin-bottom: 16px;
 `;
 
 const Poster = styled.img`
   width: 100%;
-  height: 150px; /* Fixed height for the poster */
-  object-fit: cover; /* Maintain aspect ratio and crop if needed */
+  height: 180px;
+  object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 10px;
 `;
 
 const PosterPlaceholder = styled.div`
   width: 100%;
-  height: 150px; // Adjust this to match your poster's aspect ratio
-  background-color: #2c2c2c;
-  color: #ffffff;
+  height: 180px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
-  text-align: center;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #3c3c3c;
-  }
+  color: #666;
+  font-size: 14px;
 `;
 
 const Title = styled.h3`
-  color: black; /* Yellow */
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: bold;
+  color: #2c2c2c;
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
 `;
 
-const Description = styled.p`
-  color: rgb(102, 102, 102);
-  font-size: 0.9rem;
-  margin-bottom: 15px;
-  flex-grow: 1;
-  margin-top: 0px;
-  overflow-y: auto; /* Use auto instead of scroll */
-  max-height: 130px;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3; /* Limit to 3 lines */
-  -webkit-box-orient: vertical;
-
-  /* Scrollbar styling */
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #d3d3d3 #f5f5f5; /* Scrollbar thumb and track colors */
-
-  &::-webkit-scrollbar {
-    width: 8px; /* Scrollbar width */
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f5f5f5; /* Light background for the track */
-    border-radius: 4px; /* Rounded corners */
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #d3d3d3; /* Light grey thumb */
-    border-radius: 4px; /* Rounded corners */
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: #b0b0b0; /* Darker grey on hover */
-  }
-`;
-
-const InfoBar = styled.div`
+const EventInfo = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 10px;
-  border-top: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
 `;
 
-const GuestCount = styled.div<{ paddingTop?: number }>`
+const InfoItem = styled.div`
+  color: #666;
+  font-size: 14px;
   display: flex;
   align-items: center;
+  gap: 8px;
 
-  font-size: 0.9rem;
-  color: black;
-  height: 38px;
-  padding-top: ${(props) => (props.paddingTop ? props.paddingTop : 0)}px;
   svg {
-    padding-bottom: 6px;
-    margin-right: 5px;
+    min-width: 20px;
+    width: 20px;
+    height: 20px;
+    color: #999;
   }
 `;
-const Location = styled.div`
-  color: grey;
-  font-size: 0.9rem;
+
+const MetaInfo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+`;
+
+const MetaLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 42px;
+`;
+
+const MetaItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 16px;
+  height: 100%;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    color: #999;
+  }
+`;
+
+const StatusBadge = styled.div<{ color: string }>`
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  padding: 8px 16px;
+  background-color: ${(props) => props.color};
+  color: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px ${(props) => props.color}40;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 1;
+
+  &::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: white;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(1.2);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+`;
+
+const CheckInButton = styled(PrimaryButton)<{ tabletMode: boolean }>`
+  padding: ${(props) => (props.tabletMode ? "12px" : "12px 24px")};
+  width: ${(props) => (props.tabletMode ? "42px" : "auto")};
+  min-width: ${(props) => (props.tabletMode ? "unset" : "auto")};
+  height: 42px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #6c5dd3;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  span {
+    display: ${(props) => (props.tabletMode ? "none" : "inline")};
+  }
 `;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const EventComponent: React.FC<EventProps> = ({ event }) => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const dateTimeStatus = getDateTimeStatus(event?.date, event?.endDate);
+  const location = useLocation();
+  const status = getDateTimeStatus(event.date, event.endDate);
   const tabletMode = isTablet();
-  const guestCount = `${event.guests.length} ${
-    event.guests.length != 1 ? "Guests" : "Guest"
-  }`;
 
   return (
     <Card
-      color={dateTimeStatus.color}
-      onClick={() =>
-        navigate(`/events/${event._id}`, {
-          state: { from: location.pathname },
-        })
-      }
+      color={status.color}
+      onClick={() => navigate(`${location.pathname}/${event._id}`)}
     >
-      {event.poster ? (
-        <Poster src={event.poster} alt={`${event.title} Poster`} />
-      ) : (
-        <PosterPlaceholder>No poster provided</PosterPlaceholder>
-      )}
+      <PosterWrapper>
+        {event.poster ? (
+          <Poster src={event.poster} alt={event.title} />
+        ) : (
+          <PosterPlaceholder>No poster available</PosterPlaceholder>
+        )}
+        <StatusBadge color={status.color}>{status.type}</StatusBadge>
+      </PosterWrapper>
+
       <Title>{event.title}</Title>
-      <GuestCount>{new Date(event.date).toLocaleString()}</GuestCount>
-      {/* {event.location.address && <Location>{event.location.address}</Location>} */}
-      <InfoBar>
-        <GuestCount paddingTop={4}>
+
+      <EventInfo>
+        <InfoItem>
           <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
             <path
-              d="M13 20V18C13 15.2386 10.7614 13 8 13C5.23858 13 3 15.2386 3 18V20H13ZM13 20H21V19C21 16.0545 18.7614 14 16 14C14.5867 14 13.3103 14.6255 12.4009 15.6311M11 7C11 8.65685 9.65685 10 8 10C6.34315 10 5 8.65685 5 7C5 5.34315 6.34315 4 8 4C9.65685 4 11 5.34315 11 7ZM18 9C18 10.1046 17.1046 11 16 11C14.8954 11 14 10.1046 14 9C14 7.89543 14.8954 7 16 7C17.1046 7 18 7.89543 18 9Z"
-              stroke="black"
-              stroke-width="2"
               strokeLinecap="round"
-              stroke-linejoin="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          {guestCount}
-        </GuestCount>
-        {dateTimeStatus.type === "Ongoing" && (
-          <PrimaryButton
-            width={tabletMode ? 38 : 130}
-            onClick={(clickEvent: React.MouseEvent) => {
-              clickEvent.stopPropagation();
+          {event.location?.address || "No location set"}
+        </InfoItem>
+        <InfoItem>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+          {formatDateTime(event.date)}
+        </InfoItem>
+      </EventInfo>
+
+      <MetaInfo>
+        <MetaLeft>
+          <MetaItem>
+            <SvgSC
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </SvgSC>
+            {event.guests?.length || 0} guests
+          </MetaItem>
+        </MetaLeft>
+
+        {status.type === "Ongoing" && (
+          <CheckInButton
+            tabletMode={tabletMode}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
               navigate(`/welcome/${event._id}`);
             }}
           >
             <svg
-              width="24"
-              height="24"
-              style={{ minWidth: "24px", minHeight: "24px" }}
-              viewBox="0 0 24 24"
-              fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
               <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
                 d="M4 12H4.01M8 12H8.01M16 12H16.01M12 12H12.01M20 12H20.01M8.5 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V8.5M15.5 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.07989 20 7.2V8.5M20 15.5V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H15.5M4 15.5V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H8.5"
-                stroke="white"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
               />
             </svg>
-            {!tabletMode && (
-              <div style={{ paddingTop: 2, marginLeft: 2 }}>Check in</div>
-            )}
-          </PrimaryButton>
+            <span>Check in</span>
+          </CheckInButton>
         )}
-      </InfoBar>
+      </MetaInfo>
     </Card>
   );
 };
