@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import useWebSocket from "../useWebSocket";
 import styled, { keyframes } from "styled-components";
 import ScannerComponent from "./ScannerPage";
@@ -17,6 +17,7 @@ import PreemlyLogo from "../logo.png";
 import HacknimeLogo from "../hacknimelogo.png";
 import { PrimaryButton } from "./EventGuestsEditor";
 import SuccessAnimation from "./SuccessAnimation";
+import GalantaVideo from "../galanta.mp4";
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -1098,6 +1099,26 @@ const InputGroup = styled.div`
   width: 100%;
 `;
 
+const VideoOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  cursor: pointer;
+  background: #2b2768;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const FullscreenVideo = styled.video`
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+`;
+
 const WelcomeScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
@@ -1117,6 +1138,9 @@ const WelcomeScreen: React.FC = () => {
   const [gdprConsent, setGdprConsent] = useState(false);
   const [showGdprConsent, setShowGdprConsent] = useState(false);
   const [pendingGuest, setPendingGuest] = useState<Guest | null>(null);
+  const [showSleepScreen, setShowSleepScreen] = useState(false);
+  const sleepTimerRef = useRef<NodeJS.Timeout>();
+  const lastActivityRef = useRef<number>(Date.now());
 
   useEffect(() => {
     if (!loading) {
@@ -1268,6 +1292,35 @@ const WelcomeScreen: React.FC = () => {
     setPendingGuest(null);
     addToast("Check-in cancelled - GDPR consent required", ToastType.ERROR);
   };
+
+  useEffect(() => {
+    const resetTimer = () => {
+      lastActivityRef.current = Date.now();
+      setShowSleepScreen(false);
+    };
+
+    const checkInactivity = () => {
+      const inactiveTime = Date.now() - lastActivityRef.current;
+      if (inactiveTime > 30000 && !isManualCheckInOpen && !showGdprConsent) {
+        setShowSleepScreen(true);
+      }
+    };
+
+    const handleActivity = () => resetTimer();
+    document.addEventListener("mousedown", handleActivity);
+    document.addEventListener("touchstart", handleActivity);
+
+    sleepTimerRef.current = setInterval(checkInactivity, 1000);
+
+    return () => {
+      document.removeEventListener("mousedown", handleActivity);
+      document.removeEventListener("touchstart", handleActivity);
+      if (sleepTimerRef.current) {
+        clearInterval(sleepTimerRef.current);
+      }
+    };
+  }, [isManualCheckInOpen, showGdprConsent]);
+
   console.log({ gdprConsent });
   return (
     <WelcomeScreenWrapper
@@ -1345,6 +1398,14 @@ const WelcomeScreen: React.FC = () => {
           setSelectedEventId={setSelectedEventId}
           handleOpenEvent={handleOpenEvent}
         />
+      )}
+
+      {showSleepScreen && (
+        <VideoOverlay onClick={() => setShowSleepScreen(false)}>
+          <FullscreenVideo autoPlay loop muted>
+            <source src={GalantaVideo} type="video/mp4" />
+          </FullscreenVideo>
+        </VideoOverlay>
       )}
 
       <Toasts />
