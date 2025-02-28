@@ -1141,6 +1141,7 @@ const WelcomeScreen: React.FC = () => {
   const [showSleepScreen, setShowSleepScreen] = useState(false);
   const sleepTimerRef = useRef<NodeJS.Timeout>();
   const lastActivityRef = useRef<number>(Date.now());
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (!loading) {
@@ -1321,6 +1322,19 @@ const WelcomeScreen: React.FC = () => {
     };
   }, [isManualCheckInOpen, showGdprConsent]);
 
+  useEffect(() => {
+    if (showSleepScreen && videoRef.current) {
+      const playVideo = async () => {
+        try {
+          await videoRef.current?.play();
+        } catch (err) {
+          console.log("Video autoplay failed:", err);
+        }
+      };
+      playVideo();
+    }
+  }, [showSleepScreen]);
+
   console.log({ gdprConsent });
   return (
     <WelcomeScreenWrapper
@@ -1402,7 +1416,14 @@ const WelcomeScreen: React.FC = () => {
 
       {showSleepScreen && (
         <VideoOverlay onClick={() => setShowSleepScreen(false)}>
-          <FullscreenVideo autoPlay loop muted>
+          <FullscreenVideo
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            webkit-playsinline="true"
+          >
             <source src={GalantaVideo} type="video/mp4" />
           </FullscreenVideo>
         </VideoOverlay>
