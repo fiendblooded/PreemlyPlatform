@@ -43,7 +43,7 @@ const sendEmail = async (
 
   try {
     const emailPayload: EmailPayload = {
-      from: 'Preemly <mailgun@mail.preemly.eu>',
+      from: 'Preemly <noreply@mail.preemly.eu>',
       to: recipient,
       subject: subject,
       html: htmlContent,

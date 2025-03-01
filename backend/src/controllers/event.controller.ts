@@ -340,14 +340,12 @@ export const downloadGuestsToExcel = async (req: Request, res: Response): Promis
       'Full Name': guest.fullName,
       Email: guest.email,
       'Phone Number': guest.phoneNumber,
-      Age: guest.age,
       'Attendance Status': guest.attendance_status,
       'Email Sent': guest.email_sent,
       'GDPR Consent': guest.gdpr_consent,
     }));
 
     const worksheet = xlsx.utils.json_to_sheet(data);
-
     const workbook = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(workbook, worksheet, 'Guests');
 

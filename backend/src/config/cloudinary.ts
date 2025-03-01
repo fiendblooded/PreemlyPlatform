@@ -21,4 +21,22 @@ export const uploadImage = async (filePath: string, folder = 'default') => {
   }
 };
 
+export const uploadRawFile = async (filePath: string, folder = 'default', publicId?: string) => {
+  try {
+    const options = {
+      resource_type: 'raw' as const,
+      folder,
+      use_filename: false,
+      unique_filename: true,
+      public_id: publicId,
+    };
+
+    const result = await cloudinary.uploader.upload(filePath, options);
+    return result;
+  } catch (error) {
+    console.error('Error uploading raw file to Cloudinary:', error);
+    throw new Error('Failed to upload file');
+  }
+};
+
 export default cloudinary;

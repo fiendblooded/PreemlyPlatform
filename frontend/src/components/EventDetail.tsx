@@ -666,13 +666,6 @@ const EventDetail: React.FC = () => {
                 <WelcomeScreenSettingsIcon color={"currentColor"} />
                 Welcome
               </ActiveStatusButton>
-              {/* <ActiveStatusButton
-            isActive={openSection === "collaborators"}
-            onClick={() => setOpenSection("collaborators")}
-            borderColor="#e6bf30"
-          >
-            Collaborators
-          </ActiveStatusButton> */}
             </ActiveStatusContainer>
             {openSection === "info" && (
               <EventDetailsEditor event={event} refetch={fetchEvent} />
@@ -689,7 +682,6 @@ const EventDetail: React.FC = () => {
             {openSection === "tasks" && (
               <EventTasksEditor event={event} refetch={fetchEvent} />
             )}
-            {/* {openSection === "collaborators" && <UserSearch />} */}
             {openSection === "email" && (
               <EmailTemplateEditor event={event} refetch={fetchEvent} />
             )}

@@ -15,6 +15,21 @@ export type Task = {
   dueDate: string;
 };
 
+export type Invoice = {
+  _id: string;
+  eventId: string;
+  title: string;
+  description?: string;
+  amount?: number;
+  date?: string;
+  vendor?: string;
+  category?: string;
+  isPaid: boolean;
+  pdfUrl: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Event = {
   date: string;
   _id: string;
@@ -52,4 +67,5 @@ export type Event = {
     };
   };
   tasks: Task[];
+  invoices?: Invoice[];
 };

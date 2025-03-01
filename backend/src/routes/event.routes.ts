@@ -5,6 +5,7 @@ import { verifyUser } from '../middleware/auth';
 
 const router = Router();
 
+// Event routes
 router.post('/', verifyUser, eventController.createEvent);
 router.get('/', verifyUser, checkScopes(['read:events']), eventController.getEvents);
 router.get('/:id', eventController.getEventById);

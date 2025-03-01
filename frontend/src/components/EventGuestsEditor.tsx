@@ -4,6 +4,7 @@ import { Event } from "../types";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { ToastType, useToast } from "./Toasts";
 import { getMailHtml, SvgSC } from "../common/common";
+import { saveAs } from "file-saver";
 // import { ActivityStatus } from "./EventDetail";
 
 const GuestsWrapper = styled.div`
@@ -275,6 +276,32 @@ export const SecondaryButton = styled.button<{
   }
 `;
 
+const ExcelButton = styled(SecondaryButton)`
+  background-color: #217346; // Excel green
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  width: 180px;
+  &:hover {
+    background-color: #1e5e3e;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+// Add this component for the Excel icon
+const ExcelIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M23 1.5q.41 0 .7.3.3.29.3.7v19q0 .41-.3.7-.29.3-.7.3H7q-.41 0-.7-.3-.3-.29-.3-.7V18H1q-.41 0-.7-.3-.3-.29-.3-.7V7q0-.41.3-.7Q.58 6 1 6h5V2.5q0-.41.3-.7.29-.3.7-.3zM6 13.28l1.42 2.66h2.14l-2.38-3.87 2.34-3.8H7.46l-1.3 2.4-.05.08-.04.09-.64-1.28-.66-1.29H2.59l2.27 3.82-2.48 3.85h2.16zM14.25 21v-3H7.5v3zm0-4.5v-3.75H7.5v3.75zm0-5.25V7.5H7.5v3.75zm0-5.25V3H7.5v3zm8.25 15v-3h-6.75v3zm0-4.5v-3.75h-6.75v3.75zm0-5.25V7.5h-6.75v3.75zm0-5.25V3h-6.75v3z" />
+  </svg>
+);
+
 export const GuestActionsButtonsContainer = styled.div<{ width?: number }>`
   display: flex;
   gap: 6px;
@@ -441,6 +468,12 @@ const ReminderPreview = styled.div`
   }
 `;
 
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+`;
+
 type Props = {
   event: Event;
   refetch: () => void;
@@ -520,7 +553,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
 
     await axiosInstance.post(`/mail`, {
       recipient: toEmail,
-      subject: `Your ticket for ${eventDetails.title}`,
+      subject: `Reminder : Your ticket for ${eventDetails.title}`,
       htmlContent: htmlContent,
     });
   };
@@ -803,6 +836,28 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     }
   };
 
+  const downloadGuestsExcel = async () => {
+    try {
+      const response = await axiosInstance.get(
+        `/events/${event._id}/guests/export`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      // Create a filename with event name and date
+      const fileName = `${event.title
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase()}_guests.xlsx`;
+      saveAs(new Blob([response.data]), fileName);
+
+      addToast("Guest list downloaded successfully", ToastType.SUCCESS);
+    } catch (error) {
+      console.error("Error downloading guest list:", error);
+      addToast("Failed to download guest list", ToastType.ERROR);
+    }
+  };
+
   const filteredGuests = event?.guests.filter(
     (guest) =>
       guest.fullName.toLowerCase().includes(filterText.toLowerCase()) ||
@@ -832,7 +887,13 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
           />
         </SearchContainer>
 
-        <PrimaryButton onClick={addNewGuestRow}>+ Add Guest</PrimaryButton>
+        <ButtonGroup>
+          <ExcelButton onClick={downloadGuestsExcel}>
+            <ExcelIcon />
+            Download Excel
+          </ExcelButton>
+          <PrimaryButton onClick={addNewGuestRow}>+ Add Guest</PrimaryButton>
+        </ButtonGroup>
       </GuestTableHeaderContainer>
 
       <ScrollableTable>

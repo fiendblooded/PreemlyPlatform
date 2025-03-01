@@ -44,4 +44,5 @@ export interface Event {
   tasks: Task[];
   welcomeScreenParams: WelcomeScreenParams;
   emailParams: EmailParams;
+  invoices: Types.ObjectId[];
 }
