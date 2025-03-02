@@ -8,13 +8,12 @@ import { Event, Guest } from "../types";
 import Spinner from "./Spinner";
 import Dropdown from "./Dropdown";
 import WaveBackground from "./WaveBackground";
-import ManualQR from "../manualqr.png";
 import PresentGuests from "./PresentGuests";
 import React from "react";
 import { ToastType, useToast } from "./Toasts";
 // import AnimatedBackground from "./AnimatedBackground";
-import PreemlyLogo from "../logo.png";
-import HacknimeLogo from "../hacknimelogo.png";
+// import PreemlyLogo from "../logo.png";
+// import HacknimeLogo from "../hacknimelogo.png";
 import { PrimaryButton } from "./EventGuestsEditor";
 import SuccessAnimation from "./SuccessAnimation";
 import GalantaVideo from "../galanta.mp4";
@@ -549,6 +548,7 @@ const GuestWelcomeView = ({
         </PreemlyLogoContainer> */}
       </WelcomeSection>
 
+      {/* Schedule section commented out as requested
       <ScheduleSection>
         <ScheduleTitle>What's next?</ScheduleTitle>
         <ScheduleItem>
@@ -572,6 +572,7 @@ const GuestWelcomeView = ({
           <ScheduleTime>10:00</ScheduleTime>
         </ScheduleItem>
       </ScheduleSection>
+      */}
     </WelcomeCard>
   </GuestWelcomeScreen>
 );
@@ -681,8 +682,7 @@ const ConfettiPiece = styled.div<{
 `;
 
 const WelcomeCard = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 40px;
   width: 100%;
   max-width: 1000px;
@@ -712,51 +712,49 @@ const WelcomeSection = styled.div`
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding-right: 40px;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%; /* Take up full width */
+  /* Removed padding-right and border-right to take full horizontal space */
 
   @media (max-width: 768px) {
     padding-right: 0;
     border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 32px;
   }
 `;
 
-const ScheduleSection = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
+// const ScheduleSection = styled.div`
+//   display: flex;
+//   flex-direction: column;
+// `;
 
-const ScheduleTitle = styled.h2`
-  font-size: 32px;
-  font-weight: 600;
-  color: white;
-  margin-bottom: 24px;
-`;
+// const ScheduleTitle = styled.h2`
+//   font-size: 32px;
+//   font-weight: 600;
+//   color: white;
+//   margin-bottom: 24px;
+// `;
 
-const ScheduleItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+// const ScheduleItem = styled.div`
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   padding: 16px 0;
+//   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
-  &:last-child {
-    border-bottom: none;
-  }
-`;
+//   &:last-child {
+//     border-bottom: none;
+//   }
+// `;
 
-const ScheduleTime = styled.div`
-  font-size: 20px;
-  font-weight: 500;
-  color: #00aef0;
-`;
+// const ScheduleTime = styled.div`
+//   font-size: 20px;
+//   font-weight: 500;
+//   color: #00aef0;
+// `;
 
-const ScheduleEvent = styled.div`
-  font-size: 20px;
-  color: white;
-`;
+// const ScheduleEvent = styled.div`
+//   font-size: 20px;
+//   color: white;
+// `;
 
 const WelcomeBanner = styled.div`
   font-size: 28px;
@@ -800,38 +798,38 @@ const GuestName = styled.div`
 //   width: auto;
 // `;
 
-const CalendarIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ marginRight: "8px" }}
-  >
-    <path
-      d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+// const CalendarIcon = () => (
+//   <svg
+//     width="24"
+//     height="24"
+//     viewBox="0 0 24 24"
+//     fill="none"
+//     xmlns="http://www.w3.org/2000/svg"
+//     style={{ marginRight: "8px" }}
+//   >
+//     <path
+//       d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z"
+//       stroke="currentColor"
+//       strokeWidth="2"
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//     />
+//   </svg>
+// );
 
-const EventDateTime = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  text-align: center;
-  margin-bottom: 16px;
-  font-weight: 500;
-  padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-`;
+// const EventDateTime = styled.div`
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   font-size: 20px;
+//   text-align: center;
+//   margin-bottom: 16px;
+//   font-weight: 500;
+//   padding: 12px 24px;
+//   background: rgba(255, 255, 255, 0.1);
+//   border-radius: 12px;
+//   border: 1px solid rgba(255, 255, 255, 0.1);
+// `;
 
 const ScannerView = ({
   event,
@@ -1128,7 +1126,6 @@ const WelcomeScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [showSpinner, setShowSpinner] = useState<boolean>(true);
   const axiosInstance = useAxiosWithAuth();
-  const message = useWebSocket(wsUrl);
   const [guest, setGuest] = useState<Guest | null>(null);
   const [isManualCheckInOpen, setManualCheckInOpen] = useState(false);
   const [manualName, setManualName] = useState("");
@@ -1142,7 +1139,7 @@ const WelcomeScreen: React.FC = () => {
   const sleepTimerRef = useRef<NodeJS.Timeout>();
   const lastActivityRef = useRef<number>(Date.now());
   const videoRef = useRef<HTMLVideoElement>(null);
-
+  useWebSocket(wsUrl);
   useEffect(() => {
     if (!loading) {
       const timeout = setTimeout(() => setShowSpinner(false), 500);
@@ -1414,7 +1411,7 @@ const WelcomeScreen: React.FC = () => {
         />
       )}
 
-      {showSleepScreen && (
+      {/* {showSleepScreen && (
         <VideoOverlay onClick={() => setShowSleepScreen(false)}>
           <FullscreenVideo
             ref={videoRef}
@@ -1427,7 +1424,7 @@ const WelcomeScreen: React.FC = () => {
             <source src={GalantaVideo} type="video/mp4" />
           </FullscreenVideo>
         </VideoOverlay>
-      )}
+      )} */}
 
       <Toasts />
     </WelcomeScreenWrapper>
