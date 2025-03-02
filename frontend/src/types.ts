@@ -30,6 +30,56 @@ export type Invoice = {
   updatedAt: string;
 };
 
+export type CategoryBreakdown = {
+  category: string;
+  amount: number;
+  percentage: number;
+};
+
+export type VendorBreakdown = {
+  vendor: string;
+  amount: number;
+  invoiceCount: number;
+};
+
+export type InvoiceAnalysis = {
+  budgetSummary: {
+    totalSpend: number;
+    budgetVariance?: {
+      amount: number;
+      percentage: number;
+    };
+    invoiceCount: number;
+    paidInvoices: number;
+    unpaidInvoices: number;
+  };
+  costBreakdown: {
+    categories: CategoryBreakdown[];
+    topCategories: string[];
+    vendors: VendorBreakdown[];
+    recurringExpenses?: string[];
+  };
+  performanceInsights?: {
+    costPerAttendee?: number;
+    costPerLead?: number;
+    profitabilityEstimate?: number;
+    costComparison?: string;
+    yearOverYearTrend?: string;
+    peakSpendingPeriods?: string[];
+    monthlySpending?: {
+      month: string;
+      amount: number;
+    }[];
+  };
+  lastUpdated: string;
+};
+
+export type Feedback = {
+  guestName?: string;
+  content: string;
+  createdAt?: string;
+};
+
 export type Event = {
   date: string;
   _id: string;
@@ -68,4 +118,6 @@ export type Event = {
   };
   tasks: Task[];
   invoices?: Invoice[];
+  invoiceAnalysis?: InvoiceAnalysis;
+  feedback?: Feedback[];
 };

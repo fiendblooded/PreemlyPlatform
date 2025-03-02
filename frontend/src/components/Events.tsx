@@ -11,30 +11,67 @@ import { useNavigate, useParams } from "react-router-dom";
 import EventDetail from "./EventDetail";
 import PopupOverlay from "./form/PopupOverlay";
 
+// Modern color palette to match sidebar but with light theme
+const colors = {
+  primary: "#6366F1", // Matches sidebar accent
+  primaryHover: "#4F46E5",
+  textPrimary: "#1E293B",
+  textSecondary: "#64748B",
+  borderLight: "#E2E8F0",
+  backgroundLight: "#FFFFFF",
+  backgroundSecondary: "#F8FAFC",
+  yellow: "#e6bf30",
+  green: "#2a9134",
+  blue: "#4F46E5",
+  gray: "#64748B",
+  shadow: "rgba(0, 0, 0, 0.05)",
+};
+
 export const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  background-color: ${colors.backgroundLight};
+  font-family: "Inter", Axiforma, sans-serif;
 `;
+
 export const ContentWrapper = styled.div<{ marginTop?: number }>`
   margin-top: ${(props) => (props.marginTop ? `${props.marginTop}px` : "0px")};
-  padding: 0px 25px;
+  padding: 0px 32px;
   display: flex;
   flex-direction: column;
   flex: 1;
   overflow-y: auto;
   height: calc(100vh - 140px);
+
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.2);
+    border-radius: 4px;
+  }
 `;
 
 export const Header = styled.div`
-  margin-top: 20px;
+  margin-top: 24px;
   height: 50px;
-  color: #061c3a; /* Purple */
+  color: ${colors.textPrimary};
   display: flex;
-  font-size: 28px;
+  font-size: 24px;
+  font-weight: 600;
   justify-content: space-between;
   flex-shrink: 0;
+  margin-bottom: 20px;
+  align-items: center;
+  letter-spacing: -0.2px;
 `;
 
 export const SpinnerContainer = styled.div`
@@ -44,13 +81,14 @@ export const SpinnerContainer = styled.div`
   margin-top: 300px;
   width: 100%;
 `;
+
 export const Spinner = styled.div`
-  border: 8px solid rgba(0, 0, 0, 0.1);
-  width: 52px;
-  height: 52px;
+  border: 4px solid rgba(99, 102, 241, 0.1);
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  border-left-color: #f4c430;
-  animation: spin 1s linear infinite;
+  border-left-color: ${colors.primary};
+  animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 
   @keyframes spin {
     to {
@@ -62,32 +100,54 @@ export const Spinner = styled.div`
 const SearchContainer = styled.div`
   display: flex;
   align-items: center;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 8px 12px;
-  width: calc(18.4% - 26px);
+  background-color: ${colors.backgroundSecondary};
+  border: 1px solid ${colors.borderLight};
+  border-radius: 8px;
+  padding: 10px 14px;
+  width: calc(20% - 26px);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px ${colors.shadow};
+
+  &:focus-within {
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+  }
 `;
 
 export const SearchIcon = styled.svg`
   width: 20px;
   height: 20px;
-  fill: rgb(137, 137, 137);
-  margin-right: 8px;
+  fill: ${colors.textSecondary};
+  margin-right: 10px;
+  opacity: 0.7;
 `;
 
 const SearchInput = styled.input`
-  font-family: Axiforma, sans-serif;
+  font-family: "Inter", Axiforma, sans-serif;
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 16px;
-  color: #333;
+  font-size: 14px;
+  color: ${colors.textPrimary};
   outline: none;
-  &:focus {
-  }
+
   &::placeholder {
-    color: #aaa;
+    color: ${colors.textSecondary};
+    opacity: 0.6;
+  }
+`;
+
+const ClearButton = styled.div`
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    opacity: 1;
+    transform: scale(1.1);
   }
 `;
 
@@ -96,10 +156,11 @@ export const ActiveStatusContainer = styled.div<{ isDetail?: boolean }>`
   margin-top: 10px;
   display: flex;
   ${(props) => props.isDetail && "width: 90%; margin: 20px auto;"}
-  gap: 20px;
+  gap: 24px;
   max-width: 100%;
   overflow: scroll;
-  border-bottom: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
+  border-bottom: 1px solid ${colors.borderLight};
+  padding: 0 32px 4px;
 
   /* Hide scrollbar for Webkit browsers (Chrome, Safari, Edge) */
   &::-webkit-scrollbar {
@@ -120,37 +181,80 @@ export const ActiveStatusButton = styled.div<{
 }>`
   display: flex;
   align-items: flex-end;
-  color: ${(props) => (props.isActive ? "black" : "rgb(167, 167, 167)")};
-  font-size: 16px;
-  font-weight: bold;
+  color: ${(props) =>
+    props.isActive ? colors.textPrimary : colors.textSecondary};
+  font-size: 15px;
+  font-weight: ${(props) => (props.isActive ? "600" : "500")};
   cursor: pointer;
   line-height: 20px;
-  padding-bottom: 4px;
+  padding-bottom: 8px;
   gap: 4px;
   margin-left: ${(props) =>
-    props.marginLeft != undefined ? props.marginLeft : 28}px;
+    props.marginLeft != undefined ? props.marginLeft : 0}px;
   border-bottom: 2px solid
     ${(props) => (props.isActive ? props.borderColor : "transparent")};
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Add smooth transition */
-  transition: color 0.3s ease, border-bottom-color 0.3s ease;
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: ${(props) => props.borderColor};
+    transform: scaleX(${(props) => (props.isActive ? 1 : 0)});
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.7;
+  }
 
   &:hover {
-    color: ${(props) => (props.isActive ? "black" : "grey")};
-    border-bottom: 2px solid
-      ${(props) => (props.isActive ? props.borderColor : "grey")};
+    color: ${(props) => (props.isActive ? colors.textPrimary : colors.primary)};
+
+    &::after {
+      transform: scaleX(1);
+      opacity: ${(props) => (props.isActive ? 1 : 0.3)};
+    }
   }
 `;
 
 // Make sure the EventList container has room to grow
 const EventListContainer = styled.div`
   flex: 1;
-  padding: 24px 0;
   overflow-y: auto;
+  margin-bottom: 24px;
+  /* Scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.2) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 116, 139, 0.2);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`;
+
+const StatusCount = styled.span`
+  font-weight: 600;
+  color: ${colors.primary};
+`;
+
+const StatusText = styled.span`
+  font-weight: 400;
 `;
 
 const Events: React.FC = () => {
   useAuthSetup();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { user } = useAuth0();
   const { id } = useParams<{ id: string }>();
   const [activeStatus, setActiveStatus] = useState("All");
@@ -194,10 +298,10 @@ const Events: React.FC = () => {
     }
     if (filterStatus === "All") {
       return filteredEvents;
-    } else if (filterStatus === "Incoming") {
+    } else if (filterStatus === "Upcoming") {
       filteredEvents = filteredEvents.filter(
         (event) =>
-          getDateTimeStatus(event?.date, event?.endDate).type === "Incoming"
+          getDateTimeStatus(event?.date, event?.endDate).type === "Upcoming"
       );
     } else if (filterStatus === "Past") {
       filteredEvents = filteredEvents.filter(
@@ -222,28 +326,28 @@ const Events: React.FC = () => {
           <ActiveStatusButton
             isActive={activeStatus === "All"}
             onClick={() => setActiveStatus("All")}
-            borderColor="#e6bf30"
+            borderColor={colors.yellow}
           >
             All Events
           </ActiveStatusButton>
           <ActiveStatusButton
             isActive={activeStatus === "Ongoing"}
             onClick={() => setActiveStatus("Ongoing")}
-            borderColor="#2a9134"
+            borderColor={colors.green}
           >
             Ongoing
           </ActiveStatusButton>
           <ActiveStatusButton
-            isActive={activeStatus === "Incoming"}
-            onClick={() => setActiveStatus("Incoming")}
-            borderColor="#00aef0"
+            isActive={activeStatus === "Upcoming"}
+            onClick={() => setActiveStatus("Upcoming")}
+            borderColor={colors.blue}
           >
-            Incoming
+            Upcoming
           </ActiveStatusButton>
           <ActiveStatusButton
             isActive={activeStatus === "Past"}
             onClick={() => setActiveStatus("Past")}
-            borderColor="grey"
+            borderColor={colors.gray}
           >
             Past
           </ActiveStatusButton>
@@ -251,11 +355,17 @@ const Events: React.FC = () => {
         <ContentWrapper>
           <Header>
             <>
-              {filteredEvents.length}{" "}
-              {activeStatus != "All" ? activeStatus.toLowerCase() : "total"}{" "}
-              event
-              {(filteredEvents.length > 1 || filteredEvents.length === 0) &&
-                "s"}
+              <div>
+                <StatusCount>{filteredEvents.length}</StatusCount>{" "}
+                <StatusText>
+                  {activeStatus !== "All"
+                    ? activeStatus.toLowerCase()
+                    : "total"}{" "}
+                  event
+                  {(filteredEvents.length > 1 || filteredEvents.length === 0) &&
+                    "s"}
+                </StatusText>
+              </div>
             </>
             <SearchContainer>
               <SearchIcon
@@ -271,46 +381,45 @@ const Events: React.FC = () => {
                 >
                   <path
                     d="M14.9536 14.9458L21 21M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
-                    stroke="rgb(137, 137, 137)"
-                    stroke-width="2"
+                    stroke="currentColor"
+                    strokeWidth="2"
                     strokeLinecap="round"
-                    stroke-linejoin="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
               </SearchIcon>
               <SearchInput
                 type="text"
-                placeholder="Search..."
+                placeholder="Search events..."
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
 
-              {searchQuery != "" && (
-                <svg
-                  onClick={() => {
-                    setSearchQuery("");
-                  }}
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M9 9L15 15M15 9L9 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                    stroke="rgb(137, 137, 137)"
-                    stroke-width="1.5"
-                    strokeLinecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
+              {searchQuery !== "" && (
+                <ClearButton onClick={() => setSearchQuery("")}>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M9 9L15 15M15 9L9 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </ClearButton>
               )}
             </SearchContainer>
           </Header>
 
           {loading ? (
             <SpinnerContainer>
-              <Spinner />{" "}
+              <Spinner />
             </SpinnerContainer>
           ) : (
             <EventListContainer>
@@ -323,7 +432,7 @@ const Events: React.FC = () => {
         </ContentWrapper>
       </PageWrapper>
       {id && (
-        <PopupOverlay visible={true} onClose={() => navigate(-1)}>
+        <PopupOverlay visible={true} onClose={() => navigate("/events")}>
           <EventDetail />
         </PopupOverlay>
       )}

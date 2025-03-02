@@ -30,6 +30,56 @@ export interface EmailParams {
   dining: EmailExtraModule;
 }
 
+export interface CategoryBreakdown {
+  category: string;
+  amount: number;
+  percentage: number;
+}
+
+export interface VendorBreakdown {
+  vendor: string;
+  amount: number;
+  invoiceCount: number;
+}
+
+export interface InvoiceAnalysis {
+  budgetSummary: {
+    totalSpend: number;
+    budgetVariance?: {
+      amount: number;
+      percentage: number;
+    };
+    invoiceCount: number;
+    paidInvoices: number;
+    unpaidInvoices: number;
+  };
+  costBreakdown: {
+    categories: CategoryBreakdown[];
+    topCategories: string[];
+    vendors: VendorBreakdown[];
+    recurringExpenses?: string[];
+  };
+  performanceInsights?: {
+    costPerAttendee?: number;
+    costPerLead?: number;
+    profitabilityEstimate?: number;
+    costComparison?: string;
+    yearOverYearTrend?: string;
+    peakSpendingPeriods?: string[];
+    monthlySpending?: {
+      month: string;
+      amount: number;
+    }[];
+  };
+  lastUpdated: Date;
+}
+
+export interface Feedback {
+  guestName?: string;
+  content: string;
+  createdAt: Date;
+}
+
 export interface Event {
   _id: Types.ObjectId;
   title: string;
@@ -44,5 +94,7 @@ export interface Event {
   tasks: Task[];
   welcomeScreenParams: WelcomeScreenParams;
   emailParams: EmailParams;
-  invoices: Types.ObjectId[];
+  invoices?: Types.ObjectId[];
+  invoiceAnalysis?: InvoiceAnalysis;
+  feedback?: Feedback[];
 }

@@ -10,6 +10,18 @@ import {
 } from "../common/common";
 import { PrimaryButton } from "./EventGuestsEditor";
 
+// Modern color palette to match sidebar and Events page
+const colors = {
+  primary: "#6366F1", // Matches sidebar accent
+  primaryHover: "#4F46E5",
+  textPrimary: "#1E293B",
+  textSecondary: "#64748B",
+  borderLight: "#E2E8F0",
+  backgroundLight: "#FFFFFF",
+  backgroundSecondary: "#F8FAFC",
+  shadow: "rgba(0, 0, 0, 0.05)",
+};
+
 interface EventProps {
   event: Event;
 }
@@ -18,16 +30,16 @@ const Card = styled.div<{ color: string }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: #ffffff;
+  background-color: ${colors.backgroundLight};
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px ${colors.shadow};
   padding: 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   height: auto;
   min-height: 300px;
   overflow: hidden;
-  border: 1px solid #eee;
+  border: 1px solid ${colors.borderLight};
   position: relative;
 
   &::before {
@@ -42,41 +54,49 @@ const Card = styled.div<{ color: string }>`
   }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   }
 `;
 
 const PosterWrapper = styled.div`
   position: relative;
   margin-bottom: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px ${colors.shadow};
 `;
 
 const Poster = styled.img`
   width: 100%;
   height: 180px;
   object-fit: cover;
-  border-radius: 8px;
+  transition: transform 0.3s ease;
+
+  ${Card}:hover & {
+    transform: scale(1.03);
+  }
 `;
 
 const PosterPlaceholder = styled.div`
   width: 100%;
   height: 180px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
+  background-color: ${colors.backgroundSecondary};
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #666;
+  color: ${colors.textSecondary};
   font-size: 14px;
+  font-family: "Inter", Axiforma, sans-serif;
 `;
 
 const Title = styled.h3`
-  color: #2c2c2c;
+  color: ${colors.textPrimary};
   margin: 0 0 8px 0;
   font-size: 18px;
   font-weight: 600;
   line-height: 1.4;
+  font-family: "Inter", Axiforma, sans-serif;
 `;
 
 const EventInfo = styled.div`
@@ -87,17 +107,19 @@ const EventInfo = styled.div`
 `;
 
 const InfoItem = styled.div`
-  color: #666;
+  color: ${colors.textSecondary};
   font-size: 14px;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-family: "Inter", Axiforma, sans-serif;
 
   svg {
     min-width: 20px;
     width: 20px;
     height: 20px;
-    color: #999;
+    color: ${colors.textSecondary};
+    opacity: 0.7;
   }
 `;
 
@@ -108,7 +130,7 @@ const MetaInfo = styled.div`
   gap: 24px;
   margin-top: auto;
   padding-top: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid ${colors.borderLight};
 `;
 
 const MetaLeft = styled.div`
@@ -122,14 +144,16 @@ const MetaItem = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #666;
-  font-size: 16px;
+  color: ${colors.textSecondary};
+  font-size: 15px;
   height: 100%;
+  font-family: "Inter", Axiforma, sans-serif;
 
   svg {
     width: 20px;
     height: 20px;
-    color: #999;
+    color: ${colors.textSecondary};
+    opacity: 0.7;
   }
 `;
 
@@ -150,6 +174,7 @@ const StatusBadge = styled.div<{ color: string; isOngoing: boolean }>`
   align-items: center;
   gap: 6px;
   z-index: 1;
+  font-family: "Inter", Axiforma, sans-serif;
 
   ${(props) =>
     props.isOngoing &&
@@ -187,11 +212,33 @@ const CheckInButton = styled(PrimaryButton)<{ tabletMode: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #6c5dd3;
+  background: linear-gradient(
+    135deg,
+    ${colors.primary} 0%,
+    ${colors.primaryHover} 100%
+  );
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+  font-family: "Inter", Axiforma, sans-serif;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 
   svg {
     width: 24px;
     height: 24px;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover svg {
+    transform: scale(1.1);
   }
 
   span {

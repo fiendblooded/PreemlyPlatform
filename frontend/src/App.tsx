@@ -16,7 +16,7 @@ import useAuthSetup from "./useAuthSetup";
 import Profile from "./components/Profile";
 import PreemlyFAQ from "./components/PreemlyFAQ";
 import { isTablet } from "./common/common";
-// import VirtualSpace from "./components/VirtualSpace";
+import VirtualSpace from "./components/VirtualSpace";
 import EventDetail from "./components/EventDetail";
 
 export const GlobalStyle = createGlobalStyle`
@@ -140,10 +140,11 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const tabletMode = isTablet();
   // Define routes where the sidebar should not be displayed
-  const noSidebarRoutes = ["/login", "/welcome", "/preembot"];
+  const noSidebarRoutes = ["/login", "/welcome", "/preembot", "/space"];
   const isFullWidth =
     noSidebarRoutes.includes(location.pathname) ||
-    location.pathname.startsWith("/welcome/");
+    location.pathname.startsWith("/welcome/") ||
+    location.pathname.startsWith("/space/");
 
   return (
     <AppWrapper>
@@ -165,10 +166,14 @@ const AppContent: React.FC = () => {
             path="/events/:id"
             element={tabletMode ? <EventDetail /> : <Events />}
           />
+          <Route
+            path="/events/:id/:tab"
+            element={tabletMode ? <EventDetail /> : <Events />}
+          />
           <Route path="/help" element={<PreemlyFAQ />} />
           <Route path="/profile" element={<Profile />} />
           {/* <Route path="/scanner" element={<ScannerPage />} /> */}
-          {/* <Route path="/space/:id" element={<VirtualSpace />} /> */}
+          <Route path="/space/:id" element={<VirtualSpace />} />
           <Route
             path="/welcome"
             element={

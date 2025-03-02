@@ -1,195 +1,637 @@
-// import styled from "styled-components";
-// import { Event } from "../types";
-// import { useLocation, useNavigate } from "react-router-dom";
-// import { PrimaryButton, SecondaryButton } from "./EventDetail";
-// import { getDateTimeStatus, isTablet } from "../common/common";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import styled from "styled-components";
+import axios from "axios";
+import { Event } from "../types";
 
-// interface EventProps {
-//   event: Event;
-// }
+// Modern color palette to match other components
+const colors = {
+  primary: "#6366F1", // Matches sidebar accent
+  primaryHover: "#4F46E5",
+  textPrimary: "#1E293B",
+  textSecondary: "#64748B",
+  borderLight: "#E2E8F0",
+  backgroundLight: "#FFFFFF",
+  backgroundSecondary: "#F8FAFC",
+  shadow: "rgba(0, 0, 0, 0.05)",
+  error: "#EF4444",
+  success: "#10B981",
+  yellow: "#F59E0B",
+  green: "#10B981",
+};
 
-// const Card = styled.div<{ color: string }>`
-//   display: flex;
-//   flex-direction: column;
-//   justify-content: space-between;
-//   background-color: #ffffff;
-//   border-top: 6px solid ${(props) => props.color};
-//   border-radius: 4px;
-//   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-//   padding: 15px;
-//   cursor: pointer;
-//   transition: transform 0.2s ease, box-shadow 0.2s ease;
+const SpaceWrapper = styled.div`
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: ${colors.backgroundSecondary};
+  font-family: "Inter", Axiforma, sans-serif;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+`;
 
-//   /* Allow the height to naturally adjust */
-//   height: auto;
-//   min-height: 300px; /* Optional: Enforce a minimum height */
-//   overflow: hidden;
+const HeaderCard = styled.div<{ posterUrl?: string }>`
+  width: 100%;
+  height: 35vh;
+  min-height: 220px;
+  background-color: #000;
+  background-image: ${(props) =>
+    props.posterUrl ? `url(${props.posterUrl})` : "none"};
+  background-size: cover;
+  background-position: center;
+  position: relative;
 
-//   &:hover {
-//     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-//   }
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.8) 100%
+    );
+    z-index: 0;
+  }
+`;
 
-//   &:active {
-//     border-color: #f4c430;
-//   }
-// `;
+const HeaderContent = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px 16px;
+  z-index: 1;
+`;
 
-// const Poster = styled.img`
-//   width: 100%;
-//   height: 150px; /* Fixed height for the poster */
-//   object-fit: cover; /* Maintain aspect ratio and crop if needed */
-//   border-radius: 8px;
-//   margin-bottom: 10px;
-// `;
+const WelcomeText = styled.h1`
+  color: white;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-family: "Inter", Axiforma, sans-serif;
+`;
 
-// const Title = styled.h3`
-//   color: black; /* Yellow */
-//   margin: 0;
-//   font-size: 1.2rem;
-//   font-weight: bold;
-// `;
+const EventName = styled.p`
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 18px;
+  margin: 0;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-family: "Inter", Axiforma, sans-serif;
+`;
 
-// const Description = styled.p`
-//   color: rgb(102, 102, 102);
-//   font-size: 0.9rem;
-//   margin-bottom: 15px;
-//   flex-grow: 1;
-//   margin-top: 0px;
-//   overflow-y: auto; /* Use auto instead of scroll */
-//   max-height: 130px;
-//   text-overflow: ellipsis;
-//   display: -webkit-box;
-//   -webkit-line-clamp: 3; /* Limit to 3 lines */
-//   -webkit-box-orient: vertical;
+const ContentSection = styled.div`
+  padding: 20px 16px;
+  flex: 1;
+  margin: 0 auto;
+  width: 95%;
+  box-sizing: border-box;
+`;
 
-//   /* Scrollbar styling */
-//   scrollbar-width: thin; /* For Firefox */
-//   scrollbar-color: #d3d3d3 #f5f5f5; /* Scrollbar thumb and track colors */
+const SectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+`;
 
-//   &::-webkit-scrollbar {
-//     width: 8px; /* Scrollbar width */
-//   }
+const SectionTitle = styled.h2`
+  color: ${colors.textPrimary};
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  font-family: "Inter", Axiforma, sans-serif;
+`;
 
-//   &::-webkit-scrollbar-track {
-//     background: #f5f5f5; /* Light background for the track */
-//     border-radius: 4px; /* Rounded corners */
-//   }
+const ViewAllLink = styled.a`
+  color: ${colors.primary};
+  font-size: 14px;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: rgba(99, 102, 241, 0.1);
+  transition: all 0.2s ease;
+  font-family: "Inter", Axiforma, sans-serif;
 
-//   &::-webkit-scrollbar-thumb {
-//     background: #d3d3d3; /* Light grey thumb */
-//     border-radius: 4px; /* Rounded corners */
-//   }
+  &:hover {
+    background-color: rgba(99, 102, 241, 0.15);
+    transform: translateY(-1px);
+  }
 
-//   &::-webkit-scrollbar-thumb:hover {
-//     background: #b0b0b0; /* Darker grey on hover */
-//   }
-// `;
+  &:active {
+    transform: translateY(0);
+  }
+`;
 
-// const InfoBar = styled.div`
-//   display: flex;
-//   justify-content: space-between;
-//   align-items: center;
-//   padding-top: 10px;
-//   border-top: 1.5px solid rgb(205, 205, 205); /* Subtle border for separation */
-// `;
+const TimelineContainer = styled.div`
+  position: relative;
+  margin-left: 20px;
+  margin-bottom: 24px;
 
-// const GuestCount = styled.div<{ paddingTop?: number }>`
-//   display: flex;
-//   align-items: center;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 8px;
+    width: 2px;
+    background-color: ${colors.borderLight};
+    z-index: 0;
+  }
+`;
 
-//   font-size: 0.9rem;
-//   color: black;
-//   height: 38px;
-//   padding-top: ${(props) => (props.paddingTop ? props.paddingTop : 0)}px;
-//   svg {
-//     padding-bottom: 6px;
-//     margin-right: 5px;
-//   }
-// `;
-// const Location = styled.div`
-//   color: grey;
-//   font-size: 0.9rem;
-// `;
+const TimeMarker = styled.div`
+  color: ${colors.textSecondary};
+  font-size: 14px;
+  font-weight: 600;
+  margin-left: -20px;
+  position: relative;
+  z-index: 1;
+  padding: 8px 0;
+  font-family: "Inter", Axiforma, sans-serif;
+`;
 
-// // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// const VirtualSpace: React.FC = () => {
-//   const location = useLocation();
-//   const navigate = useNavigate();
-//   const dateTimeStatus = getDateTimeStatus(event?.date, event?.endDate);
-//   const tabletMode = isTablet();
-//   const guestCount = `${event.guests.length} ${
-//     event.guests.length != 1 ? "Guests" : "Guest"
-//   }`;
+const ScheduleCard = styled.div<{ isActive?: boolean }>`
+  background-color: ${colors.backgroundLight};
+  border-radius: 12px;
+  box-shadow: 0 4px 16px ${colors.shadow};
+  padding: 16px;
+  margin: 8px 0 16px 24px;
+  position: relative;
+  transition: all 0.2s ease;
+  border: 1px solid ${colors.borderLight};
 
-//   return (
-//     <Card
-//       color={dateTimeStatus.color}
-//       onClick={() =>
-//         navigate(`/events/${event._id}`, {
-//           state: { from: location.pathname },
-//         })
-//       }
-//     >
-//       {event.poster ? (
-//         <Poster src={event.poster} alt={`${event.title} Poster`} />
-//       ) : (
-//         <Poster
-//           src="https://via.placeholder.com/300x180?text=No+Poster"
-//           alt="No Poster Available"
-//         />
-//       )}
-//       <Title>{event.title}</Title>
-//       <GuestCount>{new Date(event.date).toLocaleString()}</GuestCount>
-//       {/* {event.location.address && <Location>{event.location.address}</Location>} */}
-//       <InfoBar>
-//         <GuestCount paddingTop={4}>
-//           <svg
-//             width="24"
-//             height="24"
-//             viewBox="0 0 24 24"
-//             fill="none"
-//             xmlns="http://www.w3.org/2000/svg"
-//           >
-//             <path
-//               d="M13 20V18C13 15.2386 10.7614 13 8 13C5.23858 13 3 15.2386 3 18V20H13ZM13 20H21V19C21 16.0545 18.7614 14 16 14C14.5867 14 13.3103 14.6255 12.4009 15.6311M11 7C11 8.65685 9.65685 10 8 10C6.34315 10 5 8.65685 5 7C5 5.34315 6.34315 4 8 4C9.65685 4 11 5.34315 11 7ZM18 9C18 10.1046 17.1046 11 16 11C14.8954 11 14 10.1046 14 9C14 7.89543 14.8954 7 16 7C17.1046 7 18 7.89543 18 9Z"
-//               stroke="black"
-//               stroke-width="2"
-//               strokeLinecap="round"
-//               stroke-linejoin="round"
-//             />
-//           </svg>
-//           {guestCount}
-//         </GuestCount>
-//         <PrimaryButton
-//           width={tabletMode ? 38 : 130}
-//           onClick={(clickEvent: React.MouseEvent) => {
-//             clickEvent.stopPropagation();
-//             navigate(`/welcome/${event._id}`);
-//           }}
-//         >
-//           <svg
-//             width="24"
-//             height="24"
-//             style={{ minWidth: "24px", minHeight: "24px" }}
-//             viewBox="0 0 24 24"
-//             fill="none"
-//             xmlns="http://www.w3.org/2000/svg"
-//           >
-//             <path
-//               d="M4 12H4.01M8 12H8.01M16 12H16.01M12 12H12.01M20 12H20.01M8.5 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V8.5M15.5 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.07989 20 7.2V8.5M20 15.5V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H15.5M4 15.5V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H8.5"
-//               stroke="white"
-//               stroke-width="2"
-//               stroke-linecap="round"
-//               stroke-linejoin="round"
-//             />
-//           </svg>
-//           {!tabletMode && (
-//             <div style={{ paddingTop: 2, marginLeft: 2 }}>Check in</div>
-//           )}
-//         </PrimaryButton>
-//       </InfoBar>
-//     </Card>
-//   );
-// };
+  &::before {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: ${(props) =>
+      props.isActive ? colors.green : colors.yellow};
+    left: -30px;
+    top: 16px;
+    z-index: 1;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px
+      ${(props) =>
+        props.isActive ? `${colors.green}30` : `${colors.yellow}30`};
+  }
 
-// export default VirtualSpace;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px ${colors.shadow};
+  }
+`;
+
+const SessionTitle = styled.h3`
+  color: ${colors.textPrimary};
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  font-family: "Inter", Axiforma, sans-serif;
+`;
+
+const SessionDetails = styled.p`
+  color: ${colors.textSecondary};
+  font-size: 14px;
+  margin: 0;
+  font-family: "Inter", Axiforma, sans-serif;
+`;
+
+const SessionIcon = styled.span`
+  margin-right: 8px;
+  font-size: 16px;
+`;
+
+const FeedbackSection = styled.div`
+  background-color: ${colors.backgroundLight};
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 16px ${colors.shadow};
+  border: 1px solid ${colors.borderLight};
+  margin-top: 24px;
+`;
+
+const FeedbackLabel = styled.p`
+  color: ${colors.textSecondary};
+  font-size: 14px;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+  font-family: "Inter", Axiforma, sans-serif;
+`;
+
+const FeedbackInput = styled.textarea`
+  width: 100%;
+  height: 120px;
+  padding: 12px 16px;
+  border: 1px solid ${colors.borderLight};
+  border-radius: 8px;
+  font-family: "Inter", Axiforma, sans-serif;
+  font-size: 15px;
+  resize: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  background-color: ${colors.backgroundSecondary};
+  color: ${colors.textPrimary};
+  box-shadow: 0 2px 4px ${colors.shadow};
+
+  &::placeholder {
+    color: ${colors.textSecondary};
+    opacity: 0.6;
+  }
+
+  &:hover {
+    border-color: rgba(99, 102, 241, 0.6);
+    box-shadow: 0 4px 8px ${colors.shadow};
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  }
+`;
+
+const NameInput = styled.input`
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid ${colors.borderLight};
+  border-radius: 8px;
+  font-family: "Inter", Axiforma, sans-serif;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  background-color: ${colors.backgroundSecondary};
+  color: ${colors.textPrimary};
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px ${colors.shadow};
+
+  &::placeholder {
+    color: ${colors.textSecondary};
+    opacity: 0.6;
+  }
+
+  &:hover {
+    border-color: rgba(99, 102, 241, 0.6);
+    box-shadow: 0 4px 8px ${colors.shadow};
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  }
+`;
+
+const SubmitButton = styled.button`
+  background: linear-gradient(
+    135deg,
+    ${colors.primary} 0%,
+    ${colors.primaryHover} 100%
+  );
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  transition: all 0.2s ease;
+  font-family: "Inter", Axiforma, sans-serif;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const LoadingContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+`;
+
+const LoadingSpinner = styled.div`
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(99, 102, 241, 0.1);
+  border-radius: 50%;
+  border-top-color: ${colors.primary};
+  animation: spin 1s ease-in-out infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+const ErrorMessage = styled.div`
+  color: ${colors.error};
+  background-color: rgba(239, 68, 68, 0.1);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 20px;
+  font-size: 16px;
+  font-family: "Inter", Axiforma, sans-serif;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+`;
+
+const SuccessMessage = styled.div`
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: ${colors.success};
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  animation: slideUp 0.3s ease forwards;
+  z-index: 100;
+  font-family: "Inter", Axiforma, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &::before {
+    content: "✓";
+    font-weight: bold;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 20px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+`;
+
+// Sample schedule data
+const sampleSchedule = [
+  {
+    id: 1,
+    title: "Speakers Introduction",
+    time: "08:00 - 09:00",
+    location: "Main Hall",
+    icon: "🎤",
+  },
+  {
+    id: 2,
+    title: "Group Photo Session",
+    time: "10:00 - 11:00",
+    location: "Auditorium 1",
+    icon: "📷",
+  },
+  {
+    id: 3,
+    title: "Keynote Speech",
+    time: "11:30 - 12:30",
+    location: "Main Stage",
+    icon: "🎯",
+  },
+  {
+    id: 4,
+    title: "Networking Lunch",
+    time: "13:00 - 14:00",
+    location: "Dining Hall",
+    icon: "🍽️",
+  },
+];
+
+const VirtualSpace: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [event, setEvent] = useState<Event | null>(null);
+  const [feedback, setFeedback] = useState("");
+  const [guestName, setGuestName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [currentTime] = useState(new Date());
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/events/${id}`
+        );
+        setEvent(response.data.data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching event:", err);
+        setError(
+          "Failed to load event details. The event may not exist or you may not have access."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchEvent();
+    }
+  }, [id]);
+
+  const handleFeedbackChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFeedback(e.target.value);
+  };
+
+  const handleGuestNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGuestName(e.target.value);
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (!feedback.trim()) {
+      alert("Please enter your feedback before submitting.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/events/${id}/feedback`,
+        {
+          guestName: guestName.trim() || undefined,
+          content: feedback.trim(),
+        }
+      );
+
+      if (response.data.success) {
+        setSubmitSuccess(true);
+        setFeedback("");
+        setGuestName("");
+
+        // Reset success message after 3 seconds
+        setTimeout(() => {
+          setSubmitSuccess(false);
+        }, 3000);
+      }
+    } catch (err) {
+      console.error("Error submitting feedback:", err);
+      alert("Failed to submit feedback. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Helper function to check if a session is currently active
+  const isSessionActive = (sessionTime: string) => {
+    const [startStr, endStr] = sessionTime.split(" - ");
+    const [startHour, startMin] = startStr.split(":").map(Number);
+    const [endHour, endMin] = endStr.split(":").map(Number);
+
+    const sessionStart = new Date();
+    sessionStart.setHours(startHour, startMin, 0);
+
+    const sessionEnd = new Date();
+    sessionEnd.setHours(endHour, endMin, 0);
+
+    return currentTime >= sessionStart && currentTime <= sessionEnd;
+  };
+
+  if (loading) {
+    return (
+      <SpaceWrapper>
+        <LoadingContainer>
+          <LoadingSpinner />
+        </LoadingContainer>
+      </SpaceWrapper>
+    );
+  }
+
+  if (error || !event) {
+    return (
+      <SpaceWrapper>
+        <ErrorMessage>
+          {error || "Event not found. Please check the URL and try again."}
+        </ErrorMessage>
+      </SpaceWrapper>
+    );
+  }
+
+  return (
+    <SpaceWrapper>
+      <HeaderCard posterUrl={event.poster || undefined}>
+        <HeaderContent>
+          <WelcomeText>Welcome!</WelcomeText>
+          <EventName>
+            This is your Virtual Space for the {event.title}
+          </EventName>
+        </HeaderContent>
+      </HeaderCard>
+
+      <ContentSection>
+        <SectionHeader>
+          <SectionTitle>Schedule</SectionTitle>
+          <ViewAllLink href="#">View all</ViewAllLink>
+        </SectionHeader>
+
+        <TimelineContainer>
+          <TimeMarker>08:00</TimeMarker>
+          <ScheduleCard isActive={isSessionActive(sampleSchedule[0].time)}>
+            <SessionTitle>
+              <SessionIcon>{sampleSchedule[0].icon}</SessionIcon>
+              {sampleSchedule[0].title}
+            </SessionTitle>
+            <SessionDetails>
+              {sampleSchedule[0].time} | {sampleSchedule[0].location}
+            </SessionDetails>
+          </ScheduleCard>
+
+          <TimeMarker>09:00</TimeMarker>
+
+          <TimeMarker>10:00</TimeMarker>
+          <ScheduleCard isActive={isSessionActive(sampleSchedule[1].time)}>
+            <SessionTitle>
+              <SessionIcon>{sampleSchedule[1].icon}</SessionIcon>
+              {sampleSchedule[1].title}
+            </SessionTitle>
+            <SessionDetails>
+              {sampleSchedule[1].time} | {sampleSchedule[1].location}
+            </SessionDetails>
+          </ScheduleCard>
+
+          <TimeMarker>11:00</TimeMarker>
+          <ScheduleCard isActive={isSessionActive(sampleSchedule[2].time)}>
+            <SessionTitle>
+              <SessionIcon>{sampleSchedule[2].icon}</SessionIcon>
+              {sampleSchedule[2].title}
+            </SessionTitle>
+            <SessionDetails>
+              {sampleSchedule[2].time} | {sampleSchedule[2].location}
+            </SessionDetails>
+          </ScheduleCard>
+        </TimelineContainer>
+
+        <FeedbackSection>
+          <SectionTitle>Feedback form</SectionTitle>
+          <FeedbackLabel>
+            This is the perfect place to let us know what you liked or disliked
+            about the event
+          </FeedbackLabel>
+          <NameInput
+            value={guestName}
+            onChange={handleGuestNameChange}
+            placeholder="Your name (optional)"
+          />
+          <FeedbackInput
+            value={feedback}
+            onChange={handleFeedbackChange}
+            placeholder="Give us your thoughts here..."
+          />
+          <SubmitButton onClick={handleSubmitFeedback} disabled={submitting}>
+            {submitting
+              ? "Submitting..."
+              : submitSuccess
+              ? "Thank you!"
+              : "Submit"}
+          </SubmitButton>
+        </FeedbackSection>
+      </ContentSection>
+
+      {submitSuccess && (
+        <SuccessMessage>Feedback submitted successfully!</SuccessMessage>
+      )}
+    </SpaceWrapper>
+  );
+};
+
+export default VirtualSpace;

@@ -4,52 +4,70 @@ import UserProfile from "./auth/UserProfile";
 import { useNavigate } from "react-router-dom";
 import EventForm from "./form/EventForm";
 
+// Modern color palette to match sidebar and Events page
+const colors = {
+  primary: "#6366F1", // Matches sidebar accent
+  primaryHover: "#4F46E5",
+  textPrimary: "#1E293B",
+  textSecondary: "#64748B",
+  borderLight: "#E2E8F0",
+  backgroundLight: "#FFFFFF",
+  backgroundSecondary: "#F8FAFC",
+  shadow: "rgba(0, 0, 0, 0.05)",
+};
+
 const TopBarContainer = styled.div`
   width: -webkit-fill-available;
   position: relative;
   display: flex;
   align-items: center;
-  height: 64px;
+  height: 70px;
   justify-content: space-between;
-  background-color: white;
-  padding: 0 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  background-color: ${colors.backgroundLight};
+  padding: 0 32px;
+  border-bottom: 1px solid ${colors.borderLight};
+  box-shadow: 0 1px 8px ${colors.shadow};
+  font-family: "Inter", Axiforma, sans-serif;
 `;
 
 const Title = styled.h1`
   font-size: 22px;
   font-weight: 600;
-  color: #2c2c2c;
+  color: ${colors.textPrimary};
   margin: 0;
   padding: 0;
+  letter-spacing: -0.3px;
 `;
 
 const RightSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
 `;
 
-const UpgradeButton = styled.button`
+const AddEventButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 9px 16px;
   font-size: 14px;
   font-weight: 500;
   color: white;
-  background-color: rgb(107, 61, 223);
+  background: linear-gradient(
+    135deg,
+    ${colors.primary} 0%,
+    ${colors.primaryHover} 100%
+  );
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
 
   &:hover {
-    background-color: rgb(87, 41, 203);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(107, 61, 223, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
   }
 
   &:active {
@@ -59,34 +77,55 @@ const UpgradeButton = styled.button`
   svg {
     width: 18px;
     height: 18px;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover svg {
+    transform: scale(1.1);
   }
 `;
+
 const ButtonText = styled.div`
   margin: auto 0;
   height: 100%;
+  letter-spacing: 0.2px;
 `;
+
 const BackButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   background: none;
   border: none;
   cursor: pointer;
-  color: black;
+  color: ${colors.textPrimary};
   font-size: 14px;
   font-weight: 500;
   padding: 8px 12px;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
+  border-radius: 6px;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: #f7f7f7;
+    background-color: ${colors.backgroundSecondary};
+    color: ${colors.primary};
   }
 
   svg {
     width: 16px;
     height: 16px;
+    transition: transform 0.2s ease;
   }
+
+  &:hover svg {
+    transform: translateX(-2px);
+  }
+`;
+
+const TitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
 `;
 
 interface TopBarProps {
@@ -99,7 +138,7 @@ const TopBar: React.FC<TopBarProps> = ({ sectionTitle, showBackButton }) => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   return (
     <TopBarContainer>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <TitleContainer>
         {showBackButton && (
           <BackButton onClick={() => navigate(-1)}>
             <svg
@@ -119,9 +158,9 @@ const TopBar: React.FC<TopBarProps> = ({ sectionTitle, showBackButton }) => {
           </BackButton>
         )}
         <Title>{sectionTitle}</Title>
-      </div>
+      </TitleContainer>
       <RightSection>
-        <UpgradeButton onClick={() => setIsPopupVisible(true)}>
+        <AddEventButton onClick={() => setIsPopupVisible(true)}>
           <svg
             width="20"
             height="20"
@@ -138,7 +177,7 @@ const TopBar: React.FC<TopBarProps> = ({ sectionTitle, showBackButton }) => {
             />
           </svg>
           <ButtonText>Add event</ButtonText>
-        </UpgradeButton>
+        </AddEventButton>
         <UserProfile />
       </RightSection>
       {isPopupVisible && (

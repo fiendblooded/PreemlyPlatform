@@ -888,10 +888,12 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         </SearchContainer>
 
         <ButtonGroup>
-          <ExcelButton onClick={downloadGuestsExcel}>
-            <ExcelIcon />
-            Download Excel
-          </ExcelButton>
+          {event.guests.length && (
+            <ExcelButton onClick={downloadGuestsExcel}>
+              <ExcelIcon />
+              Download Excel
+            </ExcelButton>
+          )}
           <PrimaryButton onClick={addNewGuestRow}>+ Add Guest</PrimaryButton>
         </ButtonGroup>
       </GuestTableHeaderContainer>

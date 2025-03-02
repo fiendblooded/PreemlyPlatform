@@ -4,10 +4,22 @@ import EventComponent from "./EventComponent";
 import EventForm from "./form/EventForm";
 import { useState } from "react";
 
+// Modern color palette to match sidebar and Events page
+const colors = {
+  primary: "#6366F1", // Matches sidebar accent
+  primaryHover: "#4F46E5",
+  textPrimary: "#1E293B",
+  textSecondary: "#64748B",
+  borderLight: "#E2E8F0",
+  backgroundLight: "#FFFFFF",
+  backgroundSecondary: "#F8FAFC",
+  shadow: "rgba(0, 0, 0, 0.05)",
+};
+
 const fadeInRight = keyframes`
   from {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateX(-10px);
   }
   to {
     opacity: 1;
@@ -27,17 +39,18 @@ const fadeIn = keyframes`
 `;
 
 const Wrapper = styled.div`
-  margin-top: 32px;
+  margin-top: 16px;
   height: 100%;
-  padding: 0 24px;
+  padding: 0;
 `;
+
 const ListWrapper = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
 
   & > * {
-    animation: ${fadeInRight} 0.4s ease-out backwards;
+    animation: ${fadeInRight} 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
   }
 
   & > *:nth-child(1) {
@@ -59,78 +72,92 @@ const ListWrapper = styled.div`
     animation-delay: 0.35s;
   }
 
-  // overflow-y: auto;
   @media (max-width: 900px) {
-    grid-template-columns: repeat(
-      3,
-      1fr
-    ); /* 4 cards per row on medium screens */
+    grid-template-columns: repeat(3, 1fr);
   }
 
   @media (max-width: 600px) {
-    grid-template-columns: repeat(
-      2,
-      1fr
-    ); /* 2 cards per row on small screens */
+    grid-template-columns: repeat(2, 1fr);
   }
 
   @media (max-width: 400px) {
-    grid-template-columns: 1fr; /* Full-width cards on very small screens */
+    grid-template-columns: 1fr;
   }
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #d3d3d3 #f5f5f5; /* Scrollbar thumb and track colors */
+
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.2) transparent;
 
   &::-webkit-scrollbar {
-    width: 8px; /* Scrollbar width */
+    width: 6px;
   }
 
   &::-webkit-scrollbar-track {
-    background: #f5f5f5; /* Light background for the track */
-    border-radius: 4px; /* Rounded corners */
+    background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #d3d3d3; /* Light grey thumb */
-    border-radius: 4px; /* Rounded corners */
+    background-color: rgba(100, 116, 139, 0.2);
+    border-radius: 4px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: #b0b0b0; /* Darker grey on hover */
+    background-color: rgba(100, 116, 139, 0.3);
   }
 `;
 
 export const MessageContainer = styled.div`
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   margin: 64px auto;
-  padding: 32px;
+  padding: 36px;
   text-align: center;
-  background: white;
+  background: ${colors.backgroundLight};
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  animation: ${fadeIn} 0.5s ease-out;
-
+  box-shadow: 0 4px 20px ${colors.shadow};
+  animation: ${fadeIn} 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 16px;
-  color: #666;
+  color: ${colors.textSecondary};
   line-height: 1.6;
+  font-family: "Inter", Axiforma, sans-serif;
 `;
 
 export const CreateLink = styled.a`
-  color: rgb(107, 61, 223);
+  color: ${colors.primary};
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    bottom: -1px;
+    left: 0;
+    background-color: ${colors.primary};
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
   &:hover {
-    color: rgb(87, 41, 203);
-    text-decoration: underline;
+    color: ${colors.primaryHover};
+
+    &::after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
+    }
   }
 `;
+
 interface EventListProps {
   events: Event[];
   isFilterQueue: boolean;
 }
+
 const EventList: React.FC<EventListProps> = ({ events, isFilterQueue }) => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   return (

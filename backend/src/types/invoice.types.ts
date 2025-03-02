@@ -1,4 +1,4 @@
-import type { Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 export interface Invoice {
   _id: Types.ObjectId;
@@ -11,7 +11,6 @@ export interface Invoice {
   category?: string;
   isPaid: boolean;
   pdfUrl: string;
-  cloudinaryPublicId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -59,7 +59,7 @@ export function getDateTimeStatus(
   const end = new Date(endDateTime);
 
   if (now < start) {
-    return { type: "Incoming", color: "#00aef0" }; // Blue
+    return { type: "Upcoming", color: "#00aef0" }; // Blue
   } else if (now > end) {
     return { type: "Past", color: "#6b6b6b" }; // Grey
   } else {
@@ -135,192 +135,6 @@ function generateOutlookCalendarUrl(
 
 // Original getMailHtml commented out
 
-// export function getMailHtml(
-//   guestName: string,
-//   qrCodeImageSrc: string,
-//   eventTitle: string,
-//   eventLogoImageSrc: string,
-//   eventDescription: string,
-//   eventDate: string,
-//   eventEndDate: string,
-//   parkingOptions: EmailExtraModule,
-//   scheduleImageSrc: EmailExtraModule,
-//   diningOptions: EmailExtraModule,
-//   eventLocation: string,
-//   bodyOnly?: boolean
-// ): string {
-//   const lightModeLogoLink = "https://platform.preemly.eu/logosmall.png";
-
-//   const bodyContent = `
-//   <table width='100%' height="100%" border='0' cellspacing='0' cellpadding='0' style='background-color: #EEEDF2; min-height: 100vh;'>
-//         <tr>
-//             <td align='center' style='padding:0;'>
-//                 <table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color: #ffffff; border-radius: 10px; margin:0 auto; width:100%; max-width:700px;'>
-//                     <tr>
-//                         <td align='center' style='padding:0; margin:0; background-color:#ffffff; border-radius:10px 10px 0 0; line-height:0; font-size:0;'>
-//                            <img src='${lightModeLogoLink}' alt="Preemly Logo" style='display:block; width:100%; height:auto; border-radius:10px 10px 0 0; margin:0; padding:0;'/>
-//                         </td>
-//                     </tr>
-//                     <tr>
-//                         <td align='center' style='font-size: 24px; font-weight: bold; color: #333; padding-top:20px; padding-left: 20px; padding-right: 20px;'>You're invited, ${guestName}!</td>
-//                     </tr>
-//                     <tr>
-//                         <td align='center' style='padding: 20px;'>
-//                             <img src='${eventLogoImageSrc}' alt='Event Logo' style='display:block; width:100%; height:auto; max-height:400px; border-radius:8px; object-fit:cover; object-position:center;'>
-//                         </td>
-//                     </tr>
-//                     <tr>
-//                         <td align='center' style='font-size: 22px; font-weight: bold; color: #333; padding-left: 20px; padding-right: 20px;'>${eventTitle}</td>
-//                     </tr>
-//                      <tr>
-//                         <td align='center' style='font-size: 16px; color: #666; padding: 10px 20px 20px 20px;'>
-//                             ${eventDescription}
-//                         </td>
-//                     </tr>
-
-//                     <tr>
-//                         <td style='text-align: center; padding: 20px;'>
-//                             <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>📅 Date & Time</p>
-//                             <p style='color: #666; margin-top: 0; font-size: 16px;'>${getDateRangeDetails(
-//                               eventDate,
-//                               eventEndDate
-//                             )}</p>
-//                             <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>📍 Location</p>
-//                             <p style='color: #666; margin-top: 0; font-size: 16px;'>${eventLocation}</p>
-//                             ${
-//                               parkingOptions.enabled
-//                                 ? `
-//                             <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>🚗 Parking Information</p>
-//                             <p style='color: #666; margin-top: 0; font-size: 16px;'>${parkingOptions.content}</p>
-//                             `
-//                                 : ""
-//                             }
-//                             ${
-//                               scheduleImageSrc.enabled
-//                                 ? `
-//                             <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>📅 Event Schedule</p>
-//                             <p style='color: #666; margin-top: 0; font-size: 16px;'>${scheduleImageSrc.content}</p>
-//                             `
-//                                 : ""
-//                             }
-//                             ${
-//                               diningOptions.enabled
-//                                 ? `
-//                             <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>🍽 Dining Options</p>
-//                             <p style='color: #666; margin-top: 0; font-size: 16px;'>${diningOptions.content}</p>
-//                             `
-//                                 : ""
-//                             }
-//                         </td>
-//                     </tr>
-
-//                     <tr>
-//                         <td align='center' style='font-size: 22px; font-weight: bold; color: #333; padding-top: 10px;'>Your Invitation QR Code</td>
-//                     </tr>
-//                     <tr>
-//                         <td align='center' style='padding: 15px 0;'>
-//                             <img src='${qrCodeImageSrc}' alt='QR Code' style='display:block; max-width: 250px; width:100%; height:auto; margin:0 auto;'>
-//                         </td>
-//                     </tr>
-//                     <tr>
-//                         <td align='center' style='font-size: 16px; color: #666; padding: 0 20px 20px 20px;'>Please present this QR code at the entrance for a smooth check-in process.</td>
-//                     </tr>
-//                    <tr>
-//                       <td align='center' style='padding: 20px; padding-bottom: 40px;'>
-//                         <table border='0' cellspacing='0' cellpadding='0' width='100%'>
-//                           <tr>
-//                             <td align='center' style='padding: 0 10px 10px 10px;'>
-//                               <a href="${generateGoogleCalendarUrl(
-//                                 eventTitle,
-//                                 eventDescription,
-//                                 eventDate,
-//                                 eventEndDate,
-//                                 eventLocation
-//                               )}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #4285F4; color: #4285F4; padding: 12px 16px; text-decoration: none; font-size: 15px; border-radius: 5px; font-weight: bold; display: inline-block; width:100%; max-width:300px; text-align: center; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-//                                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Calendar_icon_%282020%29.svg/2048px-Google_Calendar_icon_%282020%29.svg.png" alt="Google Calendar" style="vertical-align: middle; margin-right: 8px; width: 20px; height: 20px;">
-//                                 Add to Google Calendar
-//                               </a>
-//                             </td>
-//                           </tr>
-//                           <tr>
-//                             <td align='center' style='padding: 0 10px;'>
-//                               <a href="${generateOutlookCalendarUrl(
-//                                 eventTitle,
-//                                 eventDescription,
-//                                 eventDate,
-//                                 eventEndDate,
-//                                 eventLocation
-//                               )}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #0078D4; color: #0078D4; padding: 12px 16px; text-decoration: none; font-size: 15px; border-radius: 5px; font-weight: bold; display: inline-block; width:100%; max-width:300px; text-align: center; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-//                                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg/1101px-Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg.png" alt="Outlook Calendar" style="vertical-align: middle; margin-right: 8px; width: 20px; height: 20px;">
-//                                 Add to Outlook Calendar
-//                               </a>
-//                             </td>
-//                           </tr>
-//                         </table>
-//                       </td>
-//                     </tr>
-
-//                     <tr>
-//                         <td align='center' style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;'>
-//                             Follow us on:
-//                             <a href='https://x.com/trypreemly' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>Twitter</a> |
-//                             <a href='https://www.linkedin.com/company/106173934' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>LinkedIn</a>
-//                             <br>
-//                             Visit our website: <a href='https://preemly.eu' style='color: #FFCC32; text-decoration: none;'><b>preemly.eu</b></a>
-//                         </td>
-//                     </tr>
-//                 </table>
-//             </td>
-//         </tr>
-//     </table>
-//   `;
-
-//   if (bodyOnly) {
-//     return bodyContent;
-//   } else {
-//     return `<!DOCTYPE html>
-//     <html>
-//     <head>
-//         <meta charset='UTF-8'>
-//         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-//         <title>${eventTitle} - Preemly</title>
-//         <style type="text/css">
-//             @media screen and (max-width: 620px) {
-//                 .main-table {
-//                     width: 100% !important;
-//                 }
-//                 .content {
-//                     padding: 10px !important;
-//                 }
-//                 .header-text {
-//                     font-size: 22px !important;
-//                 }
-//                 .event-title {
-//                     font-size: 20px !important;
-//                 }
-//                 .description {
-//                     font-size: 15px !important;
-//                 }
-//                 .section-title {
-//                     font-size: 17px !important;
-//                 }
-//                 .section-content {
-//                     font-size: 15px !important;
-//                 }
-//                 .button-text {
-//                     font-size: 14px !important;
-//                 }
-//             }
-//         </style>
-//     </head>
-//     <body style='margin: 0; padding: 0; font-family: Axiforma, Arial, sans-serif; background-color: #EEEDF2;'>
-//         ${bodyContent}
-//     </body>
-//     </html>`;
-//   }
-// }
-
-// New implementation based on new-email.html
 export function getMailHtml(
   guestName: string,
   qrCodeImageSrc: string,
@@ -335,704 +149,890 @@ export function getMailHtml(
   eventLocation: string,
   bodyOnly?: boolean
 ): string {
-  return `<!DOCTYPE html>
+  const lightModeLogoLink = "https://platform.preemly.eu/logosmall.png";
 
-<html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
-<head>
-<title></title>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]--><!--[if !mso]><!-->
-<link href="https://fonts.googleapis.com/css?family=Cabin" rel="stylesheet" type="text/css"/><!--<![endif]-->
-<style>
-		* {
-			box-sizing: border-box;
-		}
+  const bodyContent = `
+  <table width='100%' height="100%" border='0' cellspacing='0' cellpadding='0' style='background-color: #EEEDF2; min-height: 100vh;'>
+        <tr>
+            <td align='center' style='padding:0;'>
+                <table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color: #ffffff; border-radius: 10px; margin:0 auto; width:100%; max-width:700px;'>
+                    <tr>
+                        <td align='center' style='padding:0; margin:0; background-color:#ffffff; border-radius:10px 10px 0 0; line-height:0; font-size:0;'>
+                           <img src='${lightModeLogoLink}' alt="Preemly Logo" style='display:block; width:100%; height:auto; border-radius:10px 10px 0 0; margin:0; padding:0;'/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align='center' style='font-size: 24px; font-weight: bold; color: #333; padding-top:20px; padding-left: 20px; padding-right: 20px;'>You're invited, ${guestName}!</td>
+                    </tr>
+                    <tr>
+                        <td align='center' style='padding: 20px;'>
+                            <img src='${eventLogoImageSrc}' alt='Event Logo' style='display:block; width:100%; height:auto; max-height:400px; border-radius:8px; object-fit:cover; object-position:center;'>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align='center' style='font-size: 22px; font-weight: bold; color: #333; padding-left: 20px; padding-right: 20px;'>${eventTitle}</td>
+                    </tr>
+                     <tr>
+                        <td align='center' style='font-size: 16px; color: #666; padding: 10px 20px 20px 20px;'>
+                            ${eventDescription}
+                        </td>
+                    </tr>
 
-		body {
-			margin: 0;
-			padding: 0;
-		}
+                    <tr>
+                        <td style='text-align: center; padding: 20px;'>
+                            <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>📅 Date & Time</p>
+                            <p style='color: #666; margin-top: 0; font-size: 16px;'>${getDateRangeDetails(
+                              eventDate,
+                              eventEndDate
+                            )}</p>
+                            <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>📍 Location</p>
+                            <p style='color: #666; margin-top: 0; font-size: 16px;'>${eventLocation}</p>
+                            ${
+                              parkingOptions.enabled
+                                ? `
+                            <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>🚗 Parking Information</p>
+                            <p style='color: #666; margin-top: 0; font-size: 16px;'>${parkingOptions.content}</p>
+                            `
+                                : ""
+                            }
+                            ${
+                              scheduleImageSrc.enabled
+                                ? `
+                            <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>📅 Event Schedule</p>
+                            <p style='color: #666; margin-top: 0; font-size: 16px;'>${scheduleImageSrc.content}</p>
+                            `
+                                : ""
+                            }
+                            ${
+                              diningOptions.enabled
+                                ? `
+                            <p style='font-weight: bold; color: #333; margin-bottom: 5px; font-size: 18px;'>🍽 Dining Options</p>
+                            <p style='color: #666; margin-top: 0; font-size: 16px;'>${diningOptions.content}</p>
+                            `
+                                : ""
+                            }
+                        </td>
+                    </tr>
 
-		a[x-apple-data-detectors] {
-			color: inherit !important;
-			text-decoration: inherit !important;
-		}
+                    <tr>
+                        <td align='center' style='font-size: 22px; font-weight: bold; color: #333; padding-top: 10px;'>Your Invitation QR Code</td>
+                    </tr>
+                    <tr>
+                        <td align='center' style='padding: 15px 0;'>
+                            <img src='${qrCodeImageSrc}' alt='QR Code' style='display:block; max-width: 250px; width:100%; height:auto; margin:0 auto;'>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align='center' style='font-size: 16px; color: #666; padding: 0 20px 20px 20px;'>Please present this QR code at the entrance for a smooth check-in process.</td>
+                    </tr>
+                   <tr>
+                      <td align='center' style='padding: 20px; padding-bottom: 40px;'>
+                        <table border='0' cellspacing='0' cellpadding='0' width='100%'>
+                          <tr>
+                            <td align='center' style='padding: 0 10px 10px 10px;'>
+                              <a href="${generateGoogleCalendarUrl(
+                                eventTitle,
+                                eventDescription,
+                                eventDate,
+                                eventEndDate,
+                                eventLocation
+                              )}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #4285F4; color: #4285F4; padding: 12px 16px; text-decoration: none; font-size: 15px; border-radius: 5px; font-weight: bold; display: inline-block; width:100%; max-width:300px; text-align: center; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Calendar_icon_%282020%29.svg/2048px-Google_Calendar_icon_%282020%29.svg.png" alt="Google Calendar" style="vertical-align: middle; margin-right: 8px; width: 20px; height: 20px;">
+                                Add to Google Calendar
+                              </a>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align='center' style='padding: 0 10px;'>
+                              <a href="${generateOutlookCalendarUrl(
+                                eventTitle,
+                                eventDescription,
+                                eventDate,
+                                eventEndDate,
+                                eventLocation
+                              )}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #0078D4; color: #0078D4; padding: 12px 16px; text-decoration: none; font-size: 15px; border-radius: 5px; font-weight: bold; display: inline-block; width:100%; max-width:300px; text-align: center; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg/1101px-Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg.png" alt="Outlook Calendar" style="vertical-align: middle; margin-right: 8px; width: 20px; height: 20px;">
+                                Add to Outlook Calendar
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
 
-		#MessageViewBody a {
-			color: inherit;
-			text-decoration: none;
-		}
+                    <tr>
+                        <td align='center' style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;'>
+                            Follow us on:
+                            <a href='https://x.com/trypreemly' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>Twitter</a> |
+                            <a href='https://www.linkedin.com/company/106173934' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>LinkedIn</a>
+                            <br>
+                            Visit our website: <a href='https://preemly.eu' style='color: #FFCC32; text-decoration: none;'><b>preemly.eu</b></a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+  `;
 
-		p {
-			line-height: inherit
-		}
-
-		.desktop_hide,
-		.desktop_hide table {
-			mso-hide: all;
-			display: none;
-			max-height: 0px;
-			overflow: hidden;
-		}
-
-		.image_block img+div {
-			display: none;
-		}
-
-		sup,
-		sub {
-			font-size: 75%;
-			line-height: 0;
-		}
-
-		@media (max-width:710px) {
-			.image_block div.fullWidth {
-				max-width: 100% !important;
-			}
-
-			.mobile_hide {
-				display: none;
-			}
-
-			.row-content {
-				width: 100% !important;
-			}
-
-			.stack .column {
-				width: 100%;
-				display: block;
-			}
-
-			.mobile_hide {
-				min-height: 0;
-				max-height: 0;
-				max-width: 0;
-				overflow: hidden;
-				font-size: 0px;
-			}
-
-			.desktop_hide,
-			.desktop_hide table {
-				display: table !important;
-				max-height: none !important;
-			}
-
-			.row-14 .column-1 .block-2.paragraph_block td.pad>div,
-			.row-14 .column-2 .block-2.paragraph_block td.pad>div {
-				text-align: left !important;
-				font-size: 16px !important;
-			}
-
-			.row-14 .column-1 .block-1.heading_block h3,
-			.row-14 .column-2 .block-1.heading_block h3 {
-				text-align: left !important;
-				font-size: 24px !important;
-			}
-
-			.row-14 .column-1 .block-1.heading_block td.pad,
-			.row-14 .column-2 .block-1.heading_block td.pad {
-				padding: 10px 0 !important;
-			}
-
-			.row-14 .column-1,
-			.row-14 .column-2 {
-				padding: 20px !important;
-			}
-		}
-	</style><!--[if mso ]><style>sup, sub { font-size: 100% !important; } sup { mso-text-raise:10% } sub { mso-text-raise:-10% }</style> <![endif]-->
-</head>
-<body class="body" style="background-color: #fbfbfb; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
-<table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 10px; padding-left: 8px; padding-right: 10px; padding-top: 15px; vertical-align: top;" width="100%">
-<table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-left:15px;width:100%;padding-right:0px;">
-<div align="center" class="alignment" style="line-height:10px">
-<div style="max-width: 235.2px;"><img alt="Logo" height="auto" src="https://drive.google.com/uc?id=1-4kx45bNcfTkLK8i2Iv8yMCs__wQj0te" style="display: block; height: auto; border: 0; width: 100%;" title="Logo" width="235.2"/></div>
-</div>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f2f2f2; border-radius: 0; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top;" width="100%">
-<div class="spacer_block block-1" style="height:20px;line-height:20px;font-size:1px;"> </div>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-size: auto;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-size: auto; background-color: #fbfbfb; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 25px; padding-left: 25px; padding-right: 25px; padding-top: 25px; vertical-align: top;" width="100%">
-<table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="width:100%;">
-<div align="center" class="alignment" style="line-height:10px">
-<div class="fullWidth" style="max-width: 640px;"><img alt="Campus" height="auto" src="https://drive.google.com/uc?id=13mNkSjuro1p9VGezZ-n4oF2JNbNo-K53" style="display: block; height: auto; border: 0; width: 100%;" title="Campus" width="640"/></div>
-</div>
-</td>
-</tr>
-</table>
-<div class="spacer_block block-2" style="height:10px;line-height:10px;font-size:1px;"> </div>
-<table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-<tr>
-<td class="pad" style="padding-left:5px;padding-right:5px;padding-top:10px;">
-<div style="color:#393d47;direction:ltr;font-family:Cabin, Arial, Helvetica Neue, Helvetica, sans-serif;font-size:15px;font-weight:400;letter-spacing:0px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-<p style="margin: 0; margin-bottom: 16px; font-size: 26px;">Dear ${guestName},</p>
-<p style="margin: 0;">We're thrilled to welcome you to the <strong>Intelligent Event Guide Hackathon</strong>, where your ideas will shape the community of Galanta . Join us on <strong>February 28th - March 1st, 2025</strong>, for two days of innovation, collaboration, and excitement.</p>
-</div>
-</td>
-</tr>
-</table>
-<div class="spacer_block block-4" style="height:10px;line-height:10px;font-size:1px;"> </div>
-<table border="0" cellpadding="0" cellspacing="0" class="button_block block-5" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:15px;padding-left:5px;padding-right:5px;padding-top:15px;text-align:left;">
-<div align="left" class="alignment"><a href="https://www.hacknime.to/en/hackathon/intelligent-event-guide" style="color:#ffffff;text-decoration:none;" target="_blank"><!--[if mso]>
-<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="https://www.hacknime.to/en/hackathon/intelligent-event-guide"  style="height:38px;width:147px;v-text-anchor:middle;" arcsize="0%" fillcolor="#00afef">
-<v:stroke dashstyle="Solid" weight="0px" color="#8a3b8f"/>
-<w:anchorlock/>
-<v:textbox inset="0px,0px,0px,0px">
-<center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:14px">
-<![endif]--><span class="button" style="background-color: #00afef; border-bottom: 0px solid #8a3b8f; border-left: 0px solid #8a3b8f; border-radius: 0px; border-right: 0px solid #8a3b8f; border-top: 0px solid #8a3b8f; color: #ffffff; display: inline-block; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 35px; padding-right: 35px; text-align: center; width: auto; word-break: keep-all; letter-spacing: 1px;"><span style="word-break: break-word;"><span data-mce-style="" style="word-break: break-word; line-height: 28px;"><strong>Learn More</strong></span></span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-4" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 10px; padding-left: 25px; padding-right: 25px; padding-top: 20px; vertical-align: top;" width="100%">
-<table border="0" cellpadding="5" cellspacing="0" class="heading_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad">
-<h1 style="margin: 0; color: #fbfbfb; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 25px; font-weight: 400; letter-spacing: 1px; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 30px;"><strong><span class="tinyMce-placeholder" style="word-break: break-word;">Check-in process</span></strong></h1>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-5" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-radius: 0; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="100%">
-<table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-<tr>
-<td class="pad" style="padding-left:5px;padding-right:5px;padding-top:10px;">
-<div style="color:#393d47;direction:ltr;font-family:Cabin, Arial, Helvetica Neue, Helvetica, sans-serif;font-size:15px;font-weight:400;letter-spacing:0px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-<p style="margin: 0; margin-bottom: 16px;">The check-in process is quick and effortless, designed to save you time and get you straight into the event. </p>
-<p style="margin: 0;"><strong>Check-In instructions:</strong><br/><strong>1. Arrive at Hackathon:</strong> Head to the check-in area.<br/><strong>2. Open your email:</strong> Locate the email with your unique QR code.<br/><strong>3. Scan your QR code:</strong> Follow the instructions on the tablet to complete your check-in.<br/><strong>4. Follow further instructions:</strong> Follow the guidance provided by the organization team</p>
-</div>
-</td>
-<tr>
-    <td align="center" style="padding: 15px 0;">
-      <div align="center" class="alignment" style="line-height:10px">
-        <img src="${qrCodeImageSrc}" alt="QR Code" style="display: block; max-width: 250px; width: 100%; height: auto; margin: 0 auto;">
-      </div>
-    </td>
-  </tr>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-7" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 10px; padding-left: 25px; padding-right: 25px; padding-top: 20px; vertical-align: top;" width="100%">
-<table border="0" cellpadding="5" cellspacing="0" class="heading_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad">
-<h1 style="margin: 0; color: #fbfbfb; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 24px; font-weight: 400; letter-spacing: 1px; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 28.799999999999997px;"><strong>Get started: YOUR ESSENTIAL PACK</strong></h1>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-8" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
-<table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
-<div align="center" class="alignment" style="line-height:10px">
-<div class="fullWidth" style="max-width: 331px;"><img alt="Library" height="auto" src="https://drive.google.com/uc?id=1fTZZ23LLVmrmM5QakFR2urPxU3mp0hqX" style="display: block; height: auto; border: 0; width: 100%;" title="Library" width="331"/></div>
-</div>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><span class="tinyMce-placeholder" style="word-break: break-word;">Location</span></h1>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;"><a href="https://maps.app.goo.gl/J4SJu9AtEioqRGHY8" rel="noopener" style="text-decoration: underline; color: #6295fe;" target="_blank">Neogotický kaštieľ Esterházyovcov, <br/>Parková 760, Galanta</a><br/></h1>
-</td>
-</tr>
-</table>
-</td>
-<td class="column column-2" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
-<table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
-<div align="center" class="alignment" style="line-height:10px">
-<div class="fullWidth" style="max-width: 331px;"><img alt="Library" height="auto" src="https://drive.google.com/uc?id=1xuOTtEhN_XDS_cOd2eSmrwNLr60JOXDT" style="display: block; height: auto; border: 0; width: 100%;" title="Library" width="331"/></div>
-</div>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><span class="tinyMce-placeholder" style="word-break: break-word;">Wi-Fi access</span></h1>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;">We'll send you the Wi-Fi info on the day of the hackathon via <a href="https://join.slack.com/share/enQtODUyMzAxNDc2MjM1Mi04ZGJmYmRiZjNjOWRiNjMxZmZhY2ZkZDhmNDZiNzU2ZmYwNDUwZjU2Mzk0NWVmOGEyYmY5YzRjMGZiZTJiZDY0" rel="noopener" style="text-decoration: underline; color: #6295fe;" target="_blank"><strong>Slack</strong> </a>&  <strong><a href="https://discord.gg/VwzAcMam" rel="noopener" style="text-decoration: underline; color: #6295fe;" target="_blank">Discord</a></strong>.</h1>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-9" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-radius: 0; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="50%">
-<table border="0" cellpadding="10" cellspacing="0" class="button_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad">
-<div align="left" class="alignment"><a href="https://maps.app.goo.gl/J4SJu9AtEioqRGHY8" style="color:#ffffff;text-decoration:none;" target="_blank"><!--[if mso]>
-<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="https://maps.app.goo.gl/J4SJu9AtEioqRGHY8"  style="height:29px;width:82px;v-text-anchor:middle;" arcsize="14%" fillcolor="#00afef">
-<v:stroke dashstyle="Solid" weight="0px" color="#00afef"/>
-<w:anchorlock/>
-<v:textbox inset="0px,0px,0px,0px">
-<center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:16px">
-<![endif]--><span class="button" style="background-color: #00afef; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 4px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #ffffff; display: inline-block; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 16px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; padding-right: 20px; text-align: center; width: auto; word-break: keep-all; letter-spacing: normal;"><span style="word-break: break-word; line-height: 19.2px;">Venue</span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
-</td>
-</tr>
-</table>
-</td>
-<td class="column column-2" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="25%">
-<table border="0" cellpadding="10" cellspacing="0" class="button_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad">
-<div align="left" class="alignment"><a href="https://join.slack.com/share/enQtODUyMzAxNDc2MjM1Mi04ZGJmYmRiZjNjOWRiNjMxZmZhY2ZkZDhmNDZiNzU2ZmYwNDUwZjU2Mzk0NWVmOGEyYmY5YzRjMGZiZTJiZDY0" style="color:#ffffff;text-decoration:none;" target="_blank"><!--[if mso]>
-<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="https://join.slack.com/share/enQtODUyMzAxNDc2MjM1Mi04ZGJmYmRiZjNjOWRiNjMxZmZhY2ZkZDhmNDZiNzU2ZmYwNDUwZjU2Mzk0NWVmOGEyYmY5YzRjMGZiZTJiZDY0"  style="height:29px;width:75px;v-text-anchor:middle;" arcsize="14%" fillcolor="#00afef">
-<v:stroke dashstyle="Solid" weight="0px" color="#00afef"/>
-<w:anchorlock/>
-<v:textbox inset="0px,0px,0px,0px">
-<center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:16px">
-<![endif]--><span class="button" style="background-color: #00afef; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 4px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #ffffff; display: inline-block; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 16px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; padding-right: 20px; text-align: center; width: auto; word-break: keep-all; letter-spacing: normal;"><span style="word-break: break-word; line-height: 19.2px;">Slack</span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
-</td>
-</tr>
-</table>
-</td>
-<td class="column column-3" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="25%">
-<table border="0" cellpadding="10" cellspacing="0" class="button_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad">
-<div align="left" class="alignment"><a href="https://discord.gg/VwzAcMam" style="color:#ffffff;text-decoration:none;" target="_blank"><!--[if mso]>
-<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="https://discord.gg/VwzAcMam"  style="height:29px;width:91px;v-text-anchor:middle;" arcsize="14%" fillcolor="#00afef">
-<v:stroke dashstyle="Solid" weight="0px" color="#00afef"/>
-<w:anchorlock/>
-<v:textbox inset="0px,0px,0px,0px">
-<center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:16px">
-<![endif]--><span class="button" style="background-color: #00afef; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 4px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #ffffff; display: inline-block; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 16px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; padding-right: 20px; text-align: center; width: auto; word-break: keep-all; letter-spacing: normal;"><span style="word-break: break-word; line-height: 19.2px;">Discord</span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-10" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-bottom: 15px solid transparent; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 15px solid transparent; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
-<table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
-<div align="center" class="alignment" style="line-height:10px">
-<div class="fullWidth" style="max-width: 316px;"><img alt="Library" height="auto" src="https://drive.google.com/uc?id=1UAGAu6r5O62SqnJtxelXgL0LGYYGwzDX" style="display: block; height: auto; border: 0; width: 100%;" title="Library" width="316"/></div>
-</div>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><strong>Dining options </strong></h1>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;"><strong>Breakfast, lunch, and dinner</strong> can be found <strong>next to the main room</strong>. <br/><br/>Have dietary preferences? Just give us a heads-up!<br/><br/>If you <strong>can't make it to lunch</strong>, let us know so we can arrange something for you.</h1>
-</td>
-</tr>
-</table>
-</td>
-<td class="column column-2" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
-<table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
-<div align="center" class="alignment" style="line-height:10px">
-<div class="fullWidth" style="max-width: 316px;"><img alt="Friends" height="auto" src="https://drive.google.com/uc?id=1OIt_jaLgKXTlUtdJeVYRpJ2-OvADeioS" style="display: block; height: auto; border: 0; width: 100%;" title="Friends" width="316"/></div>
-</div>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><strong>Snacks & drinks</strong></h1>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;"><strong>Snacks and drinks?</strong> All chillin' in the main room.<br/><br/><strong>Want some tea?</strong> Just ask the team – we've got you.</h1>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-11" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-bottom: 15px solid transparent; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 15px solid transparent; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
-<table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
-<div align="center" class="alignment" style="line-height:10px">
-<div class="fullWidth" style="max-width: 316px;"><img alt="Library" height="auto" src="https://drive.google.com/uc?id=1w-GK9UVZPpxqf3XUcVNAsD1i-c66dtfh" style="display: block; height: auto; border: 0; width: 100%;" title="Library" width="316"/></div>
-</div>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><strong>Parking situation</strong></h1>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;"><span class="tinyMce-placeholder" style="word-break: break-word;">There are some <strong>parking spots</strong> nearby. <br/><br/>You can park at: ulica Parková (next to coop jednota) or Ulica Školská (next to restaurant stop).<br/><br/>Heads up – <strong>both spots are paid parking </strong>so keep that in mind!</span></h1>
-</td>
-</tr>
-</table>
-</td>
-<td class="column column-2" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
-<table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
-<div align="center" class="alignment" style="line-height:10px">
-<div class="fullWidth" style="max-width: 316px;"><img alt="Friends" height="auto" src="https://drive.google.com/uc?id=1wGIcBQWzgW7czDKGEjxh6wSHdY9zP9kI" style="display: block; height: auto; border: 0; width: 100%;" title="Friends" width="316"/></div>
-</div>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><span class="tinyMce-placeholder" style="word-break: break-word;">Overnight stay</span></h1>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
-<h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;">Need to <strong>crash for the night</strong>? Cool, you can totally stay over.<br/><br/><strong>Important:</strong> Please bring your own <strong>mats and sleeping bags</strong> – no Airbnb luxuries, sorry, but it's all part of the hacker adventure.<br/><br/>Shower will not be available.</h1>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-12" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 10px; padding-left: 25px; padding-right: 25px; padding-top: 20px; vertical-align: top;" width="100%">
-<table border="0" cellpadding="5" cellspacing="0" class="heading_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad">
-<h1 style="margin: 0; color: #fbfbfb; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 24px; font-weight: 400; letter-spacing: 1px; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 28.799999999999997px;"><strong>Got any questions or suggestions?</strong></h1>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-13" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-radius: 0; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="100%">
-<table border="0" cellpadding="10" cellspacing="0" class="paragraph_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-<tr>
-<td class="pad">
-<div style="color:#101112;direction:ltr;font-family:Cabin, Arial, Helvetica Neue, Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:120%;text-align:center;mso-line-height-alt:19.2px;">
-<p style="margin: 0;"><strong>With any queries feel free to contact our Team via Whatsapp or email!</strong></p>
-</div>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-14" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-radius: 0; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; background-color: #fbfbfb; padding-bottom: 20px; padding-left: 20px; padding-right: 20px; padding-top: 20px; vertical-align: top;" width="50%">
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;padding-top:10px;text-align:center;width:100%;">
-<h3 style="margin: 0; color: #26045d; direction: ltr; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: normal; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 24px;"><a href="mailto:Viktor@campus-cowork.com" style="text-decoration: underline; color: #26045d;">Viktor@campus-cowork.com</a></h3>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-<tr>
-<td class="pad">
-<div style="color:#444a5b;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:20px;font-weight:400;letter-spacing:0px;line-height:150%;text-align:center;mso-line-height-alt:30px;">
-<p style="margin: 0;"><strong>0902 377 463</strong></p>
-</div>
-</td>
-</tr>
-</table>
-</td>
-<td class="column gap" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top;">
-<table height="45" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 45px; height: 45px;" width="45"></table>
-</td>
-<td class="column column-2" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 20px; padding-left: 15px; padding-right: 20px; padding-top: 20px; vertical-align: top;" width="50%">
-<table border="0" cellpadding="0" cellspacing="0" class="heading_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:10px;padding-top:10px;text-align:center;width:100%;">
-<h3 style="margin: 0; color: #26045d; direction: ltr; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: normal; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 24px;"><a href="mailto:Bianka@campus-cowork.com" style="text-decoration: underline; color: #26045d;">Bianka@campus-cowork.com</a></h3>
-</td>
-</tr>
-</table>
-<table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-<tr>
-<td class="pad">
-<div style="color:#444a5b;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:20px;font-weight:400;letter-spacing:0px;line-height:150%;text-align:center;mso-line-height-alt:30px;">
-<p style="margin: 0;"><strong>0917 525 457</strong></p>
-</div>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-15" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-left: 25px; padding-right: 25px; padding-top: 7px; vertical-align: top;" width="100%">
-<table border="0" cellpadding="0" cellspacing="0" class="button_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad" style="padding-bottom:15px;padding-left:5px;padding-right:5px;padding-top:15px;text-align:center;">
-<div align="center" class="alignment"><a href="https://www.hacknime.to/en/hackathon/digital-fair-portal-of-the-city" style="color:#ffffff;text-decoration:none;" target="_blank"><!--[if mso]>
-<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="https://www.hacknime.to/en/hackathon/digital-fair-portal-of-the-city"  style="height:38px;width:148px;v-text-anchor:middle;" arcsize="0%" fillcolor="#00afef">
-<v:stroke dashstyle="Solid" weight="0px" color="#8a3b8f"/>
-<w:anchorlock/>
-<v:textbox inset="0px,0px,0px,0px">
-<center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:14px">
-<![endif]--><span class="button" style="background-color: #00afef; border-bottom: 0px solid #8a3b8f; border-left: 0px solid #8a3b8f; border-radius: 0px; border-right: 0px solid #8a3b8f; border-top: 0px solid #8a3b8f; color: #ffffff; display: inline-block; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 35px; padding-right: 35px; text-align: center; width: auto; word-break: keep-all; letter-spacing: 1px;"><span style="word-break: break-word;"><span data-mce-style="" style="word-break: break-word; line-height: 28px;"><strong>Learn more<br/></strong></span></span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
-</td>
-</tr>
-</table>
-<div class="spacer_block block-2" style="height:30px;line-height:30px;font-size:1px;"> </div>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-16" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tbody>
-<tr>
-<td>
-<table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 690px; margin: 0 auto;" width="690">
-<tbody>
-<tr>
-<td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="100%">
-<table border="0" cellpadding="5" cellspacing="0" class="divider_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="pad">
-<div align="center" class="alignment">
-<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-<tr>
-<td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 1px solid #7B7B7B;"><span style="word-break: break-word;"> </span></td>
-</tr>
-</table>
-</div>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table><!-- End -->
-</body>
-</html>`;
+  if (bodyOnly) {
+    return bodyContent;
+  } else {
+    return `<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>${eventTitle} - Preemly</title>
+        <style type="text/css">
+            @media screen and (max-width: 620px) {
+                .main-table {
+                    width: 100% !important;
+                }
+                .content {
+                    padding: 10px !important;
+                }
+                .header-text {
+                    font-size: 22px !important;
+                }
+                .event-title {
+                    font-size: 20px !important;
+                }
+                .description {
+                    font-size: 15px !important;
+                }
+                .section-title {
+                    font-size: 17px !important;
+                }
+                .section-content {
+                    font-size: 15px !important;
+                }
+                .button-text {
+                    font-size: 14px !important;
+                }
+            }
+        </style>
+    </head>
+    <body style='margin: 0; padding: 0; font-family: Axiforma, Arial, sans-serif; background-color: #EEEDF2;'>
+        ${bodyContent}
+    </body>
+    </html>`;
+  }
 }
+
+// New implementation based on new-email.html
+// export function getMailHtml(
+//   guestName: string,
+//   qrCodeImageSrc: string,
+//   eventTitle: string,
+//   eventLogoImageSrc: string,
+//   eventDescription: string,
+//   eventDate: string,
+//   eventEndDate: string,
+//   parkingOptions: EmailExtraModule,
+//   scheduleImageSrc: EmailExtraModule,
+//   diningOptions: EmailExtraModule,
+//   eventLocation: string,
+//   bodyOnly?: boolean
+// ): string {
+//   return `<!DOCTYPE html>
+
+// <html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
+// <head>
+// <title></title>
+// <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+// <meta content="width=device-width, initial-scale=1.0" name="viewport"/><!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]--><!--[if !mso]><!-->
+// <link href="https://fonts.googleapis.com/css?family=Cabin" rel="stylesheet" type="text/css"/><!--<![endif]-->
+// <style>
+// 		* {
+// 			box-sizing: border-box;
+// 		}
+
+// 		body {
+// 			margin: 0;
+// 			padding: 0;
+// 		}
+
+// 		a[x-apple-data-detectors] {
+// 			color: inherit !important;
+// 			text-decoration: inherit !important;
+// 		}
+
+// 		#MessageViewBody a {
+// 			color: inherit;
+// 			text-decoration: none;
+// 		}
+
+// 		p {
+// 			line-height: inherit
+// 		}
+
+// 		.desktop_hide,
+// 		.desktop_hide table {
+// 			mso-hide: all;
+// 			display: none;
+// 			max-height: 0px;
+// 			overflow: hidden;
+// 		}
+
+// 		.image_block img+div {
+// 			display: none;
+// 		}
+
+// 		sup,
+// 		sub {
+// 			font-size: 75%;
+// 			line-height: 0;
+// 		}
+
+// 		@media (max-width:710px) {
+// 			.image_block div.fullWidth {
+// 				max-width: 100% !important;
+// 			}
+
+// 			.mobile_hide {
+// 				display: none;
+// 			}
+
+// 			.row-content {
+// 				width: 100% !important;
+// 			}
+
+// 			.stack .column {
+// 				width: 100%;
+// 				display: block;
+// 			}
+
+// 			.mobile_hide {
+// 				min-height: 0;
+// 				max-height: 0;
+// 				max-width: 0;
+// 				overflow: hidden;
+// 				font-size: 0px;
+// 			}
+
+// 			.desktop_hide,
+// 			.desktop_hide table {
+// 				display: table !important;
+// 				max-height: none !important;
+// 			}
+
+// 			.row-14 .column-1 .block-2.paragraph_block td.pad>div,
+// 			.row-14 .column-2 .block-2.paragraph_block td.pad>div {
+// 				text-align: left !important;
+// 				font-size: 16px !important;
+// 			}
+
+// 			.row-14 .column-1 .block-1.heading_block h3,
+// 			.row-14 .column-2 .block-1.heading_block h3 {
+// 				text-align: left !important;
+// 				font-size: 24px !important;
+// 			}
+
+// 			.row-14 .column-1 .block-1.heading_block td.pad,
+// 			.row-14 .column-2 .block-1.heading_block td.pad {
+// 				padding: 10px 0 !important;
+// 			}
+
+// 			.row-14 .column-1,
+// 			.row-14 .column-2 {
+// 				padding: 20px !important;
+// 			}
+// 		}
+// 	</style><!--[if mso ]><style>sup, sub { font-size: 100% !important; } sup { mso-text-raise:10% } sub { mso-text-raise:-10% }</style> <![endif]-->
+// </head>
+// <body class="body" style="background-color: #fbfbfb; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
+// <table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 10px; padding-left: 8px; padding-right: 10px; padding-top: 15px; vertical-align: top;" width="100%">
+// <table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-left:15px;width:100%;padding-right:0px;">
+// <div align="center" class="alignment" style="line-height:10px">
+// <div style="max-width: 235.2px;"><img alt="Logo" height="auto" src="https://drive.google.com/uc?id=1-4kx45bNcfTkLK8i2Iv8yMCs__wQj0te" style="display: block; height: auto; border: 0; width: 100%;" title="Logo" width="235.2"/></div>
+// </div>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f2f2f2; border-radius: 0; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top;" width="100%">
+// <div class="spacer_block block-1" style="height:20px;line-height:20px;font-size:1px;"> </div>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-size: auto;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-size: auto; background-color: #fbfbfb; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 25px; padding-left: 25px; padding-right: 25px; padding-top: 25px; vertical-align: top;" width="100%">
+// <table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="width:100%;">
+// <div align="center" class="alignment" style="line-height:10px">
+// <div class="fullWidth" style="max-width: 640px;"><img alt="Campus" height="auto" src="https://drive.google.com/uc?id=13mNkSjuro1p9VGezZ-n4oF2JNbNo-K53" style="display: block; height: auto; border: 0; width: 100%;" title="Campus" width="640"/></div>
+// </div>
+// </td>
+// </tr>
+// </table>
+// <div class="spacer_block block-2" style="height:10px;line-height:10px;font-size:1px;"> </div>
+// <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
+// <tr>
+// <td class="pad" style="padding-left:5px;padding-right:5px;padding-top:10px;">
+// <div style="color:#393d47;direction:ltr;font-family:Cabin, Arial, Helvetica Neue, Helvetica, sans-serif;font-size:15px;font-weight:400;letter-spacing:0px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
+// <p style="margin: 0; margin-bottom: 16px; font-size: 26px;">Dear ${guestName},</p>
+// <p style="margin: 0;">We're thrilled to welcome you to the <strong>Intelligent Event Guide Hackathon</strong>, where your ideas will shape the community of Galanta . Join us on <strong>February 28th - March 1st, 2025</strong>, for two days of innovation, collaboration, and excitement.</p>
+// </div>
+// </td>
+// </tr>
+// </table>
+// <div class="spacer_block block-4" style="height:10px;line-height:10px;font-size:1px;"> </div>
+// <table border="0" cellpadding="0" cellspacing="0" class="button_block block-5" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:15px;padding-left:5px;padding-right:5px;padding-top:15px;text-align:left;">
+// <div align="left" class="alignment"><a href="https://www.hacknime.to/en/hackathon/intelligent-event-guide" style="color:#ffffff;text-decoration:none;" target="_blank"><!--[if mso]>
+// <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="https://www.hacknime.to/en/hackathon/intelligent-event-guide"  style="height:38px;width:147px;v-text-anchor:middle;" arcsize="0%" fillcolor="#00afef">
+// <v:stroke dashstyle="Solid" weight="0px" color="#8a3b8f"/>
+// <w:anchorlock/>
+// <v:textbox inset="0px,0px,0px,0px">
+// <center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:14px">
+// <![endif]--><span class="button" style="background-color: #00afef; border-bottom: 0px solid #8a3b8f; border-left: 0px solid #8a3b8f; border-radius: 0px; border-right: 0px solid #8a3b8f; border-top: 0px solid #8a3b8f; color: #ffffff; display: inline-block; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 35px; padding-right: 35px; text-align: center; width: auto; word-break: keep-all; letter-spacing: 1px;"><span style="word-break: break-word;"><span data-mce-style="" style="word-break: break-word; line-height: 28px;"><strong>Learn More</strong></span></span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-4" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 10px; padding-left: 25px; padding-right: 25px; padding-top: 20px; vertical-align: top;" width="100%">
+// <table border="0" cellpadding="5" cellspacing="0" class="heading_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad">
+// <h1 style="margin: 0; color: #fbfbfb; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 25px; font-weight: 400; letter-spacing: 1px; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 30px;"><strong><span class="tinyMce-placeholder" style="word-break: break-word;">Check-in process</span></strong></h1>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-5" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-radius: 0; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="100%">
+// <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
+// <tr>
+// <td class="pad" style="padding-left:5px;padding-right:5px;padding-top:10px;">
+// <div style="color:#393d47;direction:ltr;font-family:Cabin, Arial, Helvetica Neue, Helvetica, sans-serif;font-size:15px;font-weight:400;letter-spacing:0px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
+// <p style="margin: 0; margin-bottom: 16px;">The check-in process is quick and effortless, designed to save you time and get you straight into the event. </p>
+// <p style="margin: 0;"><strong>Check-In instructions:</strong><br/><strong>1. Arrive at Hackathon:</strong> Head to the check-in area.<br/><strong>2. Open your email:</strong> Locate the email with your unique QR code.<br/><strong>3. Scan your QR code:</strong> Follow the instructions on the tablet to complete your check-in.<br/><strong>4. Follow further instructions:</strong> Follow the guidance provided by the organization team</p>
+// </div>
+// </td>
+// <tr>
+//     <td align="center" style="padding: 15px 0;">
+//       <div align="center" class="alignment" style="line-height:10px">
+//         <img src="${qrCodeImageSrc}" alt="QR Code" style="display: block; max-width: 250px; width: 100%; height: auto; margin: 0 auto;">
+//       </div>
+//     </td>
+//   </tr>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-7" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 10px; padding-left: 25px; padding-right: 25px; padding-top: 20px; vertical-align: top;" width="100%">
+// <table border="0" cellpadding="5" cellspacing="0" class="heading_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad">
+// <h1 style="margin: 0; color: #fbfbfb; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 24px; font-weight: 400; letter-spacing: 1px; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 28.799999999999997px;"><strong>Get started: YOUR ESSENTIAL PACK</strong></h1>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-8" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
+// <table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
+// <div align="center" class="alignment" style="line-height:10px">
+// <div class="fullWidth" style="max-width: 331px;"><img alt="Library" height="auto" src="https://drive.google.com/uc?id=1fTZZ23LLVmrmM5QakFR2urPxU3mp0hqX" style="display: block; height: auto; border: 0; width: 100%;" title="Library" width="331"/></div>
+// </div>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><span class="tinyMce-placeholder" style="word-break: break-word;">Location</span></h1>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;"><a href="https://maps.app.goo.gl/J4SJu9AtEioqRGHY8" rel="noopener" style="text-decoration: underline; color: #6295fe;" target="_blank">Neogotický kaštieľ Esterházyovcov, <br/>Parková 760, Galanta</a><br/></h1>
+// </td>
+// </tr>
+// </table>
+// </td>
+// <td class="column column-2" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
+// <table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
+// <div align="center" class="alignment" style="line-height:10px">
+// <div class="fullWidth" style="max-width: 331px;"><img alt="Library" height="auto" src="https://drive.google.com/uc?id=1xuOTtEhN_XDS_cOd2eSmrwNLr60JOXDT" style="display: block; height: auto; border: 0; width: 100%;" title="Library" width="331"/></div>
+// </div>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><span class="tinyMce-placeholder" style="word-break: break-word;">Wi-Fi access</span></h1>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;">We'll send you the Wi-Fi info on the day of the hackathon via <a href="https://join.slack.com/share/enQtODUyMzAxNDc2MjM1Mi04ZGJmYmRiZjNjOWRiNjMxZmZhY2ZkZDhmNDZiNzU2ZmYwNDUwZjU2Mzk0NWVmOGEyYmY5YzRjMGZiZTJiZDY0" rel="noopener" style="text-decoration: underline; color: #6295fe;" target="_blank"><strong>Slack</strong> </a>&  <strong><a href="https://discord.gg/VwzAcMam" rel="noopener" style="text-decoration: underline; color: #6295fe;" target="_blank">Discord</a></strong>.</h1>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-9" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-radius: 0; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="50%">
+// <table border="0" cellpadding="10" cellspacing="0" class="button_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad">
+// <div align="left" class="alignment"><a href="https://maps.app.goo.gl/J4SJu9AtEioqRGHY8" style="color:#ffffff;text-decoration:none;" target="_blank"><!--[if mso]>
+// <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="https://maps.app.goo.gl/J4SJu9AtEioqRGHY8"  style="height:29px;width:82px;v-text-anchor:middle;" arcsize="14%" fillcolor="#00afef">
+// <v:stroke dashstyle="Solid" weight="0px" color="#00afef"/>
+// <w:anchorlock/>
+// <v:textbox inset="0px,0px,0px,0px">
+// <center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:16px">
+// <![endif]--><span class="button" style="background-color: #00afef; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 4px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #ffffff; display: inline-block; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 16px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; padding-right: 20px; text-align: center; width: auto; word-break: keep-all; letter-spacing: normal;"><span style="word-break: break-word; line-height: 19.2px;">Venue</span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
+// </td>
+// </tr>
+// </table>
+// </td>
+// <td class="column column-2" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="25%">
+// <table border="0" cellpadding="10" cellspacing="0" class="button_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad">
+// <div align="left" class="alignment"><a href="https://join.slack.com/share/enQtODUyMzAxNDc2MjM1Mi04ZGJmYmRiZjNjOWRiNjMxZmZhY2ZkZDhmNDZiNzU2ZmYwNDUwZjU2Mzk0NWVmOGEyYmY5YzRjMGZiZTJiZDY0" style="color:#ffffff;text-decoration:none;" target="_blank"><!--[if mso]>
+// <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="https://join.slack.com/share/enQtODUyMzAxNDc2MjM1Mi04ZGJmYmRiZjNjOWRiNjMxZmZhY2ZkZDhmNDZiNzU2ZmYwNDUwZjU2Mzk0NWVmOGEyYmY5YzRjMGZiZTJiZDY0"  style="height:29px;width:75px;v-text-anchor:middle;" arcsize="14%" fillcolor="#00afef">
+// <v:stroke dashstyle="Solid" weight="0px" color="#00afef"/>
+// <w:anchorlock/>
+// <v:textbox inset="0px,0px,0px,0px">
+// <center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:16px">
+// <![endif]--><span class="button" style="background-color: #00afef; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 4px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #ffffff; display: inline-block; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 16px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; padding-right: 20px; text-align: center; width: auto; word-break: keep-all; letter-spacing: normal;"><span style="word-break: break-word; line-height: 19.2px;">Slack</span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
+// </td>
+// </tr>
+// </table>
+// </td>
+// <td class="column column-3" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="25%">
+// <table border="0" cellpadding="10" cellspacing="0" class="button_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad">
+// <div align="left" class="alignment"><a href="https://discord.gg/VwzAcMam" style="color:#ffffff;text-decoration:none;" target="_blank"><!--[if mso]>
+// <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="https://discord.gg/VwzAcMam"  style="height:29px;width:91px;v-text-anchor:middle;" arcsize="14%" fillcolor="#00afef">
+// <v:stroke dashstyle="Solid" weight="0px" color="#00afef"/>
+// <w:anchorlock/>
+// <v:textbox inset="0px,0px,0px,0px">
+// <center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:16px">
+// <![endif]--><span class="button" style="background-color: #00afef; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 4px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #ffffff; display: inline-block; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 16px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; padding-right: 20px; text-align: center; width: auto; word-break: keep-all; letter-spacing: normal;"><span style="word-break: break-word; line-height: 19.2px;">Discord</span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-10" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-bottom: 15px solid transparent; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 15px solid transparent; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
+// <table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
+// <div align="center" class="alignment" style="line-height:10px">
+// <div class="fullWidth" style="max-width: 316px;"><img alt="Library" height="auto" src="https://drive.google.com/uc?id=1UAGAu6r5O62SqnJtxelXgL0LGYYGwzDX" style="display: block; height: auto; border: 0; width: 100%;" title="Library" width="316"/></div>
+// </div>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><strong>Dining options </strong></h1>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;"><strong>Breakfast, lunch, and dinner</strong> can be found <strong>next to the main room</strong>. <br/><br/>Have dietary preferences? Just give us a heads-up!<br/><br/>If you <strong>can't make it to lunch</strong>, let us know so we can arrange something for you.</h1>
+// </td>
+// </tr>
+// </table>
+// </td>
+// <td class="column column-2" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
+// <table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
+// <div align="center" class="alignment" style="line-height:10px">
+// <div class="fullWidth" style="max-width: 316px;"><img alt="Friends" height="auto" src="https://drive.google.com/uc?id=1OIt_jaLgKXTlUtdJeVYRpJ2-OvADeioS" style="display: block; height: auto; border: 0; width: 100%;" title="Friends" width="316"/></div>
+// </div>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><strong>Snacks & drinks</strong></h1>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;"><strong>Snacks and drinks?</strong> All chillin' in the main room.<br/><br/><strong>Want some tea?</strong> Just ask the team – we've got you.</h1>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-11" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-bottom: 15px solid transparent; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 15px solid transparent; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
+// <table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
+// <div align="center" class="alignment" style="line-height:10px">
+// <div class="fullWidth" style="max-width: 316px;"><img alt="Library" height="auto" src="https://drive.google.com/uc?id=1w-GK9UVZPpxqf3XUcVNAsD1i-c66dtfh" style="display: block; height: auto; border: 0; width: 100%;" title="Library" width="316"/></div>
+// </div>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><strong>Parking situation</strong></h1>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;"><span class="tinyMce-placeholder" style="word-break: break-word;">There are some <strong>parking spots</strong> nearby. <br/><br/>You can park at: ulica Parková (next to coop jednota) or Ulica Školská (next to restaurant stop).<br/><br/>Heads up – <strong>both spots are paid parking </strong>so keep that in mind!</span></h1>
+// </td>
+// </tr>
+// </table>
+// </td>
+// <td class="column column-2" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-bottom: 7px solid transparent; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid transparent; padding-bottom: 5px; vertical-align: top;" width="50%">
+// <table border="0" cellpadding="0" cellspacing="0" class="image_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;width:100%;padding-right:0px;padding-left:0px;">
+// <div align="center" class="alignment" style="line-height:10px">
+// <div class="fullWidth" style="max-width: 316px;"><img alt="Friends" height="auto" src="https://drive.google.com/uc?id=1wGIcBQWzgW7czDKGEjxh6wSHdY9zP9kI" style="display: block; height: auto; border: 0; width: 100%;" title="Friends" width="316"/></div>
+// </div>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:5px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #00afef; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 20.4px;"><span class="tinyMce-placeholder" style="word-break: break-word;">Overnight stay</span></h1>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;text-align:center;width:100%;">
+// <h1 style="margin: 0; color: #444444; direction: ltr; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 16.8px;">Need to <strong>crash for the night</strong>? Cool, you can totally stay over.<br/><br/><strong>Important:</strong> Please bring your own <strong>mats and sleeping bags</strong> – no Airbnb luxuries, sorry, but it's all part of the hacker adventure.<br/><br/>Shower will not be available.</h1>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-12" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #00afef; background-size: auto; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 10px; padding-left: 25px; padding-right: 25px; padding-top: 20px; vertical-align: top;" width="100%">
+// <table border="0" cellpadding="5" cellspacing="0" class="heading_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad">
+// <h1 style="margin: 0; color: #fbfbfb; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 24px; font-weight: 400; letter-spacing: 1px; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 28.799999999999997px;"><strong>Got any questions or suggestions?</strong></h1>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-13" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-radius: 0; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="100%">
+// <table border="0" cellpadding="10" cellspacing="0" class="paragraph_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
+// <tr>
+// <td class="pad">
+// <div style="color:#101112;direction:ltr;font-family:Cabin, Arial, Helvetica Neue, Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:120%;text-align:center;mso-line-height-alt:19.2px;">
+// <p style="margin: 0;"><strong>With any queries feel free to contact our Team via Whatsapp or email!</strong></p>
+// </div>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-14" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbfbfb; border-radius: 0; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; background-color: #fbfbfb; padding-bottom: 20px; padding-left: 20px; padding-right: 20px; padding-top: 20px; vertical-align: top;" width="50%">
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;padding-top:10px;text-align:center;width:100%;">
+// <h3 style="margin: 0; color: #26045d; direction: ltr; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: normal; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 24px;"><a href="mailto:Viktor@campus-cowork.com" style="text-decoration: underline; color: #26045d;">Viktor@campus-cowork.com</a></h3>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
+// <tr>
+// <td class="pad">
+// <div style="color:#444a5b;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:20px;font-weight:400;letter-spacing:0px;line-height:150%;text-align:center;mso-line-height-alt:30px;">
+// <p style="margin: 0;"><strong>0902 377 463</strong></p>
+// </div>
+// </td>
+// </tr>
+// </table>
+// </td>
+// <td class="column gap" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top;">
+// <table height="45" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 45px; height: 45px;" width="45"></table>
+// </td>
+// <td class="column column-2" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 20px; padding-left: 15px; padding-right: 20px; padding-top: 20px; vertical-align: top;" width="50%">
+// <table border="0" cellpadding="0" cellspacing="0" class="heading_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:10px;padding-top:10px;text-align:center;width:100%;">
+// <h3 style="margin: 0; color: #26045d; direction: ltr; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: normal; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 24px;"><a href="mailto:Bianka@campus-cowork.com" style="text-decoration: underline; color: #26045d;">Bianka@campus-cowork.com</a></h3>
+// </td>
+// </tr>
+// </table>
+// <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
+// <tr>
+// <td class="pad">
+// <div style="color:#444a5b;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:20px;font-weight:400;letter-spacing:0px;line-height:150%;text-align:center;mso-line-height-alt:30px;">
+// <p style="margin: 0;"><strong>0917 525 457</strong></p>
+// </div>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-15" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-left: 25px; padding-right: 25px; padding-top: 7px; vertical-align: top;" width="100%">
+// <table border="0" cellpadding="0" cellspacing="0" class="button_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad" style="padding-bottom:15px;padding-left:5px;padding-right:5px;padding-top:15px;text-align:center;">
+// <div align="center" class="alignment"><a href="https://www.hacknime.to/en/hackathon/digital-fair-portal-of-the-city" style="color:#ffffff;text-decoration:none;" target="_blank"><!--[if mso]>
+// <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="https://www.hacknime.to/en/hackathon/digital-fair-portal-of-the-city"  style="height:38px;width:148px;v-text-anchor:middle;" arcsize="0%" fillcolor="#00afef">
+// <v:stroke dashstyle="Solid" weight="0px" color="#8a3b8f"/>
+// <w:anchorlock/>
+// <v:textbox inset="0px,0px,0px,0px">
+// <center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:14px">
+// <![endif]--><span class="button" style="background-color: #00afef; border-bottom: 0px solid #8a3b8f; border-left: 0px solid #8a3b8f; border-radius: 0px; border-right: 0px solid #8a3b8f; border-top: 0px solid #8a3b8f; color: #ffffff; display: inline-block; font-family: Cabin, Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 14px; font-weight: 400; mso-border-alt: none; padding-bottom: 5px; padding-top: 5px; padding-left: 35px; padding-right: 35px; text-align: center; width: auto; word-break: keep-all; letter-spacing: 1px;"><span style="word-break: break-word;"><span data-mce-style="" style="word-break: break-word; line-height: 28px;"><strong>Learn more<br/></strong></span></span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
+// </td>
+// </tr>
+// </table>
+// <div class="spacer_block block-2" style="height:30px;line-height:30px;font-size:1px;"> </div>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-16" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tbody>
+// <tr>
+// <td>
+// <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 690px; margin: 0 auto;" width="690">
+// <tbody>
+// <tr>
+// <td class="column column-1" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;" width="100%">
+// <table border="0" cellpadding="5" cellspacing="0" class="divider_block block-1" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="pad">
+// <div align="center" class="alignment">
+// <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+// <tr>
+// <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 1px solid #7B7B7B;"><span style="word-break: break-word;"> </span></td>
+// </tr>
+// </table>
+// </div>
+// </td>
+// </tr>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+// </tbody>
+// </table><!-- End -->
+// </body>
+// </html>`;
+// }
 
 export const SvgSC = styled.svg<{
   size?: number;

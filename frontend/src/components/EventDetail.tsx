@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { Event } from "../types";
 
@@ -8,9 +8,8 @@ import PosterUploadModal from "./PosterUploadModal";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 
 import { ActiveStatusButton } from "./Events";
-import EventLocationEditor from "./EventLocationEditor";
 import EventDetailsEditor from "./EventDetailsEditor";
-import EventGuestsEditor from "./EventGuestsEditor";
+import EventGuestsEditor, { PrimaryButton } from "./EventGuestsEditor";
 import {
   getDateRangeDetails,
   getDateTimeStatus,
@@ -26,11 +25,14 @@ import GeneralSettingsIcon from "./icons/GeneralSettingsIcon";
 import TasksSettingsIcon from "./icons/TasksSettingsIcon";
 import GuestsSettingsIcon from "./icons/GuestsSettingsIcon";
 import EmailSettingsIcon from "./icons/EmailSettingsIcon";
-import LocationSettingsIcon from "./icons/LocationSettingsIcon";
 import WelcomeScreenSettingsIcon from "./icons/WelcomeScreenSettingsIcon";
+import FeedbackSettingsIcon from "./icons/FeedbackSettingsIcon";
+import EventFeedbackViewer from "./EventFeedbackViewer";
 import { useAuth0 } from "@auth0/auth0-react";
 
 import ErrorBigIcon from "./icons/ErrorBigIcon";
+import EventBudgetEditor from "./EventBudgetEditor";
+import BudgetSettingsIcon from "./icons/BudgetSettingsIcon";
 
 export const PageWrapper = styled.div<{ tabletMode: boolean }>`
   width: ${(props) => (props.tabletMode ? "100%" : "70%")};
@@ -78,29 +80,21 @@ const ActiveStatusContainer = styled.div<{ isDetail?: boolean }>`
   -ms-overflow-style: none;
 `;
 
-const ChangePosterModalButton = styled.div`
+const ChangePosterModalButton = styled(PrimaryButton)`
   position: absolute;
   bottom: 16px;
   right: 16px;
-  width: 80px;
-  height: 40px;
+  width: 120px;
+
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgb(107, 61, 223);
   color: white;
   cursor: pointer;
   font-weight: bold;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease,
-    background-color 0.2s ease;
-  box-shadow: 0 4px 12px rgba(107, 61, 223, 0.3);
-
-  &:hover {
-    background-color: rgb(123, 81, 236);
-  }
 `;
 
 const PosterImage = styled.div<{ imageUrl: string }>`
@@ -477,16 +471,63 @@ const ErrorNotYourEvent = styled.div`
 `;
 
 const EventDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [event, setEvent] = useState<Event | null>(null);
-  const [openSection, setOpenSection] = useState("info");
-  const [loading, setLoading] = useState<boolean>(true);
-  const [title, setTitle] = useState(event?.title);
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [isModalOpen, setModalOpen] = useState(false); // Modal state
+  const location = useLocation();
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("");
+  const [isModalOpen, setModalOpen] = useState(false);
   const tabletMode = isTablet();
-
   const { user } = useAuth0();
+
+  // Extract the tab from the URL path
+  const getTabFromPath = () => {
+    const path = location.pathname;
+    const parts = path.split("/");
+    if (parts.length > 3) {
+      const tab = parts[3];
+      // Map URL path segments to tab names
+      const tabMap: Record<string, string> = {
+        info: "info",
+        tasks: "tasks",
+        guests: "attendance",
+        attendance: "attendance",
+        email: "email",
+        // location: "location",
+        welcome: "welcome",
+        budget: "budget",
+        feedback: "feedback",
+      };
+      return tabMap[tab] || "info";
+    }
+    return "info"; // Default tab
+  };
+
+  // Set initial tab based on URL
+  const [openSection, setOpenSection] = useState<string>(getTabFromPath());
+
+  // Update URL when tab changes
+  const handleTabChange = (tab: string) => {
+    setOpenSection(tab);
+    // Map tab names to URL path segments
+    const pathMap: Record<string, string> = {
+      info: "info",
+      tasks: "tasks",
+      attendance: "guests",
+      email: "email",
+      // location: "location",
+      welcome: "welcome",
+      budget: "budget",
+      feedback: "feedback",
+    };
+    navigate(`/events/${id}/${pathMap[tab] || tab}`, { replace: true });
+  };
+
+  // Update tab when URL changes
+  useEffect(() => {
+    setOpenSection(getTabFromPath());
+  }, [location.pathname]);
 
   const axiosInstance = useAxiosWithAuth();
   const fetchEvent = async () => {
@@ -536,7 +577,7 @@ const EventDetail: React.FC = () => {
             {event.poster ? (
               <PosterImage imageUrl={`${event.poster}`}>
                 <ChangePosterModalButton onClick={() => setModalOpen(true)}>
-                  Edit
+                  Change
                 </ChangePosterModalButton>
               </PosterImage>
             ) : (
@@ -620,7 +661,7 @@ const EventDetail: React.FC = () => {
               <ActiveStatusButton
                 marginLeft={0}
                 isActive={openSection === "info"}
-                onClick={() => setOpenSection("info")}
+                onClick={() => handleTabChange("info")}
                 borderColor="#e6bf30"
               >
                 <GeneralSettingsIcon color={"currentColor"} />
@@ -628,7 +669,7 @@ const EventDetail: React.FC = () => {
               </ActiveStatusButton>
               <ActiveStatusButton
                 isActive={openSection === "tasks"}
-                onClick={() => setOpenSection("tasks")}
+                onClick={() => handleTabChange("tasks")}
                 borderColor="#e6bf30"
               >
                 <TasksSettingsIcon color={"currentColor"} />
@@ -636,7 +677,7 @@ const EventDetail: React.FC = () => {
               </ActiveStatusButton>
               <ActiveStatusButton
                 isActive={openSection === "attendance"}
-                onClick={() => setOpenSection("attendance")}
+                onClick={() => handleTabChange("attendance")}
                 borderColor="#e6bf30"
               >
                 <GuestsSettingsIcon color={"currentColor"} />
@@ -644,27 +685,43 @@ const EventDetail: React.FC = () => {
               </ActiveStatusButton>
               <ActiveStatusButton
                 isActive={openSection === "email"}
-                onClick={() => setOpenSection("email")}
+                onClick={() => handleTabChange("email")}
                 borderColor="#e6bf30"
               >
                 <EmailSettingsIcon color={"currentColor"} />
                 Email
               </ActiveStatusButton>
-              <ActiveStatusButton
+              {/* <ActiveStatusButton
                 isActive={openSection === "location"}
-                onClick={() => setOpenSection("location")}
+                onClick={() => handleTabChange("location")}
                 borderColor="#e6bf30"
               >
                 <LocationSettingsIcon color={"currentColor"} />
                 Location
-              </ActiveStatusButton>
+              </ActiveStatusButton> */}
               <ActiveStatusButton
                 isActive={openSection === "welcome"}
-                onClick={() => setOpenSection("welcome")}
+                onClick={() => handleTabChange("welcome")}
                 borderColor="#e6bf30"
               >
                 <WelcomeScreenSettingsIcon color={"currentColor"} />
-                Welcome
+                Welcome Screen
+              </ActiveStatusButton>
+              <ActiveStatusButton
+                isActive={openSection === "budget"}
+                onClick={() => handleTabChange("budget")}
+                borderColor="#e6bf30"
+              >
+                <BudgetSettingsIcon color={"currentColor"} />
+                Budget
+              </ActiveStatusButton>
+              <ActiveStatusButton
+                isActive={openSection === "feedback"}
+                onClick={() => handleTabChange("feedback")}
+                borderColor="#e6bf30"
+              >
+                <FeedbackSettingsIcon color={"currentColor"} />
+                Feedback
               </ActiveStatusButton>
             </ActiveStatusContainer>
             {openSection === "info" && (
@@ -673,9 +730,9 @@ const EventDetail: React.FC = () => {
             {openSection === "attendance" && (
               <EventGuestsEditor event={event} refetch={fetchEvent} />
             )}
-            {openSection === "location" && (
+            {/* {openSection === "location" && (
               <EventLocationEditor event={event} refetch={fetchEvent} />
-            )}
+            )} */}
             {openSection === "welcome" && (
               <WelcomeScreenEditor event={event} refetch={fetchEvent} />
             )}
@@ -684,6 +741,12 @@ const EventDetail: React.FC = () => {
             )}
             {openSection === "email" && (
               <EmailTemplateEditor event={event} refetch={fetchEvent} />
+            )}
+            {openSection === "budget" && (
+              <EventBudgetEditor event={event} refetch={fetchEvent} />
+            )}
+            {openSection === "feedback" && (
+              <EventFeedbackViewer event={event} />
             )}
             {isModalOpen && (
               <PosterUploadModal

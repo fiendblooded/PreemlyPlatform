@@ -360,3 +360,46 @@ export const downloadGuestsToExcel = async (req: Request, res: Response): Promis
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+export const addEventFeedback = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { guestName, content } = req.body;
+
+    if (!content) {
+      res.status(400).json({
+        success: false,
+        message: 'Feedback content is required',
+      });
+      return;
+    }
+
+    const event = await Event.findById(id);
+    if (!event) {
+      res.status(404).json({ success: false, message: 'Event not found' });
+      return;
+    }
+
+    const feedback = {
+      guestName: guestName || undefined,
+      content,
+      createdAt: new Date(),
+    };
+
+    if (!event.feedback) {
+      event.feedback = [];
+    }
+
+    event.feedback.push(feedback);
+    await event.save();
+
+    res.json({
+      success: true,
+      message: 'Feedback added successfully',
+      data: feedback,
+    });
+  } catch (error) {
+    console.error('Error adding feedback:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};

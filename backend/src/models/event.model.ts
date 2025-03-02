@@ -48,6 +48,59 @@ const eventSchema = new Schema<Event>({
     type: Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),
   },
+  invoices: [{ type: Schema.Types.ObjectId, ref: 'Invoice' }],
+  feedback: [
+    {
+      guestName: { type: String },
+      content: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now },
+    },
+  ],
+  invoiceAnalysis: {
+    budgetSummary: {
+      totalSpend: { type: Number },
+      budgetVariance: {
+        amount: { type: Number },
+        percentage: { type: Number },
+      },
+      invoiceCount: { type: Number },
+      paidInvoices: { type: Number },
+      unpaidInvoices: { type: Number },
+    },
+    costBreakdown: {
+      categories: [
+        {
+          category: { type: String },
+          amount: { type: Number },
+          percentage: { type: Number },
+        },
+      ],
+      topCategories: [{ type: String }],
+      vendors: [
+        {
+          vendor: { type: String },
+          amount: { type: Number },
+          invoiceCount: { type: Number },
+        },
+      ],
+      recurringExpenses: [{ type: String }],
+    },
+    performanceInsights: {
+      costPerAttendee: { type: Number },
+      costPerLead: { type: Number },
+      profitabilityEstimate: { type: Number },
+      costComparison: { type: String },
+      yearOverYearTrend: { type: String },
+      peakSpendingPeriods: [{ type: String }],
+      monthlySpending: [
+        {
+          month: { type: String },
+          amount: { type: Number },
+        },
+      ],
+    },
+    lastUpdated: { type: Date, default: Date.now },
+  },
 });
 
 export default model<Event>('Event', eventSchema);
