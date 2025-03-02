@@ -119,7 +119,7 @@ export const MessageContainer = styled.div`
   font-size: 16px;
   color: ${colors.textSecondary};
   line-height: 1.6;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 `;
 
 export const CreateLink = styled.a`

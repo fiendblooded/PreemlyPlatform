@@ -29,7 +29,7 @@ const EventDetailsWrapper = styled.div`
   justify-content: space-between;
   margin-top: 0;
   gap: 20px;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 `;
 
 export const StyledDatePickerWrapper = styled.div`
@@ -49,7 +49,7 @@ export const StyledDatePickerWrapper = styled.div`
     box-shadow: 0 4px 12px ${colors.shadow};
     padding: 8px;
     transition: all 0.2s ease;
-    font-family: "Inter", Axiforma, sans-serif;
+    font-family: Axiforma, sans-serif;
   }
 
   .react-datepicker__header {
@@ -98,7 +98,7 @@ export const StyledDatePickerWrapper = styled.div`
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px ${colors.shadow};
     width: 140px;
-    font-family: "Inter", Axiforma, sans-serif;
+    font-family: Axiforma, sans-serif;
 
     &:hover {
       border-color: rgba(99, 102, 241, 0.6);
@@ -214,7 +214,7 @@ const StyledTextarea = styled.textarea`
   font-size: 15px;
   line-height: 1.6;
   box-sizing: border-box;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
   transition: all 0.2s ease;
   resize: vertical;
 

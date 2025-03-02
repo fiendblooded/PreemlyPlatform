@@ -87,7 +87,7 @@ const PosterPlaceholder = styled.div`
   align-items: center;
   color: ${colors.textSecondary};
   font-size: 14px;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 `;
 
 const Title = styled.h3`
@@ -96,7 +96,7 @@ const Title = styled.h3`
   font-size: 18px;
   font-weight: 600;
   line-height: 1.4;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 `;
 
 const EventInfo = styled.div`
@@ -112,7 +112,7 @@ const InfoItem = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 
   svg {
     min-width: 20px;
@@ -147,7 +147,7 @@ const MetaItem = styled.div`
   color: ${colors.textSecondary};
   font-size: 15px;
   height: 100%;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 
   svg {
     width: 20px;
@@ -174,7 +174,7 @@ const StatusBadge = styled.div<{ color: string; isOngoing: boolean }>`
   align-items: center;
   gap: 6px;
   z-index: 1;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 
   ${(props) =>
     props.isOngoing &&
@@ -220,7 +220,7 @@ const CheckInButton = styled(PrimaryButton)<{ tabletMode: boolean }>`
   border-radius: 8px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 
   &:hover {
     transform: translateY(-2px);

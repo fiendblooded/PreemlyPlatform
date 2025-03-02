@@ -33,7 +33,7 @@ export const PageWrapper = styled.div`
   height: 100vh;
   overflow: hidden;
   background-color: ${colors.backgroundLight};
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 `;
 
 export const ContentWrapper = styled.div<{ marginTop?: number }>`
@@ -123,7 +123,7 @@ export const SearchIcon = styled.svg`
 `;
 
 const SearchInput = styled.input`
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
   flex: 1;
   border: none;
   background: transparent;

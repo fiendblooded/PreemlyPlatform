@@ -27,7 +27,7 @@ const TopBarContainer = styled.div`
   padding: 0 32px;
   border-bottom: 1px solid ${colors.borderLight};
   box-shadow: 0 1px 8px ${colors.shadow};
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 `;
 
 const Title = styled.h1`

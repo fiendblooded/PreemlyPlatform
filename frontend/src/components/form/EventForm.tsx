@@ -26,7 +26,7 @@ const FormTitle = styled.h2`
   color: ${colors.textPrimary};
   text-align: center;
   margin-bottom: 24px;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
   font-weight: 600;
   font-size: 24px;
 `;
@@ -39,7 +39,7 @@ const FormContainer = styled.form`
   justify-content: center;
   align-items: center;
   gap: 20px;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 `;
 
 const Input = styled.input`
@@ -49,7 +49,7 @@ const Input = styled.input`
   border-radius: 8px;
   background-color: ${colors.backgroundLight};
   font-size: 15px;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
   color: ${colors.textPrimary};
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px ${colors.shadow};
@@ -75,7 +75,7 @@ const SuccessMessage = styled.p`
   color: ${colors.success};
   text-align: center;
   margin-top: 16px;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -92,7 +92,7 @@ const ErrorMessage = styled.p`
   color: ${colors.error};
   text-align: center;
   margin-top: 16px;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -124,7 +124,7 @@ const PopupContent = styled.div`
   flex-direction: column;
   align-items: center;
   margin: auto;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
   animation: fadeIn 0.3s ease;
 
   @keyframes fadeIn {

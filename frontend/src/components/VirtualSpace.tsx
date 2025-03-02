@@ -26,7 +26,7 @@ const SpaceWrapper = styled.div`
   display: flex;
   flex-direction: column;
   background-color: ${colors.backgroundSecondary};
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
   position: fixed;
   top: 0;
   left: 0;
@@ -34,12 +34,13 @@ const SpaceWrapper = styled.div`
   bottom: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  font-size: 16px;
 `;
 
 const HeaderCard = styled.div<{ posterUrl?: string }>`
   width: 100%;
-  height: 35vh;
-  min-height: 220px;
+  height: 40vh;
+  min-height: 250px;
   background-color: #000;
   background-image: ${(props) =>
     props.posterUrl ? `url(${props.posterUrl})` : "none"};
@@ -68,33 +69,34 @@ const HeaderContent = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 24px 16px;
+  padding: 32px 24px;
   z-index: 1;
 `;
 
 const WelcomeText = styled.h1`
   color: white;
-  font-size: 32px;
+  font-size: 42px;
   font-weight: 700;
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
+  line-height: 1.2;
 `;
 
 const EventName = styled.p`
   color: rgba(255, 255, 255, 0.9);
-  font-size: 18px;
+  font-size: 24px;
   margin: 0;
   line-height: 1.4;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 `;
 
 const ContentSection = styled.div`
-  padding: 20px 16px;
+  padding: 32px 24px;
   flex: 1;
   margin: 0 auto;
-  width: 95%;
+  width: 100%;
   box-sizing: border-box;
 `;
 
@@ -102,27 +104,27 @@ const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 `;
 
 const SectionTitle = styled.h2`
   color: ${colors.textPrimary};
-  font-size: 22px;
+  font-size: 32px;
   font-weight: 600;
   margin: 0;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 `;
 
 const ViewAllLink = styled.a`
   color: ${colors.primary};
-  font-size: 14px;
+  font-size: 18px;
   text-decoration: none;
   font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
   background-color: rgba(99, 102, 241, 0.1);
   transition: all 0.2s ease;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 
   &:hover {
     background-color: rgba(99, 102, 241, 0.15);
@@ -136,16 +138,16 @@ const ViewAllLink = styled.a`
 
 const TimelineContainer = styled.div`
   position: relative;
-  margin-left: 20px;
-  margin-bottom: 24px;
+  margin-left: 24px;
+  margin-bottom: 32px;
 
   &::before {
     content: "";
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 8px;
-    width: 2px;
+    left: 10px;
+    width: 3px;
     background-color: ${colors.borderLight};
     z-index: 0;
   }
@@ -153,21 +155,21 @@ const TimelineContainer = styled.div`
 
 const TimeMarker = styled.div`
   color: ${colors.textSecondary};
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
-  margin-left: -20px;
+  margin-left: -24px;
   position: relative;
   z-index: 1;
-  padding: 8px 0;
-  font-family: "Inter", Axiforma, sans-serif;
+  padding: 12px 0;
+  font-family: Axiforma, sans-serif;
 `;
 
 const ScheduleCard = styled.div<{ isActive?: boolean }>`
   background-color: ${colors.backgroundLight};
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 0 4px 16px ${colors.shadow};
-  padding: 16px;
-  margin: 8px 0 16px 24px;
+  padding: 24px;
+  margin: 12px 0 24px 32px;
   position: relative;
   transition: all 0.2s ease;
   border: 1px solid ${colors.borderLight};
@@ -175,83 +177,83 @@ const ScheduleCard = styled.div<{ isActive?: boolean }>`
   &::before {
     content: "";
     position: absolute;
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     background-color: ${(props) =>
       props.isActive ? colors.green : colors.yellow};
-    left: -30px;
-    top: 16px;
+    left: -40px;
+    top: 24px;
     z-index: 1;
-    border: 2px solid white;
-    box-shadow: 0 0 0 2px
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px
       ${(props) =>
         props.isActive ? `${colors.green}30` : `${colors.yellow}30`};
   }
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px ${colors.shadow};
+    box-shadow: 0 8px 24px ${colors.shadow};
   }
 `;
 
 const SessionTitle = styled.h3`
   color: ${colors.textPrimary};
-  font-size: 16px;
+  font-size: 22px;
   font-weight: 600;
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
   display: flex;
   align-items: center;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 `;
 
 const SessionDetails = styled.p`
   color: ${colors.textSecondary};
-  font-size: 14px;
+  font-size: 18px;
   margin: 0;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
+  line-height: 1.5;
 `;
 
 const SessionIcon = styled.span`
-  margin-right: 8px;
-  font-size: 16px;
+  margin-right: 12px;
+  font-size: 24px;
 `;
 
 const FeedbackSection = styled.div`
   background-color: ${colors.backgroundLight};
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 16px;
+  padding: 32px;
   box-shadow: 0 4px 16px ${colors.shadow};
   border: 1px solid ${colors.borderLight};
-  margin-top: 24px;
+  margin-top: 32px;
 `;
 
-const FeedbackLabel = styled.p`
+const FeedbackLabel = styled.div`
   color: ${colors.textSecondary};
-  font-size: 14px;
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-size: 22px !important;
+  margin-bottom: 24px;
 `;
 
 const FeedbackInput = styled.textarea`
   width: 100%;
-  height: 120px;
-  padding: 12px 16px;
+  height: 150px;
+  padding: 16px 20px;
   border: 1px solid ${colors.borderLight};
-  border-radius: 8px;
-  font-family: "Inter", Axiforma, sans-serif;
-  font-size: 15px;
+  border-radius: 12px;
+  font-family: Axiforma, sans-serif;
+  font-size: 24px;
   resize: none;
   transition: all 0.2s ease;
   box-sizing: border-box;
   background-color: ${colors.backgroundSecondary};
   color: ${colors.textPrimary};
   box-shadow: 0 2px 4px ${colors.shadow};
+  margin-bottom: 8px;
 
   &::placeholder {
     color: ${colors.textSecondary};
-    opacity: 0.6;
+    opacity: 0.8;
   }
 
   &:hover {
@@ -268,21 +270,21 @@ const FeedbackInput = styled.textarea`
 
 const NameInput = styled.input`
   width: 100%;
-  padding: 12px 16px;
+  padding: 16px 20px;
   border: 1px solid ${colors.borderLight};
-  border-radius: 8px;
-  font-family: "Inter", Axiforma, sans-serif;
-  font-size: 15px;
+  border-radius: 12px;
+  font-family: Axiforma, sans-serif;
+  font-size: 24px;
   transition: all 0.2s ease;
   box-sizing: border-box;
   background-color: ${colors.backgroundSecondary};
   color: ${colors.textPrimary};
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   box-shadow: 0 2px 4px ${colors.shadow};
 
   &::placeholder {
     color: ${colors.textSecondary};
-    opacity: 0.6;
+    opacity: 0.8;
   }
 
   &:hover {
@@ -305,16 +307,16 @@ const SubmitButton = styled.button`
   );
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 14px;
-  font-size: 16px;
+  border-radius: 12px;
+  padding: 18px;
+  font-size: 28px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 16px;
+  margin-top: 24px;
   width: 100%;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
   transition: all 0.2s ease;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
 
   &:hover {
     transform: translateY(-2px);
@@ -340,9 +342,9 @@ const LoadingContainer = styled.div`
 `;
 
 const LoadingSpinner = styled.div`
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(99, 102, 241, 0.1);
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(99, 102, 241, 0.1);
   border-radius: 50%;
   border-top-color: ${colors.primary};
   animation: spin 1s ease-in-out infinite;
@@ -357,38 +359,42 @@ const LoadingSpinner = styled.div`
 const ErrorMessage = styled.div`
   color: ${colors.error};
   background-color: rgba(239, 68, 68, 0.1);
-  padding: 16px;
-  border-radius: 8px;
+  padding: 24px;
+  border-radius: 12px;
   text-align: center;
-  margin: 20px;
-  font-size: 16px;
-  font-family: "Inter", Axiforma, sans-serif;
+  margin: 32px;
+  font-size: 20px;
+  font-family: Axiforma, sans-serif;
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
 `;
 
 const SuccessMessage = styled.div`
   position: fixed;
-  bottom: 20px;
+  bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
   background-color: ${colors.success};
   color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 18px;
   font-weight: 500;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   animation: slideUp 0.3s ease forwards;
   z-index: 100;
-  font-family: "Inter", Axiforma, sans-serif;
+  font-family: Axiforma, sans-serif;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  min-width: 280px;
+  text-align: center;
+  justify-content: center;
 
   &::before {
     content: "✓";
     font-weight: bold;
+    font-size: 22px;
   }
 
   @keyframes slideUp {
@@ -561,7 +567,7 @@ const VirtualSpace: React.FC = () => {
       <ContentSection>
         <SectionHeader>
           <SectionTitle>Schedule</SectionTitle>
-          <ViewAllLink href="#">View all</ViewAllLink>
+          {/* <ViewAllLink href="#">View all</ViewAllLink> */}
         </SectionHeader>
 
         <TimelineContainer>
@@ -604,8 +610,7 @@ const VirtualSpace: React.FC = () => {
         <FeedbackSection>
           <SectionTitle>Feedback form</SectionTitle>
           <FeedbackLabel>
-            This is the perfect place to let us know what you liked or disliked
-            about the event
+            Let us know what you liked or disliked about the event
           </FeedbackLabel>
           <NameInput
             value={guestName}
