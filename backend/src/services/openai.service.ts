@@ -62,21 +62,30 @@ export const analyzeInvoices = async (
         Analyze this data and provide a comprehensive financial analysis in JSON format.
         Pay special attention to dates and amounts to generate accurate monthly spending data.`;
 
-    const userPromptTemplate = `I need you to analyze these invoices for my event and provide insights.
-        Here's the extracted text from the PDFs:
-        {invoiceTexts}
+    const userPromptTemplate = `Analyze these invoices and extract key financial insights.
         
-        And here's the structured data we have about each invoice:
-        {invoiceData}
+        Invoice Data: {invoiceData}
         
-        Please provide a detailed analysis with the following structure:
-        1. Budget Summary (totalSpend, budgetVariance if possible, invoiceCount, paidInvoices, unpaidInvoices)
-        2. Cost Breakdown (categories with amounts and percentages, top 3 costliest categories, 
-           vendor breakdown, recurring expenses)
-        3. Performance Insights: (if possible: costPerAttendee, costPerLead, profitabilityEstimate, 
-           costComparison, yearOverYearTrend, peakSpendingPeriods)
+        Invoice Texts: {invoiceTexts}
+        
+        Please analyze the invoices and extract the following information:
+        
+        1. Budget Summary: Calculate the total spend, number of invoices, how many are paid vs. unpaid.
+           If there's any budget information, calculate the variance (amount and percentage).
+        
+        2. Cost Breakdown: Categorize expenses and calculate the amount and percentage for each category.
+           Identify the top 3 spending categories.
+           List vendors with their total amounts and number of invoices.
+           Identify any recurring expenses.
+        
+        3. Performance Insights: If possible, calculate metrics like cost per attendee, cost per lead,
+           profitability estimates, and any year-over-year trends.
+        
         4. Monthly Spending: Group the invoices by month and calculate the total spending for each month.
            Format should be an array of objects with 'month' (in 'YYYY-MM' format) and 'amount' properties.
+        
+        5. Due Dates: Extract due dates from invoices and create a list of upcoming payments.
+           Include the invoice title, amount, and ID for each due date.
         
         Return your analysis as a valid JSON object with this structure:
         {
@@ -101,7 +110,15 @@ export const analyzeInvoices = async (
             "yearOverYearTrend": string (if possible),
             "peakSpendingPeriods": [string] (if possible),
             "monthlySpending": [{ "month": string, "amount": number }] (group by month in YYYY-MM format)
-          }
+          },
+          "dueDates": [
+            { 
+              "date": string (in YYYY-MM-DD format), 
+              "title": string, 
+              "amount": number, 
+              "id": string 
+            }
+          ]
         }
         
         If any data point cannot be determined, use null or omit it. 
@@ -109,7 +126,8 @@ export const analyzeInvoices = async (
         
         IMPORTANT: Do not make up or generate any data. Only use the information provided in the invoices.
         For the monthlySpending data, use the date field from the invoice data to group by month.
-        If an invoice doesn't have a date, exclude it from the monthly spending calculation.`;
+        If an invoice doesn't have a date, exclude it from the monthly spending calculation.
+        For dueDates, extract any due date information from the invoices and format as YYYY-MM-DD.`;
 
     const userPrompt = userPromptTemplate
       .replace('{invoiceTexts}', JSON.stringify(invoiceTexts))

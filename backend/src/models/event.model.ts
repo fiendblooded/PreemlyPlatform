@@ -99,6 +99,14 @@ const eventSchema = new Schema<Event>({
         },
       ],
     },
+    dueDates: [
+      {
+        date: { type: String },
+        title: { type: String },
+        amount: { type: Number },
+        id: { type: String },
+      },
+    ],
     lastUpdated: { type: Date, default: Date.now },
   },
 });

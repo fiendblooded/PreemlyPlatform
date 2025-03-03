@@ -16,6 +16,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { format, parseISO, isSameDay } from "date-fns";
 
 // Register Chart.js components
 ChartJS.register(
@@ -290,6 +291,10 @@ const AnalysisContainer = styled.div`
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 `;
 
 const AnalysisHeader = styled.div`
@@ -658,6 +663,251 @@ const VendorDetail = styled.div`
   color: #666;
 `;
 
+// Due Date Calendar Styled Components
+const CalendarContainer = styled.div`
+  display: flex;
+  gap: 24px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+  }
+`;
+
+const CalendarWrapper = styled.div`
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+`;
+
+const DueDatesList = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const DueDateSection = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-height: 300px;
+  overflow-y: auto;
+`;
+
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const SectionIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #6b3ddf;
+`;
+
+const CountBadge = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #6b3ddf;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 2px 8px;
+  margin-left: 8px;
+`;
+
+const DueDateItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const DueDateInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const DueDateTitle = styled.div`
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+`;
+
+const DueDateDate = styled.div`
+  font-size: 14px;
+  color: #666;
+`;
+
+const DueDateAmount = styled.div`
+  font-weight: 600;
+  font-size: 16px;
+  color: #6b3ddf;
+`;
+
+const CalendarHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+`;
+
+const CalendarTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+`;
+
+const CalendarNavigation = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const CalendarButton = styled.button`
+  background: #f5f5f5;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background: #e9e9e9;
+  }
+`;
+
+const CalendarGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+`;
+
+const CalendarDay = styled.div<{
+  isToday?: boolean;
+  hasDueDate?: boolean;
+  isCurrentMonth?: boolean;
+}>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 14px;
+  position: relative;
+  cursor: ${(props) => (props.hasDueDate ? "pointer" : "default")};
+  background: ${(props) =>
+    props.isToday ? "#f0f0ff" : props.hasDueDate ? "#f9f5ff" : "transparent"};
+  color: ${(props) => (props.isCurrentMonth ? "#333" : "#ccc")};
+  font-weight: ${(props) =>
+    props.isToday || props.hasDueDate ? "600" : "normal"};
+
+  &:hover {
+    background: ${(props) =>
+      props.hasDueDate ? "#f0e6ff" : props.isToday ? "#e6e6ff" : "transparent"};
+  }
+
+  &::after {
+    content: "";
+    display: ${(props) => (props.hasDueDate ? "block" : "none")};
+    position: absolute;
+    bottom: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6b3ddf;
+  }
+`;
+
+const DayOfWeek = styled.div`
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #666;
+  padding: 8px 0;
+`;
+
+const NoDataMessage = styled.div`
+  text-align: center;
+  padding: 40px 0;
+  color: #666;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+`;
+
+const PastDueDateItem = styled(DueDateItem)`
+  opacity: 0.7;
+  background-color: #f9f9f9;
+`;
+
+const UpcomingIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const PastIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M12 8V12L9 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const AnalysisWrapper = styled.div`
+  padding: 0 20px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+`;
+
 const EventBudgetEditor: React.FC<{
   event: Event;
   refetch: () => void;
@@ -670,9 +920,11 @@ const EventBudgetEditor: React.FC<{
   const [deletingInvoiceId, setDeletingInvoiceId] = useState<string | null>(
     null
   );
-  const [activeTab, setActiveTab] = useState<"invoices" | "analysis">(
-    "invoices"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "invoices" | "analysis" | "dueDate"
+  >("invoices");
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addToast } = useToast();
   const axiosInstance = useAxiosWithAuth();
@@ -681,7 +933,7 @@ const EventBudgetEditor: React.FC<{
   useEffect(() => {
     setActiveTab("invoices");
   }, []);
-
+  console.log(invoices);
   // Fetch invoices when the component mounts or when the event changes
   useEffect(() => {
     if (event) {
@@ -848,7 +1100,7 @@ const EventBudgetEditor: React.FC<{
 
     const analysis = event.invoiceAnalysis;
     const lastUpdated = new Date(analysis.lastUpdated);
-
+    console.log({ analysis });
     // Use monthly spending data from API if available, otherwise use local calculation
     const monthlySpendingData =
       analysis.performanceInsights?.monthlySpending &&
@@ -925,9 +1177,6 @@ const EventBudgetEditor: React.FC<{
                             font: {
                               weight: "bold",
                             },
-                          },
-                          grid: {
-                            color: "rgba(0, 0, 0, 0.1)",
                           },
                         },
                         x: {
@@ -1264,18 +1513,20 @@ const EventBudgetEditor: React.FC<{
     // If analysis is in progress, show the loading animation
     if (analyzingInvoices) {
       return (
-        <div style={{ textAlign: "center", padding: "40px 0" }}>
-          <div style={{ marginBottom: "20px" }}>
-            <LoadingSpinner
-              style={{ width: "40px", height: "40px", margin: "0 auto" }}
-            />
+        <AnalysisWrapper>
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <div style={{ marginBottom: "20px" }}>
+              <LoadingSpinner
+                style={{ width: "40px", height: "40px", margin: "0 auto" }}
+              />
+            </div>
+            <h3>AI is analyzing your invoices</h3>
+            <p style={{ color: "#666", fontSize: "14px" }}>
+              This may take a moment as we process your data to generate
+              insights...
+            </p>
           </div>
-          <h3>AI is analyzing your invoices</h3>
-          <p style={{ color: "#666", fontSize: "14px" }}>
-            This may take a moment as we process your data to generate
-            insights...
-          </p>
-        </div>
+        </AnalysisWrapper>
       );
     }
 
@@ -1284,28 +1535,366 @@ const EventBudgetEditor: React.FC<{
       // Check if there are any invoices
       if (invoices.length === 0) {
         return (
-          <EmptyState>
-            <EmptyStateIcon>📄</EmptyStateIcon>
-            <p>
-              No invoices available. Please upload some invoices in the Invoices
-              tab before performing an analysis.
-            </p>
-          </EmptyState>
+          <AnalysisWrapper>
+            <EmptyState>
+              <EmptyStateIcon>📄</EmptyStateIcon>
+              <p>
+                No invoices available. Please upload some invoices in the
+                Invoices tab before performing an analysis.
+              </p>
+            </EmptyState>
+          </AnalysisWrapper>
         );
       } else {
         return (
-          <EmptyState>
-            <EmptyStateIcon>📊</EmptyStateIcon>
-            <p>
-              No analysis has been performed yet. Click the "Analyze with AI"
-              button above to generate insights from your invoices.
-            </p>
-          </EmptyState>
+          <AnalysisWrapper>
+            <EmptyState>
+              <EmptyStateIcon>📊</EmptyStateIcon>
+              <p>
+                No analysis has been performed yet. Click the "Analyze with AI"
+                button above to generate insights from your invoices.
+              </p>
+            </EmptyState>
+          </AnalysisWrapper>
         );
       }
     }
 
-    return renderAnalysis();
+    return <AnalysisWrapper>{renderAnalysis()}</AnalysisWrapper>;
+  };
+
+  const renderDueDateTab = () => {
+    // Get due dates from the analysis
+    const dueDates = event.invoiceAnalysis?.dueDates || [];
+
+    if (dueDates.length === 0) {
+      return (
+        <AnalysisWrapper>
+          <EmptyState>
+            <EmptyStateIcon>📅</EmptyStateIcon>
+            <p>
+              No due dates available. Upload invoices with due date information
+              to see them here.
+            </p>
+          </EmptyState>
+        </AnalysisWrapper>
+      );
+    }
+
+    // Parse due dates
+    const parsedDueDates = dueDates.map((dueDate) => ({
+      ...dueDate,
+      parsedDate: parseISO(dueDate.date),
+    }));
+
+    // Sort due dates by date (closest first)
+    const sortedDueDates = [...parsedDueDates].sort(
+      (a, b) => a.parsedDate.getTime() - b.parsedDate.getTime()
+    );
+
+    // Separate upcoming and past due dates
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to beginning of day for accurate comparison
+
+    const upcomingDueDates = sortedDueDates.filter(
+      (dueDate) => dueDate.parsedDate >= today
+    );
+
+    const pastDueDates = sortedDueDates
+      .filter((dueDate) => dueDate.parsedDate < today)
+      .sort((a, b) => b.parsedDate.getTime() - a.parsedDate.getTime()); // Most recent first
+
+    // Get days with due dates for the selected month
+    const getDaysWithDueDates = () => {
+      const year = selectedMonth.getFullYear();
+      const month = selectedMonth.getMonth();
+
+      return parsedDueDates.filter(
+        (dueDate) =>
+          dueDate.parsedDate.getFullYear() === year &&
+          dueDate.parsedDate.getMonth() === month
+      );
+    };
+
+    // Get due dates for the selected date
+    const getDueDatesForSelectedDate = () => {
+      if (!selectedDate) return [];
+
+      return parsedDueDates.filter((dueDate) =>
+        isSameDay(dueDate.parsedDate, selectedDate)
+      );
+    };
+
+    // Generate calendar days
+    const generateCalendarDays = () => {
+      const year = selectedMonth.getFullYear();
+      const month = selectedMonth.getMonth();
+
+      // First day of the month
+      const firstDay = new Date(year, month, 1);
+      // Last day of the month
+      const lastDay = new Date(year, month + 1, 0);
+
+      // Day of the week for the first day (0 = Sunday, 6 = Saturday)
+      const firstDayOfWeek = firstDay.getDay();
+
+      // Total days in the month
+      const daysInMonth = lastDay.getDate();
+
+      // Days from previous month to show
+      const daysFromPrevMonth = firstDayOfWeek;
+
+      // Get days with due dates
+      const daysWithDueDates = getDaysWithDueDates();
+
+      // Calendar days
+      const days = [];
+
+      // Add days from previous month
+      const prevMonth = new Date(year, month - 1, 0);
+      const prevMonthDays = prevMonth.getDate();
+
+      for (
+        let i = prevMonthDays - daysFromPrevMonth + 1;
+        i <= prevMonthDays;
+        i++
+      ) {
+        const date = new Date(year, month - 1, i);
+        const hasDueDate = parsedDueDates.some((dueDate) =>
+          isSameDay(dueDate.parsedDate, date)
+        );
+
+        days.push({
+          date,
+          day: i,
+          isCurrentMonth: false,
+          isToday: isSameDay(date, new Date()),
+          hasDueDate,
+        });
+      }
+
+      // Add days from current month
+      for (let i = 1; i <= daysInMonth; i++) {
+        const date = new Date(year, month, i);
+        const hasDueDate = daysWithDueDates.some(
+          (dueDate) => dueDate.parsedDate.getDate() === i
+        );
+
+        days.push({
+          date,
+          day: i,
+          isCurrentMonth: true,
+          isToday: isSameDay(date, new Date()),
+          hasDueDate,
+        });
+      }
+
+      // Add days from next month to complete the grid
+      const totalDaysToShow =
+        Math.ceil((daysFromPrevMonth + daysInMonth) / 7) * 7;
+      const daysFromNextMonth =
+        totalDaysToShow - (daysFromPrevMonth + daysInMonth);
+
+      for (let i = 1; i <= daysFromNextMonth; i++) {
+        const date = new Date(year, month + 1, i);
+        const hasDueDate = parsedDueDates.some((dueDate) =>
+          isSameDay(dueDate.parsedDate, date)
+        );
+
+        days.push({
+          date,
+          day: i,
+          isCurrentMonth: false,
+          isToday: isSameDay(date, new Date()),
+          hasDueDate,
+        });
+      }
+
+      return days;
+    };
+
+    // Navigate to previous month
+    const goToPrevMonth = () => {
+      setSelectedMonth(
+        new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1)
+      );
+    };
+
+    // Navigate to next month
+    const goToNextMonth = () => {
+      setSelectedMonth(
+        new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1)
+      );
+    };
+
+    // Handle day click
+    const handleDayClick = (day: { date: Date; hasDueDate: boolean }) => {
+      if (day.hasDueDate) {
+        setSelectedDate(day.date);
+      }
+    };
+
+    const calendarDays = generateCalendarDays();
+    const selectedDueDates = getDueDatesForSelectedDate();
+
+    // Filter selected due dates into upcoming and past
+    const selectedUpcomingDueDates = selectedDueDates.filter(
+      (dueDate) => dueDate.parsedDate >= today
+    );
+
+    const selectedPastDueDates = selectedDueDates
+      .filter((dueDate) => dueDate.parsedDate < today)
+      .sort((a, b) => b.parsedDate.getTime() - a.parsedDate.getTime()); // Most recent first
+
+    return (
+      <AnalysisWrapper>
+        <CalendarContainer>
+          <CalendarWrapper>
+            <CalendarHeader>
+              <CalendarTitle>
+                {format(selectedMonth, "MMMM yyyy")}
+              </CalendarTitle>
+              <CalendarNavigation>
+                <CalendarButton onClick={goToPrevMonth}>
+                  Previous
+                </CalendarButton>
+                <CalendarButton onClick={goToNextMonth}>Next</CalendarButton>
+              </CalendarNavigation>
+            </CalendarHeader>
+
+            <CalendarGrid>
+              {/* Days of the week */}
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                <DayOfWeek key={day}>{day}</DayOfWeek>
+              ))}
+
+              {/* Calendar days */}
+              {calendarDays.map((day, index) => (
+                <CalendarDay
+                  key={index}
+                  isToday={day.isToday}
+                  hasDueDate={day.hasDueDate}
+                  isCurrentMonth={day.isCurrentMonth}
+                  onClick={() => handleDayClick(day)}
+                >
+                  {day.day}
+                </CalendarDay>
+              ))}
+            </CalendarGrid>
+          </CalendarWrapper>
+
+          <DueDatesList>
+            {/* Upcoming Due Dates Section */}
+            <DueDateSection>
+              <SectionHeader>
+                <SectionIcon>
+                  <UpcomingIcon />
+                </SectionIcon>
+                <CalendarTitle>
+                  {selectedDate
+                    ? `Upcoming Due Dates for ${format(
+                        selectedDate,
+                        "MMMM d, yyyy"
+                      )}`
+                    : "Upcoming Due Dates"}
+                </CalendarTitle>
+                {(selectedDate
+                  ? selectedUpcomingDueDates.length
+                  : upcomingDueDates.length) > 0 && (
+                  <CountBadge>
+                    {selectedDate
+                      ? selectedUpcomingDueDates.length
+                      : upcomingDueDates.length}
+                  </CountBadge>
+                )}
+              </SectionHeader>
+
+              {(selectedDate ? selectedUpcomingDueDates : upcomingDueDates).map(
+                (dueDate, index) => (
+                  <DueDateItem key={index}>
+                    <DueDateInfo>
+                      <DueDateTitle>{dueDate.title}</DueDateTitle>
+                      <DueDateDate>
+                        {format(dueDate.parsedDate, "MMMM d, yyyy")}
+                      </DueDateDate>
+                    </DueDateInfo>
+                    {dueDate.amount && (
+                      <DueDateAmount>
+                        {formatCurrency(dueDate.amount)}
+                      </DueDateAmount>
+                    )}
+                  </DueDateItem>
+                )
+              )}
+
+              {selectedDate && selectedUpcomingDueDates.length === 0 && (
+                <NoDataMessage>
+                  No upcoming due dates for the selected day.
+                </NoDataMessage>
+              )}
+
+              {!selectedDate && upcomingDueDates.length === 0 && (
+                <NoDataMessage>No upcoming due dates.</NoDataMessage>
+              )}
+            </DueDateSection>
+
+            {/* Past Due Dates Section */}
+            <DueDateSection>
+              <SectionHeader>
+                <SectionIcon>
+                  <PastIcon />
+                </SectionIcon>
+                <CalendarTitle>
+                  {selectedDate
+                    ? `Past Due Dates for ${format(
+                        selectedDate,
+                        "MMMM d, yyyy"
+                      )}`
+                    : "Past Due Dates"}
+                </CalendarTitle>
+                {(selectedDate
+                  ? selectedPastDueDates.length
+                  : pastDueDates.length) > 0 && (
+                  <CountBadge>
+                    {selectedDate
+                      ? selectedPastDueDates.length
+                      : pastDueDates.length}
+                  </CountBadge>
+                )}
+              </SectionHeader>
+
+              {(selectedDate ? selectedPastDueDates : pastDueDates).map(
+                (dueDate, index) => (
+                  <PastDueDateItem key={index}>
+                    <DueDateInfo>
+                      <DueDateTitle>{dueDate.title}</DueDateTitle>
+                      <DueDateDate>
+                        {format(dueDate.parsedDate, "MMMM d, yyyy")}
+                      </DueDateDate>
+                    </DueDateInfo>
+                    {dueDate.amount && (
+                      <DueDateAmount>
+                        {formatCurrency(dueDate.amount)}
+                      </DueDateAmount>
+                    )}
+                  </PastDueDateItem>
+                )
+              )}
+
+              {selectedDate && selectedPastDueDates.length === 0 && (
+                <NoDataMessage>
+                  No past due dates for the selected day.
+                </NoDataMessage>
+              )}
+
+              {!selectedDate && pastDueDates.length === 0 && (
+                <NoDataMessage>No past due dates.</NoDataMessage>
+              )}
+            </DueDateSection>
+          </DueDatesList>
+        </CalendarContainer>
+      </AnalysisWrapper>
+    );
   };
 
   // Extract monthly spending data from actual invoices only
@@ -1338,6 +1927,15 @@ const EventBudgetEditor: React.FC<{
 
     // Sort the entries by date
     const sortedEntries = Array.from(monthlySpending.entries()).sort((a, b) => {
+      const [monthA, yearA] = a[0].split(" ");
+      const [monthB, yearB] = b[0].split(" ");
+
+      // First compare years
+      if (yearA !== yearB) {
+        return parseInt(yearA) - parseInt(yearB);
+      }
+
+      // Then compare months
       const monthsOrder = [
         "January",
         "February",
@@ -1352,16 +1950,6 @@ const EventBudgetEditor: React.FC<{
         "November",
         "December",
       ];
-
-      const [monthA, yearA] = a[0].split(" ");
-      const [monthB, yearB] = b[0].split(" ");
-
-      // Compare years first
-      if (yearA !== yearB) {
-        return parseInt(yearA) - parseInt(yearB);
-      }
-
-      // Then compare months
       return monthsOrder.indexOf(monthA) - monthsOrder.indexOf(monthB);
     });
 
@@ -1464,6 +2052,12 @@ const EventBudgetEditor: React.FC<{
         >
           Analysis
         </Tab>
+        <Tab
+          isActive={activeTab === "dueDate"}
+          onClick={() => setActiveTab("dueDate")}
+        >
+          Due Dates
+        </Tab>
       </TabsContainer>
 
       {showUploadArea && activeTab === "invoices" && (
@@ -1483,6 +2077,7 @@ const EventBudgetEditor: React.FC<{
 
       {activeTab === "invoices" && renderInvoicesTab()}
       {activeTab === "analysis" && renderAnalysisTab()}
+      {activeTab === "dueDate" && renderDueDateTab()}
     </BudgetWrapper>
   );
 };

@@ -463,7 +463,7 @@ const Dashboard: React.FC = () => {
       .filter(
         (currentEvent) =>
           getDateTimeStatus(currentEvent.date, currentEvent.endDate).type ===
-          "Upcoming"
+          "Incoming"
       )
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 

@@ -35,10 +35,18 @@ const EventDetailsWrapper = styled.div`
 export const StyledDatePickerWrapper = styled.div`
   color: ${colors.textPrimary};
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  margin-right: 4px;
-  gap: 4px;
+  gap: 8px;
+  width: 100%;
+  position: relative;
+
+  svg {
+    position: absolute;
+    left: 12px;
+    color: ${colors.primary};
+    z-index: 1;
+  }
 
   .react-datepicker {
     font-size: 14px;
@@ -91,13 +99,13 @@ export const StyledDatePickerWrapper = styled.div`
     background-color: ${colors.backgroundLight};
     border: 1px solid ${colors.borderLight};
     border-radius: 8px;
-    padding: 10px 14px;
+    padding: 10px 14px 10px 40px;
     font-size: 14px;
     font-weight: 500;
     color: ${colors.textPrimary};
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px ${colors.shadow};
-    width: 140px;
+    width: 100%;
     font-family: Axiforma, sans-serif;
 
     &:hover {
@@ -314,11 +322,38 @@ const DateTimeContainer = styled.div`
   align-items: center;
   gap: 8px;
   color: ${colors.textSecondary};
+  flex-wrap: wrap;
 
   svg {
     color: ${colors.primary};
     opacity: 0.7;
   }
+`;
+
+const DateTimeGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  margin-top: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const DateTimeInputGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+`;
+
+const DateTimeLabel = styled.label`
+  font-size: 14px;
+  font-weight: 500;
+  color: ${colors.textSecondary};
+  margin-bottom: 4px;
 `;
 
 const EventTypeEditor: React.FC<{
@@ -505,30 +540,68 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
         </SectionTitle>
         {isEditingDate ? (
           <div>
-            <GuestActionsButtonsContainer>
-              <StyledDatePickerWrapper>
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date || new Date())}
-                  placeholderText="Start date"
-                  showTimeSelect
-                  timeFormat="HH:mm"
-                  timeIntervals={15}
-                  dateFormat="MMMM d, yyyy h:mm aa"
-                />
-              </StyledDatePickerWrapper>
-              <StyledDatePickerWrapper>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date || new Date())}
-                  placeholderText="End date"
-                  showTimeSelect
-                  timeFormat="HH:mm"
-                  timeIntervals={15}
-                  dateFormat="MMMM d, yyyy h:mm aa"
-                />
-              </StyledDatePickerWrapper>
-            </GuestActionsButtonsContainer>
+            <DateTimeGrid>
+              <DateTimeInputGroup>
+                <DateTimeLabel>Start Date & Time</DateTimeLabel>
+                <StyledDatePickerWrapper>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 18.8856 21 19.8284 20.4142 20.4142C19.8284 21 18.8856 21 17 21H7C5.11438 21 4.17157 21 3.58579 20.4142C3 19.8284 3 18.8856 3 17V8.5C3 6.61438 3 5.67157 3.58579 5.08579C4.17157 4.5 5.11438 4.5 7 4.5H17C18.8856 4.5 19.8284 4.5 20.4142 5.08579C21 5.67157 21 6.61438 21 8.5Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <DatePicker
+                    selected={startDate}
+                    onChange={(date) => setStartDate(date || new Date())}
+                    placeholderText="Select start date and time"
+                    showTimeSelect
+                    timeFormat="HH:mm"
+                    timeIntervals={15}
+                    dateFormat="MMMM d, yyyy h:mm aa"
+                  />
+                </StyledDatePickerWrapper>
+              </DateTimeInputGroup>
+
+              <DateTimeInputGroup>
+                <DateTimeLabel>End Date & Time</DateTimeLabel>
+                <StyledDatePickerWrapper>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 18.8856 21 19.8284 20.4142 20.4142C19.8284 21 18.8856 21 17 21H7C5.11438 21 4.17157 21 3.58579 20.4142C3 19.8284 3 18.8856 3 17V8.5C3 6.61438 3 5.67157 3.58579 5.08579C4.17157 4.5 5.11438 4.5 7 4.5H17C18.8856 4.5 19.8284 4.5 20.4142 5.08579C21 5.67157 21 6.61438 21 8.5Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <DatePicker
+                    selected={endDate}
+                    onChange={(date) => setEndDate(date || new Date())}
+                    placeholderText="Select end date and time"
+                    showTimeSelect
+                    timeFormat="HH:mm"
+                    timeIntervals={15}
+                    dateFormat="MMMM d, yyyy h:mm aa"
+                  />
+                </StyledDatePickerWrapper>
+              </DateTimeInputGroup>
+            </DateTimeGrid>
+
             <GuestActionsButtonsContainer>
               <PrimaryButton onClick={updateDateRange}>Save</PrimaryButton>
               <SecondaryButton onClick={() => setIsEditingDate(false)}>

@@ -71,6 +71,12 @@ export type InvoiceAnalysis = {
       amount: number;
     }[];
   };
+  dueDates?: {
+    date: string;
+    title: string;
+    amount?: number;
+    id: string;
+  }[];
   lastUpdated: string;
 };
 
