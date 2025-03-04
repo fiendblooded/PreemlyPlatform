@@ -34,34 +34,31 @@ const openai = new OpenAI({
 
 // Helper function to extract monthly spending data directly from invoice data
 // This serves as a fallback in case the OpenAI API doesn't return this data
-const extractMonthlySpendingData = (invoiceData: InvoiceData[]): { month: string; amount: number }[] => {
-  // Create a map to store spending by month
-  const monthlySpending = new Map<string, number>();
+// const extractMonthlySpendingData = (invoiceData: InvoiceData[]): { month: string; amount: number }[] => {
+//   // Create a map to store spending by month
+//   const monthlySpending = new Map<string, number>();
 
-  // Process each invoice
-  invoiceData.forEach((invoice) => {
-    if (invoice.amount !== undefined && invoice.date) {
-      // Format as YYYY-MM
-      const date = new Date(invoice.date);
-      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+//   // Process each invoice
+//   invoiceData.forEach((invoice) => {
+//     if (invoice.amount !== undefined && invoice.date) {
+//       // Format as YYYY-MM
+//       const date = new Date(invoice.date);
+//       const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
-      // Add to existing month or create new entry
-      const currentAmount = monthlySpending.get(monthYear) || 0;
-      monthlySpending.set(monthYear, currentAmount + invoice.amount);
-    }
-  });
+//       // Add to existing month or create new entry
+//       const currentAmount = monthlySpending.get(monthYear) || 0;
+//       monthlySpending.set(monthYear, currentAmount + invoice.amount);
+//     }
+//   });
 
-  // Convert map to array of objects
-  return Array.from(monthlySpending.entries()).map(([month, amount]) => ({
-    month,
-    amount,
-  }));
-};
+//   // Convert map to array of objects
+//   return Array.from(monthlySpending.entries()).map(([month, amount]) => ({
+//     month,
+//     amount,
+//   }));
+// };
 
-export const analyzeInvoices = async (
-  invoiceTexts: string[],
-  invoiceData: InvoiceData[],
-): Promise<InvoiceAnalysis> => {
+export const analyzeInvoices = async (invoiceTexts: string[]): Promise<InvoiceAnalysis> => {
   try {
     const systemPrompt = `You are an AI assistant specialized in financial analysis for event planning. 
         Your task is to analyze invoice data and provide meaningful insights.
@@ -136,9 +133,7 @@ export const analyzeInvoices = async (
         If an invoice doesn't have a date, exclude it from the monthly spending calculation.
         For dueDates, extract any due date information from the invoices and format as YYYY-MM-DD.`;
 
-    const userPrompt = userPromptTemplate
-      .replace('{invoiceTexts}', JSON.stringify(invoiceTexts))
-      .replace('{invoiceData}', JSON.stringify(invoiceData));
+    const userPrompt = userPromptTemplate.replace('{invoiceTexts}', JSON.stringify(invoiceTexts));
 
     const messages: ChatMessage[] = [
       {
@@ -168,19 +163,19 @@ export const analyzeInvoices = async (
       const analysis = JSON.parse(analysisText) as InvoiceAnalysis;
 
       // If OpenAI didn't provide monthly spending data, generate it ourselves
-      if (
-        !analysis.performanceInsights?.monthlySpending ||
-        analysis.performanceInsights.monthlySpending.length < 2
-      ) {
-        const monthlySpendingData = extractMonthlySpendingData(invoiceData);
+      //   if (
+      //     !analysis.performanceInsights?.monthlySpending ||
+      //     analysis.performanceInsights.monthlySpending.length < 2
+      //   ) {
+      //     const monthlySpendingData = extractMonthlySpendingData(invoiceData);
 
-        if (monthlySpendingData.length >= 2) {
-          if (!analysis.performanceInsights) {
-            analysis.performanceInsights = {};
-          }
-          analysis.performanceInsights.monthlySpending = monthlySpendingData;
-        }
-      }
+      //     if (monthlySpendingData.length >= 2) {
+      //       if (!analysis.performanceInsights) {
+      //         analysis.performanceInsights = {};
+      //       }
+      //       analysis.performanceInsights.monthlySpending = monthlySpendingData;
+      //     }
+      //   }
 
       return analysis;
     } catch (parseError) {
