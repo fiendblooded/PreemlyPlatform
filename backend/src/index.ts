@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import { connectDB } from './config/db';
 import eventRoutes from './routes/event.routes';
+import reviewRoutes from './routes/reviews.routers';
 import guestRoutes from './routes/guest.routes';
 import mailRoutes from './routes/mail.routes';
 import userRoutes from './routes/user.routes';
@@ -47,6 +48,7 @@ app.use('/api/guests', guestRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/mail', mailRoutes);
 app.use('/api/openai', openaiAssistantRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err.message === 'Not allowed by CORS') {

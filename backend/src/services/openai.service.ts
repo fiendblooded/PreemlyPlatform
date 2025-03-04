@@ -21,6 +21,13 @@ interface ChatMessage {
   content: string;
 }
 
+interface ReviewAnalysis {
+  overview: string;
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+}
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -175,6 +182,78 @@ export const analyzeInvoices = async (
         }
       }
 
+      return analysis;
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      throw new Error('Failed to parse analysis from OpenAI');
+    }
+  } catch (error) {
+    console.error('Error in OpenAI analysis:', error);
+    throw error;
+  }
+};
+
+export const analyzeReviews = async (reviews: string[]): Promise<ReviewAnalysis> => {
+  try {
+    const systemPrompt = `You are an AI assistant specialized in analyzing customer reviews. 
+        Your task is to analyze the provided reviews and provide a comprehensive overview.
+        Identify the main strengths, weaknesses, and provide actionable suggestions for improvement.
+        Your response should be in English and structured as a JSON object.`;
+
+    const userPromptTemplate = `Analyze these customer reviews and provide a detailed overview.
+        
+        Reviews: {reviews}
+        
+        Please analyze the reviews and extract the following information:
+        
+        1. Overview: A summary of the overall sentiment and key points from the reviews.
+        
+        2. Strengths: A list of the main strengths mentioned in the reviews.
+        
+        3. Weaknesses: A list of the main weaknesses mentioned in the reviews.
+        
+        4. Suggestions: A list of actionable suggestions for improvement based on the reviews.
+        
+        Return your analysis as a valid JSON object with this structure:
+        {
+          "overview": string,
+          "strengths": string[],
+          "weaknesses": string[],
+          "suggestions": string[]
+        }
+        
+        If any data point cannot be determined, use null or omit it. 
+        For string values that can't be determined, use "N/A".
+        
+        IMPORTANT: Do not make up or generate any data. Only use the information provided in the reviews.`;
+
+    const userPrompt = userPromptTemplate.replace('{reviews}', JSON.stringify(reviews));
+
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: systemPrompt,
+      },
+      {
+        role: 'user',
+        content: userPrompt,
+      },
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages,
+      temperature: 0.2,
+      response_format: { type: 'json_object' },
+    });
+
+    const analysisText = response.choices[0].message.content;
+    if (!analysisText) {
+      throw new Error('No analysis received from OpenAI');
+    }
+
+    try {
+      const analysis = JSON.parse(analysisText) as ReviewAnalysis;
       return analysis;
     } catch (parseError) {
       console.error('Error parsing OpenAI response:', parseError);
