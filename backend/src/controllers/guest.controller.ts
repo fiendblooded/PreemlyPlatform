@@ -36,11 +36,14 @@ export const createGuest = async (req: Request, res: Response): Promise<void> =>
 
 export const updateGuest = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('Updating guest:', req.params.id, req.body);
     const updatedGuest = await Guest.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
     if (!updatedGuest) {
       res.status(404).json({ success: false, message: 'Guest not found' });
       return;
     }
+
     res.json({ success: true, data: updatedGuest });
   } catch (error) {
     console.error('Error in Update Guest:', error);

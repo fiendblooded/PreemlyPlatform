@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import useWebSocket from "../useWebSocket";
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 import ScannerComponent from "./ScannerPage";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { useParams, useNavigate } from "react-router-dom";
@@ -154,8 +154,14 @@ const Container = styled.div<{ isVisible: boolean }>`
   justify-content: center;
   align-items: center;
   font-size: 40px;
-  animation: ${({ isVisible }) => (isVisible ? fadeIn : fadeOut)} 0.5s
-    ease-in-out;
+  animation: ${({ isVisible }) =>
+    isVisible
+      ? css`
+          ${fadeIn} 0.5s ease-in-out
+        `
+      : css`
+          ${fadeOut} 0.5s ease-in-out
+        `};
   opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
   transform: ${({ isVisible }) =>
     isVisible ? "translateY(0)" : "translateY(-10px)"};
@@ -638,8 +644,14 @@ const GuestWelcomeScreen = styled.div<{ isVisible: boolean }>`
   align-items: center;
   justify-content: center;
   width: 100%;
-  animation: ${({ isVisible }) => (isVisible ? fadeIn : fadeOut)} 0.5s
-    ease-in-out forwards;
+  animation: ${({ isVisible }) =>
+    isVisible
+      ? css`
+          ${fadeIn} 0.5s ease-in-out
+        `
+      : css`
+          ${fadeOut} 0.5s ease-in-out
+        `};
   z-index: 100;
   padding: 40px;
   position: relative;

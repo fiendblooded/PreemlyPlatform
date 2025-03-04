@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
-import { Event, Invoice } from "../types";
+import { CategoryBreakdown, Event, Invoice } from "../types";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { ToastType, useToast } from "./Toasts";
 import { SecondaryButton } from "./EventGuestsEditor";
@@ -15,7 +15,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2";
 import { format, parseISO, isSameDay } from "date-fns";
 
 // Register Chart.js components
@@ -591,14 +591,14 @@ const CategoryProgressBar = styled.div`
   margin-bottom: 8px;
 `;
 
-const CategoryProgressFill = styled.div<{ percentage: number }>`
+const CategoryProgressFill = styled.div<{ percentage: number; color: string }>`
   height: 100%;
   width: ${(props) => props.percentage}%;
-  background-color: #6b3ddf;
+  background-color: ${(props) => props.color};
   border-radius: 4px;
 `;
 
-const CategoryPercentage = styled.div`
+const CategoryPercentage = styled.div<{ color: string }>`
   font-size: 14px;
   color: #666;
 `;
@@ -907,6 +907,26 @@ const AnalysisWrapper = styled.div`
   box-sizing: border-box;
   overflow-x: hidden;
 `;
+// Add this function to generate colors for the chart
+const generateCategoryColors = (count: number) => {
+  const baseColors = [
+    "rgba(107, 61, 223, 0.8)", // Primary purple
+    "rgba(66, 133, 244, 0.8)", // Blue
+    "rgba(219, 68, 55, 0.8)", // Red
+    "rgba(244, 180, 0, 0.8)", // Yellow
+    "rgba(15, 157, 88, 0.8)", // Green
+    "rgba(171, 71, 188, 0.8)", // Purple
+    "rgba(255, 112, 67, 0.8)", // Orange
+    "rgba(0, 172, 193, 0.8)", // Teal
+  ];
+
+  const colors = [];
+  for (let i = 0; i < count; i++) {
+    colors.push(baseColors[i % baseColors.length]);
+  }
+
+  return colors;
+};
 
 const EventBudgetEditor: React.FC<{
   event: Event;
@@ -1093,6 +1113,45 @@ const EventBudgetEditor: React.FC<{
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
+  // Add this function before renderAnalysis
+  const aggregateCategories = (categories: CategoryBreakdown[]) => {
+    if (!categories || categories.length === 0) return [];
+
+    const aggregatedMap = new Map<string, CategoryBreakdown>();
+
+    // Group categories by name and sum their amounts
+    categories.forEach((category) => {
+      const categoryName = category.category || "Miscellaneous";
+
+      if (aggregatedMap.has(categoryName)) {
+        const existing = aggregatedMap.get(categoryName)!;
+        existing.amount += category.amount || 0;
+        // We'll recalculate percentages after aggregation
+      } else {
+        aggregatedMap.set(categoryName, {
+          ...category,
+          category: categoryName,
+          amount: category.amount || 0,
+        });
+      }
+    });
+
+    // Convert map to array
+    const aggregatedCategories = Array.from(aggregatedMap.values());
+
+    // Recalculate percentages based on total
+    const totalAmount = aggregatedCategories.reduce(
+      (sum, cat) => sum + (cat.amount || 0),
+      0
+    );
+
+    return aggregatedCategories
+      .map((cat) => ({
+        ...cat,
+        percentage: totalAmount > 0 ? (cat.amount / totalAmount) * 100 : 0,
+      }))
+      .sort((a, b) => b.amount - a.amount); // Sort by amount descending
+  };
 
   const renderAnalysis = () => {
     if (!event.invoiceAnalysis || !event.invoiceAnalysis.budgetSummary)
@@ -1139,7 +1198,56 @@ const EventBudgetEditor: React.FC<{
           </EmptyState>
         ) : (
           <>
-            {/* Monthly Spending Chart */}
+            <AnalysisSection>
+              <SectionTitle>Budget Summary</SectionTitle>
+              <StatGrid>
+                <StatCard>
+                  <StatLabel>Total Spend</StatLabel>
+                  <StatValue>
+                    {formatCurrency(analysis.budgetSummary?.totalSpend)}
+                  </StatValue>
+                </StatCard>
+                <StatCard>
+                  <StatLabel>Invoices Processed</StatLabel>
+                  <StatValue>
+                    {analysis.budgetSummary?.invoiceCount || 0}
+                  </StatValue>
+                </StatCard>
+                {/* <StatCard>
+                  <StatLabel>Paid Invoices</StatLabel>
+                  <StatValue>
+                    {analysis.budgetSummary?.paidInvoices || 0}
+                  </StatValue>
+                </StatCard>
+                <StatCard>
+                  <StatLabel>Unpaid Invoices</StatLabel>
+                  <StatValue>
+                    {analysis.budgetSummary?.unpaidInvoices || 0}
+                  </StatValue>
+                </StatCard> */}
+                {analysis.budgetSummary?.budgetVariance && (
+                  <StatCard>
+                    <StatLabel>Budget Variance</StatLabel>
+                    <StatValue>
+                      {formatCurrency(
+                        analysis.budgetSummary.budgetVariance.amount
+                      )}
+                      {analysis.budgetSummary.budgetVariance.percentage !==
+                        undefined && (
+                        <>
+                          (
+                          {analysis.budgetSummary.budgetVariance.percentage > 0
+                            ? "+"
+                            : ""}
+                          {analysis.budgetSummary.budgetVariance.percentage}%)
+                        </>
+                      )}
+                    </StatValue>
+                  </StatCard>
+                )}
+              </StatGrid>
+            </AnalysisSection>
+
             <AnalysisSection>
               <SectionTitle>Monthly Spending Trend</SectionTitle>
               {monthlySpendingData ? (
@@ -1211,90 +1319,106 @@ const EventBudgetEditor: React.FC<{
             </AnalysisSection>
 
             <AnalysisSection>
-              <SectionTitle>Budget Summary</SectionTitle>
-              <StatGrid>
-                <StatCard>
-                  <StatLabel>Total Spend</StatLabel>
-                  <StatValue>
-                    {formatCurrency(analysis.budgetSummary?.totalSpend)}
-                  </StatValue>
-                </StatCard>
-                <StatCard>
-                  <StatLabel>Invoices Processed</StatLabel>
-                  <StatValue>
-                    {analysis.budgetSummary?.invoiceCount || 0}
-                  </StatValue>
-                </StatCard>
-                <StatCard>
-                  <StatLabel>Paid Invoices</StatLabel>
-                  <StatValue>
-                    {analysis.budgetSummary?.paidInvoices || 0}
-                  </StatValue>
-                </StatCard>
-                <StatCard>
-                  <StatLabel>Unpaid Invoices</StatLabel>
-                  <StatValue>
-                    {analysis.budgetSummary?.unpaidInvoices || 0}
-                  </StatValue>
-                </StatCard>
-                {analysis.budgetSummary?.budgetVariance && (
-                  <StatCard>
-                    <StatLabel>Budget Variance</StatLabel>
-                    <StatValue>
-                      {formatCurrency(
-                        analysis.budgetSummary.budgetVariance.amount
-                      )}
-                      {analysis.budgetSummary.budgetVariance.percentage !==
-                        undefined && (
-                        <>
-                          (
-                          {analysis.budgetSummary.budgetVariance.percentage > 0
-                            ? "+"
-                            : ""}
-                          {analysis.budgetSummary.budgetVariance.percentage}%)
-                        </>
-                      )}
-                    </StatValue>
-                  </StatCard>
-                )}
-              </StatGrid>
-            </AnalysisSection>
-
-            <AnalysisSection>
               {analysis.costBreakdown?.categories &&
                 analysis.costBreakdown.categories.length > 0 && (
                   <div>
                     <SectionTitle>Cost Breakdown by Category</SectionTitle>
-                    {analysis.costBreakdown.categories.map(
-                      (category, index) => (
-                        <CategoryCard key={index}>
-                          <CategoryHeader>
-                            <CategoryName>
-                              {category.category || "Unknown"}
-                            </CategoryName>
-                            <CategoryAmount>
-                              {formatCurrency(category.amount)}
-                            </CategoryAmount>
-                          </CategoryHeader>
-                          <CategoryProgressBar>
-                            <CategoryProgressFill
-                              percentage={category.percentage || 0}
-                            />
-                          </CategoryProgressBar>
-                          <CategoryPercentage>
-                            {category.percentage !== undefined
-                              ? `${category.percentage.toFixed(
-                                  1
-                                )}% of total spend`
-                              : "N/A"}
-                          </CategoryPercentage>
-                        </CategoryCard>
-                      )
+
+                    {/* Add Doughnut Chart */}
+                    <div style={{ height: "300px", marginBottom: "20px" }}>
+                      <Doughnut
+                        data={{
+                          labels: aggregateCategories(
+                            analysis.costBreakdown.categories
+                          ).map((cat) => cat.category),
+                          datasets: [
+                            {
+                              data: aggregateCategories(
+                                analysis.costBreakdown.categories
+                              ).map((cat) => cat.amount),
+                              backgroundColor: generateCategoryColors(
+                                aggregateCategories(
+                                  analysis.costBreakdown.categories
+                                ).length
+                              ),
+                              borderWidth: 1,
+                            },
+                          ],
+                        }}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: "right",
+                              labels: {
+                                boxWidth: 15,
+                                padding: 15,
+                              },
+                            },
+                            tooltip: {
+                              callbacks: {
+                                label: (context) => {
+                                  const value = context.raw as number;
+                                  return `${context.label}: ${formatCurrency(
+                                    value
+                                  )} (${(
+                                    (context.parsed /
+                                      context.dataset.data.reduce(
+                                        (a, b) => (a as number) + (b as number),
+                                        0
+                                      )) *
+                                    100
+                                  ).toFixed(1)}%)`;
+                                },
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+
+                    {/* Keep the existing category cards */}
+                    {aggregateCategories(analysis.costBreakdown.categories).map(
+                      (category, index) => {
+                        // Get the same color that's used in the pie chart
+                        const colors = generateCategoryColors(
+                          aggregateCategories(analysis.costBreakdown.categories)
+                            .length
+                        );
+                        const categoryColor = colors[index];
+
+                        return (
+                          <CategoryCard key={index}>
+                            <CategoryHeader>
+                              <CategoryName>
+                                {category.category || "Unknown"}
+                              </CategoryName>
+                              <CategoryAmount>
+                                {formatCurrency(category.amount)}
+                              </CategoryAmount>
+                            </CategoryHeader>
+                            <CategoryProgressBar>
+                              <CategoryProgressFill
+                                percentage={category.percentage || 0}
+                                color={categoryColor}
+                              />
+                            </CategoryProgressBar>
+                            <CategoryPercentage color={categoryColor}>
+                              {category.percentage !== undefined
+                                ? `${category.percentage.toFixed(
+                                    1
+                                  )}% of total spend`
+                                : "N/A"}
+                            </CategoryPercentage>
+                          </CategoryCard>
+                        );
+                      }
                     )}
                   </div>
                 )}
 
-              {analysis.costBreakdown?.topCategories &&
+              {/* {analysis.costBreakdown?.topCategories &&
                 analysis.costBreakdown.topCategories.length > 0 && (
                   <>
                     <SectionTitle>Top Cost Categories</SectionTitle>
@@ -1309,7 +1433,7 @@ const EventBudgetEditor: React.FC<{
                       )}
                     </StatGrid>
                   </>
-                )}
+                )} */}
 
               {analysis.costBreakdown?.vendors &&
                 analysis.costBreakdown.vendors.length > 0 && (

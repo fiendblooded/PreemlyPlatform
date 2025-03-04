@@ -12,6 +12,7 @@ import WelcomeScreen from "./components/WelcomeScreen";
 import Events from "./components/Events";
 import Dashboard from "./components/Dashboard";
 import ChatbotPage from "./components/chatbot/ChatbotPage";
+import Chatbot from "./components/chatbot/Chatbot";
 import useAuthSetup from "./useAuthSetup";
 import Profile from "./components/Profile";
 import PreemlyFAQ from "./components/PreemlyFAQ";
@@ -146,6 +147,13 @@ const AppContent: React.FC = () => {
     location.pathname.startsWith("/welcome/") ||
     location.pathname.startsWith("/space/");
 
+  // Don't show chatbot on login, welcome, or dedicated chatbot page
+  const hideChatbot =
+    location.pathname === "/login" ||
+    location.pathname === "/welcome" ||
+    location.pathname === "/preembot" ||
+    location.pathname.startsWith("/welcome/");
+
   return (
     <AppWrapper>
       {!isFullWidth && (
@@ -200,6 +208,13 @@ const AppContent: React.FC = () => {
           />
         </Routes>
       </ContentWrapper>
+
+      {/* Add the floating chatbot component */}
+      {!hideChatbot && (
+        <ProtectedRoute>
+          <Chatbot />
+        </ProtectedRoute>
+      )}
     </AppWrapper>
   );
 };

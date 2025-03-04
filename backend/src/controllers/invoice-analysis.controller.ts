@@ -59,7 +59,7 @@ export const analyzeEventInvoices = async (req: Request, res: Response): Promise
     }
 
     // Analyze the invoices using OpenAI
-    const analysis = await analyzeInvoices(invoiceTexts, invoiceData);
+    const analysis = await analyzeInvoices(invoiceTexts);
 
     // Update the event with the analysis results
     event.invoiceAnalysis = {

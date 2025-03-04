@@ -34,29 +34,30 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
       posterUrl = uploadResponse.secure_url;
     }
 
+    // Use values from request when available, otherwise use defaults
     const newEvent = new Event({
       title: event.title,
       description: event.description || '',
       ownerId: req?.user?.sub,
-      date: '2025-03-20T23:00:23.000+00:00',
-      endDate: '2025-03-20T23:00:23.000+00:00',
-      eventType: 'Offline',
+      date: event.date || '2025-03-20T23:00:23.000+00:00',
+      endDate: event.endDate || event.date || '2025-03-20T23:00:23.000+00:00',
+      eventType: event.eventType || 'Offline',
       poster: posterUrl,
-      location: {
+      location: event.location || {
         address: '1600 Amphitheatre Parkway, Mountain View, CA, USA',
         latitude: 37.4224764,
         longitude: -122.0842499,
         placeId: 'ChIJ2eUgeAK6j4ARbn5u_wAGqWA',
       },
-      tasks: [],
-      welcomeScreenParams: {
+      tasks: event.tasks || [],
+      welcomeScreenParams: event.welcomeScreenParams || {
         backgroundColor: '',
         textColor: '',
         isGdpr: false,
         isManualCheckin: true,
         videoUrl: '',
       },
-      emailParams: {
+      emailParams: event.emailParams || {
         scheduleSrc: {
           enabled: false,
           content: '',

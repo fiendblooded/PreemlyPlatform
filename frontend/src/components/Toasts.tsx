@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 
 type Toast = {
   id: number;
@@ -65,7 +65,14 @@ const ToastMessage = styled.div<{ isExiting: boolean; type: ToastType }>`
       : type === ToastType.ERROR
       ? "#dc3545"
       : "#00aef0"};
-  animation: ${({ isExiting }) => (isExiting ? fadeOut : fadeIn)} 0.3s forwards;
+  animation: ${({ isExiting }) =>
+    isExiting
+      ? css`
+          ${fadeOut} 0.3s forwards
+        `
+      : css`
+          ${fadeIn} 0.3s forwards
+        `};
 
   svg {
     width: 20px;
