@@ -4,6 +4,6 @@ import { verifyUser } from '../middleware/auth';
 
 const router = Router();
 
-router.post('/', verifyUser, reviewController.createOverview);
+router.post('/', verifyUser, reviewController.analyzeCustomerReviews);
 
 export default router;
