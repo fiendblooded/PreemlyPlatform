@@ -23,7 +23,7 @@ export function startEmailScheduler() {
       for (const email of pendingEmails) {
         try {
           // Schedule the email with Mailgun
-          const emailResult = await sendEmail(
+          await sendEmail(
             email.recipient,
             email.subject,
             email.htmlContent,
