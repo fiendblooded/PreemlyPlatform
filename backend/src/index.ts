@@ -46,7 +46,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/guests', guestRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/mail', mailRoutes);
-app.use('/api/revies', reviewRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err.message === 'Not allowed by CORS') {
