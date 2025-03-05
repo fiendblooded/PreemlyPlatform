@@ -297,7 +297,36 @@ const Events: React.FC = () => {
       );
     }
     if (filterStatus === "All") {
-      return filteredEvents;
+      // Sort events by datetime when filter is set to "All"
+      return filteredEvents.sort((a, b) => {
+        // Get the start dates for comparison
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+
+        // Get current date for comparison
+        const now = new Date();
+
+        // For events that are in the past, sort them in reverse (most recent past events first)
+        if (dateA < now && dateB < now) {
+          return dateB.getTime() - dateA.getTime();
+        }
+
+        // For events that are in the future, sort them chronologically (closest future events first)
+        if (dateA > now && dateB > now) {
+          return dateA.getTime() - dateB.getTime();
+        }
+
+        // If one event is in the past and one is in the future, prioritize future events
+        if (dateA < now && dateB > now) {
+          return 1; // b comes first
+        }
+        if (dateA > now && dateB < now) {
+          return -1; // a comes first
+        }
+
+        // If dates are the same, maintain original order
+        return 0;
+      });
     } else if (filterStatus === "Upcoming") {
       filteredEvents = filteredEvents.filter(
         (event) =>

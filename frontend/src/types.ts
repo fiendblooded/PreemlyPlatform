@@ -86,6 +86,14 @@ export type Feedback = {
   createdAt?: string;
 };
 
+export type FeedbackAnalysis = {
+  overview: string;
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+  lastUpdated: string;
+};
+
 export type Event = {
   date: string;
   _id: string;
@@ -126,4 +134,5 @@ export type Event = {
   invoices?: Invoice[];
   invoiceAnalysis?: InvoiceAnalysis;
   feedback?: Feedback[];
+  feedbackAnalysis?: FeedbackAnalysis;
 };

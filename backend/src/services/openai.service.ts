@@ -5,15 +5,6 @@ import { InvoiceAnalysis } from '../types/event.types';
 dotenv.config();
 
 // Define more specific types for invoice data
-interface InvoiceData {
-  id: string;
-  title: string;
-  amount?: number;
-  date?: Date;
-  vendor?: string;
-  category?: string;
-  isPaid: boolean;
-}
 
 // Define the OpenAI chat message type
 interface ChatMessage {

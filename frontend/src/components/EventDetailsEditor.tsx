@@ -107,7 +107,7 @@ export const StyledDatePickerWrapper = styled.div`
     box-shadow: 0 2px 4px ${colors.shadow};
     width: 100%;
     font-family: Axiforma, sans-serif;
-
+    box-sizing: border-box;
     &:hover {
       border-color: rgba(99, 102, 241, 0.6);
       box-shadow: 0 4px 8px ${colors.shadow};

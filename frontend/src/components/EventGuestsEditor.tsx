@@ -302,6 +302,64 @@ const ExcelIcon = () => (
   </svg>
 );
 
+// Add a TestButton component
+const TestButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #e5e7eb;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+// Add a TestIcon component
+const TestIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M19.25 3.25H4.75C3.92157 3.25 3.25 3.92157 3.25 4.75V19.25C3.25 20.0784 3.92157 20.75 4.75 20.75H19.25C20.0784 20.75 20.75 20.0784 20.75 19.25V4.75C20.75 3.92157 20.0784 3.25 19.25 3.25Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 8V16"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M8 12H16"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 export const GuestActionsButtonsContainer = styled.div<{ width?: number }>`
   display: flex;
   gap: 6px;
@@ -479,6 +537,44 @@ type Props = {
   refetch: () => void;
 };
 
+// Sample guest data based on feedback reviewers
+const sampleGuestData = [
+  { fullName: "Michael Chen", email: "michael.chen@outlook.com", age: 28 },
+  { fullName: "Sarah Johnson", email: "argentmystery@gmail.com", age: 32 },
+  {
+    fullName: "David Rodriguez",
+    email: "david.rodriguez@outlook.com",
+    age: 35,
+  },
+  { fullName: "Emily Wong", email: "emily.wong@outlook.com", age: 29 },
+  { fullName: "James Wilson", email: "james.wilson@outlook.com", age: 41 },
+  { fullName: "Priya Patel", email: "priya.patel@outlook.com", age: 27 },
+  { fullName: "Robert Taylor", email: "robert.taylor@outlook.com", age: 38 },
+  {
+    fullName: "Sophia Martinez",
+    email: "sophia.martinez@outlook.com",
+    age: 31,
+  },
+  { fullName: "Thomas Lee", email: "thomas.lee@outlook.com", age: 33 },
+  { fullName: "Aisha Johnson", email: "aisha.johnson@outlook.com", age: 26 },
+  { fullName: "Daniel Kim", email: "daniel.kim@outlook.com", age: 30 },
+  {
+    fullName: "Olivia Williams",
+    email: "olivia.williams@outlook.com",
+    age: 34,
+  },
+  { fullName: "Marcus Johnson", email: "marcus.johnson@outlook.com", age: 37 },
+  {
+    fullName: "Jennifer Garcia",
+    email: "jennifer.garcia@outlook.com",
+    age: 29,
+  },
+  { fullName: "Raj Patel", email: "raj.patel@outlook.com", age: 36 },
+  { fullName: "Lisa Thompson", email: "lisa.thompson@outlook.com", age: 31 },
+  { fullName: "Carlos Mendez", email: "carlos.mendez@outlook.com", age: 28 },
+  { fullName: "Natalie Wong", email: "natalie.wong@outlook.com", age: 33 },
+];
+
 const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   const axiosInstance = useAxiosWithAuth();
   const { addToast, Toasts } = useToast();
@@ -495,6 +591,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   const [reminderTime, setReminderTime] = useState("12:00"); // Default to noon
   const [showSendEmailDialog, setShowSendEmailDialog] = useState(false);
   const [showDeleteGuestsDialog, setShowDeleteGuestsDialog] = useState(false);
+  const [isAddingSampleGuests, setIsAddingSampleGuests] = useState(false);
 
   const addNewGuestRow = () => {
     if (newGuests === null) {
@@ -858,12 +955,35 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     }
   };
 
+  // Add a function to add sample guests
+  const addSampleGuests = async () => {
+    if (isAddingSampleGuests) return;
+
+    setIsAddingSampleGuests(true);
+    try {
+      // Add all sample guests instead of a random selection
+      await axiosInstance.put(`/events/${event._id}/guests`, {
+        guests: sampleGuestData,
+      });
+
+      addToast(
+        `Added ${sampleGuestData.length} sample guests`,
+        ToastType.SUCCESS
+      );
+      refetch();
+    } catch (err) {
+      console.error("Error adding sample guests:", err);
+      addToast("Failed to add sample guests", ToastType.ERROR);
+    } finally {
+      setIsAddingSampleGuests(false);
+    }
+  };
+
   const filteredGuests = event?.guests.filter(
     (guest) =>
       guest.fullName.toLowerCase().includes(filterText.toLowerCase()) ||
       guest.email.toLowerCase().includes(filterText.toLowerCase())
   );
-  console.log(event.guests);
   return (
     <GuestsWrapper>
       <GuestTableHeaderContainer>
@@ -888,6 +1008,15 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         </SearchContainer>
 
         <ButtonGroup>
+          {/* {process.env.NODE_ENV !== "production" && (
+            <TestButton
+              onClick={addSampleGuests}
+              disabled={isAddingSampleGuests}
+            >
+              <TestIcon />
+              {isAddingSampleGuests ? "Adding..." : "Add Sample Guests"}
+            </TestButton>
+          )} */}
           {event.guests.length && (
             <ExcelButton onClick={downloadGuestsExcel}>
               <ExcelIcon />

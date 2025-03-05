@@ -71,7 +71,7 @@ export const processEventDescription = async (req: Request, res: Response): Prom
 
     // Make the API call to OpenAI
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },

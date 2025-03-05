@@ -5,6 +5,7 @@ import { verifyUser } from '../middleware/auth';
 import multer from 'multer';
 import * as invoiceController from '../controllers/invoice.controller';
 import * as invoiceAnalysisController from '../controllers/invoice-analysis.controller';
+import * as feedbackAnalysisController from '../controllers/feedback-analysis.controller';
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.get('/:id/invoices', verifyUser, invoiceController.getEventInvoices);
 router.post('/:id/invoices', verifyUser, upload.single('invoice'), invoiceController.uploadInvoice);
 router.delete('/invoices/:id', verifyUser, invoiceController.deleteInvoice);
 router.post('/:id/invoices/analyze', verifyUser, invoiceAnalysisController.analyzeEventInvoices);
+router.post('/:id/feedback/analyze', verifyUser, feedbackAnalysisController.analyzeEventFeedback);
 
 export default router;

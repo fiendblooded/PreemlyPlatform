@@ -109,6 +109,13 @@ const eventSchema = new Schema<Event>({
     ],
     lastUpdated: { type: Date, default: Date.now },
   },
+  feedbackAnalysis: {
+    overview: { type: String },
+    strengths: [{ type: String }],
+    weaknesses: [{ type: String }],
+    suggestions: [{ type: String }],
+    lastUpdated: { type: Date },
+  },
 });
 
 export default model<Event>('Event', eventSchema);

@@ -5,6 +5,7 @@ type Toast = {
   id: number;
   message: string;
   type: ToastType;
+  isExiting: boolean;
 };
 
 export enum ToastType {
@@ -90,30 +91,41 @@ let toastId = 0;
 
 export const useToast = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [isExiting, setIsExiting] = useState(false);
+
+  // Function to remove a toast by ID
+  const removeToast = (id: number) => {
+    // First mark the toast as exiting to trigger animation
+    setToasts((prev) =>
+      prev.map((toast) =>
+        toast.id === id ? { ...toast, isExiting: true } : toast
+      )
+    );
+
+    // Then remove it after animation completes
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 300);
+  };
 
   const addToast = (message: string, type: ToastType = ToastType.INFO) => {
     const id = ++toastId;
+
+    // Add the new toast
     setToasts((prev) => {
-      const newToasts = [...prev, { id, message, type }];
-      return newToasts.length > 10 ? newToasts.slice(1) : newToasts;
+      const newToasts = [...prev, { id, message, type, isExiting: false }];
+      // Limit to 5 toasts at a time
+      return newToasts.length > 5 ? newToasts.slice(-5) : newToasts;
     });
 
-    if (!isExiting) {
-      setTimeout(() => {
-        setIsExiting(true);
-
-        setTimeout(() => {
-          setToasts([]);
-          setIsExiting(false);
-        }, 300); // Delay for fade-out animation
-      }, 5000); // Toast duration for all
-    }
+    // Set timeout to remove this specific toast
+    setTimeout(() => {
+      removeToast(id);
+    }, 5000);
   };
 
   const Toasts = () => (
     <ToastContainer>
-      {toasts.map(({ id, message, type }) => (
+      {toasts.map(({ id, message, type, isExiting }) => (
         <ToastMessage key={id} isExiting={isExiting} type={type}>
           {type === ToastType.SUCCESS && (
             <svg

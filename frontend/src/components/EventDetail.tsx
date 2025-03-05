@@ -33,6 +33,8 @@ import { useAuth0 } from "@auth0/auth0-react";
 import ErrorBigIcon from "./icons/ErrorBigIcon";
 import EventBudgetEditor from "./EventBudgetEditor";
 import BudgetSettingsIcon from "./icons/BudgetSettingsIcon";
+import EventLocationEditor from "./EventLocationEditor";
+import LocationSettingsIcon from "./icons/LocationSettingsIcon";
 
 export const PageWrapper = styled.div<{ tabletMode: boolean }>`
   width: ${(props) => (props.tabletMode ? "100%" : "70%")};
@@ -516,7 +518,7 @@ const EventDetail: React.FC = () => {
       tasks: "tasks",
       attendance: "guests",
       email: "email",
-      // location: "location",
+      location: "location",
       welcome: "welcome",
       budget: "budget",
       feedback: "feedback",
@@ -691,14 +693,14 @@ const EventDetail: React.FC = () => {
                 <EmailSettingsIcon color={"currentColor"} />
                 Email
               </ActiveStatusButton>
-              {/* <ActiveStatusButton
+              <ActiveStatusButton
                 isActive={openSection === "location"}
                 onClick={() => handleTabChange("location")}
                 borderColor="#e6bf30"
               >
                 <LocationSettingsIcon color={"currentColor"} />
                 Location
-              </ActiveStatusButton> */}
+              </ActiveStatusButton>
               <ActiveStatusButton
                 isActive={openSection === "welcome"}
                 onClick={() => handleTabChange("welcome")}
@@ -730,9 +732,9 @@ const EventDetail: React.FC = () => {
             {openSection === "attendance" && (
               <EventGuestsEditor event={event} refetch={fetchEvent} />
             )}
-            {/* {openSection === "location" && (
+            {openSection === "location" && (
               <EventLocationEditor event={event} refetch={fetchEvent} />
-            )} */}
+            )}
             {openSection === "welcome" && (
               <WelcomeScreenEditor event={event} refetch={fetchEvent} />
             )}
@@ -746,7 +748,7 @@ const EventDetail: React.FC = () => {
               <EventBudgetEditor event={event} refetch={fetchEvent} />
             )}
             {openSection === "feedback" && (
-              <EventFeedbackViewer event={event} />
+              <EventFeedbackViewer event={event} refetch={fetchEvent} />
             )}
             {isModalOpen && (
               <PosterUploadModal

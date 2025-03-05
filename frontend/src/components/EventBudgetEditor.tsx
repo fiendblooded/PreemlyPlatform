@@ -11,6 +11,7 @@ import {
   PointElement,
   LineElement,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
@@ -25,6 +26,7 @@ ChartJS.register(
   PointElement,
   LineElement,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend
@@ -249,8 +251,9 @@ const PDFPlaceholder = styled.div`
 `;
 
 const UploadContainer = styled.div`
-  width: 100%;
   height: 120px;
+  margin: 0 20px;
+  box-sizing: border-box;
   border: 2px dashed #ccc;
   border-radius: 8px;
   display: flex;
@@ -261,6 +264,20 @@ const UploadContainer = styled.div`
   margin-bottom: 20px;
   transition: all 0.2s ease;
   background-color: #f9f9f9;
+
+  /* Add appear animation */
+  animation: fadeIn 0.5s ease-in-out;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   &:hover {
     border-color: #6b3ddf;
@@ -361,7 +378,7 @@ const ButtonsContainer = styled.div`
   gap: 12px;
 `;
 
-const AIButton = styled.button`
+export const AIButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -604,30 +621,13 @@ const CategoryPercentage = styled.div<{ color: string }>`
 `;
 
 const VendorGrid = styled.div`
-  display: flex;
-  overflow-x: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
-  padding-bottom: 8px;
-
-  /* Add smooth scrolling */
-  scroll-behavior: smooth;
-
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  &::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  /* Handle */
-  &::-webkit-scrollbar-thumb {
-    background: #ddd;
-    border-radius: 4px;
-  }
-
-  /* Handle on hover */
-  &::-webkit-scrollbar-thumb:hover {
-    background: #bbb;
-  }
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 `;
 
 const VendorCard = styled.div`
@@ -635,8 +635,8 @@ const VendorCard = styled.div`
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  min-width: 300px;
-  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 const VendorHeader = styled.div`

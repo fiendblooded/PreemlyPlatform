@@ -86,6 +86,14 @@ export interface Feedback {
   createdAt: Date;
 }
 
+export interface FeedbackAnalysis {
+  overview: string;
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+  lastUpdated: Date;
+}
+
 export interface Event {
   _id: Types.ObjectId;
   title: string;
@@ -103,4 +111,5 @@ export interface Event {
   invoices?: Types.ObjectId[];
   invoiceAnalysis?: InvoiceAnalysis;
   feedback?: Feedback[];
+  feedbackAnalysis?: FeedbackAnalysis;
 }
