@@ -38,6 +38,18 @@ const eventSchema = new Schema<Event>({
     scheduleSrc: {
       enabled: { type: Boolean },
       content: { type: String },
+      items: [
+        {
+          id: { type: Number },
+          title: { type: String },
+          time: { type: String },
+          location: { type: String },
+          icon: { type: String },
+          startDateTime: { type: String },
+          endDateTime: { type: String },
+          description: { type: String },
+        },
+      ],
     },
     dining: {
       enabled: { type: Boolean },

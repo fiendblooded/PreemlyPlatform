@@ -94,6 +94,18 @@ export type FeedbackAnalysis = {
   lastUpdated: string;
 };
 
+export type ScheduleItem = {
+  id: number;
+  title: string;
+  startDateTime: string; // ISO string format
+  endDateTime: string; // ISO string format
+  location: string;
+  icon: string;
+  description?: string;
+  // Keep time field for backward compatibility, but it will be deprecated
+  time?: string;
+};
+
 export type Event = {
   date: string;
   _id: string;
@@ -124,6 +136,7 @@ export type Event = {
     scheduleSrc: {
       enabled: boolean;
       content: string;
+      items?: ScheduleItem[];
     };
     dining: {
       enabled: boolean;

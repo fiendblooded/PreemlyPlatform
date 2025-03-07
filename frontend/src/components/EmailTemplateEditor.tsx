@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Event } from "../types";
+import { Event, ScheduleItem } from "../types";
 import { getMailHtml, isTablet } from "../common/common";
 import EmailSection from "./EmailSection";
-import GuestsSettingsIcon from "./icons/GuestsSettingsIcon";
 import ScheduleIcon from "./icons/ScheduleIcon";
 import DiningIcon from "./icons/DiningIcon";
 import ParkingIcon from "./icons/ParkingIcon";
@@ -90,6 +89,7 @@ type Props = {
 export type EmailExtraModule = {
   enabled: boolean;
   content: string;
+  items?: ScheduleItem[];
 };
 
 const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
@@ -100,6 +100,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
   const [schedule, setSchedule] = useState<EmailExtraModule>({
     enabled: event?.emailParams?.scheduleSrc?.enabled || false,
     content: event?.emailParams?.scheduleSrc?.content || "",
+    items: event?.emailParams?.scheduleSrc?.items || [],
   });
   const [dining, setDining] = useState<EmailExtraModule>({
     enabled: event?.emailParams?.dining?.enabled || false,
@@ -115,7 +116,10 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
       JSON.stringify(parking) !== JSON.stringify(event?.emailParams?.parking);
     const hasSchedule =
       JSON.stringify(schedule) !==
-      JSON.stringify(event?.emailParams?.scheduleSrc);
+      JSON.stringify({
+        enabled: event?.emailParams?.scheduleSrc?.enabled,
+        content: event?.emailParams?.scheduleSrc?.content,
+      });
     const hasDining =
       JSON.stringify(dining) !== JSON.stringify(event?.emailParams?.dining);
 
@@ -147,7 +151,11 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
         ...event,
         emailParams: {
           parking,
-          scheduleSrc: schedule,
+          scheduleSrc: {
+            ...event.emailParams.scheduleSrc,
+            enabled: schedule.enabled,
+            content: schedule.content,
+          },
           dining,
         },
       });

@@ -35,6 +35,7 @@ import EventBudgetEditor from "./EventBudgetEditor";
 import BudgetSettingsIcon from "./icons/BudgetSettingsIcon";
 import EventLocationEditor from "./EventLocationEditor";
 import LocationSettingsIcon from "./icons/LocationSettingsIcon";
+import ScheduleEditor from "./ScheduleEditor";
 
 export const PageWrapper = styled.div<{ tabletMode: boolean }>`
   width: ${(props) => (props.tabletMode ? "100%" : "70%")};
@@ -472,6 +473,32 @@ const ErrorNotYourEvent = styled.div`
   }
 `;
 
+// Add a ScheduleIcon component
+const ScheduleIcon = ({ color }: { color: string }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 6V12L16 14"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const EventDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -485,21 +512,18 @@ const EventDetail: React.FC = () => {
 
   // Extract the tab from the URL path
   const getTabFromPath = () => {
-    const path = location.pathname;
-    const parts = path.split("/");
-    if (parts.length > 3) {
-      const tab = parts[3];
-      // Map URL path segments to tab names
+    const tab = location.pathname.split("/").pop();
+    if (tab) {
       const tabMap: Record<string, string> = {
         info: "info",
         tasks: "tasks",
         guests: "attendance",
-        attendance: "attendance",
         email: "email",
-        // location: "location",
+        location: "location",
         welcome: "welcome",
         budget: "budget",
         feedback: "feedback",
+        schedule: "schedule",
       };
       return tabMap[tab] || "info";
     }
@@ -522,6 +546,7 @@ const EventDetail: React.FC = () => {
       welcome: "welcome",
       budget: "budget",
       feedback: "feedback",
+      schedule: "schedule",
     };
     navigate(`/events/${id}/${pathMap[tab] || tab}`, { replace: true });
   };
@@ -725,6 +750,14 @@ const EventDetail: React.FC = () => {
                 <FeedbackSettingsIcon color={"currentColor"} />
                 Feedback
               </ActiveStatusButton>
+              <ActiveStatusButton
+                isActive={openSection === "schedule"}
+                onClick={() => handleTabChange("schedule")}
+                borderColor="#e6bf30"
+              >
+                <ScheduleIcon color={"currentColor"} />
+                Schedule
+              </ActiveStatusButton>
             </ActiveStatusContainer>
             {openSection === "info" && (
               <EventDetailsEditor event={event} refetch={fetchEvent} />
@@ -749,6 +782,9 @@ const EventDetail: React.FC = () => {
             )}
             {openSection === "feedback" && (
               <EventFeedbackViewer event={event} refetch={fetchEvent} />
+            )}
+            {openSection === "schedule" && event && (
+              <ScheduleEditor event={event} refetch={fetchEvent} />
             )}
             {isModalOpen && (
               <PosterUploadModal

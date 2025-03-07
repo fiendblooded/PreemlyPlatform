@@ -20,13 +20,30 @@ export interface WelcomeScreenParams {
   isGdpr: boolean;
   videoUrl: string;
 }
+
 export interface EmailExtraModule {
   enabled: boolean;
   content: string;
 }
+
+export interface ScheduleItem {
+  id: number;
+  title: string;
+  startDateTime: string;
+  endDateTime: string;
+  location: string;
+  icon: string;
+  description?: string;
+  time?: string;
+}
+
+export interface ScheduleModule extends EmailExtraModule {
+  items?: ScheduleItem[];
+}
+
 export interface EmailParams {
   parking: EmailExtraModule;
-  scheduleSrc: EmailExtraModule;
+  scheduleSrc: ScheduleModule;
   dining: EmailExtraModule;
 }
 

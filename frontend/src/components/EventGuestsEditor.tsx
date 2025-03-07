@@ -303,6 +303,37 @@ const ExcelIcon = () => (
 );
 
 // Add a TestButton component
+// const TestButton = styled.button`
+//   display: flex;
+//   align-items: center;
+//   gap: 8px;
+//   background-color: #f3f4f6;
+//   color: #4b5563;
+//   border: 1px solid #d1d5db;
+//   border-radius: 6px;
+//   padding: 8px 12px;
+//   font-size: 14px;
+//   font-weight: 500;
+//   cursor: pointer;
+//   transition: all 0.2s ease;
+
+//   &:hover {
+//     background-color: #e5e7eb;
+//   }
+
+//   &:disabled {
+//     opacity: 0.6;
+//     cursor: not-allowed;
+//   }
+// `;
+
+// Add a TestIcon component
+// const TestIcon = () => (
+//   <svg
+//     width="16"
+//     height="16"
+//     viewBox="0 0 24 24"
+//     fill="none"
 const TestButton = styled.button`
   display: flex;
   align-items: center;
@@ -643,7 +674,11 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       eventDetails.date,
       eventDetails.endDate,
       eventDetails.emailParams.parking,
-      eventDetails.emailParams.scheduleSrc,
+      {
+        enabled: eventDetails.emailParams.scheduleSrc.enabled,
+        content: eventDetails.emailParams.scheduleSrc.content,
+        items: eventDetails.emailParams.scheduleSrc.items || [],
+      },
       eventDetails.emailParams.dining,
       event.location.address || ""
     );
@@ -821,7 +856,11 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
           event.date,
           event.endDate,
           event.emailParams.parking,
-          event.emailParams.scheduleSrc,
+          {
+            enabled: event.emailParams.scheduleSrc.enabled,
+            content: event.emailParams.scheduleSrc.content,
+            items: event.emailParams.scheduleSrc.items || [],
+          },
           event.emailParams.dining,
           event.location.address || ""
         );
@@ -955,24 +994,16 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     }
   };
 
-  // Add a function to add sample guests
   const addSampleGuests = async () => {
     if (isAddingSampleGuests) return;
 
     setIsAddingSampleGuests(true);
     try {
-      // Add all sample guests instead of a random selection
-      await axiosInstance.put(`/events/${event._id}/guests`, {
-        guests: sampleGuestData,
-      });
-
-      addToast(
-        `Added ${sampleGuestData.length} sample guests`,
-        ToastType.SUCCESS
-      );
+      await axiosInstance.post(`/events/${event._id}/sample-guests`);
       refetch();
-    } catch (err) {
-      console.error("Error adding sample guests:", err);
+      addToast("Sample guests added successfully", ToastType.SUCCESS);
+    } catch (error) {
+      console.error("Error adding sample guests:", error);
       addToast("Failed to add sample guests", ToastType.ERROR);
     } finally {
       setIsAddingSampleGuests(false);

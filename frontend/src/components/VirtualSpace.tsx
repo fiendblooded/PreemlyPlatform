@@ -4,20 +4,75 @@ import styled from "styled-components";
 import axios from "axios";
 import { Event } from "../types";
 
-// Modern color palette to match other components
+// Modern color palette with gradients
 const colors = {
-  primary: "#6366F1", // Matches sidebar accent
-  primaryHover: "#4F46E5",
-  textPrimary: "#1E293B",
-  textSecondary: "#64748B",
-  borderLight: "#E2E8F0",
+  primary: "#4F46E5", // Indigo
+  primaryDark: "#4338CA",
+  primaryLight: "#EEF2FF",
+  primaryGradient: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+  secondary: "#EC4899", // Pink
+  secondaryLight: "#FCE7F3",
+  secondaryGradient: "linear-gradient(135deg, #EC4899 0%, #BE185D 100%)",
+  accent: "#06B6D4", // Cyan
+  accentLight: "#CFFAFE",
+  accentGradient: "linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)",
+  success: "#10B981", // Green
+  successLight: "#D1FAE5",
+  successGradient: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+  error: "#EF4444", // Red
+  errorLight: "#FEE2E2",
+  warning: "#F59E0B", // Amber
+  warningLight: "#FEF3C7",
+  textPrimary: "#111827",
+  textSecondary: "#6B7280",
+  textTertiary: "#9CA3AF",
+  borderLight: "#E5E7EB",
   backgroundLight: "#FFFFFF",
-  backgroundSecondary: "#F8FAFC",
+  backgroundSecondary: "#F9FAFB",
+  backgroundTertiary: "#F3F4F6",
   shadow: "rgba(0, 0, 0, 0.05)",
-  error: "#EF4444",
-  success: "#10B981",
-  yellow: "#F59E0B",
-  green: "#10B981",
+  shadowMedium: "rgba(0, 0, 0, 0.1)",
+  glass: "rgba(255, 255, 255, 0.8)",
+  glassCard: "rgba(255, 255, 255, 0.7)",
+  darkGlass: "rgba(0, 0, 0, 0.7)",
+};
+
+// Modern typography
+const fontWeights = {
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700,
+};
+
+// Design tokens
+const designTokens = {
+  borderRadius: {
+    sm: "0.375rem",
+    md: "0.75rem",
+    lg: "1rem",
+    xl: "1.5rem",
+    full: "9999px",
+  },
+  spacing: {
+    xs: "0.25rem",
+    sm: "0.5rem",
+    md: "1rem",
+    lg: "1.5rem",
+    xl: "2rem",
+    xxl: "3rem",
+  },
+  animation: {
+    fast: "0.2s ease",
+    medium: "0.3s ease",
+    slow: "0.5s ease",
+  },
+  shadows: {
+    sm: "0 1px 2px rgba(0, 0, 0, 0.05)",
+    md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+    lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+    xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+  },
 };
 
 const SpaceWrapper = styled.div`
@@ -26,7 +81,8 @@ const SpaceWrapper = styled.div`
   display: flex;
   flex-direction: column;
   background-color: ${colors.backgroundSecondary};
-  font-family: Axiforma, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
   position: fixed;
   top: 0;
   left: 0;
@@ -35,18 +91,21 @@ const SpaceWrapper = styled.div`
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   font-size: 16px;
+  color: ${colors.textPrimary};
+  scroll-behavior: smooth;
 `;
 
 const HeaderCard = styled.div<{ posterUrl?: string }>`
   width: 100%;
-  height: 40vh;
-  min-height: 250px;
+  height: 45vh;
+  min-height: 280px;
   background-color: #000;
   background-image: ${(props) =>
-    props.posterUrl ? `url(${props.posterUrl})` : "none"};
+    props.posterUrl ? `url(${props.posterUrl})` : colors.primaryGradient};
   background-size: cover;
   background-position: center;
   position: relative;
+  overflow: hidden;
 
   &::after {
     content: "";
@@ -62,6 +121,18 @@ const HeaderCard = styled.div<{ posterUrl?: string }>`
     );
     z-index: 0;
   }
+
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: ${colors.backgroundSecondary};
+    border-radius: 40px 40px 0 0;
+    z-index: 1;
+  }
 `;
 
 const HeaderContent = styled.div`
@@ -69,285 +140,471 @@ const HeaderContent = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 32px 24px;
+  padding: ${designTokens.spacing.xxl} ${designTokens.spacing.xl};
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: ${designTokens.spacing.sm};
+
+  @media (max-width: 480px) {
+    padding: ${designTokens.spacing.xl} ${designTokens.spacing.lg};
+  }
 `;
 
 const WelcomeText = styled.h1`
   color: white;
-  font-size: 42px;
-  font-weight: 700;
-  margin: 0 0 12px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  font-family: Axiforma, sans-serif;
+  font-size: 34px;
+  font-weight: ${fontWeights.bold};
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
+  letter-spacing: -0.5px;
+
+  @media (max-width: 480px) {
+    font-size: 28px;
+  }
 `;
 
 const EventName = styled.p`
   color: rgba(255, 255, 255, 0.9);
-  font-size: 24px;
-  margin: 0;
+  font-size: 20px;
+  margin: 0 0 ${designTokens.spacing.lg};
   line-height: 1.4;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  font-family: Axiforma, sans-serif;
+  font-weight: ${fontWeights.medium};
+  max-width: 90%;
+
+  @media (max-width: 480px) {
+    font-size: 18px;
+    margin-bottom: ${designTokens.spacing.md};
+  }
 `;
 
 const ContentSection = styled.div`
-  padding: 32px 24px;
+  padding: ${designTokens.spacing.xl} ${designTokens.spacing.lg};
   flex: 1;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+
+  @media (max-width: 480px) {
+    padding: ${designTokens.spacing.lg} ${designTokens.spacing.md};
+  }
 `;
 
 const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: ${designTokens.spacing.lg};
+  padding: 0 ${designTokens.spacing.sm};
+
+  @media (max-width: 480px) {
+    margin-bottom: ${designTokens.spacing.md};
+  }
 `;
 
 const SectionTitle = styled.h2`
   color: ${colors.textPrimary};
-  font-size: 32px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: ${fontWeights.bold};
   margin: 0;
-  font-family: Axiforma, sans-serif;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: ${colors.primaryGradient};
+    border-radius: ${designTokens.borderRadius.full};
+  }
+
+  @media (max-width: 480px) {
+    font-size: 20px;
+  }
 `;
 
-const ViewAllLink = styled.a`
-  color: ${colors.primary};
-  font-size: 18px;
-  text-decoration: none;
-  font-weight: 500;
-  padding: 10px 16px;
-  border-radius: 8px;
-  background-color: rgba(99, 102, 241, 0.1);
-  transition: all 0.2s ease;
-  font-family: Axiforma, sans-serif;
+// Modern card with subtle shadow
+const Card = styled.div`
+  background-color: ${colors.backgroundLight};
+  border-radius: ${designTokens.borderRadius.lg};
+  box-shadow: ${designTokens.shadows.md};
+  overflow: hidden;
+  margin-bottom: ${designTokens.spacing.xl};
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  transition: transform ${designTokens.animation.medium},
+    box-shadow ${designTokens.animation.medium};
 
   &:hover {
-    background-color: rgba(99, 102, 241, 0.15);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: ${designTokens.shadows.lg};
+  }
+`;
+
+// Modern schedule container
+const ScheduleContainer = styled.div`
+  margin-bottom: ${designTokens.spacing.xl};
+`;
+
+// Modern schedule item
+const ScheduleItem = styled.div<{ isActive?: boolean }>`
+  display: flex;
+  padding: ${designTokens.spacing.lg};
+  border-bottom: 1px solid ${colors.borderLight};
+  position: relative;
+  background-color: ${(props) =>
+    props.isActive ? colors.primaryLight : colors.backgroundLight};
+  transition: all ${designTokens.animation.fast};
+
+  &:last-child {
+    border-bottom: none;
   }
 
   &:active {
-    transform: translateY(0);
+    background-color: ${colors.backgroundTertiary};
+  }
+
+  @media (max-width: 480px) {
+    padding: ${designTokens.spacing.md};
+    flex-wrap: wrap;
   }
 `;
 
-const TimelineContainer = styled.div`
+const ScheduleIconContainer = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: ${designTokens.borderRadius.md};
+  background: ${colors.primaryGradient};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: ${designTokens.spacing.lg};
+  flex-shrink: 0;
+  font-size: 22px;
+  box-shadow: ${designTokens.shadows.sm};
+  color: white;
+
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    margin-right: ${designTokens.spacing.md};
+  }
+`;
+
+const ScheduleContent = styled.div`
+  flex: 1;
+  min-width: 0; // Ensures text truncation works properly
+  display: flex;
+  flex-direction: column;
+  gap: ${designTokens.spacing.xs};
+`;
+
+const ScheduleTitle = styled.h3`
+  color: ${colors.textPrimary};
+  font-size: 18px;
+  font-weight: ${fontWeights.semibold};
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.3px;
+
+  @media (max-width: 480px) {
+    font-size: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    white-space: normal;
+    align-items: center;
+  }
+`;
+
+const ScheduleDescription = styled.p`
+  color: ${colors.textSecondary};
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+    -webkit-line-clamp: 3;
+  }
+`;
+
+const ScheduleDetails = styled.p`
+  color: ${colors.textSecondary};
+  font-size: 14px;
+  margin: ${designTokens.spacing.xs} 0 0;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: ${designTokens.spacing.xs};
+
+  &::before {
+    content: "📍";
+    font-size: 14px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+  }
+`;
+
+const ScheduleTimeContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+  padding-left: ${designTokens.spacing.lg};
+  min-width: 90px;
+
+  @media (max-width: 480px) {
+    padding-left: ${designTokens.spacing.md};
+    min-width: 80px;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: ${designTokens.spacing.sm};
+    margin-left: 0;
+    padding-left: calc(
+      40px + ${designTokens.spacing.md} + ${designTokens.spacing.xs}
+    );
+  }
+`;
+
+const ScheduleTime = styled.div`
+  color: ${colors.primary};
+  font-size: 15px;
+  font-weight: ${fontWeights.medium};
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: ${designTokens.spacing.xs};
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
+`;
+
+const DateBadge = styled.div<{
+  isToday?: boolean;
+  isTomorrow?: boolean;
+  isMultiDay?: boolean;
+}>`
+  font-size: 12px;
+  font-weight: ${fontWeights.medium};
+  padding: 3px 10px;
+  border-radius: ${designTokens.borderRadius.full};
+  margin-top: ${designTokens.spacing.sm};
+  background-color: ${(props) =>
+    props.isToday
+      ? colors.primaryLight
+      : props.isTomorrow
+      ? colors.secondaryLight
+      : props.isMultiDay
+      ? colors.accentLight
+      : colors.backgroundTertiary};
+  color: ${(props) =>
+    props.isToday
+      ? colors.primary
+      : props.isTomorrow
+      ? colors.secondary
+      : props.isMultiDay
+      ? colors.accent
+      : colors.textSecondary};
+
+  @media (max-width: 480px) {
+    margin-top: 0;
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+`;
+
+const MultiDayBadge = styled.span`
+  font-size: 11px;
+  font-weight: ${fontWeights.medium};
+  padding: 2px 6px;
+  border-radius: ${designTokens.borderRadius.sm};
+  margin-left: ${designTokens.spacing.sm};
+  background-color: ${colors.accentLight};
+  color: ${colors.accent};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  @media (max-width: 480px) {
+    font-size: 10px;
+    padding: 1px 5px;
+    margin-left: ${designTokens.spacing.xs};
+  }
+`;
+
+const TimeIcon = styled.span`
+  margin-right: ${designTokens.spacing.xs};
+  font-size: 14px;
+`;
+
+const ActiveIndicator = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: ${colors.primaryGradient};
+  border-radius: 0 ${designTokens.borderRadius.sm}
+    ${designTokens.borderRadius.sm} 0;
+`;
+
+// Modern form elements
+const FormGroup = styled.div`
+  margin-bottom: ${designTokens.spacing.lg};
+`;
+
+const Label = styled.label`
+  display: block;
+  color: ${colors.textSecondary};
+  font-size: 14px;
+  font-weight: ${fontWeights.medium};
+  margin-bottom: ${designTokens.spacing.sm};
+  padding-left: ${designTokens.spacing.xs};
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: ${designTokens.spacing.md} ${designTokens.spacing.lg};
+  border: 1px solid ${colors.borderLight};
+  border-radius: ${designTokens.borderRadius.md};
+  font-size: 16px;
+  transition: all ${designTokens.animation.fast};
+  box-sizing: border-box;
+  background-color: ${colors.backgroundLight};
+  color: ${colors.textPrimary};
+  box-shadow: ${designTokens.shadows.sm};
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+
+  &::placeholder {
+    color: ${colors.textTertiary};
+    opacity: 0.8;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+  }
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  height: 140px;
+  padding: ${designTokens.spacing.md} ${designTokens.spacing.lg};
+  border: 1px solid ${colors.borderLight};
+  border-radius: ${designTokens.borderRadius.md};
+  font-size: 16px;
+  resize: none;
+  transition: all ${designTokens.animation.fast};
+  box-sizing: border-box;
+  background-color: ${colors.backgroundLight};
+  color: ${colors.textPrimary};
+  box-shadow: ${designTokens.shadows.sm};
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+
+  &::placeholder {
+    color: ${colors.textTertiary};
+    opacity: 0.8;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+  }
+`;
+
+// Modern button
+const Button = styled.button`
+  background: ${colors.primaryGradient};
+  color: white;
+  border: none;
+  border-radius: ${designTokens.borderRadius.md};
+  padding: ${designTokens.spacing.md} ${designTokens.spacing.lg};
+  font-size: 16px;
+  font-weight: ${fontWeights.semibold};
+  cursor: pointer;
+  width: 100%;
+  transition: all ${designTokens.animation.medium};
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  box-shadow: ${designTokens.shadows.md};
   position: relative;
-  margin-left: 24px;
-  margin-bottom: 32px;
+  overflow: hidden;
 
   &::before {
     content: "";
     position: absolute;
     top: 0;
-    bottom: 0;
-    left: 10px;
-    width: 3px;
-    background-color: ${colors.borderLight};
-    z-index: 0;
-  }
-`;
-
-const TimeMarker = styled.div`
-  color: ${colors.textSecondary};
-  font-size: 18px;
-  font-weight: 600;
-  margin-left: -24px;
-  position: relative;
-  z-index: 1;
-  padding: 12px 0;
-  font-family: Axiforma, sans-serif;
-`;
-
-const ScheduleCard = styled.div<{ isActive?: boolean }>`
-  background-color: ${colors.backgroundLight};
-  border-radius: 16px;
-  box-shadow: 0 4px 16px ${colors.shadow};
-  padding: 24px;
-  margin: 12px 0 24px 32px;
-  position: relative;
-  transition: all 0.2s ease;
-  border: 1px solid ${colors.borderLight};
-
-  &::before {
-    content: "";
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: ${(props) =>
-      props.isActive ? colors.green : colors.yellow};
-    left: -40px;
-    top: 24px;
-    z-index: 1;
-    border: 3px solid white;
-    box-shadow: 0 0 0 3px
-      ${(props) =>
-        props.isActive ? `${colors.green}30` : `${colors.yellow}30`};
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0)
+    );
+    opacity: 0;
+    transition: opacity ${designTokens.animation.fast};
   }
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px ${colors.shadow};
-  }
-`;
+    box-shadow: ${designTokens.shadows.lg};
 
-const SessionTitle = styled.h3`
-  color: ${colors.textPrimary};
-  font-size: 22px;
-  font-weight: 600;
-  margin: 0 0 12px 0;
-  display: flex;
-  align-items: center;
-  font-family: Axiforma, sans-serif;
-`;
-
-const SessionDetails = styled.p`
-  color: ${colors.textSecondary};
-  font-size: 18px;
-  margin: 0;
-  font-family: Axiforma, sans-serif;
-  line-height: 1.5;
-`;
-
-const SessionIcon = styled.span`
-  margin-right: 12px;
-  font-size: 24px;
-`;
-
-const FeedbackSection = styled.div`
-  background-color: ${colors.backgroundLight};
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 4px 16px ${colors.shadow};
-  border: 1px solid ${colors.borderLight};
-  margin-top: 32px;
-`;
-
-const FeedbackLabel = styled.div`
-  color: ${colors.textSecondary};
-  font-size: 22px !important;
-  margin-bottom: 24px;
-`;
-
-const FeedbackInput = styled.textarea`
-  width: 100%;
-  height: 150px;
-  padding: 16px 20px;
-  border: 1px solid ${colors.borderLight};
-  border-radius: 12px;
-  font-family: Axiforma, sans-serif;
-  font-size: 24px;
-  resize: none;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-  background-color: ${colors.backgroundSecondary};
-  color: ${colors.textPrimary};
-  box-shadow: 0 2px 4px ${colors.shadow};
-  margin-bottom: 8px;
-
-  &::placeholder {
-    color: ${colors.textSecondary};
-    opacity: 0.8;
-  }
-
-  &:hover {
-    border-color: rgba(99, 102, 241, 0.6);
-    box-shadow: 0 4px 8px ${colors.shadow};
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${colors.primary};
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-  }
-`;
-
-const NameInput = styled.input`
-  width: 100%;
-  padding: 16px 20px;
-  border: 1px solid ${colors.borderLight};
-  border-radius: 12px;
-  font-family: Axiforma, sans-serif;
-  font-size: 24px;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-  background-color: ${colors.backgroundSecondary};
-  color: ${colors.textPrimary};
-  margin-bottom: 24px;
-  box-shadow: 0 2px 4px ${colors.shadow};
-
-  &::placeholder {
-    color: ${colors.textSecondary};
-    opacity: 0.8;
-  }
-
-  &:hover {
-    border-color: rgba(99, 102, 241, 0.6);
-    box-shadow: 0 4px 8px ${colors.shadow};
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${colors.primary};
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-  }
-`;
-
-const SubmitButton = styled.button`
-  background: linear-gradient(
-    135deg,
-    ${colors.primary} 0%,
-    ${colors.primaryHover} 100%
-  );
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 18px;
-  font-size: 28px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 24px;
-  width: 100%;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-  transition: all 0.2s ease;
-  font-family: Axiforma, sans-serif;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    &::before {
+      opacity: 1;
+    }
   }
 
   &:active {
-    transform: translateY(0);
+    transform: translateY(1px);
+    box-shadow: ${designTokens.shadows.sm};
   }
 
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
   }
 `;
 
 const LoadingContainer = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  gap: ${designTokens.spacing.lg};
+  background: ${colors.backgroundSecondary};
 `;
 
 const LoadingSpinner = styled.div`
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(99, 102, 241, 0.1);
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(79, 70, 229, 0.1);
   border-radius: 50%;
   border-top-color: ${colors.primary};
-  animation: spin 1s ease-in-out infinite;
+  animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+  box-shadow: ${designTokens.shadows.md};
 
   @keyframes spin {
     to {
@@ -356,37 +613,52 @@ const LoadingSpinner = styled.div`
   }
 `;
 
+const LoadingText = styled.p`
+  color: ${colors.textSecondary};
+  font-size: 16px;
+  font-weight: ${fontWeights.medium};
+  margin: 0;
+`;
+
 const ErrorMessage = styled.div`
   color: ${colors.error};
-  background-color: rgba(239, 68, 68, 0.1);
-  padding: 24px;
-  border-radius: 12px;
+  background-color: ${colors.errorLight};
+  padding: ${designTokens.spacing.lg};
+  border-radius: ${designTokens.borderRadius.lg};
   text-align: center;
-  margin: 32px;
-  font-size: 20px;
-  font-family: Axiforma, sans-serif;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+  margin: ${designTokens.spacing.xl};
+  font-size: 16px;
+  box-shadow: ${designTokens.shadows.md};
   border: 1px solid rgba(239, 68, 68, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${designTokens.spacing.md};
+
+  &::before {
+    content: "⚠️";
+    font-size: 28px;
+    margin-bottom: ${designTokens.spacing.sm};
+  }
 `;
 
 const SuccessMessage = styled.div`
   position: fixed;
-  bottom: 32px;
+  bottom: ${designTokens.spacing.xl};
   left: 50%;
   transform: translateX(-50%);
-  background-color: ${colors.success};
+  background: ${colors.successGradient};
   color: white;
-  padding: 16px 32px;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  animation: slideUp 0.3s ease forwards;
+  padding: ${designTokens.spacing.md} ${designTokens.spacing.xl};
+  border-radius: ${designTokens.borderRadius.md};
+  font-size: 16px;
+  font-weight: ${fontWeights.medium};
+  box-shadow: ${designTokens.shadows.lg};
+  animation: slideUp 0.4s ${designTokens.animation.medium} forwards;
   z-index: 100;
-  font-family: Axiforma, sans-serif;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: ${designTokens.spacing.sm};
   min-width: 280px;
   text-align: center;
   justify-content: center;
@@ -394,7 +666,14 @@ const SuccessMessage = styled.div`
   &::before {
     content: "✓";
     font-weight: bold;
-    font-size: 22px;
+    font-size: 18px;
+    background: rgba(255, 255, 255, 0.2);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   @keyframes slideUp {
@@ -409,37 +688,95 @@ const SuccessMessage = styled.div`
   }
 `;
 
-// Sample schedule data
-const sampleSchedule = [
-  {
-    id: 1,
-    title: "Speakers Introduction",
-    time: "08:00 - 09:00",
-    location: "Main Hall",
-    icon: "🎤",
-  },
-  {
-    id: 2,
-    title: "Group Photo Session",
-    time: "10:00 - 11:00",
-    location: "Auditorium 1",
-    icon: "📷",
-  },
-  {
-    id: 3,
-    title: "Keynote Speech",
-    time: "11:30 - 12:30",
-    location: "Main Stage",
-    icon: "🎯",
-  },
-  {
-    id: 4,
-    title: "Networking Lunch",
-    time: "13:00 - 14:00",
-    location: "Dining Hall",
-    icon: "🍽️",
-  },
-];
+// Add these new styled components
+const EventInfoCard = styled.div`
+  background: ${colors.glassCard};
+  backdrop-filter: blur(10px);
+  border-radius: ${designTokens.borderRadius.lg};
+  padding: ${designTokens.spacing.lg};
+  margin-bottom: ${designTokens.spacing.xl};
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: ${designTokens.shadows.lg};
+`;
+
+const EventInfoRow = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: ${designTokens.spacing.md};
+  gap: ${designTokens.spacing.md};
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const EventInfoIcon = styled.div`
+  width: 36px;
+  height: 36px;
+  border-radius: ${designTokens.borderRadius.md};
+  background: ${colors.primaryGradient};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  flex-shrink: 0;
+`;
+
+const EventInfoContent = styled.div`
+  flex: 1;
+`;
+
+const EventInfoLabel = styled.div`
+  font-size: 13px;
+  color: ${colors.textSecondary};
+  margin-bottom: 2px;
+`;
+
+const EventInfoValue = styled.div`
+  font-size: 16px;
+  color: ${colors.textPrimary};
+  font-weight: ${fontWeights.medium};
+`;
+
+const SectionDivider = styled.div`
+  height: 8px;
+  margin: ${designTokens.spacing.xl} 0;
+  background: ${colors.backgroundTertiary};
+  border-radius: ${designTokens.borderRadius.full};
+  width: 100%;
+  opacity: 0.6;
+`;
+
+const EmptyStateMessage = styled.div`
+  text-align: center;
+  padding: ${designTokens.spacing.xl};
+  color: ${colors.textSecondary};
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${designTokens.spacing.md};
+
+  &::before {
+    content: "📅";
+    font-size: 32px;
+    margin-bottom: ${designTokens.spacing.sm};
+  }
+`;
+
+// Define schedule item type
+interface ScheduleItem {
+  id: number;
+  title: string;
+  startDateTime: string; // ISO string format
+  endDateTime: string; // ISO string format
+  location: string;
+  icon: string;
+  description?: string;
+  // Keep time field for backward compatibility, but it will be deprecated
+  time?: string;
+}
 
 const VirtualSpace: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -452,6 +789,9 @@ const VirtualSpace: React.FC = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [currentTime] = useState(new Date());
 
+  // Schedule state - initialize with empty array
+  const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -460,6 +800,12 @@ const VirtualSpace: React.FC = () => {
           `${import.meta.env.VITE_API_BASE_URL}/events/${id}`
         );
         setEvent(response.data.data);
+
+        // Use event's schedule items if available
+        if (response.data.data.emailParams?.scheduleSrc?.items?.length > 0) {
+          setSchedule(response.data.data.emailParams.scheduleSrc.items);
+        }
+
         setError(null);
       } catch (err) {
         console.error("Error fetching event:", err);
@@ -518,19 +864,120 @@ const VirtualSpace: React.FC = () => {
     }
   };
 
+  // Helper function to check if a date is today
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  // Helper function to check if a date is tomorrow
+  const isTomorrow = (date: Date) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return (
+      date.getDate() === tomorrow.getDate() &&
+      date.getMonth() === tomorrow.getMonth() &&
+      date.getFullYear() === tomorrow.getFullYear()
+    );
+  };
+
+  // Helper function to check if two dates are on the same day
+  const isSameDay = (date1: Date, date2: Date) => {
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
+  };
+
+  // Helper function to format date and time
+  const formatTimeRange = (item: ScheduleItem) => {
+    // If we have startDateTime and endDateTime, use them
+    if (item.startDateTime && item.endDateTime) {
+      const start = new Date(item.startDateTime);
+      const end = new Date(item.endDateTime);
+
+      const formatTime = (date: Date) => {
+        return date.toLocaleTimeString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      };
+
+      // If same day, just show time range
+      if (isSameDay(start, end)) {
+        return formatTime(start) + " - " + formatTime(end);
+      }
+
+      // If different days, show abbreviated format
+      return formatTime(start) + " - " + formatTime(end);
+    }
+
+    // Fallback to time field for backward compatibility
+    return item.time || "";
+  };
+
+  // Helper function to get date badge text
+  const getDateBadgeText = (startDateTime: string, endDateTime: string) => {
+    const start = new Date(startDateTime);
+    const end = new Date(endDateTime);
+    const sameDay = isSameDay(start, end);
+
+    if (isToday(start)) {
+      return sameDay ? "Today" : "Starts Today";
+    }
+
+    if (isTomorrow(start)) {
+      return sameDay ? "Tomorrow" : "Starts Tomorrow";
+    }
+
+    // Return formatted date for other days
+    const formattedDate = start.toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+
+    return sameDay ? formattedDate : `From ${formattedDate}`;
+  };
+
   // Helper function to check if a session is currently active
-  const isSessionActive = (sessionTime: string) => {
-    const [startStr, endStr] = sessionTime.split(" - ");
-    const [startHour, startMin] = startStr.split(":").map(Number);
-    const [endHour, endMin] = endStr.split(":").map(Number);
+  const isSessionActive = (sessionTime: string, item?: ScheduleItem) => {
+    // If we have startDateTime and endDateTime, use them
+    if (item && item.startDateTime && item.endDateTime) {
+      const sessionStart = new Date(item.startDateTime);
+      const sessionEnd = new Date(item.endDateTime);
 
-    const sessionStart = new Date();
-    sessionStart.setHours(startHour, startMin, 0);
+      return currentTime >= sessionStart && currentTime <= sessionEnd;
+    }
 
-    const sessionEnd = new Date();
-    sessionEnd.setHours(endHour, endMin, 0);
+    // Legacy format handling
+    if (!sessionTime) return false;
 
-    return currentTime >= sessionStart && currentTime <= sessionEnd;
+    try {
+      // Extract start and end times
+      const [start, end] = sessionTime.split(" - ");
+
+      // Parse hours and minutes
+      const [startHour, startMin] = start.split(":").map(Number);
+      const [endHour, endMin] = end.split(":").map(Number);
+
+      // Create Date objects for comparison
+      const sessionStart = new Date();
+      sessionStart.setHours(startHour, startMin, 0);
+
+      const sessionEnd = new Date();
+      sessionEnd.setHours(endHour, endMin, 0);
+
+      return currentTime >= sessionStart && currentTime <= sessionEnd;
+    } catch (error) {
+      console.error("Error parsing session time:", error);
+      return false;
+    }
   };
 
   if (loading) {
@@ -538,6 +985,7 @@ const VirtualSpace: React.FC = () => {
       <SpaceWrapper>
         <LoadingContainer>
           <LoadingSpinner />
+          <LoadingText>Loading your virtual space...</LoadingText>
         </LoadingContainer>
       </SpaceWrapper>
     );
@@ -558,78 +1006,134 @@ const VirtualSpace: React.FC = () => {
       <HeaderCard posterUrl={event.poster || undefined}>
         <HeaderContent>
           <WelcomeText>Welcome!</WelcomeText>
-          <EventName>
-            This is your Virtual Space for the {event.title}
-          </EventName>
+          <EventName>This is your Virtual Space for {event.title}</EventName>
         </HeaderContent>
       </HeaderCard>
 
       <ContentSection>
+        {/* Event Info Card */}
+        <EventInfoCard>
+          <EventInfoRow>
+            <EventInfoIcon>📅</EventInfoIcon>
+            <EventInfoContent>
+              <EventInfoLabel>Event Date</EventInfoLabel>
+              <EventInfoValue>
+                {event.date
+                  ? new Date(event.date).toLocaleDateString(undefined, {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : "Date not specified"}
+              </EventInfoValue>
+            </EventInfoContent>
+          </EventInfoRow>
+
+          {event.location && (
+            <EventInfoRow>
+              <EventInfoIcon>📍</EventInfoIcon>
+              <EventInfoContent>
+                <EventInfoLabel>Location</EventInfoLabel>
+                <EventInfoValue>{event.location.address}</EventInfoValue>
+              </EventInfoContent>
+            </EventInfoRow>
+          )}
+        </EventInfoCard>
+
         <SectionHeader>
           <SectionTitle>Schedule</SectionTitle>
-          {/* <ViewAllLink href="#">View all</ViewAllLink> */}
         </SectionHeader>
 
-        <TimelineContainer>
-          <TimeMarker>08:00</TimeMarker>
-          <ScheduleCard isActive={isSessionActive(sampleSchedule[0].time)}>
-            <SessionTitle>
-              <SessionIcon>{sampleSchedule[0].icon}</SessionIcon>
-              {sampleSchedule[0].title}
-            </SessionTitle>
-            <SessionDetails>
-              {sampleSchedule[0].time} | {sampleSchedule[0].location}
-            </SessionDetails>
-          </ScheduleCard>
+        <Card>
+          <ScheduleContainer>
+            {schedule.length === 0 ? (
+              <EmptyStateMessage>
+                No schedule items available for this event.
+              </EmptyStateMessage>
+            ) : (
+              schedule.map((item) => {
+                const start = new Date(item.startDateTime);
+                const end = new Date(item.endDateTime);
+                const sameDay = isSameDay(start, end);
+                const isActive = isSessionActive(item.time || "", item);
+                const isStartToday = isToday(start);
+                const isStartTomorrow = isTomorrow(start);
 
-          <TimeMarker>09:00</TimeMarker>
+                return (
+                  <ScheduleItem key={item.id} isActive={isActive}>
+                    {isActive && <ActiveIndicator />}
+                    <ScheduleIconContainer>{item.icon}</ScheduleIconContainer>
+                    <ScheduleContent>
+                      <ScheduleTitle>
+                        {item.title}
+                        {!sameDay && <MultiDayBadge>Multi-day</MultiDayBadge>}
+                      </ScheduleTitle>
+                      {item.description && (
+                        <ScheduleDescription>
+                          {item.description}
+                        </ScheduleDescription>
+                      )}
+                      <ScheduleDetails>{item.location}</ScheduleDetails>
+                    </ScheduleContent>
+                    <ScheduleTimeContainer>
+                      <ScheduleTime>
+                        <TimeIcon>🕒</TimeIcon>
+                        {formatTimeRange(item)}
+                      </ScheduleTime>
+                      {item.startDateTime && (
+                        <DateBadge
+                          isToday={isStartToday}
+                          isTomorrow={isStartTomorrow}
+                          isMultiDay={!sameDay}
+                        >
+                          {getDateBadgeText(
+                            item.startDateTime,
+                            item.endDateTime
+                          )}
+                        </DateBadge>
+                      )}
+                    </ScheduleTimeContainer>
+                  </ScheduleItem>
+                );
+              })
+            )}
+          </ScheduleContainer>
+        </Card>
 
-          <TimeMarker>10:00</TimeMarker>
-          <ScheduleCard isActive={isSessionActive(sampleSchedule[1].time)}>
-            <SessionTitle>
-              <SessionIcon>{sampleSchedule[1].icon}</SessionIcon>
-              {sampleSchedule[1].title}
-            </SessionTitle>
-            <SessionDetails>
-              {sampleSchedule[1].time} | {sampleSchedule[1].location}
-            </SessionDetails>
-          </ScheduleCard>
+        <SectionDivider />
 
-          <TimeMarker>11:00</TimeMarker>
-          <ScheduleCard isActive={isSessionActive(sampleSchedule[2].time)}>
-            <SessionTitle>
-              <SessionIcon>{sampleSchedule[2].icon}</SessionIcon>
-              {sampleSchedule[2].title}
-            </SessionTitle>
-            <SessionDetails>
-              {sampleSchedule[2].time} | {sampleSchedule[2].location}
-            </SessionDetails>
-          </ScheduleCard>
-        </TimelineContainer>
+        <SectionHeader>
+          <SectionTitle>Feedback</SectionTitle>
+        </SectionHeader>
 
-        <FeedbackSection>
-          <SectionTitle>Feedback form</SectionTitle>
-          <FeedbackLabel>
-            Let us know what you liked or disliked about the event
-          </FeedbackLabel>
-          <NameInput
-            value={guestName}
-            onChange={handleGuestNameChange}
-            placeholder="Your name (optional)"
-          />
-          <FeedbackInput
-            value={feedback}
-            onChange={handleFeedbackChange}
-            placeholder="Give us your thoughts here..."
-          />
-          <SubmitButton onClick={handleSubmitFeedback} disabled={submitting}>
+        <Card style={{ padding: `${designTokens.spacing.lg}` }}>
+          <FormGroup>
+            <Label>Your Name (optional)</Label>
+            <Input
+              value={guestName}
+              onChange={handleGuestNameChange}
+              placeholder="Enter your name"
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label>Your Feedback</Label>
+            <TextArea
+              value={feedback}
+              onChange={handleFeedbackChange}
+              placeholder="Let us know what you liked or disliked about the event..."
+            />
+          </FormGroup>
+
+          <Button onClick={handleSubmitFeedback} disabled={submitting}>
             {submitting
               ? "Submitting..."
               : submitSuccess
               ? "Thank you!"
-              : "Submit"}
-          </SubmitButton>
-        </FeedbackSection>
+              : "Submit Feedback"}
+          </Button>
+        </Card>
       </ContentSection>
 
       {submitSuccess && (

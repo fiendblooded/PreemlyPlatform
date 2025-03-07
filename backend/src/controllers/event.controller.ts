@@ -61,6 +61,7 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
         scheduleSrc: {
           enabled: false,
           content: '',
+          items: [],
         },
         parking: {
           enabled: false,

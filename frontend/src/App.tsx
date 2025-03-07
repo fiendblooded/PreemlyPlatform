@@ -210,11 +210,11 @@ const AppContent: React.FC = () => {
       </ContentWrapper>
 
       {/* Add the floating chatbot component */}
-      {!hideChatbot && (
+      {/* {!hideChatbot && (
         <ProtectedRoute>
           <Chatbot />
         </ProtectedRoute>
-      )}
+      )} */}
     </AppWrapper>
   );
 };

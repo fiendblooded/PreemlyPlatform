@@ -288,6 +288,7 @@ const createEvent = async (
         scheduleSrc: {
           enabled: false,
           content: "",
+          items: [], // Initialize empty items array
         },
         parking: {
           enabled: false,
