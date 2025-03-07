@@ -798,7 +798,7 @@ const TestFeedbackGenerator: React.FC<TestFeedbackGeneratorProps> = ({
   axiosInstance,
 }) => {
   const [isAdding, setIsAdding] = useState(false);
-  const { addToast } = useToast();
+  const { addToast, Toasts } = useToast();
 
   const addSampleFeedback = async () => {
     if (isAdding) return;
@@ -868,6 +868,7 @@ const TestFeedbackGenerator: React.FC<TestFeedbackGeneratorProps> = ({
       <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
         *For testing only adds random sample reviews
       </div>
+      <Toasts />
     </div>
   );
 };

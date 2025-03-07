@@ -946,7 +946,7 @@ const EventBudgetEditor: React.FC<{
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { addToast } = useToast();
+  const { addToast, Toasts } = useToast();
   const axiosInstance = useAxiosWithAuth();
 
   // Set default tab to "invoices" when component mounts
@@ -2202,6 +2202,7 @@ const EventBudgetEditor: React.FC<{
       {activeTab === "invoices" && renderInvoicesTab()}
       {activeTab === "analysis" && renderAnalysisTab()}
       {activeTab === "dueDate" && renderDueDateTab()}
+      <Toasts />
     </BudgetWrapper>
   );
 };

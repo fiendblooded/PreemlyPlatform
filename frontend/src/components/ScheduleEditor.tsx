@@ -5,6 +5,7 @@ import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { ToastType, useToast } from "./Toasts";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
+import { useNavigate } from "react-router-dom";
 
 // Updated color palette with more vibrant, engaging colors
 const colors = {
@@ -749,9 +750,45 @@ const formatDate = (dateString: string) => {
   }
 };
 
+const SpaceButton = styled.button`
+  display: flex;
+  align-items: center;
+  background-color: ${colors.primary};
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: ${fontWeights.medium};
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${colors.primaryDark};
+  }
+
+  svg {
+    margin-right: 8px;
+  }
+`;
+
+const CopyLinkButton = styled(SpaceButton)`
+  background-color: ${colors.info};
+
+  &:hover {
+    background-color: ${colors.blue};
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
 const ScheduleEditor: React.FC<Props> = ({ event, refetch }) => {
   const axiosInstance = useAxiosWithAuth();
-  const { addToast } = useToast();
+  const { addToast, Toasts } = useToast();
+  const navigate = useNavigate();
 
   // Initialize schedule from event data or use default empty array
   const [schedule, setSchedule] = useState<ScheduleItem[]>(
@@ -1438,10 +1475,88 @@ const ScheduleEditor: React.FC<Props> = ({ event, refetch }) => {
     }
   }, [newScheduleItem.startDateTime, newScheduleItem.endDateTime]);
 
+  const copyEventSpaceLink = () => {
+    const url = `${window.location.origin}/space/${event._id}`;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        addToast("Event space link copied to clipboard", ToastType.SUCCESS);
+      })
+      .catch((error) => {
+        console.error("Failed to copy link:", error);
+        addToast("Failed to copy link", ToastType.ERROR);
+      });
+  };
+
   return (
     <ScheduleWrapper>
       <ScheduleHeader>
         <ScheduleTitle>Event Schedule</ScheduleTitle>
+        <ButtonGroup>
+          <SpaceButton
+            onClick={() => navigate(`/space/${event._id}`)}
+            title="Go to event space"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M12 8V16"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M8 12H16"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Go to Event Space
+          </SpaceButton>
+          <CopyLinkButton
+            onClick={copyEventSpaceLink}
+            title="Copy event space link to clipboard"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 5H6C4.89543 5 4 5.89543 4 7V19C4 20.1046 4.89543 21 6 21H16C17.1046 21 18 20.1046 18 19V17"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M19 3H11C9.89543 3 9 3.89543 9 5V13C9 14.1046 9.89543 15 11 15H19C20.1046 15 21 14.1046 21 13V5C21 3.89543 20.1046 3 19 3Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Copy Link
+          </CopyLinkButton>
+        </ButtonGroup>
       </ScheduleHeader>
 
       <ContentContainer>
@@ -1699,6 +1814,7 @@ const ScheduleEditor: React.FC<Props> = ({ event, refetch }) => {
           </FormContainer>
         </ScheduleFormSection>
       </ContentContainer>
+      <Toasts />
     </ScheduleWrapper>
   );
 };
