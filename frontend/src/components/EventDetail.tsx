@@ -36,6 +36,7 @@ import BudgetSettingsIcon from "./icons/BudgetSettingsIcon";
 import EventLocationEditor from "./EventLocationEditor";
 import LocationSettingsIcon from "./icons/LocationSettingsIcon";
 import ScheduleEditor from "./ScheduleEditor";
+import SponsorDealsEditor from "./SponsorDealsEditor";
 
 export const PageWrapper = styled.div<{ tabletMode: boolean }>`
   width: ${(props) => (props.tabletMode ? "100%" : "70%")};
@@ -446,6 +447,35 @@ const SeamlessInput = styled.input`
 const HeaderButtonsContainer = styled.div`
   display: flex;
   gap: 12px;
+  align-items: center;
+`;
+
+const VirtualSpaceButton = styled.div`
+  display: flex;
+  width: 130px;
+  height: 40px;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 8px;
+  background-color: transparent;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 1.5px solid #3b82f6; /* Blue color */
+  color: #3b82f6;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #3b82f6;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
 `;
 
 const ErrorNotYourEvent = styled.div`
@@ -499,6 +529,32 @@ const ScheduleIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
+const SponsorDealsIcon = ({ color }: { color: string }) => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ color }}
+  >
+    <path
+      d="M21 14V8C21 6.89543 20.1046 6 19 6H5C3.89543 6 3 6.89543 3 8V14M21 14C21 15.1046 20.1046 16 19 16H5C3.89543 16 3 15.1046 3 14M21 14L21.2929 13.7071C21.6834 13.3166 21.6834 12.6834 21.2929 12.2929L17.5 8.5M3 14L2.70711 13.7071C2.31658 13.3166 2.31658 12.6834 2.70711 12.2929L6.5 8.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 13C13.1046 13 14 12.1046 14 11C14 9.89543 13.1046 9 12 9C10.8954 9 10 9.89543 10 11C10 12.1046 10.8954 13 12 13Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const EventDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -524,6 +580,7 @@ const EventDetail: React.FC = () => {
         budget: "budget",
         feedback: "feedback",
         schedule: "schedule",
+        sponsors: "sponsors",
       };
       return tabMap[tab] || "info";
     }
@@ -547,6 +604,7 @@ const EventDetail: React.FC = () => {
       budget: "budget",
       feedback: "feedback",
       schedule: "schedule",
+      sponsors: "sponsors",
     };
     navigate(`/events/${id}/${pathMap[tab] || tab}`, { replace: true });
   };
@@ -621,6 +679,49 @@ const EventDetail: React.FC = () => {
                 }}
               />
               <HeaderButtonsContainer>
+                <VirtualSpaceButton
+                  onClick={() => navigate(`/space/${event._id}`)}
+                  title="Go to Virtual Space"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{ marginRight: 4 }}
+                  >
+                    <path
+                      d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M3.6001 9H20.4001"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M3.6001 15H20.4001"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 20.7999C14.2091 20.7999 16 16.8375 16 11.9999C16 7.16236 14.2091 3.19995 12 3.19995C9.79086 3.19995 8 7.16236 8 11.9999C8 16.8375 9.79086 20.7999 12 20.7999Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <div style={{ paddingTop: 4 }}>Space</div>
+                </VirtualSpaceButton>
                 <WelcomeScreenButton
                   onClick={() => navigate(`/welcome/${event._id}`)}
                 >
@@ -758,6 +859,14 @@ const EventDetail: React.FC = () => {
                 <ScheduleIcon color={"currentColor"} />
                 Schedule
               </ActiveStatusButton>
+              <ActiveStatusButton
+                isActive={openSection === "sponsors"}
+                onClick={() => handleTabChange("sponsors")}
+                borderColor="#e6bf30"
+              >
+                <SponsorDealsIcon color={"currentColor"} />
+                Sponsors
+              </ActiveStatusButton>
             </ActiveStatusContainer>
             {openSection === "info" && (
               <EventDetailsEditor event={event} refetch={fetchEvent} />
@@ -785,6 +894,9 @@ const EventDetail: React.FC = () => {
             )}
             {openSection === "schedule" && event && (
               <ScheduleEditor event={event} refetch={fetchEvent} />
+            )}
+            {openSection === "sponsors" && event && (
+              <SponsorDealsEditor event={event} refetch={fetchEvent} />
             )}
             {isModalOpen && (
               <PosterUploadModal

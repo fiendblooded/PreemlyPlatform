@@ -2,9 +2,9 @@
 import { Request, Response } from 'express';
 import Event from '../models/event.model';
 import Guest from '../models/guest.model';
+import { AuthRequest } from '../types/auth.types';
 import { uploadImage } from '../config/cloudinary';
 import axios from 'axios';
-import { AuthRequest } from '../types/auth.types';
 import cloudinary from '../config/cloudinary';
 import { extractPublicId } from '../utils/helpers';
 import xlsx from 'xlsx';
@@ -70,6 +70,11 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
         dining: {
           enabled: false,
           content: '',
+        },
+        sponsorDeals: {
+          enabled: false,
+          content: '',
+          items: [],
         },
       },
     });
@@ -403,5 +408,33 @@ export const addEventFeedback = async (req: Request, res: Response): Promise<voi
   } catch (error) {
     console.error('Error adding feedback:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+export const uploadSponsorDealImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { image } = req.body;
+
+    if (!image) {
+      res.status(400).json({ success: false, message: 'No image provided' });
+      return;
+    }
+
+    // Upload image to Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(image, {
+      folder: 'sponsor_deals',
+      resource_type: 'image',
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        url: uploadResponse.secure_url,
+        publicId: uploadResponse.public_id,
+      },
+    });
+  } catch (error) {
+    console.error('Error uploading sponsor deal image:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload image' });
   }
 };

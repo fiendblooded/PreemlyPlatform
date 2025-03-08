@@ -42,16 +42,16 @@ const fontWeights = {
 
 // Main container with consistent styling
 const ScheduleWrapper = styled.div`
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto 40px;
+  width: 90%;
+  overflow: hidden;
+  margin: 20px auto;
+  margin-bottom: 80px;
   display: flex;
   flex-direction: column;
   background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px ${colors.shadow};
-  overflow: hidden;
-  font-family: Axiforma, sans-serif;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
 `;
 
 const ScheduleHeader = styled.div`
@@ -1814,6 +1814,7 @@ const ScheduleEditor: React.FC<Props> = ({ event, refetch }) => {
           </FormContainer>
         </ScheduleFormSection>
       </ContentContainer>
+
       <Toasts />
     </ScheduleWrapper>
   );

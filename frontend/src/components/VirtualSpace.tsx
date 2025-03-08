@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
-import { Event } from "../types";
+import { Event, SponsorDeal } from "../types";
 
 // Modern color palette with gradients
 const colors = {
@@ -45,7 +45,7 @@ const fontWeights = {
   bold: 700,
 };
 
-// Design tokens
+// Design tokens with improved mobile spacing
 const designTokens = {
   borderRadius: {
     sm: "0.375rem",
@@ -73,6 +73,12 @@ const designTokens = {
     lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
     xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
   },
+  // Add responsive breakpoints
+  breakpoints: {
+    sm: "480px",
+    md: "768px",
+    lg: "1024px",
+  },
 };
 
 const SpaceWrapper = styled.div`
@@ -93,6 +99,10 @@ const SpaceWrapper = styled.div`
   font-size: 16px;
   color: ${colors.textPrimary};
   scroll-behavior: smooth;
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 18px; /* Increase base font size for mobile */
+  }
 `;
 
 const HeaderCard = styled.div<{ posterUrl?: string }>`
@@ -133,6 +143,10 @@ const HeaderCard = styled.div<{ posterUrl?: string }>`
     border-radius: 40px 40px 0 0;
     z-index: 1;
   }
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    height: 35vh; /* Reduce header height on mobile */
+  }
 `;
 
 const HeaderContent = styled.div`
@@ -146,7 +160,7 @@ const HeaderContent = styled.div`
   flex-direction: column;
   gap: ${designTokens.spacing.sm};
 
-  @media (max-width: 480px) {
+  @media (max-width: ${designTokens.breakpoints.sm}) {
     padding: ${designTokens.spacing.xl} ${designTokens.spacing.lg};
   }
 `;
@@ -160,8 +174,8 @@ const WelcomeText = styled.h1`
   line-height: 1.2;
   letter-spacing: -0.5px;
 
-  @media (max-width: 480px) {
-    font-size: 28px;
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 32px; /* Increase from 28px for better readability */
   }
 `;
 
@@ -174,8 +188,8 @@ const EventName = styled.p`
   font-weight: ${fontWeights.medium};
   max-width: 90%;
 
-  @media (max-width: 480px) {
-    font-size: 18px;
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 20px; /* Increase from 18px for better readability */
     margin-bottom: ${designTokens.spacing.md};
   }
 `;
@@ -189,7 +203,7 @@ const ContentSection = styled.div`
   position: relative;
   z-index: 2;
 
-  @media (max-width: 480px) {
+  @media (max-width: ${designTokens.breakpoints.sm}) {
     padding: ${designTokens.spacing.lg} ${designTokens.spacing.md};
   }
 `;
@@ -201,7 +215,7 @@ const SectionHeader = styled.div`
   margin-bottom: ${designTokens.spacing.lg};
   padding: 0 ${designTokens.spacing.sm};
 
-  @media (max-width: 480px) {
+  @media (max-width: ${designTokens.breakpoints.sm}) {
     margin-bottom: ${designTokens.spacing.md};
   }
 `;
@@ -224,8 +238,8 @@ const SectionTitle = styled.h2`
     border-radius: ${designTokens.borderRadius.full};
   }
 
-  @media (max-width: 480px) {
-    font-size: 20px;
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 22px; /* Increase from 20px for better readability */
   }
 `;
 
@@ -244,14 +258,22 @@ const Card = styled.div`
     transform: translateY(-2px);
     box-shadow: ${designTokens.shadows.lg};
   }
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    margin-bottom: ${designTokens.spacing.lg};
+  }
 `;
 
 // Modern schedule container
 const ScheduleContainer = styled.div`
   margin-bottom: ${designTokens.spacing.xl};
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    margin-bottom: ${designTokens.spacing.lg};
+  }
 `;
 
-// Modern schedule item
+// Modern schedule item - improved for mobile
 const ScheduleItem = styled.div<{ isActive?: boolean }>`
   display: flex;
   padding: ${designTokens.spacing.lg};
@@ -269,9 +291,9 @@ const ScheduleItem = styled.div<{ isActive?: boolean }>`
     background-color: ${colors.backgroundTertiary};
   }
 
-  @media (max-width: 480px) {
-    padding: ${designTokens.spacing.md};
-    flex-wrap: wrap;
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    padding: ${designTokens.spacing.lg} ${designTokens.spacing.md}; /* Increase vertical padding */
+    flex-direction: column; /* Stack elements vertically on mobile */
   }
 `;
 
@@ -289,11 +311,13 @@ const ScheduleIconContainer = styled.div`
   box-shadow: ${designTokens.shadows.sm};
   color: white;
 
-  @media (max-width: 480px) {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
-    margin-right: ${designTokens.spacing.md};
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    width: 48px; /* Keep icon size */
+    height: 48px;
+    font-size: 22px;
+    margin-right: 0;
+    margin-bottom: ${designTokens.spacing.md}; /* Add bottom margin */
+    align-self: flex-start; /* Align to the start */
   }
 `;
 
@@ -303,6 +327,11 @@ const ScheduleContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${designTokens.spacing.xs};
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    width: 100%;
+    gap: ${designTokens.spacing.sm}; /* Increase gap between elements */
+  }
 `;
 
 const ScheduleTitle = styled.h3`
@@ -315,12 +344,12 @@ const ScheduleTitle = styled.h3`
   text-overflow: ellipsis;
   letter-spacing: -0.3px;
 
-  @media (max-width: 480px) {
-    font-size: 16px;
-    display: flex;
-    flex-wrap: wrap;
-    white-space: normal;
-    align-items: center;
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 20px; /* Increase from 16px for better readability */
+    white-space: normal; /* Allow text to wrap */
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.3;
   }
 `;
 
@@ -334,9 +363,11 @@ const ScheduleDescription = styled.p`
   -webkit-box-orient: vertical;
   overflow: hidden;
 
-  @media (max-width: 480px) {
-    font-size: 14px;
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 16px; /* Increase from 14px for better readability */
     -webkit-line-clamp: 3;
+    line-height: 1.4;
+    margin-top: ${designTokens.spacing.xs};
   }
 `;
 
@@ -354,8 +385,9 @@ const ScheduleDetails = styled.p`
     font-size: 14px;
   }
 
-  @media (max-width: 480px) {
-    font-size: 13px;
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 16px; /* Increase from 13px for better readability */
+    margin-top: ${designTokens.spacing.sm};
   }
 `;
 
@@ -367,18 +399,15 @@ const ScheduleTimeContainer = styled.div`
   padding-left: ${designTokens.spacing.lg};
   min-width: 90px;
 
-  @media (max-width: 480px) {
-    padding-left: ${designTokens.spacing.md};
-    min-width: 80px;
-    width: 100%;
+  @media (max-width: ${designTokens.breakpoints.sm}) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    margin-top: ${designTokens.spacing.sm};
+    width: 100%;
+    margin-top: ${designTokens.spacing.md};
     margin-left: 0;
-    padding-left: calc(
-      40px + ${designTokens.spacing.md} + ${designTokens.spacing.xs}
-    );
+    padding-left: 0;
+    min-width: unset;
   }
 `;
 
@@ -391,8 +420,8 @@ const ScheduleTime = styled.div`
   align-items: center;
   gap: ${designTokens.spacing.xs};
 
-  @media (max-width: 480px) {
-    font-size: 14px;
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 16px; /* Increase from 14px for better readability */
   }
 `;
 
@@ -423,10 +452,10 @@ const DateBadge = styled.div<{
       ? colors.accent
       : colors.textSecondary};
 
-  @media (max-width: 480px) {
+  @media (max-width: ${designTokens.breakpoints.sm}) {
     margin-top: 0;
-    font-size: 11px;
-    padding: 2px 8px;
+    font-size: 14px; /* Increase from 11px for better readability */
+    padding: 4px 10px; /* Increase padding for better touch target */
   }
 `;
 
@@ -441,16 +470,22 @@ const MultiDayBadge = styled.span`
   text-transform: uppercase;
   letter-spacing: 0.5px;
 
-  @media (max-width: 480px) {
-    font-size: 10px;
-    padding: 1px 5px;
-    margin-left: ${designTokens.spacing.xs};
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 12px; /* Increase from 10px for better readability */
+    padding: 3px 8px; /* Increase padding for better touch target */
+    margin-left: ${designTokens.spacing.sm};
+    display: inline-block;
+    margin-top: ${designTokens.spacing.xs};
   }
 `;
 
 const TimeIcon = styled.span`
   margin-right: ${designTokens.spacing.xs};
   font-size: 14px;
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 16px; /* Increase icon size */
+  }
 `;
 
 const ActiveIndicator = styled.div`
@@ -462,11 +497,20 @@ const ActiveIndicator = styled.div`
   background: ${colors.primaryGradient};
   border-radius: 0 ${designTokens.borderRadius.sm}
     ${designTokens.borderRadius.sm} 0;
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    width: 6px; /* Make indicator more visible */
+  }
 `;
 
 // Modern form elements
 const FormGroup = styled.div`
   margin-bottom: ${designTokens.spacing.lg};
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    margin-bottom: ${designTokens.spacing
+      .xl}; /* Increase spacing between form groups */
+  }
 `;
 
 const Label = styled.label`
@@ -476,6 +520,11 @@ const Label = styled.label`
   font-weight: ${fontWeights.medium};
   margin-bottom: ${designTokens.spacing.sm};
   padding-left: ${designTokens.spacing.xs};
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 16px; /* Increase label size */
+    margin-bottom: ${designTokens.spacing.md}; /* Add more space below label */
+  }
 `;
 
 const Input = styled.input`
@@ -501,6 +550,13 @@ const Input = styled.input`
     outline: none;
     border-color: ${colors.primary};
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+  }
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 18px; /* Increase input text size */
+    padding: ${designTokens.spacing
+      .lg}; /* Increase padding for better touch target */
+    height: 56px; /* Set explicit height for better touch target */
   }
 `;
 
@@ -529,6 +585,13 @@ const TextArea = styled.textarea`
     outline: none;
     border-color: ${colors.primary};
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+  }
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 18px; /* Increase textarea text size */
+    padding: ${designTokens.spacing
+      .lg}; /* Increase padding for better touch target */
+    height: 160px; /* Increase height for better usability */
   }
 `;
 
@@ -584,6 +647,13 @@ const Button = styled.button`
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+  }
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    font-size: 18px; /* Increase button text size */
+    padding: ${designTokens.spacing
+      .lg}; /* Increase padding for better touch target */
+    height: 56px; /* Set explicit height for better touch target */
   }
 `;
 
@@ -765,6 +835,352 @@ const EmptyStateMessage = styled.div`
   }
 `;
 
+// Sponsor deals section - only keeping the components we use
+const BannersContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+
+  @media (max-width: ${designTokens.breakpoints.md}) {
+    grid-template-columns: 1fr;
+  }
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    gap: 16px; /* Reduce gap on mobile */
+  }
+`;
+
+const Banner = styled.div<{ backgroundImage: string }>`
+  position: relative;
+  height: 180px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-image: url(${(props) => props.backgroundImage});
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (max-width: ${designTokens.breakpoints.sm}) {
+    height: 200px; /* Increase height on mobile */
+  }
+`;
+
+const BannerOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+  color: white;
+
+  ${Banner}:hover & {
+    opacity: 1;
+  }
+`;
+
+const BannerTitle = styled.h3`
+  font-size: 18px;
+  font-weight: ${fontWeights.semibold};
+  margin: 0 0 8px 0;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+`;
+
+const BannerDescription = styled.p`
+  font-size: 14px;
+  margin: 0 0 16px 0;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const BannerButton = styled.a`
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  z-index: 2;
+
+  &:hover {
+    background-color: #4f46e5;
+  }
+`;
+
+// Custom popup components
+const PopupBackdrop = styled.div<{ isOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: ${(props) => (props.isOpen ? "flex" : "none")};
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(3px);
+  transition: opacity 0.3s ease;
+  opacity: ${(props) => (props.isOpen ? 1 : 0)};
+`;
+
+// Base popup container with shared styles
+const PopupContainer = styled.div`
+  background-color: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  animation: popupFadeIn 0.3s ease forwards;
+  transform-origin: center;
+
+  @keyframes popupFadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @media (max-width: 768px) {
+    width: 95%;
+    max-height: 85vh;
+  }
+`;
+
+// Popup with description
+const DescriptionPopup = styled(PopupContainer)`
+  min-height: 450px;
+
+  @media (max-width: 768px) {
+    min-height: 500px;
+  }
+`;
+
+// Popup without description
+const SimplePopup = styled(PopupContainer)`
+  min-height: 400px;
+
+  @media (max-width: 768px) {
+    min-height: 450px;
+  }
+`;
+
+// Popup header with image
+const PopupHeader = styled.div<{ hasDescription: boolean }>`
+  position: relative;
+  width: 100%;
+  padding-top: ${(props) => (props.hasDescription ? "56.25%" : "75%")};
+  background-size: cover;
+  background-position: center;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+
+  @media (max-width: 768px) {
+    padding-top: ${(props) => (props.hasDescription ? "60%" : "90%")};
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+  }
+`;
+
+// Popup content area
+const PopupContent = styled.div<{ hasDescription: boolean }>`
+  padding: ${(props) => (props.hasDescription ? "30px" : "25px")};
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  ${(props) =>
+    props.hasDescription
+      ? `
+    justify-content: space-between;
+    text-align: left;
+  `
+      : `
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+  `}
+
+  @media (max-width: 768px) {
+    padding: ${(props) => (props.hasDescription ? "25px 20px" : "30px 20px")};
+  }
+`;
+
+// Popup title
+const PopupTitle = styled.h2<{ hasDescription: boolean }>`
+  font-size: ${(props) => (props.hasDescription ? "24px" : "26px")};
+  font-weight: ${fontWeights.semibold};
+  color: ${colors.textPrimary};
+  margin: 0 0 ${(props) => (props.hasDescription ? "20px" : "30px")} 0;
+
+  @media (max-width: 768px) {
+    font-size: ${(props) => (props.hasDescription ? "22px" : "24px")};
+    margin: 0 0 ${(props) => (props.hasDescription ? "15px" : "25px")} 0;
+  }
+`;
+
+// Popup description
+const PopupDescription = styled.p`
+  font-size: 16px;
+  line-height: 1.6;
+  color: ${colors.textSecondary};
+  margin: 0 0 30px 0;
+
+  @media (max-width: 768px) {
+    font-size: 15px;
+    margin: 0 0 25px 0;
+  }
+`;
+
+// Popup button
+const PopupButton = styled.a<{ hasDescription: boolean }>`
+  display: inline-block;
+  background-color: ${colors.primary};
+  color: white;
+  font-weight: ${fontWeights.medium};
+  padding: 14px 32px;
+  border-radius: 8px;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s ease;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+  ${(props) =>
+    props.hasDescription ? "align-self: flex-start;" : "width: 100%;"}
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 16px 24px;
+    font-size: ${(props) => (props.hasDescription ? "16px" : "18px")};
+  }
+
+  &:hover {
+    background-color: ${colors.primaryDark};
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
+  }
+`;
+
+// Close button
+const PopupCloseButton = styled.button`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: white;
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(1);
+  }
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 2px;
+    background-color: ${colors.textPrimary};
+  }
+
+  &::before {
+    transform: rotate(45deg);
+  }
+
+  &::after {
+    transform: rotate(-45deg);
+  }
+
+  @media (max-width: 768px) {
+    top: 12px;
+    right: 12px;
+  }
+`;
+
+// Helper function to ensure URLs have the correct format
+const formatUrl = (url: string): string => {
+  // Check if the URL already starts with http:// or https://
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  // Add https:// prefix if missing
+  return `https://${url}`;
+};
+
 // Define schedule item type
 interface ScheduleItem {
   id: number;
@@ -789,8 +1205,15 @@ const VirtualSpace: React.FC = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [currentTime] = useState(new Date());
 
+  // Add state for the sponsor deal popup
+  const [selectedDeal, setSelectedDeal] = useState<SponsorDeal | null>(null);
+  const [isDealPopupVisible, setIsDealPopupVisible] = useState(false);
+
   // Schedule state - initialize with empty array
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+
+  // Add a ref for the popup
+  const popupRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -799,20 +1222,31 @@ const VirtualSpace: React.FC = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/events/${id}`
         );
-        setEvent(response.data.data);
+        const fetchedEvent = response.data.data;
 
-        // Use event's schedule items if available
-        if (response.data.data.emailParams?.scheduleSrc?.items?.length > 0) {
-          setSchedule(response.data.data.emailParams.scheduleSrc.items);
+        // Initialize sponsorDeals if it doesn't exist
+        if (!fetchedEvent.emailParams.sponsorDeals) {
+          fetchedEvent.emailParams.sponsorDeals = {
+            enabled: false,
+            content: "",
+            items: [],
+          };
         }
 
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching event:", err);
-        setError(
-          "Failed to load event details. The event may not exist or you may not have access."
-        );
-      } finally {
+        setEvent(fetchedEvent);
+
+        // Set schedule items if they exist
+        if (
+          fetchedEvent.emailParams.scheduleSrc &&
+          fetchedEvent.emailParams.scheduleSrc.items
+        ) {
+          setSchedule(fetchedEvent.emailParams.scheduleSrc.items);
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching event:", error);
+        setError("Failed to load event data. Please try again later.");
         setLoading(false);
       }
     };
@@ -980,6 +1414,35 @@ const VirtualSpace: React.FC = () => {
     }
   };
 
+  // Add a function to handle opening the deal popup
+  const handleDealClick = (deal: SponsorDeal) => {
+    setSelectedDeal(deal);
+    setIsDealPopupVisible(true);
+    // Prevent body scrolling when popup is open
+    document.body.style.overflow = "hidden";
+  };
+
+  // Add a function to close the deal popup
+  const closeDealPopup = () => {
+    setIsDealPopupVisible(false);
+    // Restore body scrolling when popup is closed
+    document.body.style.overflow = "auto";
+  };
+
+  // Add a function to handle clicks outside the popup
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+      closeDealPopup();
+    }
+  };
+
+  // Clean up body style on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
   if (loading) {
     return (
       <SpaceWrapper>
@@ -1075,31 +1538,78 @@ const VirtualSpace: React.FC = () => {
                         </ScheduleDescription>
                       )}
                       <ScheduleDetails>{item.location}</ScheduleDetails>
+
+                      {/* Move time container inside schedule content on mobile */}
+                      <ScheduleTimeContainer>
+                        <ScheduleTime>
+                          <TimeIcon>🕒</TimeIcon>
+                          {formatTimeRange(item)}
+                        </ScheduleTime>
+                        {item.startDateTime && (
+                          <DateBadge
+                            isToday={isStartToday}
+                            isTomorrow={isStartTomorrow}
+                            isMultiDay={!sameDay}
+                          >
+                            {getDateBadgeText(
+                              item.startDateTime,
+                              item.endDateTime
+                            )}
+                          </DateBadge>
+                        )}
+                      </ScheduleTimeContainer>
                     </ScheduleContent>
-                    <ScheduleTimeContainer>
-                      <ScheduleTime>
-                        <TimeIcon>🕒</TimeIcon>
-                        {formatTimeRange(item)}
-                      </ScheduleTime>
-                      {item.startDateTime && (
-                        <DateBadge
-                          isToday={isStartToday}
-                          isTomorrow={isStartTomorrow}
-                          isMultiDay={!sameDay}
-                        >
-                          {getDateBadgeText(
-                            item.startDateTime,
-                            item.endDateTime
-                          )}
-                        </DateBadge>
-                      )}
-                    </ScheduleTimeContainer>
                   </ScheduleItem>
                 );
               })
             )}
           </ScheduleContainer>
         </Card>
+
+        {event.emailParams.sponsorDeals?.items &&
+          event.emailParams.sponsorDeals.items.length > 0 && (
+            <>
+              <SectionDivider />
+
+              <SectionHeader>
+                <SectionTitle>Sponsor Deals</SectionTitle>
+              </SectionHeader>
+
+              <Card>
+                <BannersContainer>
+                  {event.emailParams.sponsorDeals.items.map((deal) => (
+                    <Banner
+                      key={deal.id}
+                      backgroundImage={deal.imageSrc}
+                      onClick={() => handleDealClick(deal)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <BannerOverlay>
+                        <BannerTitle>{deal.title}</BannerTitle>
+                        {deal.description && (
+                          <BannerDescription>
+                            {deal.description}
+                          </BannerDescription>
+                        )}
+                      </BannerOverlay>
+                      <BannerButton
+                        as="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDealClick(deal);
+                        }}
+                        title={deal.description || deal.title}
+                      >
+                        {deal.title.includes("Learn")
+                          ? "Learn More"
+                          : "View Deal"}
+                      </BannerButton>
+                    </Banner>
+                  ))}
+                </BannersContainer>
+              </Card>
+            </>
+          )}
 
         <SectionDivider />
 
@@ -1135,6 +1645,66 @@ const VirtualSpace: React.FC = () => {
           </Button>
         </Card>
       </ContentSection>
+
+      {/* Custom popup implementation */}
+      <PopupBackdrop isOpen={isDealPopupVisible} onClick={handleBackdropClick}>
+        {selectedDeal &&
+          (selectedDeal.description ? (
+            <DescriptionPopup
+              ref={popupRef}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PopupCloseButton onClick={closeDealPopup} />
+              <PopupHeader
+                hasDescription={true}
+                style={{ backgroundImage: `url(${selectedDeal.imageSrc})` }}
+              />
+              <PopupContent hasDescription={true}>
+                <div>
+                  <PopupTitle hasDescription={true}>
+                    {selectedDeal.title}
+                  </PopupTitle>
+                  <PopupDescription>
+                    {selectedDeal.description}
+                  </PopupDescription>
+                </div>
+                <PopupButton
+                  hasDescription={true}
+                  href={formatUrl(selectedDeal.linkUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {selectedDeal.title.includes("Learn")
+                    ? "Learn More"
+                    : "Apply Now"}
+                </PopupButton>
+              </PopupContent>
+            </DescriptionPopup>
+          ) : (
+            <SimplePopup ref={popupRef} onClick={(e) => e.stopPropagation()}>
+              <PopupCloseButton onClick={closeDealPopup} />
+              <PopupHeader
+                hasDescription={false}
+                style={{ backgroundImage: `url(${selectedDeal.imageSrc})` }}
+              />
+              <PopupContent hasDescription={false}>
+                <PopupTitle hasDescription={false}>
+                  {selectedDeal.title}
+                </PopupTitle>
+                <PopupButton
+                  hasDescription={false}
+                  href={formatUrl(selectedDeal.linkUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {selectedDeal.title.includes("Learn")
+                    ? "Learn More"
+                    : "Apply Now"}
+                </PopupButton>
+              </PopupContent>
+            </SimplePopup>
+          ))}
+      </PopupBackdrop>
 
       {submitSuccess && (
         <SuccessMessage>Feedback submitted successfully!</SuccessMessage>

@@ -55,6 +55,19 @@ const eventSchema = new Schema<Event>({
       enabled: { type: Boolean },
       content: { type: String },
     },
+    sponsorDeals: {
+      enabled: { type: Boolean },
+      content: { type: String },
+      items: [
+        {
+          id: { type: Number },
+          title: { type: String },
+          description: { type: String },
+          imageSrc: { type: String },
+          linkUrl: { type: String },
+        },
+      ],
+    },
   },
   _id: {
     type: Schema.Types.ObjectId,

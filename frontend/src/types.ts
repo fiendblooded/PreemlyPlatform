@@ -106,6 +106,14 @@ export type ScheduleItem = {
   time?: string;
 };
 
+export type SponsorDeal = {
+  id: number;
+  title: string;
+  description?: string;
+  imageSrc: string;
+  linkUrl: string;
+};
+
 export type Event = {
   date: string;
   _id: string;
@@ -141,6 +149,11 @@ export type Event = {
     dining: {
       enabled: boolean;
       content: string;
+    };
+    sponsorDeals: {
+      enabled: boolean;
+      content: string;
+      items?: SponsorDeal[];
     };
   };
   tasks: Task[];

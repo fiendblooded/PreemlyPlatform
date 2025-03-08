@@ -41,10 +41,23 @@ export interface ScheduleModule extends EmailExtraModule {
   items?: ScheduleItem[];
 }
 
+export interface SponsorDeal {
+  id: number;
+  title: string;
+  description?: string;
+  imageSrc: string;
+  linkUrl: string;
+}
+
+export interface SponsorDealsModule extends EmailExtraModule {
+  items?: SponsorDeal[];
+}
+
 export interface EmailParams {
   parking: EmailExtraModule;
   scheduleSrc: ScheduleModule;
   dining: EmailExtraModule;
+  sponsorDeals: SponsorDealsModule;
 }
 
 export interface CategoryBreakdown {

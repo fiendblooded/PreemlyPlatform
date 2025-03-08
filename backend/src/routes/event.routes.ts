@@ -28,4 +28,7 @@ router.delete('/invoices/:id', verifyUser, invoiceController.deleteInvoice);
 router.post('/:id/invoices/analyze', verifyUser, invoiceAnalysisController.analyzeEventInvoices);
 router.post('/:id/feedback/analyze', verifyUser, feedbackAnalysisController.analyzeEventFeedback);
 
+// Add a new route for uploading sponsor deal images
+router.post('/sponsor-deal-image', verifyUser, eventController.uploadSponsorDealImage);
+
 export default router;
