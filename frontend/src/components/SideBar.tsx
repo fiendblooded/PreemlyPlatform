@@ -80,6 +80,8 @@ const MenuButton = styled.button<{ isactive: boolean; tablet: boolean }>`
   margin: 2px 0;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
+  line-height: 1;
 
   &::before {
     content: "";
@@ -106,20 +108,18 @@ const MenuButton = styled.button<{ isactive: boolean; tablet: boolean }>`
   }
 
   svg {
-    transition: transform 0.2s ease;
-  }
-
-  &:hover svg {
-    transform: scale(1.1);
+    transition: color 0.2s ease;
   }
 `;
 
-const MenuButtonText = styled.div<{ tablet: boolean }>`
+const MenuButtonText = styled.span<{ tablet: boolean }>`
   display: ${(props) => (props.tablet ? "none" : "block")};
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.2px;
   white-space: nowrap;
+  position: relative;
+  top: 1px;
 `;
 
 const IconWrapper = styled.div<{ isactive: boolean }>`
@@ -128,10 +128,17 @@ const IconWrapper = styled.div<{ isactive: boolean }>`
   justify-content: center;
   width: 24px;
   height: 24px;
-  transition: all 0.2s ease;
+  flex-shrink: 0;
+  position: relative;
 
   svg {
     stroke-width: ${(props) => (props.isactive ? 2 : 1.5)}px;
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 `;
 
@@ -414,6 +421,129 @@ const Sidebar: React.FC = () => {
             </MenuButton>
             {isTabletDevice && activeTooltip === "welcome" && (
               <Tooltip show={true}>Welcome screen</Tooltip>
+            )}
+          </TooltipWrapper>
+        </SidebarSection>
+
+        <SidebarSection>
+          <SectionTitle tablet={isTabletDevice}>FINANCIALS</SectionTitle>
+
+          <TooltipWrapper
+            onMouseEnter={() =>
+              isTabletDevice && setActiveTooltip("financials")
+            }
+            onMouseLeave={() => setActiveTooltip(null)}
+          >
+            <MenuButton
+              onClick={() => navigate("/financials")}
+              isactive={getPageStatus("financials")}
+              tablet={isTabletDevice}
+            >
+              <IconWrapper isactive={getPageStatus("financials")}>
+                <svg
+                  width="20"
+                  height="20"
+                  style={
+                    isTabletDevice
+                      ? { minWidth: "24px", minHeight: "24px" }
+                      : {}
+                  }
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M16.6667 5H3.33333C2.41286 5 1.66667 5.74619 1.66667 6.66667V15C1.66667 15.9205 2.41286 16.6667 3.33333 16.6667H16.6667C17.5871 16.6667 18.3333 15.9205 18.3333 15V6.66667C18.3333 5.74619 17.5871 5 16.6667 5Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M5.83333 13.3333L8.33333 10.8333L10.8333 13.3333L15 9.16667"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M13.3333 9.16667H15V10.8333"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M6.66667 3.33333V5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M13.3333 3.33333V5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </IconWrapper>
+              <MenuButtonText tablet={isTabletDevice}>
+                Financials
+              </MenuButtonText>
+            </MenuButton>
+            {isTabletDevice && activeTooltip === "financials" && (
+              <Tooltip show={true}>Financials</Tooltip>
+            )}
+          </TooltipWrapper>
+        </SidebarSection>
+
+        <SidebarSection>
+          <SectionTitle tablet={isTabletDevice}>TASKS</SectionTitle>
+
+          <TooltipWrapper
+            onMouseEnter={() => isTabletDevice && setActiveTooltip("tasks")}
+            onMouseLeave={() => setActiveTooltip(null)}
+          >
+            <MenuButton
+              onClick={() => navigate("/tasks")}
+              isactive={getPageStatus("tasks")}
+              tablet={isTabletDevice}
+            >
+              <IconWrapper isactive={getPageStatus("tasks")}>
+                <svg
+                  width="20"
+                  height="20"
+                  style={
+                    isTabletDevice
+                      ? { minWidth: "24px", minHeight: "24px" }
+                      : {}
+                  }
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6.66667 10L8.33333 11.6667L13.3333 6.66669"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M9.99967 18.3333C14.6021 18.3333 18.333 14.6024 18.333 10C18.333 5.39763 14.6021 1.66669 9.99967 1.66669C5.39728 1.66669 1.66634 5.39763 1.66634 10C1.66634 14.6024 5.39728 18.3333 9.99967 18.3333Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </IconWrapper>
+              <MenuButtonText tablet={isTabletDevice}>Tasks</MenuButtonText>
+            </MenuButton>
+            {isTabletDevice && activeTooltip === "tasks" && (
+              <Tooltip show={true}>Tasks</Tooltip>
             )}
           </TooltipWrapper>
         </SidebarSection>

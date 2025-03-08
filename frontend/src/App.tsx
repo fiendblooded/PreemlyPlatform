@@ -19,6 +19,8 @@ import PreemlyFAQ from "./components/PreemlyFAQ";
 import { isTablet } from "./common/common";
 import VirtualSpace from "./components/VirtualSpace";
 import EventDetail from "./components/EventDetail";
+import Financials from "./components/Financials";
+import Tasks from "./components/Tasks";
 
 export const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -203,6 +205,22 @@ const AppContent: React.FC = () => {
             element={
               <ProtectedRoute>
                 <ChatbotPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/financials"
+            element={
+              <ProtectedRoute>
+                <Financials />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute>
+                <Tasks />
               </ProtectedRoute>
             }
           />
