@@ -99,16 +99,21 @@ const SpaceWrapper = styled.div`
   font-size: 16px;
   color: ${colors.textPrimary};
   scroll-behavior: smooth;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 18px; /* Increase base font size for mobile */
+  /* Mobile-first approach - base styles are for mobile */
+  font-size: 16px;
+
+  /* Then adjust for larger screens */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 16px;
   }
 `;
 
 const HeaderCard = styled.div<{ posterUrl?: string }>`
   width: 100%;
-  height: 45vh;
-  min-height: 280px;
+  height: 35vh; /* Reduced height for mobile */
+  min-height: 250px;
   background-color: #000;
   background-image: ${(props) =>
     props.posterUrl ? `url(${props.posterUrl})` : colors.primaryGradient};
@@ -126,26 +131,34 @@ const HeaderCard = styled.div<{ posterUrl?: string }>`
     bottom: 0;
     background: linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.3) 0%,
       rgba(0, 0, 0, 0.8) 100%
     );
     z-index: 0;
   }
 
+  /* Modern curved bottom edge */
   &::before {
     content: "";
     position: absolute;
     bottom: -2px;
     left: 0;
     right: 0;
-    height: 40px;
+    height: 24px;
     background: ${colors.backgroundSecondary};
-    border-radius: 40px 40px 0 0;
+    border-radius: 24px 24px 0 0;
     z-index: 1;
   }
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    height: 35vh; /* Reduce header height on mobile */
+  /* Increase height on larger screens */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    height: 40vh;
+    min-height: 280px;
+
+    &::before {
+      height: 32px;
+      border-radius: 32px 32px 0 0;
+    }
   }
 `;
 
@@ -154,48 +167,52 @@ const HeaderContent = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  padding: ${designTokens.spacing.xxl} ${designTokens.spacing.xl};
+  padding: ${designTokens.spacing.xl} ${designTokens.spacing.lg};
   z-index: 1;
   display: flex;
   flex-direction: column;
   gap: ${designTokens.spacing.sm};
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    padding: ${designTokens.spacing.xl} ${designTokens.spacing.lg};
+  /* Add more padding on larger screens */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    padding: ${designTokens.spacing.xxl} ${designTokens.spacing.xl};
   }
 `;
 
 const WelcomeText = styled.h1`
   color: white;
-  font-size: 34px;
+  font-size: 28px;
   font-weight: ${fontWeights.bold};
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
   letter-spacing: -0.5px;
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 32px; /* Increase from 28px for better readability */
+  /* Increase size on larger screens */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 34px;
   }
 `;
 
 const EventName = styled.p`
   color: rgba(255, 255, 255, 0.9);
-  font-size: 20px;
-  margin: 0 0 ${designTokens.spacing.lg};
+  font-size: 18px;
+  margin: 0 0 ${designTokens.spacing.md};
   line-height: 1.4;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   font-weight: ${fontWeights.medium};
-  max-width: 90%;
+  max-width: 100%;
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 20px; /* Increase from 18px for better readability */
-    margin-bottom: ${designTokens.spacing.md};
+  /* Adjust for larger screens */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 20px;
+    margin: 0 0 ${designTokens.spacing.lg};
+    max-width: 90%;
   }
 `;
 
 const ContentSection = styled.div`
-  padding: ${designTokens.spacing.xl} ${designTokens.spacing.lg};
+  padding: ${designTokens.spacing.lg} ${designTokens.spacing.md};
   flex: 1;
   margin: 0 auto;
   width: 100%;
@@ -203,8 +220,10 @@ const ContentSection = styled.div`
   position: relative;
   z-index: 2;
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    padding: ${designTokens.spacing.lg} ${designTokens.spacing.md};
+  /* Add more padding on larger screens */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    padding: ${designTokens.spacing.xl} ${designTokens.spacing.lg};
+    max-width: 800px;
   }
 `;
 
@@ -212,112 +231,186 @@ const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${designTokens.spacing.lg};
-  padding: 0 ${designTokens.spacing.sm};
+  margin-bottom: ${designTokens.spacing.md};
+  padding: 0 ${designTokens.spacing.xs};
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    margin-bottom: ${designTokens.spacing.md};
+  /* Add more margin on larger screens */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    margin-bottom: ${designTokens.spacing.lg};
+    padding: 0 ${designTokens.spacing.sm};
   }
 `;
 
 const SectionTitle = styled.h2`
   color: ${colors.textPrimary};
-  font-size: 24px;
+  font-size: 22px;
   font-weight: ${fontWeights.bold};
   margin: 0;
   position: relative;
+  display: flex;
+  align-items: center;
 
   &::after {
     content: "";
     position: absolute;
     bottom: -8px;
     left: 0;
-    width: 40px;
+    width: 32px;
     height: 3px;
-    background: ${colors.primaryGradient};
+    background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
     border-radius: ${designTokens.borderRadius.full};
   }
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 22px; /* Increase from 20px for better readability */
+  /* Adjust for larger screens */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 24px;
+
+    &::after {
+      width: 40px;
+    }
   }
 `;
 
-// Modern card with subtle shadow
+// Modern card with subtle shadow - more touch-friendly
 const Card = styled.div`
   background-color: ${colors.backgroundLight};
   border-radius: ${designTokens.borderRadius.lg};
   box-shadow: ${designTokens.shadows.md};
   overflow: hidden;
-  margin-bottom: ${designTokens.spacing.xl};
+  margin-bottom: ${designTokens.spacing.lg};
   border: 1px solid rgba(0, 0, 0, 0.03);
   transition: transform ${designTokens.animation.medium},
     box-shadow ${designTokens.animation.medium};
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${designTokens.shadows.lg};
-  }
+  /* Remove hover effect on mobile for better touch experience */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    margin-bottom: ${designTokens.spacing.xl};
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    margin-bottom: ${designTokens.spacing.lg};
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: ${designTokens.shadows.lg};
+    }
   }
 `;
 
-// Modern schedule container
+// Modern schedule container - with enhanced styling
 const ScheduleContainer = styled.div`
-  margin-bottom: ${designTokens.spacing.xl};
+  margin-bottom: ${designTokens.spacing.lg};
+  background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+  border-radius: ${designTokens.borderRadius.lg};
+  padding: ${designTokens.spacing.lg};
+  box-shadow: ${designTokens.shadows.lg};
+  position: relative;
+  overflow: hidden;
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    margin-bottom: ${designTokens.spacing.lg};
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0) 50%
+      ),
+      linear-gradient(
+        235deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0) 60%
+      );
+    pointer-events: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    margin-bottom: ${designTokens.spacing.xl};
+    padding: ${designTokens.spacing.xl};
   }
 `;
 
-// Modern schedule item - improved for mobile
+// Modern schedule item - mobile-first design
 const ScheduleItem = styled.div<{ isActive?: boolean }>`
   display: flex;
-  padding: ${designTokens.spacing.lg};
-  border-bottom: 1px solid ${colors.borderLight};
+  flex-direction: column;
+  padding: ${designTokens.spacing.lg} ${designTokens.spacing.md};
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   background-color: ${(props) =>
-    props.isActive ? colors.primaryLight : colors.backgroundLight};
+    props.isActive ? "rgba(255, 255, 255, 0.18)" : "rgba(255, 255, 255, 0.08)"};
   transition: all ${designTokens.animation.fast};
+  border-radius: ${designTokens.borderRadius.md};
+  margin-bottom: ${designTokens.spacing.md};
+  backdrop-filter: blur(4px);
+  position: relative;
+  z-index: 1;
+  box-shadow: ${(props) =>
+    props.isActive
+      ? "0 4px 12px rgba(0, 0, 0, 0.1)"
+      : "0 2px 6px rgba(0, 0, 0, 0.05)"};
 
   &:last-child {
     border-bottom: none;
+    margin-bottom: 0;
   }
 
   &:active {
-    background-color: ${colors.backgroundTertiary};
+    background-color: rgba(255, 255, 255, 0.22);
+    transform: translateY(1px);
   }
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    padding: ${designTokens.spacing.lg} ${designTokens.spacing.md}; /* Increase vertical padding */
-    flex-direction: column; /* Stack elements vertically on mobile */
+  /* Switch to row layout on larger screens */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    flex-direction: row;
+    padding: ${designTokens.spacing.lg};
+  }
+`;
+
+const ScheduleItemHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: ${designTokens.spacing.md};
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    margin-bottom: 0;
   }
 `;
 
 const ScheduleIconContainer = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: ${designTokens.borderRadius.md};
-  background: ${colors.primaryGradient};
+  width: 44px;
+  height: 44px;
+  border-radius: ${designTokens.borderRadius.full};
+  background: rgba(255, 255, 255, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: ${designTokens.spacing.lg};
+  margin-right: ${designTokens.spacing.md};
   flex-shrink: 0;
   font-size: 22px;
-  box-shadow: ${designTokens.shadows.sm};
-  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: #4338ca;
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    width: 48px; /* Keep icon size */
-    height: 48px;
-    font-size: 22px;
-    margin-right: 0;
-    margin-bottom: ${designTokens.spacing.md}; /* Add bottom margin */
-    align-self: flex-start; /* Align to the start */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
   }
 `;
 
@@ -326,54 +419,45 @@ const ScheduleContent = styled.div`
   min-width: 0; // Ensures text truncation works properly
   display: flex;
   flex-direction: column;
-  gap: ${designTokens.spacing.xs};
-
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    width: 100%;
-    gap: ${designTokens.spacing.sm}; /* Increase gap between elements */
-  }
+  gap: ${designTokens.spacing.sm};
 `;
 
 const ScheduleTitle = styled.h3`
-  color: ${colors.textPrimary};
+  color: white;
   font-size: 18px;
   font-weight: ${fontWeights.semibold};
   margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  letter-spacing: -0.3px;
+  line-height: 1.3;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 20px; /* Increase from 16px for better readability */
-    white-space: normal; /* Allow text to wrap */
-    overflow: visible;
-    text-overflow: clip;
-    line-height: 1.3;
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.3px;
   }
 `;
 
 const ScheduleDescription = styled.p`
-  color: ${colors.textSecondary};
-  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 16px;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 16px; /* Increase from 14px for better readability */
-    -webkit-line-clamp: 3;
-    line-height: 1.4;
-    margin-top: ${designTokens.spacing.xs};
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 15px;
+    -webkit-line-clamp: 2;
+    line-height: 1.5;
   }
 `;
 
 const ScheduleDetails = styled.p`
-  color: ${colors.textSecondary};
-  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 16px;
   margin: ${designTokens.spacing.xs} 0 0;
   line-height: 1.4;
   display: flex;
@@ -382,46 +466,48 @@ const ScheduleDetails = styled.p`
 
   &::before {
     content: "📍";
-    font-size: 14px;
+    font-size: 16px;
   }
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 16px; /* Increase from 13px for better readability */
-    margin-top: ${designTokens.spacing.sm};
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 14px;
+
+    &::before {
+      font-size: 14px;
+    }
   }
 `;
 
 const ScheduleTimeContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  margin-left: auto;
-  padding-left: ${designTokens.spacing.lg};
-  min-width: 90px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: ${designTokens.spacing.md};
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: ${designTokens.spacing.md};
-    margin-left: 0;
-    padding-left: 0;
-    min-width: unset;
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    margin-left: auto;
+    margin-top: 0;
+    padding-left: ${designTokens.spacing.lg};
+    min-width: 90px;
+    width: auto;
   }
 `;
 
 const ScheduleTime = styled.div`
-  color: ${colors.primary};
-  font-size: 15px;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 16px;
   font-weight: ${fontWeights.medium};
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: ${designTokens.spacing.xs};
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 16px; /* Increase from 14px for better readability */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 15px;
   }
 `;
 
@@ -430,61 +516,53 @@ const DateBadge = styled.div<{
   isTomorrow?: boolean;
   isMultiDay?: boolean;
 }>`
-  font-size: 12px;
+  font-size: 14px;
   font-weight: ${fontWeights.medium};
-  padding: 3px 10px;
+  padding: 4px 10px;
   border-radius: ${designTokens.borderRadius.full};
-  margin-top: ${designTokens.spacing.sm};
   background-color: ${(props) =>
     props.isToday
-      ? colors.primaryLight
+      ? "rgba(255, 255, 255, 0.22)"
       : props.isTomorrow
-      ? colors.secondaryLight
+      ? "rgba(236, 72, 153, 0.22)"
       : props.isMultiDay
-      ? colors.accentLight
-      : colors.backgroundTertiary};
-  color: ${(props) =>
-    props.isToday
-      ? colors.primary
-      : props.isTomorrow
-      ? colors.secondary
-      : props.isMultiDay
-      ? colors.accent
-      : colors.textSecondary};
+      ? "rgba(6, 182, 212, 0.22)"
+      : "rgba(255, 255, 255, 0.12)"};
+  color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    margin-top: 0;
-    font-size: 14px; /* Increase from 11px for better readability */
-    padding: 4px 10px; /* Increase padding for better touch target */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 12px;
+    padding: 3px 10px;
+    margin-top: ${designTokens.spacing.sm};
   }
 `;
 
 const MultiDayBadge = styled.span`
-  font-size: 11px;
+  font-size: 12px;
   font-weight: ${fontWeights.medium};
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: ${designTokens.borderRadius.sm};
   margin-left: ${designTokens.spacing.sm};
-  background-color: ${colors.accentLight};
-  color: ${colors.accent};
+  background-color: rgba(6, 182, 212, 0.22);
+  color: white;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-block;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 12px; /* Increase from 10px for better readability */
-    padding: 3px 8px; /* Increase padding for better touch target */
-    margin-left: ${designTokens.spacing.sm};
-    display: inline-block;
-    margin-top: ${designTokens.spacing.xs};
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 11px;
+    padding: 2px 6px;
   }
 `;
 
 const TimeIcon = styled.span`
   margin-right: ${designTokens.spacing.xs};
-  font-size: 14px;
+  font-size: 16px;
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 16px; /* Increase icon size */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 14px;
   }
 `;
 
@@ -493,46 +571,50 @@ const ActiveIndicator = styled.div`
   left: 0;
   top: 0;
   bottom: 0;
-  width: 4px;
-  background: ${colors.primaryGradient};
+  width: 6px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.7)
+  );
   border-radius: 0 ${designTokens.borderRadius.sm}
     ${designTokens.borderRadius.sm} 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    width: 6px; /* Make indicator more visible */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    width: 4px;
   }
 `;
 
 // Modern form elements
 const FormGroup = styled.div`
-  margin-bottom: ${designTokens.spacing.lg};
+  margin-bottom: ${designTokens.spacing.xl};
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    margin-bottom: ${designTokens.spacing
-      .xl}; /* Increase spacing between form groups */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    margin-bottom: ${designTokens.spacing.lg};
   }
 `;
 
 const Label = styled.label`
   display: block;
   color: ${colors.textSecondary};
-  font-size: 14px;
+  font-size: 16px;
   font-weight: ${fontWeights.medium};
-  margin-bottom: ${designTokens.spacing.sm};
+  margin-bottom: ${designTokens.spacing.md};
   padding-left: ${designTokens.spacing.xs};
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 16px; /* Increase label size */
-    margin-bottom: ${designTokens.spacing.md}; /* Add more space below label */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 14px;
+    margin-bottom: ${designTokens.spacing.sm};
   }
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: ${designTokens.spacing.md} ${designTokens.spacing.lg};
+  padding: ${designTokens.spacing.lg};
   border: 1px solid ${colors.borderLight};
   border-radius: ${designTokens.borderRadius.md};
-  font-size: 16px;
+  font-size: 18px;
   transition: all ${designTokens.animation.fast};
   box-sizing: border-box;
   background-color: ${colors.backgroundLight};
@@ -540,6 +622,7 @@ const Input = styled.input`
   box-shadow: ${designTokens.shadows.sm};
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
+  height: 56px; /* Set explicit height for better touch target */
 
   &::placeholder {
     color: ${colors.textTertiary};
@@ -552,21 +635,20 @@ const Input = styled.input`
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
   }
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 18px; /* Increase input text size */
-    padding: ${designTokens.spacing
-      .lg}; /* Increase padding for better touch target */
-    height: 56px; /* Set explicit height for better touch target */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 16px;
+    padding: ${designTokens.spacing.md} ${designTokens.spacing.lg};
+    height: auto;
   }
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
-  height: 140px;
-  padding: ${designTokens.spacing.md} ${designTokens.spacing.lg};
+  height: 160px;
+  padding: ${designTokens.spacing.lg};
   border: 1px solid ${colors.borderLight};
   border-radius: ${designTokens.borderRadius.md};
-  font-size: 16px;
+  font-size: 18px;
   resize: none;
   transition: all ${designTokens.animation.fast};
   box-sizing: border-box;
@@ -587,11 +669,10 @@ const TextArea = styled.textarea`
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
   }
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 18px; /* Increase textarea text size */
-    padding: ${designTokens.spacing
-      .lg}; /* Increase padding for better touch target */
-    height: 160px; /* Increase height for better usability */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 16px;
+    padding: ${designTokens.spacing.md} ${designTokens.spacing.lg};
+    height: 140px;
   }
 `;
 
@@ -601,17 +682,22 @@ const Button = styled.button`
   color: white;
   border: none;
   border-radius: ${designTokens.borderRadius.md};
-  padding: ${designTokens.spacing.md} ${designTokens.spacing.lg};
-  font-size: 16px;
+  padding: ${designTokens.spacing.lg};
+  box-sizing: border-box;
+  font-size: 18px;
   font-weight: ${fontWeights.semibold};
   cursor: pointer;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all ${designTokens.animation.medium};
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
   box-shadow: ${designTokens.shadows.md};
   position: relative;
   overflow: hidden;
+  height: 56px; /* Set explicit height for better touch target */
 
   &::before {
     content: "";
@@ -628,15 +714,6 @@ const Button = styled.button`
     transition: opacity ${designTokens.animation.fast};
   }
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${designTokens.shadows.lg};
-
-    &::before {
-      opacity: 1;
-    }
-  }
-
   &:active {
     transform: translateY(1px);
     box-shadow: ${designTokens.shadows.sm};
@@ -649,11 +726,19 @@ const Button = styled.button`
     box-shadow: none;
   }
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    font-size: 18px; /* Increase button text size */
-    padding: ${designTokens.spacing
-      .lg}; /* Increase padding for better touch target */
-    height: 56px; /* Set explicit height for better touch target */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 16px;
+    padding: ${designTokens.spacing.md} ${designTokens.spacing.lg};
+    height: auto;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: ${designTokens.shadows.lg};
+
+      &::before {
+        opacity: 1;
+      }
+    }
   }
 `;
 
@@ -665,6 +750,8 @@ const LoadingContainer = styled.div`
   height: 100vh;
   gap: ${designTokens.spacing.lg};
   background: ${colors.backgroundSecondary};
+  padding: ${designTokens.spacing.lg};
+  text-align: center;
 `;
 
 const LoadingSpinner = styled.div`
@@ -696,7 +783,7 @@ const ErrorMessage = styled.div`
   padding: ${designTokens.spacing.lg};
   border-radius: ${designTokens.borderRadius.lg};
   text-align: center;
-  margin: ${designTokens.spacing.xl};
+  margin: ${designTokens.spacing.lg};
   font-size: 16px;
   box-shadow: ${designTokens.shadows.md};
   border: 1px solid rgba(239, 68, 68, 0.2);
@@ -710,16 +797,20 @@ const ErrorMessage = styled.div`
     font-size: 28px;
     margin-bottom: ${designTokens.spacing.sm};
   }
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    margin: ${designTokens.spacing.xl};
+  }
 `;
 
 const SuccessMessage = styled.div`
   position: fixed;
-  bottom: ${designTokens.spacing.xl};
+  bottom: ${designTokens.spacing.lg};
   left: 50%;
   transform: translateX(-50%);
   background: ${colors.successGradient};
   color: white;
-  padding: ${designTokens.spacing.md} ${designTokens.spacing.xl};
+  padding: ${designTokens.spacing.md} ${designTokens.spacing.lg};
   border-radius: ${designTokens.borderRadius.md};
   font-size: 16px;
   font-weight: ${fontWeights.medium};
@@ -732,6 +823,8 @@ const SuccessMessage = styled.div`
   min-width: 280px;
   text-align: center;
   justify-content: center;
+  width: calc(100% - 32px);
+  max-width: 400px;
 
   &::before {
     content: "✓";
@@ -756,103 +849,28 @@ const SuccessMessage = styled.div`
       transform: translate(-50%, 0);
     }
   }
-`;
 
-// Add these new styled components
-const EventInfoCard = styled.div`
-  background: ${colors.glassCard};
-  backdrop-filter: blur(10px);
-  border-radius: ${designTokens.borderRadius.lg};
-  padding: ${designTokens.spacing.lg};
-  margin-bottom: ${designTokens.spacing.xl};
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: ${designTokens.shadows.lg};
-`;
-
-const EventInfoRow = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: ${designTokens.spacing.md};
-  gap: ${designTokens.spacing.md};
-
-  &:last-child {
-    margin-bottom: 0;
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    bottom: ${designTokens.spacing.xl};
+    width: auto;
   }
 `;
 
-const EventInfoIcon = styled.div`
-  width: 36px;
-  height: 36px;
-  border-radius: ${designTokens.borderRadius.md};
-  background: ${colors.primaryGradient};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 18px;
-  flex-shrink: 0;
-`;
-
-const EventInfoContent = styled.div`
-  flex: 1;
-`;
-
-const EventInfoLabel = styled.div`
-  font-size: 13px;
-  color: ${colors.textSecondary};
-  margin-bottom: 2px;
-`;
-
-const EventInfoValue = styled.div`
-  font-size: 16px;
-  color: ${colors.textPrimary};
-  font-weight: ${fontWeights.medium};
-`;
-
-const SectionDivider = styled.div`
-  height: 8px;
-  margin: ${designTokens.spacing.xl} 0;
-  background: ${colors.backgroundTertiary};
-  border-radius: ${designTokens.borderRadius.full};
-  width: 100%;
-  opacity: 0.6;
-`;
-
-const EmptyStateMessage = styled.div`
-  text-align: center;
-  padding: ${designTokens.spacing.xl};
-  color: ${colors.textSecondary};
-  font-size: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: ${designTokens.spacing.md};
-
-  &::before {
-    content: "📅";
-    font-size: 32px;
-    margin-bottom: ${designTokens.spacing.sm};
-  }
-`;
-
-// Sponsor deals section - only keeping the components we use
+// Sponsor deals section - mobile-first design
 const BannersContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 16px;
 
-  @media (max-width: ${designTokens.breakpoints.md}) {
-    grid-template-columns: 1fr;
-  }
-
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    gap: 16px; /* Reduce gap on mobile */
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
   }
 `;
 
 const Banner = styled.div<{ backgroundImage: string }>`
   position: relative;
-  height: 180px;
+  height: 200px;
   border-radius: 10px;
   overflow: hidden;
   background-image: url(${(props) => props.backgroundImage});
@@ -862,13 +880,13 @@ const Banner = styled.div<{ backgroundImage: string }>`
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
 
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  }
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    height: 180px;
 
-  @media (max-width: ${designTokens.breakpoints.sm}) {
-    height: 200px; /* Increase height on mobile */
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
   }
 `;
 
@@ -884,16 +902,21 @@ const BannerOverlay = styled.div`
     rgba(0, 0, 0, 0.4) 50%,
     rgba(0, 0, 0, 0.1) 100%
   );
-  opacity: 0;
-  transition: opacity 0.3s ease;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding: 20px;
+  box-sizing: border-box;
   color: white;
+  opacity: 1;
 
-  ${Banner}:hover & {
-    opacity: 1;
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+
+    ${Banner}:hover & {
+      opacity: 1;
+    }
   }
 `;
 
@@ -924,17 +947,29 @@ const BannerButton = styled.a`
   background-color: #6366f1;
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  font-size: 14px;
+  border-radius: 8px;
+  padding: 10px 18px;
+  box-sizing: border-box;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
   transition: background-color 0.2s ease;
   z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
   &:hover {
     background-color: #4f46e5;
+  }
+
+  &:active {
+    background-color: #4338ca;
+    transform: translateY(1px);
+  }
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    padding: 8px 16px;
+    font-size: 14px;
   }
 `;
 
@@ -950,7 +985,8 @@ const PopupBackdrop = styled.div<{ isOpen: boolean }>`
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 20px;
+  padding: 16px;
+  box-sizing: border-box;
   backdrop-filter: blur(3px);
   transition: opacity 0.3s ease;
   opacity: ${(props) => (props.isOpen ? 1 : 0)};
@@ -960,7 +996,7 @@ const PopupBackdrop = styled.div<{ isOpen: boolean }>`
 const PopupContainer = styled.div`
   background-color: white;
   border-radius: 16px;
-  width: 90%;
+  width: 95%;
   max-width: 500px;
   overflow: hidden;
   position: relative;
@@ -969,6 +1005,7 @@ const PopupContainer = styled.div`
   flex-direction: column;
   animation: popupFadeIn 0.3s ease forwards;
   transform-origin: center;
+  max-height: 90vh;
 
   @keyframes popupFadeIn {
     from {
@@ -981,27 +1018,27 @@ const PopupContainer = styled.div`
     }
   }
 
-  @media (max-width: 768px) {
-    width: 95%;
-    max-height: 85vh;
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    width: 90%;
+    max-height: none;
   }
 `;
 
 // Popup with description
 const DescriptionPopup = styled(PopupContainer)`
-  min-height: 450px;
+  min-height: 500px;
 
-  @media (max-width: 768px) {
-    min-height: 500px;
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    min-height: 450px;
   }
 `;
 
 // Popup without description
 const SimplePopup = styled(PopupContainer)`
-  min-height: 400px;
+  min-height: 450px;
 
-  @media (max-width: 768px) {
-    min-height: 450px;
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    min-height: 400px;
   }
 `;
 
@@ -1009,14 +1046,14 @@ const SimplePopup = styled(PopupContainer)`
 const PopupHeader = styled.div<{ hasDescription: boolean }>`
   position: relative;
   width: 100%;
-  padding-top: ${(props) => (props.hasDescription ? "56.25%" : "75%")};
+  padding-top: ${(props) => (props.hasDescription ? "60%" : "90%")};
   background-size: cover;
   background-position: center;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
 
-  @media (max-width: 768px) {
-    padding-top: ${(props) => (props.hasDescription ? "60%" : "90%")};
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    padding-top: ${(props) => (props.hasDescription ? "56.25%" : "75%")};
   }
 
   &::after {
@@ -1038,7 +1075,8 @@ const PopupHeader = styled.div<{ hasDescription: boolean }>`
 
 // Popup content area
 const PopupContent = styled.div<{ hasDescription: boolean }>`
-  padding: ${(props) => (props.hasDescription ? "30px" : "25px")};
+  padding: ${(props) => (props.hasDescription ? "25px 20px" : "30px 20px")};
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -1055,34 +1093,34 @@ const PopupContent = styled.div<{ hasDescription: boolean }>`
     align-items: center;
   `}
 
-  @media (max-width: 768px) {
-    padding: ${(props) => (props.hasDescription ? "25px 20px" : "30px 20px")};
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    padding: ${(props) => (props.hasDescription ? "30px" : "25px")};
   }
 `;
 
 // Popup title
 const PopupTitle = styled.h2<{ hasDescription: boolean }>`
-  font-size: ${(props) => (props.hasDescription ? "24px" : "26px")};
+  font-size: ${(props) => (props.hasDescription ? "22px" : "24px")};
   font-weight: ${fontWeights.semibold};
   color: ${colors.textPrimary};
-  margin: 0 0 ${(props) => (props.hasDescription ? "20px" : "30px")} 0;
+  margin: 0 0 ${(props) => (props.hasDescription ? "15px" : "25px")} 0;
 
-  @media (max-width: 768px) {
-    font-size: ${(props) => (props.hasDescription ? "22px" : "24px")};
-    margin: 0 0 ${(props) => (props.hasDescription ? "15px" : "25px")} 0;
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: ${(props) => (props.hasDescription ? "24px" : "26px")};
+    margin: 0 0 ${(props) => (props.hasDescription ? "20px" : "30px")} 0;
   }
 `;
 
 // Popup description
 const PopupDescription = styled.p`
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.6;
   color: ${colors.textSecondary};
-  margin: 0 0 30px 0;
+  margin: 0 0 25px 0;
 
-  @media (max-width: 768px) {
-    font-size: 15px;
-    margin: 0 0 25px 0;
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 16px;
+    margin: 0 0 30px 0;
   }
 `;
 
@@ -1092,20 +1130,23 @@ const PopupButton = styled.a<{ hasDescription: boolean }>`
   background-color: ${colors.primary};
   color: white;
   font-weight: ${fontWeights.medium};
-  padding: 14px 32px;
+  padding: 16px 24px;
+  box-sizing: border-box;
   border-radius: 8px;
   text-decoration: none;
   text-align: center;
   transition: all 0.2s ease;
-  font-size: 16px;
+  font-size: ${(props) => (props.hasDescription ? "16px" : "18px")};
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
-  ${(props) =>
-    props.hasDescription ? "align-self: flex-start;" : "width: 100%;"}
+  width: 100%;
 
-  @media (max-width: 768px) {
-    width: 100%;
-    padding: 16px 24px;
-    font-size: ${(props) => (props.hasDescription ? "16px" : "18px")};
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    padding: 14px 32px;
+    font-size: 16px;
+    ${(props) =>
+      props.hasDescription
+        ? "align-self: flex-start; width: auto;"
+        : "width: 100%;"}
   }
 
   &:hover {
@@ -1123,8 +1164,8 @@ const PopupButton = styled.a<{ hasDescription: boolean }>`
 // Close button
 const PopupCloseButton = styled.button`
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 12px;
+  right: 12px;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -1164,9 +1205,9 @@ const PopupCloseButton = styled.button`
     transform: rotate(-45deg);
   }
 
-  @media (max-width: 768px) {
-    top: 12px;
-    right: 12px;
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    top: 16px;
+    right: 16px;
   }
 `;
 
@@ -1194,6 +1235,50 @@ interface ScheduleItem {
   time?: string;
 }
 
+const SectionDivider = styled.div`
+  height: 8px;
+  margin: ${designTokens.spacing.lg} 0;
+  background: ${colors.backgroundTertiary};
+  border-radius: ${designTokens.borderRadius.full};
+  width: 100%;
+  opacity: 0.6;
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    margin: ${designTokens.spacing.xl} 0;
+  }
+`;
+
+const EmptyStateMessage = styled.div`
+  text-align: center;
+  padding: ${designTokens.spacing.xl};
+  color: white;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${designTokens.spacing.md};
+  position: relative;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: ${designTokens.borderRadius.lg};
+  backdrop-filter: blur(4px);
+  margin: ${designTokens.spacing.md};
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+  &::before {
+    content: "📅";
+    font-size: 36px;
+    margin-bottom: ${designTokens.spacing.sm};
+    background: rgba(255, 255, 255, 0.15);
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+`;
+
 const VirtualSpace: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
@@ -1214,6 +1299,35 @@ const VirtualSpace: React.FC = () => {
 
   // Add a ref for the popup
   const popupRef = useRef<HTMLDivElement>(null);
+
+  // Add meta viewport tag for better mobile experience
+  useEffect(() => {
+    // Set viewport meta tag for better mobile experience
+    const metaViewport = document.createElement("meta");
+    metaViewport.name = "viewport";
+    metaViewport.content =
+      "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
+    document.head.appendChild(metaViewport);
+
+    // Add status bar color for iOS
+    const metaStatusBar = document.createElement("meta");
+    metaStatusBar.name = "apple-mobile-web-app-status-bar-style";
+    metaStatusBar.content = "black-translucent";
+    document.head.appendChild(metaStatusBar);
+
+    // Add web app capable meta for iOS
+    const metaWebApp = document.createElement("meta");
+    metaWebApp.name = "apple-mobile-web-app-capable";
+    metaWebApp.content = "yes";
+    document.head.appendChild(metaWebApp);
+
+    // Clean up on unmount
+    return () => {
+      document.head.removeChild(metaViewport);
+      document.head.removeChild(metaStatusBar);
+      document.head.removeChild(metaWebApp);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -1474,58 +1588,28 @@ const VirtualSpace: React.FC = () => {
       </HeaderCard>
 
       <ContentSection>
-        {/* Event Info Card */}
-        <EventInfoCard>
-          <EventInfoRow>
-            <EventInfoIcon>📅</EventInfoIcon>
-            <EventInfoContent>
-              <EventInfoLabel>Event Date</EventInfoLabel>
-              <EventInfoValue>
-                {event.date
-                  ? new Date(event.date).toLocaleDateString(undefined, {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : "Date not specified"}
-              </EventInfoValue>
-            </EventInfoContent>
-          </EventInfoRow>
-
-          {event.location && (
-            <EventInfoRow>
-              <EventInfoIcon>📍</EventInfoIcon>
-              <EventInfoContent>
-                <EventInfoLabel>Location</EventInfoLabel>
-                <EventInfoValue>{event.location.address}</EventInfoValue>
-              </EventInfoContent>
-            </EventInfoRow>
-          )}
-        </EventInfoCard>
-
         <SectionHeader>
           <SectionTitle>Schedule</SectionTitle>
         </SectionHeader>
 
-        <Card>
-          <ScheduleContainer>
-            {schedule.length === 0 ? (
-              <EmptyStateMessage>
-                No schedule items available for this event.
-              </EmptyStateMessage>
-            ) : (
-              schedule.map((item) => {
-                const start = new Date(item.startDateTime);
-                const end = new Date(item.endDateTime);
-                const sameDay = isSameDay(start, end);
-                const isActive = isSessionActive(item.time || "", item);
-                const isStartToday = isToday(start);
-                const isStartTomorrow = isTomorrow(start);
+        <ScheduleContainer>
+          {schedule.length === 0 ? (
+            <EmptyStateMessage>
+              No schedule items available for this event.
+            </EmptyStateMessage>
+          ) : (
+            schedule.map((item) => {
+              const start = new Date(item.startDateTime);
+              const end = new Date(item.endDateTime);
+              const sameDay = isSameDay(start, end);
+              const isActive = isSessionActive(item.time || "", item);
+              const isStartToday = isToday(start);
+              const isStartTomorrow = isTomorrow(start);
 
-                return (
-                  <ScheduleItem key={item.id} isActive={isActive}>
-                    {isActive && <ActiveIndicator />}
+              return (
+                <ScheduleItem key={item.id} isActive={isActive}>
+                  {isActive && <ActiveIndicator />}
+                  <ScheduleItemHeader>
                     <ScheduleIconContainer>{item.icon}</ScheduleIconContainer>
                     <ScheduleContent>
                       <ScheduleTitle>
@@ -1538,33 +1622,29 @@ const VirtualSpace: React.FC = () => {
                         </ScheduleDescription>
                       )}
                       <ScheduleDetails>{item.location}</ScheduleDetails>
-
-                      {/* Move time container inside schedule content on mobile */}
-                      <ScheduleTimeContainer>
-                        <ScheduleTime>
-                          <TimeIcon>🕒</TimeIcon>
-                          {formatTimeRange(item)}
-                        </ScheduleTime>
-                        {item.startDateTime && (
-                          <DateBadge
-                            isToday={isStartToday}
-                            isTomorrow={isStartTomorrow}
-                            isMultiDay={!sameDay}
-                          >
-                            {getDateBadgeText(
-                              item.startDateTime,
-                              item.endDateTime
-                            )}
-                          </DateBadge>
-                        )}
-                      </ScheduleTimeContainer>
                     </ScheduleContent>
-                  </ScheduleItem>
-                );
-              })
-            )}
-          </ScheduleContainer>
-        </Card>
+                  </ScheduleItemHeader>
+
+                  <ScheduleTimeContainer>
+                    <ScheduleTime>
+                      <TimeIcon>🕒</TimeIcon>
+                      {formatTimeRange(item)}
+                    </ScheduleTime>
+                    {item.startDateTime && (
+                      <DateBadge
+                        isToday={isStartToday}
+                        isTomorrow={isStartTomorrow}
+                        isMultiDay={!sameDay}
+                      >
+                        {getDateBadgeText(item.startDateTime, item.endDateTime)}
+                      </DateBadge>
+                    )}
+                  </ScheduleTimeContainer>
+                </ScheduleItem>
+              );
+            })
+          )}
+        </ScheduleContainer>
 
         {event.emailParams.sponsorDeals?.items &&
           event.emailParams.sponsorDeals.items.length > 0 && (
@@ -1572,7 +1652,7 @@ const VirtualSpace: React.FC = () => {
               <SectionDivider />
 
               <SectionHeader>
-                <SectionTitle>Sponsor Deals</SectionTitle>
+                <SectionTitle>Check out our sponsors!</SectionTitle>
               </SectionHeader>
 
               <Card>
@@ -1582,7 +1662,6 @@ const VirtualSpace: React.FC = () => {
                       key={deal.id}
                       backgroundImage={deal.imageSrc}
                       onClick={() => handleDealClick(deal)}
-                      style={{ cursor: "pointer" }}
                     >
                       <BannerOverlay>
                         <BannerTitle>{deal.title}</BannerTitle>
