@@ -9,6 +9,7 @@ import cloudinary from '../config/cloudinary';
 import { extractPublicId } from '../utils/helpers';
 import xlsx from 'xlsx';
 import multer from 'multer';
+import Task from '../models/task.model';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -522,5 +523,168 @@ export const uploadSponsorDealImage = async (req: Request, res: Response): Promi
   } catch (error) {
     console.error('Error uploading sponsor deal image:', error);
     res.status(500).json({ success: false, message: 'Failed to upload image' });
+  }
+};
+
+// Add a new task to an event
+export const addEventTask = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { eventId } = req.params;
+    const taskData = req.body;
+
+    // Set default values if not provided
+    if (!taskData.status) taskData.status = 'next';
+    if (!taskData.isCompleted) taskData.isCompleted = false;
+    if (!taskData.priority) taskData.priority = 'medium';
+
+    // Add timestamps
+    taskData.createdAt = new Date();
+    taskData.updatedAt = new Date();
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      res.status(404).json({ message: 'Event not found' });
+      return;
+    }
+
+    event.tasks.push(taskData);
+    await event.save();
+
+    res.status(201).json({
+      message: 'Task added successfully',
+      task: event.tasks[event.tasks.length - 1],
+    });
+  } catch (error) {
+    console.error('Error adding task:', error);
+    res.status(500).json({ message: 'Failed to add task', error });
+  }
+};
+
+// Update an existing task
+export const updateEventTask = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { eventId, taskId } = req.params;
+    const taskData = req.body;
+
+    // Update the timestamp
+    taskData.updatedAt = new Date();
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      res.status(404).json({ message: 'Event not found' });
+      return;
+    }
+
+    const taskIndex = event.tasks.findIndex((task) => task._id && task._id.toString() === taskId);
+    if (taskIndex === -1) {
+      res.status(404).json({ message: 'Task not found' });
+      return;
+    }
+
+    // Update task fields
+    Object.keys(taskData).forEach((key) => {
+      // @ts-expect-error - We're dynamically updating fields
+      event.tasks[taskIndex][key] = taskData[key];
+    });
+
+    await event.save();
+
+    res.status(200).json({
+      message: 'Task updated successfully',
+      task: event.tasks[taskIndex],
+    });
+  } catch (error) {
+    console.error('Error updating task:', error);
+    res.status(500).json({ message: 'Failed to update task', error });
+  }
+};
+
+// Delete a task
+export const deleteEventTask = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { eventId, taskId } = req.params;
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      res.status(404).json({ message: 'Event not found' });
+      return;
+    }
+
+    const taskIndex = event.tasks.findIndex((task) => task._id && task._id.toString() === taskId);
+    if (taskIndex === -1) {
+      res.status(404).json({ message: 'Task not found' });
+      return;
+    }
+
+    // Remove the task
+    event.tasks.splice(taskIndex, 1);
+    await event.save();
+
+    res.status(200).json({ message: 'Task deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    res.status(500).json({ message: 'Failed to delete task', error });
+  }
+};
+
+// Update task status (for drag and drop functionality)
+export const updateTaskStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { eventId, taskId } = req.params;
+    const { status } = req.body;
+
+    if (!['next', 'inProgress', 'finished'].includes(status)) {
+      res.status(400).json({ message: 'Invalid status value' });
+      return;
+    }
+
+    // Find the event and populate the tasks
+    const event = await Event.findById(eventId).populate('tasks');
+    if (!event) {
+      res.status(404).json({ message: 'Event not found' });
+      return;
+    }
+
+    const taskIndex = event.tasks.findIndex((task) => task._id && task._id.toString() === taskId);
+    if (taskIndex === -1) {
+      res.status(404).json({ message: 'Task not found' });
+      return;
+    }
+
+    // Update the task directly in the database
+    await Task.findByIdAndUpdate(taskId, {
+      status,
+      isCompleted: status === 'finished',
+      updatedAt: new Date(),
+    });
+
+    // Fetch the updated task
+    const updatedTask = await Task.findById(taskId);
+
+    res.status(200).json({
+      message: 'Task status updated successfully',
+      task: updatedTask,
+    });
+  } catch (error) {
+    console.error('Error updating task status:', error);
+    res.status(500).json({ message: 'Failed to update task status', error });
+  }
+};
+
+// Get all tasks for an event
+export const getEventTasks = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { eventId } = req.params;
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      res.status(404).json({ message: 'Event not found' });
+      return;
+    }
+
+    res.status(200).json({ tasks: event.tasks });
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    res.status(500).json({ message: 'Failed to fetch tasks', error });
   }
 };

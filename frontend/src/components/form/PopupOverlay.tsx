@@ -7,7 +7,9 @@ const Overlay = styled.div<{ visible: boolean }>`
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  transition: opacity 0.3s ease;
   display: ${(props) => (props.visible ? "flex" : "none")};
   align-items: center;
   justify-content: center;

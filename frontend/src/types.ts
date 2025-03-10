@@ -10,9 +10,22 @@ export type Guest = {
   gdpr_consent?: boolean; // Add this field
 };
 export type Task = {
+  _id?: string;
   title: string;
+  description?: string;
   isCompleted: boolean;
   dueDate: string;
+  status: "next" | "inProgress" | "finished";
+  eventId: string;
+  event?: {
+    _id: string;
+    title: string;
+  };
+  assignee?: string;
+  priority?: "low" | "medium" | "high";
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type Invoice = {

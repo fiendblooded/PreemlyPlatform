@@ -16,13 +16,7 @@ const eventSchema = new Schema<Event>({
     longitude: { type: Number },
     placeId: { type: String },
   },
-  tasks: [
-    {
-      title: { type: String },
-      isCompleted: { type: Boolean },
-      dueDate: { type: Date },
-    },
-  ],
+  tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
   welcomeScreenParams: {
     backgroundColor: { type: String },
     textColor: { type: String },
