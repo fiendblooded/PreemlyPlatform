@@ -833,7 +833,7 @@ const EventDetail: React.FC = () => {
                 borderColor="#e6bf30"
               >
                 <WelcomeScreenSettingsIcon color={"currentColor"} />
-                Welcome Screen
+                Check-in
               </ActiveStatusButton>
               <ActiveStatusButton
                 isActive={openSection === "budget"}

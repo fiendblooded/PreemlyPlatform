@@ -188,6 +188,7 @@ export const ActiveStatusButton = styled.div<{
   cursor: pointer;
   line-height: 20px;
   padding-bottom: 8px;
+  white-space: nowrap;
   gap: 4px;
   margin-left: ${(props) =>
     props.marginLeft != undefined ? props.marginLeft : 0}px;

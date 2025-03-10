@@ -212,6 +212,7 @@ const DashboardSection = styled.div<{
   height: ${(props) => (props.height ? props.height : "auto")};
   background-color: white;
   padding: 24px;
+  box-sizing: border-box;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
@@ -355,17 +356,17 @@ const EventMetaItem = styled.div`
 
 const DashboardRow = styled.div`
   display: flex;
-  gap: 24px;
   margin-bottom: 24px;
-
+  justify-content: space-between;
   @media (max-width: 1024px) {
+    gap: 24px;
     flex-direction: column;
   }
 `;
 
-const ContentWrapper = styled.div`
-  width: 75%;
-  height: 90%;
+const ContentWrapper = styled.div<{ tabletMode: boolean }>`
+  width: ${(props) => (props.tabletMode ? "100%" : "75%")};
+  height: ${(props) => (props.tabletMode ? "100%" : "90%")};
   margin: auto;
   background-color: white;
   border-radius: 12px;
@@ -513,7 +514,7 @@ const Dashboard: React.FC = () => {
     <PageWrapper>
       <TopBar sectionTitle="Dashboard" />
 
-      <ContentWrapper>
+      <ContentWrapper tabletMode={tabletMode}>
         {loading ? (
           <SpinnerContainer>
             <Spinner isVisible={true} />
@@ -875,7 +876,12 @@ const Dashboard: React.FC = () => {
             </DashboardSection>
 
             <DashboardRow>
-              <DashboardSection width={65} height={400} noMargin delay={0.8}>
+              <DashboardSection
+                width={tabletMode ? 100 : 65}
+                height={400}
+                noMargin
+                delay={0.8}
+              >
                 <SectionTitle>
                   <SvgSC
                     width="20"
@@ -899,7 +905,12 @@ const Dashboard: React.FC = () => {
                 </CalendarWrapper>
               </DashboardSection>
 
-              <DashboardSection width={30} height={400} noMargin delay={0.9}>
+              <DashboardSection
+                width={tabletMode ? 100 : 30}
+                height={400}
+                noMargin
+                delay={0.9}
+              >
                 <SectionTitle>
                   <svg
                     width="20"
