@@ -23,32 +23,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Helper function to extract monthly spending data directly from invoice data
-// This serves as a fallback in case the OpenAI API doesn't return this data
-// const extractMonthlySpendingData = (invoiceData: InvoiceData[]): { month: string; amount: number }[] => {
-//   // Create a map to store spending by month
-//   const monthlySpending = new Map<string, number>();
-
-//   // Process each invoice
-//   invoiceData.forEach((invoice) => {
-//     if (invoice.amount !== undefined && invoice.date) {
-//       // Format as YYYY-MM
-//       const date = new Date(invoice.date);
-//       const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-//       // Add to existing month or create new entry
-//       const currentAmount = monthlySpending.get(monthYear) || 0;
-//       monthlySpending.set(monthYear, currentAmount + invoice.amount);
-//     }
-//   });
-
-//   // Convert map to array of objects
-//   return Array.from(monthlySpending.entries()).map(([month, amount]) => ({
-//     month,
-//     amount,
-//   }));
-// };
-
 export const analyzeInvoices = async (invoiceTexts: string[]): Promise<InvoiceAnalysis> => {
   try {
     const systemPrompt = `You are an AI assistant specialized in financial analysis for event planning. 

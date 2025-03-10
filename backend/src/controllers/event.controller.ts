@@ -300,16 +300,94 @@ export const uploadGuestsFromExcel = async (req: Request, res: Response): Promis
       const worksheet = workbook.Sheets[sheetName];
       const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
-      const guests = data
-        .filter((row: any) => row.length >= 2)
-        .map((row: any) => ({
-          fullName: row[0] || '',
-          email: row[1] || '',
-          phoneNumber: row[2] || '',
-          age: 0,
-        }));
+      // Skip the header row (first row)
+      const dataWithoutHeader = data.slice(1);
 
-      const createdGuests = await Guest.insertMany(guests);
+      // Validate that we have data
+      if (dataWithoutHeader.length === 0) {
+        res.status(400).json({
+          success: false,
+          message:
+            'No guest data found in the Excel file. Please make sure your file contains guest information.',
+        });
+        return;
+      }
+
+      // Define interfaces for our guest data
+      interface GuestData {
+        fullName: string;
+        email: string;
+        phoneNumber: string;
+        age: number;
+      }
+
+      interface InvalidRow {
+        rowNumber: number;
+        fullName: string;
+        email: string;
+      }
+
+      // Filter out rows with empty required fields and create valid guest objects
+      const validGuests: GuestData[] = [];
+      const invalidRows: InvalidRow[] = [];
+
+      dataWithoutHeader.forEach((row: any, index: number) => {
+        // Skip completely empty rows
+        if (!row || row.length === 0 || (row.length === 1 && !row[0])) {
+          return;
+        }
+
+        const fullName = row[0]?.toString().trim();
+        const email = row[1]?.toString().trim();
+
+        if (fullName && email) {
+          validGuests.push({
+            fullName,
+            email,
+            phoneNumber: row[2]?.toString().trim() || '',
+            age: 0,
+          });
+        } else {
+          invalidRows.push({
+            rowNumber: index + 2, // +2 because we're 0-indexed and skipped header
+            fullName: fullName || '[MISSING]',
+            email: email || '[MISSING]',
+          });
+        }
+      });
+
+      // If we have invalid rows, return an error with details
+      if (invalidRows.length > 0 && validGuests.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'All rows in the Excel file are missing required fields (Full Name and Email).',
+          invalidRows,
+        });
+      }
+
+      if (invalidRows.length > 0) {
+        // We have some valid and some invalid rows
+        const errorMessage =
+          `${invalidRows.length} row(s) in the Excel file are missing required fields ` +
+          '(Full Name and Email). Please fix these rows and try again.';
+
+        return res.status(400).json({
+          success: false,
+          message: errorMessage,
+          invalidRows,
+        });
+      }
+
+      // If we have no valid guests after filtering, return an error
+      if (validGuests.length === 0) {
+        res.status(400).json({
+          success: false,
+          message: 'No valid guest data found. Each guest must have both a name and email.',
+        });
+        return;
+      }
+
+      const createdGuests = await Guest.insertMany(validGuests);
       const guestIds = createdGuests.map((guest) => guest._id);
 
       const updatedEvent = await Event.findByIdAndUpdate(
@@ -323,10 +401,18 @@ export const uploadGuestsFromExcel = async (req: Request, res: Response): Promis
         return;
       }
 
-      res.json({ success: true, data: updatedEvent });
+      res.json({
+        success: true,
+        message: `Successfully imported ${validGuests.length} guests.`,
+        data: updatedEvent,
+      });
     } catch (error) {
       console.error('Error uploading guests from Excel:', error);
-      res.status(500).json({ success: false, message: 'Server Error' });
+      const errorMessage = error instanceof Error ? error.message : 'Server Error';
+      res.status(500).json({
+        success: false,
+        message: `Error importing guests: ${errorMessage}`,
+      });
     }
   });
 };

@@ -58,7 +58,8 @@
     "styled-components": "^6.1.13",
     "three": "^0.171.0",
     "web-vitals": "^2.1.4",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

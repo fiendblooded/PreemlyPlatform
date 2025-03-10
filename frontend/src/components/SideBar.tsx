@@ -425,7 +425,7 @@ const Sidebar: React.FC = () => {
           </TooltipWrapper>
         </SidebarSection>
 
-        <SidebarSection>
+        {/* <SidebarSection>
           <SectionTitle tablet={isTabletDevice}>FINANCIALS</SectionTitle>
 
           <TooltipWrapper
@@ -546,7 +546,7 @@ const Sidebar: React.FC = () => {
               <Tooltip show={true}>Tasks</Tooltip>
             )}
           </TooltipWrapper>
-        </SidebarSection>
+        </SidebarSection> */}
       </SidebarTopContainer>
     </SidebarWrapper>
   );
