@@ -60,6 +60,10 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
         videoUrl: '',
       },
       emailParams: event.emailParams || {
+        customHtmlTemplate: {
+          enabled: false,
+          content: '',
+        },
         scheduleSrc: {
           enabled: false,
           content: '',
@@ -164,6 +168,8 @@ export const getEventById = async (req: Request, res: Response): Promise<void> =
 
 export const updateEvent = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('Request body:', JSON.stringify(req.body));
+
     const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedEvent) {
       res.status(404).json({ success: false, message: 'Event not found' });

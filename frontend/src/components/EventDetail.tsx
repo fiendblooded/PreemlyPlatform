@@ -39,8 +39,8 @@ import ScheduleEditor from "./ScheduleEditor";
 import SponsorDealsEditor from "./SponsorDealsEditor";
 
 export const PageWrapper = styled.div<{ tabletMode: boolean }>`
-  width: ${(props) => (props.tabletMode ? "100%" : "70%")};
-  height: ${(props) => (props.tabletMode ? "100%" : "100%")};
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   margin: auto;
@@ -188,9 +188,9 @@ const LoadingMessage = styled.p`
 `;
 
 const EventDetailWrapper = styled.div<{ tabletMode: boolean }>`
-  width: ${(props) => (props.tabletMode ? "100%" : "100%")};
-  height: ${(props) => (props.tabletMode ? "100%" : "90%")};
-  max-height: ${(props) => (props.tabletMode ? "100%" : "90%")};
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
   margin: auto;
   background-color: white;
   border-radius: 16px;

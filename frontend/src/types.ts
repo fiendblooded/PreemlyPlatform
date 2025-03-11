@@ -150,6 +150,10 @@ export type Event = {
     isGdpr: boolean;
   };
   emailParams: {
+    customHtmlTemplate?: {
+      enabled: boolean;
+      content: string;
+    };
     parking: {
       enabled: boolean;
       content: string;

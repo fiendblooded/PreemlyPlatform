@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import { Event, ScheduleItem } from "../types";
 import { getMailHtml, isTablet } from "../common/common";
@@ -9,6 +9,8 @@ import ParkingIcon from "./icons/ParkingIcon";
 import { PrimaryButton, SecondaryButton } from "./EventGuestsEditor";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { Panel } from "./EventGuestsEditor";
+import Editor, { OnMount } from "@monaco-editor/react";
+import * as monaco from "monaco-editor";
 
 const Container = styled.div<{ isTablet: boolean }>`
   background-color: white;
@@ -20,19 +22,20 @@ const Container = styled.div<{ isTablet: boolean }>`
   margin: 20px auto;
   display: flex;
   flex-direction: ${(props) => (props.isTablet ? "column-reverse" : "row")};
-
-  ${(props) => !props.isTablet && "height: 800px;"}
   justify-content: space-between;
   align-items: flex-start;
   gap: 20px;
   overflow: hidden;
+  min-height: 800px;
 `;
 
-const EmailSectionsContainer = styled.div<{ isTablet: boolean }>`
-  ${(props) => (!props.isTablet ? "flex: 2;" : "width: 100%;")}
+const EmailSectionsContainer = styled.div<{
+  isTablet: boolean;
+  isCustomTemplate: boolean;
+}>`
+  ${(props) => (!props.isTablet ? "width: 45%;" : "width: 100%;")}
   display: flex;
   max-height: 100%;
-
   box-sizing: border-box;
   justify-content: space-between;
   gap: 20px;
@@ -42,42 +45,175 @@ const EmailSectionsContainer = styled.div<{ isTablet: boolean }>`
   font-size: 20px;
   line-height: 24px;
 `;
-const IframeContainer = styled.div<{ isTablet: boolean }>`
-  ${(props) => (props.isTablet ? "width: 100%;" : "flex: 3; height: 100%;")}
+
+const IframeContainer = styled.div<{
+  isTablet: boolean;
+  isCustomTemplate: boolean;
+}>`
+  ${(props) => (!props.isTablet ? "width: 55%;" : "width: 100%;")}
   display: flex;
   position: relative;
+  height: 100%;
+  min-height: 700px;
 `;
 
-const StyledIframe = styled.div`
-  flex: 3;
+// Replace the StyledIframe div with an actual iframe to isolate styles
+const StyledIframeWrapper = styled.div`
+  flex: 1;
   height: 100%;
-  overflow-y: auto;
   background-color: #eeedf2;
   padding: 20px;
   box-sizing: border-box;
-  scrollbar-gutter: stable;
-  /* Subtle Scrollbar Styling */
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #c8c8c8 #f7f7f7; /* Thumb and Track colors for Firefox */
+  overflow: hidden;
+  border-radius: 4px;
+`;
 
-  ::-webkit-scrollbar {
-    width: 8px; /* Slimmer scrollbar */
+const SectionContainer = styled.div``;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+`;
+
+const HeaderTitle = styled.div`
+  font-weight: bold;
+  font-size: 20px;
+`;
+
+const EditorContainer = styled.div`
+  height: 650px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const EditorToolbar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+`;
+
+const EditorContent = styled.div`
+  flex: 1;
+  overflow: hidden;
+`;
+
+const InfoBox = styled.div`
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: normal;
+  color: #495057;
+`;
+
+const ToggleSwitch = styled.label`
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  span {
     position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
   }
 
-  ::-webkit-scrollbar-thumb {
-    background-color: #c8c8c8; /* Soft grey thumb */
-    border-radius: 4px; /* Rounded corners for thumb */
-    border: 1px solid #f7f7f7; /* Light border to blend into the track */
+  span:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
   }
 
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: #b5b5b5; /* Slightly darker grey on hover */
+  input:checked + span {
+    background-color: #2196f3;
   }
 
-  ::-webkit-scrollbar-track {
-    background-color: #f7f7f7; /* Very light grey track */
-    border-radius: 4px;
+  input:checked + span:before {
+    transform: translateX(26px);
+  }
+`;
+
+const ToggleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const ToggleLabel = styled.div`
+  font-size: 14px;
+  font-weight: normal;
+  color: #333;
+`;
+
+const ToolbarActions = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const ToolbarButton = styled.button`
+  padding: 6px 12px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #333;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+
+  &:active {
+    background-color: #e8e8e8;
+  }
+`;
+
+const PlaceholderButton = styled(ToolbarButton)`
+  background-color: #e6f7ff;
+  border-color: #91d5ff;
+  color: #1890ff;
+
+  &:hover {
+    background-color: #bae7ff;
+  }
+
+  &:active {
+    background-color: #91d5ff;
   }
 `;
 
@@ -92,39 +228,79 @@ export type EmailExtraModule = {
   items?: ScheduleItem[];
 };
 
-const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
-  const [parking, setParking] = useState<EmailExtraModule>({
-    enabled: event?.emailParams?.parking?.enabled || false,
-    content: event?.emailParams?.parking?.content || "",
-  });
-  const [schedule, setSchedule] = useState<EmailExtraModule>({
-    enabled: event?.emailParams?.scheduleSrc?.enabled || false,
-    content: event?.emailParams?.scheduleSrc?.content || "",
-    items: event?.emailParams?.scheduleSrc?.items || [],
-  });
-  const [dining, setDining] = useState<EmailExtraModule>({
-    enabled: event?.emailParams?.dining?.enabled || false,
-    content: event?.emailParams?.dining?.content || "",
-  });
+export type CustomHtmlTemplate = {
+  enabled: boolean;
+  content: string;
+};
 
+const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
+  // Create a deep copy of the event's emailParams to avoid reference issues
+  const eventEmailParams = JSON.parse(JSON.stringify(event?.emailParams || {}));
+
+  // Ensure all properties exist with default values if they don't
+  const defaultEmailParams = {
+    parking: { enabled: false, content: "" },
+    scheduleSrc: { enabled: false, content: "", items: [] },
+    dining: { enabled: false, content: "" },
+    customHtmlTemplate: { enabled: false, content: "" },
+  };
+
+  // Merge default values with actual values
+  const normalizedEmailParams = {
+    ...defaultEmailParams,
+    ...eventEmailParams,
+    // Ensure nested objects are properly initialized
+    parking: { ...defaultEmailParams.parking, ...eventEmailParams.parking },
+    scheduleSrc: {
+      ...defaultEmailParams.scheduleSrc,
+      ...eventEmailParams.scheduleSrc,
+      items: eventEmailParams.scheduleSrc?.items || [],
+    },
+    dining: { ...defaultEmailParams.dining, ...eventEmailParams.dining },
+    customHtmlTemplate: {
+      ...defaultEmailParams.customHtmlTemplate,
+      ...eventEmailParams.customHtmlTemplate,
+    },
+  };
+
+  const [parking, setParking] = useState<EmailExtraModule>(
+    normalizedEmailParams.parking
+  );
+  const [schedule, setSchedule] = useState<EmailExtraModule>(
+    normalizedEmailParams.scheduleSrc
+  );
+  const [dining, setDining] = useState<EmailExtraModule>(
+    normalizedEmailParams.dining
+  );
+  const [customTemplate, setCustomTemplate] = useState<CustomHtmlTemplate>(
+    normalizedEmailParams.customHtmlTemplate
+  );
   const [hasChanges, setHasChanges] = useState(false);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const handleEditorDidMount: OnMount = (editor) => {
+    editorRef.current = editor;
+  };
 
   const axiosInstance = useAxiosWithAuth();
   const tabletMode = isTablet();
+
   useEffect(() => {
+    // Compare current state with normalized event data
     const hasParking =
-      JSON.stringify(parking) !== JSON.stringify(event?.emailParams?.parking);
+      JSON.stringify(parking) !== JSON.stringify(normalizedEmailParams.parking);
     const hasSchedule =
       JSON.stringify(schedule) !==
-      JSON.stringify({
-        enabled: event?.emailParams?.scheduleSrc?.enabled,
-        content: event?.emailParams?.scheduleSrc?.content,
-      });
+      JSON.stringify(normalizedEmailParams.scheduleSrc);
     const hasDining =
-      JSON.stringify(dining) !== JSON.stringify(event?.emailParams?.dining);
+      JSON.stringify(dining) !== JSON.stringify(normalizedEmailParams.dining);
+    const hasCustomTemplate =
+      JSON.stringify(customTemplate) !==
+      JSON.stringify(normalizedEmailParams.customHtmlTemplate);
 
-    setHasChanges(hasParking || hasSchedule || hasDining);
-  }, [parking, schedule, dining, event?.emailParams]);
+    setHasChanges(hasParking || hasSchedule || hasDining || hasCustomTemplate);
+  }, [parking, schedule, dining, customTemplate, event?.emailParams]);
 
   const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
     "123467474"
@@ -142,23 +318,67 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
     schedule,
     dining,
     event.location.address || "",
-    false
+    false,
+    customTemplate.enabled ? customTemplate.content : undefined
   );
+
+  // Update iframe content when htmlContent changes
+  useEffect(() => {
+    if (iframeRef.current) {
+      const iframe = iframeRef.current;
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+
+      if (doc) {
+        doc.open();
+        doc.write(htmlContent);
+        doc.close();
+
+        // Add styles to make content fit properly in the iframe
+        const style = doc.createElement("style");
+        style.textContent = `
+          body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: 100%;
+            width: 100%;
+          }
+          table {
+            max-width: 100%;
+          }
+          img {
+            max-width: 100%;
+            height: auto;
+          }
+        `;
+        doc.head.appendChild(style);
+      }
+    }
+  }, [htmlContent]);
 
   const handleSave = async () => {
     try {
-      await axiosInstance.put(`/events/${event._id}`, {
+      const requestData = {
         ...event,
         emailParams: {
+          ...event.emailParams,
+          customHtmlTemplate: customTemplate,
           parking,
           scheduleSrc: {
             ...event.emailParams.scheduleSrc,
             enabled: schedule.enabled,
             content: schedule.content,
+            items: schedule.items || [],
           },
           dining,
         },
-      });
+      };
+
+      console.log("Request data:", JSON.stringify(requestData));
+
+      await axiosInstance.put(`/events/${event._id}`, requestData);
       refetch();
       // Optionally, show a success message to the user
       console.log("Email template saved successfully");
@@ -167,63 +387,211 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
       // Handle error (e.g., show an error message to the user)
     }
   };
+
   const handleCancel = () => {
-    setParking({
-      enabled: event?.emailParams?.parking?.enabled || false,
-      content: event?.emailParams?.parking?.content || "",
-    });
-    setSchedule({
-      enabled: event?.emailParams?.scheduleSrc?.enabled || false,
-      content: event?.emailParams?.scheduleSrc?.content || "",
-    });
-    setDining({
-      enabled: event?.emailParams?.dining?.enabled || false,
-      content: event?.emailParams?.dining?.content || "",
-    });
+    // Reset state to normalized values
+    setParking(normalizedEmailParams.parking);
+    setSchedule(normalizedEmailParams.scheduleSrc);
+    setDining(normalizedEmailParams.dining);
+    setCustomTemplate(normalizedEmailParams.customHtmlTemplate);
     setHasChanges(false);
+  };
+
+  const insertPlaceholder = (type: "name" | "qr") => {
+    if (!editorRef.current) return;
+
+    const placeholder =
+      type === "name"
+        ? '<div id="guest-name">Guest Name</div>'
+        : '<div id="qr-code">QR Code will appear here</div>';
+
+    // Get current cursor position
+    const selection = editorRef.current.getSelection();
+
+    // Insert the placeholder at cursor position
+    if (selection) {
+      const position = selection.getPosition();
+      const range = new monaco.Range(
+        position.lineNumber,
+        position.column,
+        position.lineNumber,
+        position.column
+      );
+
+      // Create an edit operation
+      const op = {
+        range: range,
+        text: placeholder,
+        forceMoveMarkers: true,
+      };
+
+      // Execute the edit
+      editorRef.current.executeEdits("placeholder-insertion", [op]);
+
+      // Focus back on the editor
+      editorRef.current.focus();
+    }
+  };
+
+  const formatHtml = () => {
+    if (!editorRef.current) return;
+
+    editorRef.current.getAction("editor.action.formatDocument")?.run();
+  };
+
+  const toggleCustomTemplate = (enabled: boolean) => {
+    setCustomTemplate((prev) => ({
+      ...prev,
+      enabled,
+    }));
   };
 
   return (
     <Container isTablet={tabletMode}>
-      <IframeContainer isTablet={tabletMode}>
-        <StyledIframe dangerouslySetInnerHTML={{ __html: htmlContent }} />
+      <IframeContainer
+        isTablet={tabletMode}
+        isCustomTemplate={customTemplate.enabled}
+      >
+        <StyledIframeWrapper>
+          <iframe
+            ref={iframeRef}
+            title="Email Preview"
+            style={{
+              width: "100%",
+              height: "100%",
+              minHeight: "700px",
+              border: "none",
+              backgroundColor: "#eeedf2",
+            }}
+            sandbox="allow-same-origin"
+          />
+        </StyledIframeWrapper>
       </IframeContainer>
-      <EmailSectionsContainer isTablet={tabletMode}>
-        Set up additional sections
-        <EmailSection
-          icon={<ParkingIcon />}
-          title={"Parking"}
-          enable={parking.enabled}
-          setEnable={() =>
-            setParking({ ...parking, enabled: !parking.enabled })
-          }
-          content={parking.content}
-          setContent={(newContent) =>
-            setParking({ ...parking, content: newContent })
-          }
-        />
-        <EmailSection
-          icon={<ScheduleIcon />}
-          title={"Schedule"}
-          enable={schedule.enabled}
-          setEnable={() =>
-            setSchedule({ ...schedule, enabled: !schedule.enabled })
-          }
-          content={schedule.content}
-          setContent={(newContent) =>
-            setSchedule({ ...schedule, content: newContent })
-          }
-        />
-        <EmailSection
-          icon={<DiningIcon />}
-          title={"Dining"}
-          enable={dining.enabled}
-          setEnable={() => setDining({ ...dining, enabled: !dining.enabled })}
-          content={dining.content}
-          setContent={(newContent) =>
-            setDining({ ...dining, content: newContent })
-          }
-        />
+      <EmailSectionsContainer
+        isTablet={tabletMode}
+        isCustomTemplate={customTemplate.enabled}
+      >
+        <Header>
+          <HeaderTitle>Email Template</HeaderTitle>
+          <ToggleContainer>
+            <ToggleLabel>
+              {customTemplate.enabled ? "Custom HTML" : "Standard Template"}
+            </ToggleLabel>
+            <ToggleSwitch>
+              <input
+                type="checkbox"
+                checked={customTemplate.enabled}
+                onChange={() => toggleCustomTemplate(!customTemplate.enabled)}
+              />
+              <span></span>
+            </ToggleSwitch>
+          </ToggleContainer>
+        </Header>
+
+        {customTemplate.enabled ? (
+          <SectionContainer>
+            <EditorContainer>
+              <EditorToolbar>
+                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+                  HTML Editor
+                </div>
+                <ToolbarActions>
+                  <PlaceholderButton onClick={() => insertPlaceholder("name")}>
+                    Insert Name
+                  </PlaceholderButton>
+                  <PlaceholderButton onClick={() => insertPlaceholder("qr")}>
+                    Insert QR Code
+                  </PlaceholderButton>
+                  <ToolbarButton onClick={formatHtml}>
+                    Format HTML
+                  </ToolbarButton>
+                </ToolbarActions>
+              </EditorToolbar>
+              <EditorContent>
+                <Editor
+                  height="100%"
+                  defaultLanguage="html"
+                  value={customTemplate.content}
+                  onChange={(value) =>
+                    setCustomTemplate((prev) => ({
+                      ...prev,
+                      content: value || "",
+                    }))
+                  }
+                  theme="vs-light"
+                  onMount={handleEditorDidMount}
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    wordWrap: "on",
+                    formatOnPaste: true,
+                    formatOnType: true,
+                    lineNumbers: "on",
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                    tabSize: 2,
+                  }}
+                />
+              </EditorContent>
+            </EditorContainer>
+
+            <InfoBox>
+              <p>
+                <strong>Important:</strong> To include dynamic content in your
+                custom template, use the following placeholders:
+              </p>
+              <ul>
+                <li>
+                  <code>&lt;div id="guest-name"&gt;&lt;/div&gt;</code> - Will be
+                  replaced with the guest's name
+                </li>
+                <li>
+                  <code>&lt;div id="qr-code"&gt;&lt;/div&gt;</code> - Will be
+                  replaced with the guest's QR code
+                </li>
+              </ul>
+            </InfoBox>
+          </SectionContainer>
+        ) : (
+          <>
+            <EmailSection
+              icon={<ParkingIcon />}
+              title={"Parking"}
+              enable={parking.enabled}
+              setEnable={() =>
+                setParking({ ...parking, enabled: !parking.enabled })
+              }
+              content={parking.content}
+              setContent={(newContent) =>
+                setParking({ ...parking, content: newContent })
+              }
+            />
+            <EmailSection
+              icon={<ScheduleIcon />}
+              title={"Schedule"}
+              enable={schedule.enabled}
+              setEnable={() =>
+                setSchedule({ ...schedule, enabled: !schedule.enabled })
+              }
+              content={schedule.content}
+              setContent={(newContent) =>
+                setSchedule({ ...schedule, content: newContent })
+              }
+            />
+            <EmailSection
+              icon={<DiningIcon />}
+              title={"Dining"}
+              enable={dining.enabled}
+              setEnable={() =>
+                setDining({ ...dining, enabled: !dining.enabled })
+              }
+              content={dining.content}
+              setContent={(newContent) =>
+                setDining({ ...dining, content: newContent })
+              }
+            />
+          </>
+        )}
       </EmailSectionsContainer>
       {hasChanges ? (
         <Panel>

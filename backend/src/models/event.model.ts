@@ -25,6 +25,10 @@ const eventSchema = new Schema<Event>({
     videoUrl: { type: String },
   },
   emailParams: {
+    customHtmlTemplate: {
+      enabled: { type: Boolean, default: false },
+      content: { type: String },
+    },
     parking: {
       enabled: { type: Boolean },
       content: { type: String },
