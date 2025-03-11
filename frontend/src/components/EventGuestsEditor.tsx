@@ -1257,7 +1257,11 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         items: eventDetails.emailParams.scheduleSrc.items || [],
       },
       eventDetails.emailParams.dining,
-      event.location.address || ""
+      event.location.address || "",
+      false,
+      eventDetails.emailParams.customHtmlTemplate?.enabled
+        ? eventDetails.emailParams.customHtmlTemplate.content
+        : undefined
     );
 
     await axiosInstance.post(`/mail`, {
@@ -1439,7 +1443,11 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
             items: event.emailParams.scheduleSrc.items || [],
           },
           event.emailParams.dining,
-          event.location.address || ""
+          event.location.address || "",
+          false,
+          event.emailParams.customHtmlTemplate?.enabled
+            ? event.emailParams.customHtmlTemplate.content
+            : undefined
         );
 
         return {

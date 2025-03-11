@@ -57,6 +57,10 @@ export interface SponsorDealsModule extends EmailExtraModule {
 }
 
 export interface EmailParams {
+  customHtmlTemplate?: {
+    enabled: boolean;
+    content: string;
+  };
   parking: EmailExtraModule;
   scheduleSrc: ScheduleModule;
   dining: EmailExtraModule;

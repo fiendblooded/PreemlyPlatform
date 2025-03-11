@@ -160,8 +160,50 @@ export function getMailHtml(
   scheduleOptions: EmailExtraModule,
   diningOptions: EmailExtraModule,
   eventLocation: string,
-  bodyOnly?: boolean
+  bodyOnly?: boolean,
+  customHtmlContent?: string
 ): string {
+  // If a custom HTML template is provided, use it with placeholders
+  if (customHtmlContent) {
+    // Replace placeholders with actual content
+    let customHtml = customHtmlContent;
+
+    // Replace guest name placeholder
+    if (customHtml.includes('id="guest-name"')) {
+      customHtml = customHtml.replace(
+        /<div id="guest-name"[^>]*>.*?<\/div>/g,
+        `<div id="guest-name">${guestName}</div>`
+      );
+    }
+
+    // Replace QR code placeholder
+    if (customHtml.includes('id="qr-code"')) {
+      customHtml = customHtml.replace(
+        /<div id="qr-code"[^>]*>.*?<\/div>/g,
+        `<div id="qr-code"><img src="${qrCodeImageSrc}" alt="QR Code" style="display:block; max-width: 250px; width:100%; height:auto; margin:0 auto;"></div>`
+      );
+    }
+
+    // If bodyOnly is true, return just the custom HTML
+    if (bodyOnly) {
+      return customHtml;
+    }
+
+    // Otherwise, wrap it in a proper HTML document
+    return `<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>${eventTitle} - Preemly</title>
+    </head>
+    <body style='margin: 0; padding: 0; font-family: Axiforma, Arial, sans-serif; background-color: #EEEDF2;'>
+        ${customHtml}
+    </body>
+    </html>`;
+  }
+
+  // If no custom template, use the default template
   const lightModeLogoLink = "https://platform.preemly.eu/logosmall.png";
 
   const bodyContent = `

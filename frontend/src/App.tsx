@@ -193,14 +193,8 @@ const AppContent: React.FC = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/events" element={<Events />} />
           <Route path="/profile" element={<Profile />} />
-          <Route
-            path="/events/:id"
-            element={tabletMode ? <EventDetail /> : <Events />}
-          />
-          <Route
-            path="/events/:id/:tab"
-            element={tabletMode ? <EventDetail /> : <Events />}
-          />
+          <Route path="/events/:id" element={<EventDetail />} />
+          <Route path="/events/:id/:tab" element={<EventDetail />} />
           <Route path="/help" element={<PreemlyFAQ />} />
           <Route path="/profile" element={<Profile />} />
           {/* <Route path="/scanner" element={<ScannerPage />} /> */}
