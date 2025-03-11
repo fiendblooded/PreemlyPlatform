@@ -18,6 +18,7 @@ import {
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { format, parseISO, isSameDay } from "date-fns";
+import { v4 as uuidv4 } from "uuid";
 
 // Register Chart.js components
 ChartJS.register(
@@ -666,24 +667,17 @@ const VendorDetail = styled.div`
 // Due Date Calendar Styled Components
 const CalendarContainer = styled.div`
   display: flex;
+  flex-direction: column;
   gap: 24px;
-  margin-top: 20px;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  box-sizing: border-box;
 
-  @media (max-width: 1024px) {
-    flex-direction: column;
+  @media (min-width: 1024px) {
+    flex-direction: row;
   }
 `;
 
 const CalendarWrapper = styled.div`
   flex: 1;
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  min-width: 0;
 `;
 
 const DueDatesList = styled.div`
@@ -766,7 +760,7 @@ const DueDateAmount = styled.div`
   color: #6b3ddf;
 `;
 
-const CalendarHeader = styled.div`
+const CalendarMonthHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -780,13 +774,19 @@ const CalendarTitle = styled.h3`
   margin: 0;
 `;
 
+const CalendarActions = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+`;
+
 const CalendarNavigation = styled.div`
   display: flex;
   gap: 8px;
 `;
 
 const CalendarButton = styled.button`
-  background: #f5f5f5;
+  background: rgb(167, 167, 167);
   border: none;
   border-radius: 4px;
   padding: 8px 12px;
@@ -794,7 +794,7 @@ const CalendarButton = styled.button`
   font-size: 14px;
 
   &:hover {
-    background: #e9e9e9;
+    background: rgb(68, 68, 68);
   }
 `;
 
@@ -808,44 +808,38 @@ const CalendarDay = styled.div<{
   isToday?: boolean;
   hasDueDate?: boolean;
   isCurrentMonth?: boolean;
+  isHeader?: boolean;
+  isSelected?: boolean;
 }>`
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   height: 40px;
-  border-radius: 8px;
-  font-size: 14px;
   position: relative;
-  cursor: ${(props) => (props.hasDueDate ? "pointer" : "default")};
-  background: ${(props) =>
-    props.isToday ? "#f0f0ff" : props.hasDueDate ? "#f9f5ff" : "transparent"};
-  color: ${(props) => (props.isCurrentMonth ? "#333" : "#ccc")};
-  font-weight: ${(props) =>
-    props.isToday || props.hasDueDate ? "600" : "normal"};
+  cursor: ${(props) => (props.isHeader ? "default" : "pointer")};
+  border-radius: 8px;
+  font-weight: ${(props) => (props.isHeader ? "600" : "400")};
+  color: ${(props) =>
+    props.isHeader
+      ? "#666"
+      : props.isCurrentMonth
+      ? "#333"
+      : "rgba(0, 0, 0, 0.3)"};
+  background-color: ${(props) =>
+    props.isSelected
+      ? "rgba(99, 102, 241, 0.1)"
+      : props.hasDueDate
+      ? "rgba(99, 102, 241, 0.05)"
+      : "transparent"};
+  border: ${(props) =>
+    props.isSelected
+      ? "1px solid rgba(99, 102, 241, 0.5)"
+      : "1px solid transparent"};
 
   &:hover {
-    background: ${(props) =>
-      props.hasDueDate ? "#f0e6ff" : props.isToday ? "#e6e6ff" : "transparent"};
+    background-color: ${(props) =>
+      props.isHeader ? "transparent" : "rgba(99, 102, 241, 0.05)"};
   }
-
-  &::after {
-    content: "";
-    display: ${(props) => (props.hasDueDate ? "block" : "none")};
-    position: absolute;
-    bottom: 4px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #6b3ddf;
-  }
-`;
-
-const DayOfWeek = styled.div`
-  text-align: center;
-  font-weight: 600;
-  font-size: 14px;
-  color: #666;
-  padding: 8px 0;
 `;
 
 const NoDataMessage = styled.div`
@@ -857,7 +851,6 @@ const NoDataMessage = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
 `;
 
 const PastDueDateItem = styled(DueDateItem)`
@@ -1874,37 +1867,50 @@ const EventBudgetEditor: React.FC<{
       <AnalysisWrapper>
         <CalendarContainer>
           <CalendarWrapper>
-            <CalendarHeader>
+            <CalendarMonthHeader>
               <CalendarTitle>
                 {format(selectedMonth, "MMMM yyyy")}
               </CalendarTitle>
               <CalendarNavigation>
+                <SecondaryButton
+                  width={200}
+                  onClick={() => downloadICSFile(sortedDueDates)}
+                  disabled={sortedDueDates.length === 0}
+                >
+                  Export Calendar as .ics
+                </SecondaryButton>
                 <CalendarButton onClick={goToPrevMonth}>
                   Previous
                 </CalendarButton>
                 <CalendarButton onClick={goToNextMonth}>Next</CalendarButton>
               </CalendarNavigation>
-            </CalendarHeader>
+            </CalendarMonthHeader>
 
             <CalendarGrid>
-              {/* Days of the week */}
+              {/* Weekday headers */}
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                <DayOfWeek key={day}>{day}</DayOfWeek>
+                <CalendarDay key={day} isHeader={true}>
+                  {day}
+                </CalendarDay>
               ))}
 
               {/* Calendar days */}
               {calendarDays.map((day, index) => (
                 <CalendarDay
                   key={index}
-                  isToday={day.isToday}
-                  hasDueDate={day.hasDueDate}
                   isCurrentMonth={day.isCurrentMonth}
+                  isSelected={
+                    selectedDate ? isSameDay(day.date, selectedDate) : false
+                  }
+                  hasDueDate={day.hasDueDate}
                   onClick={() => handleDayClick(day)}
                 >
-                  {day.day}
+                  {day.date.getDate()}
+                  {day.hasDueDate && <DueDateIndicator />}
                 </CalendarDay>
               ))}
             </CalendarGrid>
+            <CalendarActions></CalendarActions>
           </CalendarWrapper>
 
           <DueDatesList>
@@ -2131,6 +2137,89 @@ const EventBudgetEditor: React.FC<{
       ],
     };
   };
+
+  // Function to generate ICS file content from due dates
+  const generateICSContent = (
+    dueDates: Array<{
+      title: string;
+      parsedDate: Date;
+      amount?: number;
+    }>
+  ) => {
+    // ICS file header
+    let icsContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Preemly//Event Due Dates//EN",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+    ].join("\r\n");
+
+    // Add each due date as an event
+    dueDates.forEach((dueDate) => {
+      const eventDate = format(dueDate.parsedDate, "yyyyMMdd");
+      const uid = uuidv4();
+      const title = dueDate.title || "Payment Due";
+      const description = dueDate.amount
+        ? `Amount due: ${formatCurrency(dueDate.amount)}`
+        : "Payment due for event";
+
+      // Add event to ICS content
+      icsContent += [
+        "\r\nBEGIN:VEVENT",
+        `UID:${uid}`,
+        `DTSTAMP:${format(new Date(), "yyyyMMdd'T'HHmmss'Z'")}`,
+        `DTSTART;VALUE=DATE:${eventDate}`,
+        `DTEND;VALUE=DATE:${eventDate}`,
+        `SUMMARY:${title}`,
+        `DESCRIPTION:${description}`,
+        "END:VEVENT",
+      ].join("\r\n");
+    });
+
+    // ICS file footer
+    icsContent += "\r\nEND:VCALENDAR";
+
+    return icsContent;
+  };
+
+  // Function to download ICS file
+  const downloadICSFile = (
+    dueDates: Array<{
+      title: string;
+      parsedDate: Date;
+      amount?: number;
+    }>
+  ) => {
+    if (!dueDates || dueDates.length === 0) {
+      addToast("No due dates to export", ToastType.ERROR);
+      return;
+    }
+
+    const icsContent = generateICSContent(dueDates);
+    const blob = new Blob([icsContent], {
+      type: "text/calendar;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${event.title || "Event"}_Due_Dates.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    addToast("Calendar exported successfully", ToastType.SUCCESS);
+  };
+
+  const DueDateIndicator = styled.div`
+    position: absolute;
+    bottom: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #6b3ddf;
+  `;
 
   return (
     <BudgetWrapper>
