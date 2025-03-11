@@ -30,37 +30,42 @@ const sendEmail = async (
   subject: string,
   htmlContent: string,
   scheduledTime?: Date,
-): Promise<EmailResponse> => {
-  if (Array.isArray(recipient)) {
-    for (const email of recipient) {
-      if (!validateEmail(email)) {
-        throw new Error(`Invalid email address: ${email}`);
+): Promise<EmailResponse[]> => {
+  const recipients = Array.isArray(recipient) ? recipient : [recipient];
+
+  for (const email of recipients) {
+    if (!validateEmail(email)) {
+      throw new Error(`Invalid email address: ${email}`);
+    }
+  }
+
+  const responses: EmailResponse[] = [];
+  const chunkSize = 26;
+
+  for (let i = 0; i < recipients.length; i += chunkSize) {
+    const chunk = recipients.slice(i, i + chunkSize);
+
+    try {
+      const emailPayload: EmailPayload = {
+        from: 'Preemly <noreply@mail.preemly.eu>',
+        to: chunk,
+        subject: subject,
+        html: htmlContent,
+      };
+
+      if (scheduledTime && scheduledTime > new Date()) {
+        emailPayload['o:deliverytime'] = Math.floor(scheduledTime.getTime() / 1000).toString();
       }
+
+      const response = await mg.messages.create('mail.preemly.eu', emailPayload);
+      responses.push(response as EmailResponse);
+    } catch (error) {
+      console.error('Error sending email with Mailgun:', error);
+      throw error;
     }
-  } else if (!validateEmail(recipient)) {
-    throw new Error(`Invalid email address: ${recipient}`);
   }
 
-  try {
-    const emailPayload: EmailPayload = {
-      from: 'Preemly <noreply@mail.preemly.eu>',
-      to: recipient,
-      subject: subject,
-      html: htmlContent,
-    };
-
-    // Add scheduling if a future date is provided
-    if (scheduledTime && scheduledTime > new Date()) {
-      // Mailgun expects the 'o:deliverytime' parameter in Unix timestamp format
-      emailPayload['o:deliverytime'] = Math.floor(scheduledTime.getTime() / 1000).toString();
-    }
-
-    const response = await mg.messages.create('mail.preemly.eu', emailPayload);
-    return response as EmailResponse;
-  } catch (error) {
-    console.error('Error sending email with Mailgun:', error);
-    throw error;
-  }
+  return responses;
 };
 
 export default sendEmail;
