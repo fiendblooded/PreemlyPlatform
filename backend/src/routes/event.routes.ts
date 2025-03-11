@@ -22,6 +22,7 @@ router.put('/:id/guests', verifyUser, eventController.updateEventGuests);
 router.put('/:id/guests/import', verifyUser, eventController.uploadGuestsFromExcel);
 router.get('/:id/guests/export', verifyUser, eventController.downloadGuestsToExcel);
 router.post('/:id/feedback', eventController.addEventFeedback);
+router.post('/rewrite-description', verifyUser, eventController.rewriteDescription);
 router.get('/:id/invoices', verifyUser, invoiceController.getEventInvoices);
 router.post('/:id/invoices', verifyUser, upload.single('invoice'), invoiceController.uploadInvoice);
 router.delete('/invoices/:id', verifyUser, invoiceController.deleteInvoice);

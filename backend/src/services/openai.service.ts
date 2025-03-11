@@ -224,3 +224,41 @@ export const analyzeReviews = async (reviews: string[]): Promise<ReviewAnalysis>
     throw error;
   }
 };
+
+export const rewriteEventDescription = async (description: string): Promise<string> => {
+  try {
+    const systemPrompt = `You are an AI assistant specialized in event marketing and copywriting.
+        Your task is to rewrite event descriptions to make them more engaging, exciting, and appealing.
+        Maintain the core information but enhance the language, tone, and structure to create excitement.
+        Use vivid language, emotional appeals, and compelling calls to action.
+        Keep the same general length as the original description.
+        
+        IMPORTANT: Return ONLY the rewritten description as plain text without any prefixes, 
+        explanations, or formatting. Do not include phrases like "Here's your rewritten description:" 
+        or any other commentary.`;
+
+    const userPrompt = `Please rewrite the following event description to make it more engaging: 
+        
+        Original Description: ${description}
+        
+        Make it exciting, vivid, and compelling while maintaining all the key information.
+        Return ONLY the rewritten description text without any additional commentary.`;
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.7,
+      max_tokens: 1000,
+    });
+
+    const rewrittenText = response.choices[0]?.message?.content?.trim() || 'Failed to generate description';
+
+    return rewrittenText;
+  } catch (error) {
+    console.error('Error rewriting event description:', error);
+    throw new Error('Failed to rewrite event description');
+  }
+};

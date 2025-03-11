@@ -287,34 +287,33 @@ const EventTypeIcon = styled.span`
 `;
 
 const EmptyState = styled.div`
+  text-align: center;
+  padding: 24px;
   color: ${colors.textSecondary};
-  font-size: 15px;
+  background-color: ${colors.backgroundLight};
+  border-radius: 8px;
+  margin-top: 16px;
+
+  p {
+    margin-bottom: 16px;
+  }
 
   a {
     color: ${colors.primary};
     cursor: pointer;
-    font-weight: 500;
-    text-decoration: none;
-    position: relative;
+    text-decoration: underline;
 
-    &::after {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 1px;
-      bottom: -1px;
-      left: 0;
-      background-color: ${colors.primary};
-      transform: scaleX(0);
-      transform-origin: bottom right;
-      transition: transform 0.3s ease;
-    }
-
-    &:hover::after {
-      transform: scaleX(1);
-      transform-origin: bottom left;
+    &:hover {
+      color: ${colors.primaryHover};
     }
   }
+`;
+
+const EmptyStateActions = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
 `;
 
 const DateTimeContainer = styled.div`
@@ -395,6 +394,149 @@ interface Event {
   eventType: string;
 }
 
+// Import or define the AIButton component
+const AIButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 20px;
+  background: linear-gradient(
+    90deg,
+    #5e83fb,
+    #c054ff,
+    #ea5cbe,
+    #c054ff,
+    #5e83fb
+  );
+  background-size: 200% 100%;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(192, 84, 255, 0.3);
+  animation: gradientMove 3s linear infinite;
+  line-height: 24px;
+  @keyframes gradientMove {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 200% 50%;
+    }
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(192, 84, 255, 0.4);
+    animation: gradientMove 1.5s linear infinite;
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 3px rgba(192, 84, 255, 0.3);
+  }
+
+  &:disabled {
+    background: linear-gradient(
+      90deg,
+      #5e83fb,
+      #c054ff,
+      #ea5cbe,
+      #c054ff,
+      #5e83fb
+    );
+    background-size: 200% 100%;
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    animation: gradientMove 3s linear infinite;
+  }
+`;
+
+// Add a loading spinner component
+const LoadingSpinner = styled.div`
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+// Add an AI icon component
+const AIIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M19.6385 19.6387C20.1064 20.1066 20.1098 20.8693 19.5976 21.2884C18.2657 22.3778 16.7112 23.1712 15.0376 23.6091C12.9766 24.1484 10.8093 24.1293 8.75816 23.5538C6.70705 22.9783 4.84611 21.8672 3.36652 20.3345C1.88693 18.8018 0.84202 16.9029 0.339136 14.8327C-0.163748 12.7626 -0.106478 10.5959 0.505062 8.55522C1.1166 6.51454 2.26037 4.67345 3.81886 3.22107C5.37735 1.76869 7.29439 0.75739 9.37304 0.291048C11.06 -0.0874224 12.8041 -0.0958826 14.4863 0.260427C15.1353 0.397894 15.4836 1.07846 15.2824 1.70927C15.0808 2.34126 14.4039 2.68214 13.7503 2.56094C12.4788 2.32512 11.1684 2.34792 9.89841 2.63284C8.23549 3.00591 6.70186 3.81496 5.45506 4.97686C4.20827 6.13876 3.29326 7.61163 2.80402 9.24418C2.31479 10.8767 2.26898 12.6101 2.67128 14.2662C3.07359 15.9223 3.90952 17.4414 5.09319 18.6676C6.27687 19.8937 7.76561 20.7827 9.4065 21.2431C11.0474 21.7035 12.7813 21.7187 14.43 21.2873C15.6895 20.9578 16.8646 20.3766 17.8864 19.5834C18.4109 19.1762 19.1691 19.1693 19.6385 19.6387ZM21.3347 4.45945C20.9176 3.94312 20.15 3.9421 19.6779 4.40882C19.2074 4.87404 19.2102 5.6276 19.6132 6.15228C20.839 7.748 21.5389 9.69801 21.5962 11.7295C21.6535 13.7613 21.0646 15.7479 19.9305 17.4103C19.5579 17.9565 19.5979 18.7088 20.0939 19.1468C20.5915 19.5861 21.3575 19.5421 21.7446 19.0035C23.2722 16.8779 24.0697 14.3003 23.9952 11.6618C23.9208 9.02362 22.9794 6.49538 21.3347 4.45945ZM12.6411 5.75815C12.3993 5.22787 11.6376 5.22786 11.3958 5.75815L11.2432 6.0929C10.3865 7.97173 9.27951 9.72884 7.95154 11.3175L7.73017 11.5823C7.52153 11.8319 7.52153 12.1928 7.73017 12.4424L7.95154 12.7072C9.27951 14.2959 10.3865 16.053 11.2432 17.9319L11.3958 18.2666C11.6376 18.7969 12.3993 18.7969 12.6411 18.2666L12.7937 17.9319C13.6504 16.053 14.7574 14.2959 16.0854 12.7072L16.3068 12.4424C16.5154 12.1928 16.5154 11.8319 16.3068 11.5823L16.0854 11.3175C14.7574 9.72884 13.6504 7.97173 12.7937 6.0929L12.6411 5.75815ZM17.9612 1.58272C17.3845 1.25284 16.6689 1.53027 16.3989 2.13631C16.1294 2.74097 16.4067 3.44295 16.9738 3.78616C17.1414 3.88756 17.3058 3.99407 17.4669 4.10554C18.0131 4.48354 18.7706 4.44916 19.2136 3.95485C19.6552 3.46211 19.6169 2.70013 19.0823 2.30958C18.7224 2.04666 18.3481 1.804 17.9612 1.58272Z"
+      fill="white"
+    />
+  </svg>
+);
+
+// Hint icon component
+const HintIcon = () => (
+  <span
+    style={{
+      display: "inline-flex",
+      verticalAlign: "middle",
+      marginRight: "6px",
+    }}
+  >
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 4.75L19.25 9L12 13.25L4.75 9L12 4.75Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9.25 12L4.75 15L12 19.25L19.25 15L14.6722 12"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </span>
+);
+
+const AIHint = styled.div`
+  margin-top: 8px;
+  font-size: 14px;
+  color: ${colors.textSecondary};
+  background-color: rgba(94, 131, 251, 0.1);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid ${colors.primary};
+`;
+
 const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
   event,
   refetch,
@@ -406,6 +548,7 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
   const [startDate, setStartDate] = useState(new Date(event.date || ""));
   const [endDate, setEndDate] = useState(new Date(event.endDate || ""));
   const [eventType, setEventType] = useState(event.eventType);
+  const [isRewritingDescription, setIsRewritingDescription] = useState(false);
 
   const updateDescription = async () => {
     await axiosInstance.put(`/events/${event._id}`, {
@@ -414,6 +557,23 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
     });
     refetch();
     setIsEditingDescription(false);
+  };
+
+  const rewriteDescriptionWithAI = async () => {
+    try {
+      setIsRewritingDescription(true);
+      const response = await axiosInstance.post("/events/rewrite-description", {
+        description,
+      });
+
+      if (response.data.success && response.data.data?.description) {
+        setDescription(response.data.data.description);
+      }
+    } catch (error) {
+      console.error("Error rewriting description:", error);
+    } finally {
+      setIsRewritingDescription(false);
+    }
   };
 
   const updateEventType = async () => {
@@ -485,8 +645,41 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe your event..."
             />
+            {!description && (
+              <AIHint>
+                Write a basic description first, then use the "Enhance with AI"
+                button to make it more engaging.
+              </AIHint>
+            )}
+            {description && description.length > 0 && (
+              <AIHint>
+                <HintIcon />
+                Click "Enhance with AI" to make your description more engaging
+                and appealing to potential attendees.
+              </AIHint>
+            )}
             <GuestActionsButtonsContainer>
-              <PrimaryButton onClick={updateDescription}>Save</PrimaryButton>
+              <PrimaryButton
+                onClick={updateDescription}
+                disabled={!description}
+              >
+                Save
+              </PrimaryButton>
+              <AIButton
+                onClick={rewriteDescriptionWithAI}
+                disabled={isRewritingDescription || !description}
+              >
+                {isRewritingDescription ? (
+                  <>
+                    <LoadingSpinner /> Rewriting...
+                  </>
+                ) : (
+                  <>
+                    <AIIcon />
+                    Enhance with AI
+                  </>
+                )}
+              </AIButton>
               <SecondaryButton onClick={() => setIsEditingDescription(false)}>
                 Cancel
               </SecondaryButton>
@@ -496,8 +689,30 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
           <SectionContent>{event.description}</SectionContent>
         ) : (
           <EmptyState>
-            No description provided. Click{" "}
-            <a onClick={() => setIsEditingDescription(true)}>here</a> to edit.
+            <p>
+              No description provided yet. Start by writing a brief description
+              of your event, and you can enhance it with AI later.
+            </p>
+            <EmptyStateActions>
+              <AIButton onClick={() => setIsEditingDescription(true)}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 5V19M5 12H19"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Write Description
+              </AIButton>
+            </EmptyStateActions>
           </EmptyState>
         )}
       </EventDetails>

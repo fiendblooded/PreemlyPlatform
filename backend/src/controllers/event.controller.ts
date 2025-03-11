@@ -10,6 +10,7 @@ import { extractPublicId } from '../utils/helpers';
 import xlsx from 'xlsx';
 import multer from 'multer';
 import Task from '../models/task.model';
+import { rewriteEventDescription } from '../services/openai.service';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -686,5 +687,35 @@ export const getEventTasks = async (req: Request, res: Response): Promise<void> 
   } catch (error) {
     console.error('Error fetching tasks:', error);
     res.status(500).json({ message: 'Failed to fetch tasks', error });
+  }
+};
+
+export const rewriteDescription = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { description } = req.body;
+
+    if (!description) {
+      res.status(400).json({
+        success: false,
+        message: 'Description is required',
+        data: null,
+      });
+      return;
+    }
+
+    const rewrittenDescription = await rewriteEventDescription(description);
+
+    res.json({
+      success: true,
+      message: 'Description rewritten successfully',
+      data: { description: rewrittenDescription },
+    });
+  } catch (error) {
+    console.error('Error in Rewrite Description:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      data: null,
+    });
   }
 };
