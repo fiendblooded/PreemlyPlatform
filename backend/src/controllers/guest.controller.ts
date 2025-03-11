@@ -25,6 +25,7 @@ export const createGuest = async (req: Request, res: Response): Promise<void> =>
     const savedGuest = await newGuest.save();
 
     event.guests.push(savedGuest._id as ObjectId);
+
     await event.save();
 
     res.status(201).json({ success: true, data: savedGuest });
