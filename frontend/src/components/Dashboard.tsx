@@ -9,6 +9,7 @@ import TaskList from "./TaskList";
 import Spinner from "./Spinner";
 import { isTablet, getDateTimeStatus, SvgSC } from "../common/common";
 import EventForm from "./form/EventForm";
+import { Task } from "../types";
 
 // Types
 interface Event {
@@ -436,6 +437,7 @@ const CalendarWrapper = styled.div`
 
 const Dashboard: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const axiosInstance = useAxiosWithAuth();
@@ -443,18 +445,45 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axiosInstance.get("/events");
-        setEvents(response.data.data);
+        // Fetch events
+        const eventsResponse = await axiosInstance.get("/events");
+        setEvents(eventsResponse.data.data);
+
+        // Fetch tasks
+        const tasksResponse = await axiosInstance.get("/tasks");
+        // Handle different response formats
+        let tasksData: Task[] = [];
+        if (Array.isArray(tasksResponse.data)) {
+          tasksData = tasksResponse.data;
+        } else if (
+          tasksResponse.data &&
+          typeof tasksResponse.data === "object" &&
+          Array.isArray(tasksResponse.data.tasks)
+        ) {
+          tasksData = tasksResponse.data.tasks;
+        } else if (
+          tasksResponse.data &&
+          typeof tasksResponse.data === "object"
+        ) {
+          // Try to find an array in the response
+          for (const key in tasksResponse.data) {
+            if (Array.isArray(tasksResponse.data[key])) {
+              tasksData = tasksResponse.data[key];
+              break;
+            }
+          }
+        }
+        setTasks(tasksData);
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEvents();
+    fetchData();
   }, []);
 
   const calculateStats = () => {
@@ -464,7 +493,7 @@ const Dashboard: React.FC = () => {
       .filter(
         (currentEvent) =>
           getDateTimeStatus(currentEvent.date, currentEvent.endDate).type ===
-          "Incoming"
+          "Upcoming"
       )
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -929,15 +958,7 @@ const Dashboard: React.FC = () => {
                   </svg>
                   Tasks
                 </SectionTitle>
-                <TaskList
-                  events={events.map((event) => ({
-                    ...event,
-                    tasks: event.tasks.map((task) => ({
-                      ...task,
-                      dueDate: new Date().toISOString(),
-                    })),
-                  }))}
-                />
+                <TaskList tasks={tasks} compact={true} />
               </DashboardSection>
             </DashboardRow>
           </DashboardContainer>
