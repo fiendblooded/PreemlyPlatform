@@ -6,6 +6,7 @@ import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { Task } from "../types";
 import CustomCheckbox from "../common/CustomCheckbox";
 import { PrimaryButton, SecondaryButton } from "./EventGuestsEditor";
+import TaskDetail from "./TaskDetail";
 
 // Styled Components
 const Container = styled.div`
@@ -14,8 +15,9 @@ const Container = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin: 20px auto;
-  width: calc(100% - 40px);
-  max-width: 900px;
+  width: 90%;
+
+  box-sizing: border-box;
 `;
 
 const Header = styled.div`
@@ -266,6 +268,7 @@ const DatePickerWrapper = styled.div`
     font-size: 14px;
     color: #1e293b;
     background-color: white;
+    box-sizing: border-box;
   }
 `;
 
@@ -289,6 +292,7 @@ const EventTasksEditor: React.FC<EventTasksEditorProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const [newTask, setNewTask] = useState<Partial<Task>>({
     title: "",
@@ -302,11 +306,39 @@ const EventTasksEditor: React.FC<EventTasksEditorProps> = ({
     eventId: event._id,
   });
 
+  // Function to fetch tasks - defined outside useEffect so it can be reused
+  const fetchTasksEffect = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstanceRef.current.get(
+        `/tasks?eventId=${event._id}`
+      );
+
+      if (Array.isArray(response.data)) {
+        setTasks(response.data);
+      } else if (
+        response.data &&
+        typeof response.data === "object" &&
+        Array.isArray(response.data.tasks)
+      ) {
+        setTasks(response.data.tasks);
+      } else {
+        console.error("Unexpected response format:", response.data);
+        setTasks([]);
+      }
+    } catch (err) {
+      console.error("Error fetching tasks:", err);
+      setError("Failed to load tasks");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fetch tasks for this event
   useEffect(() => {
     let isMounted = true;
 
-    const fetchTasks = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         const response = await axiosInstanceRef.current.get(
@@ -338,7 +370,7 @@ const EventTasksEditor: React.FC<EventTasksEditorProps> = ({
       }
     };
 
-    fetchTasks();
+    fetchData();
 
     return () => {
       isMounted = false;
@@ -485,6 +517,31 @@ const EventTasksEditor: React.FC<EventTasksEditorProps> = ({
   // Status order for display
   const statusOrder = ["next", "inProgress", "finished"];
 
+  // Handle task click to open detail view
+  const handleTaskClick = (taskId: string) => {
+    setSelectedTaskId(taskId);
+  };
+
+  // Handle task update from detail view
+  const handleTaskUpdated = (updatedTask?: Task) => {
+    if (updatedTask) {
+      // Update the task in the local state without refetching
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === updatedTask._id ? updatedTask : task
+        )
+      );
+    } else {
+      // If no task is provided (e.g., after deletion), refresh the tasks
+      fetchTasksEffect();
+    }
+  };
+
+  // Handle closing the task detail
+  const handleTaskDetailClose = () => {
+    setSelectedTaskId(null);
+  };
+
   if (loading) {
     return <Container>Loading tasks...</Container>;
   }
@@ -530,11 +587,15 @@ const EventTasksEditor: React.FC<EventTasksEditorProps> = ({
                     key={task._id}
                     status={task.status}
                     isCompleted={task.isCompleted}
+                    onClick={() => task._id && handleTaskClick(task._id)}
+                    style={{ cursor: "pointer" }}
                   >
-                    <CustomCheckbox
-                      checked={task.isCompleted}
-                      onChange={() => toggleTaskCompletion(task._id || "")}
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <CustomCheckbox
+                        checked={task.isCompleted}
+                        onChange={() => toggleTaskCompletion(task._id || "")}
+                      />
+                    </div>
 
                     <TaskContent>
                       <TaskTitle isCompleted={task.isCompleted}>
@@ -608,7 +669,7 @@ const EventTasksEditor: React.FC<EventTasksEditorProps> = ({
                       </TaskMeta>
                     </TaskContent>
 
-                    <TaskActions>
+                    <TaskActions onClick={(e) => e.stopPropagation()}>
                       <SecondaryButton
                         width={24}
                         color={"rgb(173, 1, 1)"}
@@ -719,6 +780,14 @@ const EventTasksEditor: React.FC<EventTasksEditorProps> = ({
             <PrimaryButton onClick={addTask}>Add Task</PrimaryButton>
           </ButtonContainer>
         </FormContainer>
+      )}
+
+      {selectedTaskId && (
+        <TaskDetail
+          taskId={selectedTaskId}
+          onClose={handleTaskDetailClose}
+          onTaskUpdated={handleTaskUpdated}
+        />
       )}
     </Container>
   );
