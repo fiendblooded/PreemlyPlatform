@@ -19,6 +19,7 @@ import { Task, Event } from "../types";
 import useAxiosWithAuth from "../components/auth/useAxiosWithAuth";
 import TaskDetail from "./TaskDetail";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import TopBar from "./TopBar";
 
 // This is needed for react-beautiful-dnd to work with React 18 and StrictMode
 // It's a workaround for the issue with the library
@@ -41,15 +42,15 @@ const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
 };
 
 // Styled Components
-const Container = styled.div`
-  padding: 2rem;
+const PageWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f8f9fc;
 `;
 
-const Title = styled.h1`
-  font-size: 24px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 24px;
+const Container = styled.div`
+  padding: 20px 32px;
 `;
 
 const KanbanBoard = styled.div`
@@ -496,29 +497,6 @@ const ErrorMessage = styled.div`
 `;
 
 // Add these new styled components after the existing styled components
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
-`;
-
-const PageTitle = styled.h1`
-  font-size: 24px;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  svg {
-    color: #6366f1;
-  }
-`;
-
 const FiltersBar = styled.div`
   display: flex;
   gap: 16px;
@@ -1303,50 +1281,39 @@ const Tasks: React.FC = () => {
 
   if (loading) {
     return (
-      <Container>
-        <Title>Task Management</Title>
-        <div style={{ textAlign: "center", padding: "2rem" }}>
-          <LoadingSpinner />
-          <p>Loading tasks...</p>
-        </div>
-      </Container>
+      <PageWrapper>
+        <TopBar sectionTitle="Task Management" />
+        <Container>
+          <div style={{ textAlign: "center", padding: "2rem" }}>
+            <LoadingSpinner />
+            <p>Loading tasks...</p>
+          </div>
+        </Container>
+      </PageWrapper>
     );
   }
 
   if (error) {
     return (
-      <Container>
-        <Title>Task Management</Title>
-        <div style={{ textAlign: "center", padding: "2rem", color: "#ef4444" }}>
-          <p>{error}</p>
-          <Button onClick={() => window.location.reload()}>Retry</Button>
-        </div>
-      </Container>
+      <PageWrapper>
+        <TopBar sectionTitle="Task Management" />
+        <Container>
+          <div
+            style={{ textAlign: "center", padding: "2rem", color: "#ef4444" }}
+          >
+            <p>{error}</p>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </div>
+        </Container>
+      </PageWrapper>
     );
   }
 
   return (
-    <Container>
-      <PageHeader>
-        <PageTitle>
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9 11L12 14L22 4M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Task Management
-        </PageTitle>
+    <PageWrapper>
+      <TopBar sectionTitle="Task Management" />
 
+      <Container>
         <SummaryCard>
           <svg
             width="20"
@@ -1372,952 +1339,969 @@ const Tasks: React.FC = () => {
           </svg>
           <span>Total Tasks: {filteredTasks.length}</span>
         </SummaryCard>
-      </PageHeader>
 
-      <FiltersBar>
-        <FilterGroup>
-          <FilterLabel htmlFor="search">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M14.9536 14.9458L21 21M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+        <FiltersBar>
+          <FilterGroup>
+            <FilterLabel htmlFor="search">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.9536 14.9458L21 21M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Search
+            </FilterLabel>
+            <SearchContainer>
+              <SearchInput
+                id="search"
+                type="text"
+                placeholder="Search tasks..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-            </svg>
-            Search
-          </FilterLabel>
-          <SearchContainer>
-            <SearchInput
-              id="search"
-              type="text"
-              placeholder="Search tasks..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {searchTerm !== "" && (
-              <ClearButton onClick={() => setSearchTerm("")}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M9 9L15 15M15 9L9 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </ClearButton>
-            )}
-          </SearchContainer>
-        </FilterGroup>
+              {searchTerm !== "" && (
+                <ClearButton onClick={() => setSearchTerm("")}>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M9 9L15 15M15 9L9 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </ClearButton>
+              )}
+            </SearchContainer>
+          </FilterGroup>
 
-        <FilterGroup>
-          <FilterLabel htmlFor="eventFilter">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          <FilterGroup>
+            <FilterLabel htmlFor="eventFilter">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M16 2V6M8 2V6M3 10H21"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Event
+            </FilterLabel>
+            <FilterSelect
+              id="eventFilter"
+              value={selectedEvent}
+              onChange={handleEventFilterChange}
+              style={{
+                borderLeft:
+                  selectedEvent !== "all" ? "4px solid #6366f1" : "none",
+              }}
             >
-              <path
-                d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M16 2V6M8 2V6M3 10H21"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Event
-          </FilterLabel>
-          <FilterSelect
-            id="eventFilter"
-            value={selectedEvent}
-            onChange={handleEventFilterChange}
-            style={{
-              borderLeft:
-                selectedEvent !== "all" ? "4px solid #6366f1" : "none",
-            }}
-          >
-            <option value="all">All Events</option>
-            {events.map((event) => (
-              <option key={event._id} value={event._id}>
-                {event.title}
-              </option>
-            ))}
-          </FilterSelect>
-        </FilterGroup>
-
-        <FilterGroup>
-          <FilterLabel htmlFor="priorityFilter">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 9V13M12 17H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Priority
-          </FilterLabel>
-          <FilterSelect
-            id="priorityFilter"
-            value={priorityFilter}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setPriorityFilter(e.target.value)
-            }
-            style={{
-              borderLeft:
-                priorityFilter !== "all"
-                  ? `4px solid ${
-                      priorityFilter === "high"
-                        ? "#ef4444"
-                        : priorityFilter === "medium"
-                        ? "#f59e0b"
-                        : "#10b981"
-                    }`
-                  : "none",
-            }}
-          >
-            <option value="all">All Priorities</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </FilterSelect>
-        </FilterGroup>
-
-        <FilterGroup>
-          <FilterLabel htmlFor="assigneeFilter">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Assignee
-          </FilterLabel>
-          <FilterSelect
-            id="assigneeFilter"
-            value={assigneeFilter}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setAssigneeFilter(e.target.value)
-            }
-            style={{
-              borderLeft:
-                assigneeFilter !== "all" ? "4px solid #8b5cf6" : "none",
-            }}
-          >
-            <option value="all">All Assignees</option>
-            <option value="unassigned">Unassigned</option>
-            {uniqueAssignees
-              .filter((a) => a !== "all" && a !== "unassigned")
-              .map((assignee) => (
-                <option key={assignee} value={assignee}>
-                  {assignee}
+              <option value="all">All Events</option>
+              {events.map((event) => (
+                <option key={event._id} value={event._id}>
+                  {event.title}
                 </option>
               ))}
-          </FilterSelect>
-        </FilterGroup>
+            </FilterSelect>
+          </FilterGroup>
 
-        <FilterGroup>
-          <FilterLabel htmlFor="dueDateFilter">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          <FilterGroup>
+            <FilterLabel htmlFor="priorityFilter">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 9V13M12 17H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Priority
+            </FilterLabel>
+            <FilterSelect
+              id="priorityFilter"
+              value={priorityFilter}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                setPriorityFilter(e.target.value)
+              }
+              style={{
+                borderLeft:
+                  priorityFilter !== "all"
+                    ? `4px solid ${
+                        priorityFilter === "high"
+                          ? "#ef4444"
+                          : priorityFilter === "medium"
+                          ? "#f59e0b"
+                          : "#10b981"
+                      }`
+                    : "none",
+              }}
             >
-              <path
-                d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Due Date
-          </FilterLabel>
-          <FilterSelect
-            id="dueDateFilter"
-            value={dueDateFilter}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setDueDateFilter(e.target.value)
-            }
-            style={{
-              borderLeft:
-                dueDateFilter !== "all" ? "4px solid #0ea5e9" : "none",
-            }}
-          >
-            <option value="all">All Dates</option>
-            <option value="today">Today</option>
-            <option value="thisWeek">This Week</option>
-            <option value="overdue">Overdue</option>
-          </FilterSelect>
-        </FilterGroup>
-      </FiltersBar>
+              <option value="all">All Priorities</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </FilterSelect>
+          </FilterGroup>
 
-      <DragDropContext
-        onDragStart={onDragStart}
-        onDragUpdate={onDragUpdate}
-        onDragEnd={onDragEnd}
-      >
-        <KanbanBoard>
-          {/* Next Column */}
-          <Column isDraggingOver={draggingOver === "next"}>
-            <ColumnHeader color="#3b82f6">
-              <ColumnTitle>
-                Next <TaskCount>{nextTasks.length}</TaskCount>
-              </ColumnTitle>
-            </ColumnHeader>
-            {draggingOver === "next" &&
-              isDragging &&
-              sourceColumn !== "next" && (
-                <DropIndicator>Move to Next</DropIndicator>
-              )}
-            <StrictModeDroppable droppableId="next">
-              {(provided: DroppableProvided) => (
-                <TaskList
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  isDraggingOver={draggingOver === "next" && isDragging}
-                  isSourceColumn={sourceColumn === "next"}
-                >
-                  {nextTasks.length === 0 ? (
-                    <EmptyState>
-                      <EmptyStateIcon>📋</EmptyStateIcon>
-                      <p>No tasks yet</p>
-                    </EmptyState>
-                  ) : (
-                    nextTasks.map((task, index) => (
-                      <Draggable
-                        key={task._id}
-                        draggableId={task._id || ""}
-                        index={index}
-                      >
-                        {(
-                          provided: DraggableProvided,
-                          snapshot: DraggableStateSnapshot
-                        ) => (
-                          <TaskCard
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={getTaskStyle(
-                              snapshot.isDragging,
-                              provided.draggableProps.style
-                            )}
-                            isDragging={snapshot.isDragging}
-                            isColumnDraggingOver={draggingOver === "next"}
-                            isInSourceColumn={sourceColumn === "next"}
-                            onClick={() => handleTaskClick(task._id || "")}
-                          >
-                            <TaskCardHeader>
-                              <TaskTitle>{task.title}</TaskTitle>
-                              <TaskCardBadges>
-                                {task.priority && (
-                                  <TaskBadge
-                                    bgColor={
-                                      task.priority === "high"
-                                        ? "#fee2e2"
-                                        : task.priority === "medium"
-                                        ? "#fef3c7"
-                                        : "#ecfdf5"
-                                    }
-                                    textColor={
-                                      task.priority === "high"
-                                        ? "#b91c1c"
-                                        : task.priority === "medium"
-                                        ? "#92400e"
-                                        : "#065f46"
-                                    }
-                                  >
-                                    {task.priority.charAt(0).toUpperCase() +
-                                      task.priority.slice(1)}
-                                  </TaskBadge>
-                                )}
-                              </TaskCardBadges>
-                            </TaskCardHeader>
+          <FilterGroup>
+            <FilterLabel htmlFor="assigneeFilter">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Assignee
+            </FilterLabel>
+            <FilterSelect
+              id="assigneeFilter"
+              value={assigneeFilter}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                setAssigneeFilter(e.target.value)
+              }
+              style={{
+                borderLeft:
+                  assigneeFilter !== "all" ? "4px solid #8b5cf6" : "none",
+              }}
+            >
+              <option value="all">All Assignees</option>
+              <option value="unassigned">Unassigned</option>
+              {uniqueAssignees
+                .filter((a) => a !== "all" && a !== "unassigned")
+                .map((assignee) => (
+                  <option key={assignee} value={assignee}>
+                    {assignee}
+                  </option>
+                ))}
+            </FilterSelect>
+          </FilterGroup>
 
-                            {task.description && (
-                              <TaskDescription>
-                                {task.description.length > 100
-                                  ? `${task.description.substring(0, 100)}...`
-                                  : task.description}
-                              </TaskDescription>
-                            )}
+          <FilterGroup>
+            <FilterLabel htmlFor="dueDateFilter">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Due Date
+            </FilterLabel>
+            <FilterSelect
+              id="dueDateFilter"
+              value={dueDateFilter}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                setDueDateFilter(e.target.value)
+              }
+              style={{
+                borderLeft:
+                  dueDateFilter !== "all" ? "4px solid #0ea5e9" : "none",
+              }}
+            >
+              <option value="all">All Dates</option>
+              <option value="today">Today</option>
+              <option value="thisWeek">This Week</option>
+              <option value="overdue">Overdue</option>
+            </FilterSelect>
+          </FilterGroup>
+        </FiltersBar>
 
-                            {task.dueDate && (
-                              <TaskDueDate
-                                isOverdue={new Date(task.dueDate) < new Date()}
-                              >
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                {format(new Date(task.dueDate), "MMM d, yyyy")}
-                                {new Date(task.dueDate) < new Date() &&
-                                  " (Overdue)"}
-                              </TaskDueDate>
-                            )}
-
-                            {task.event && (
-                              <TaskEventTag>
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                  <path
-                                    d="M16 2V6M8 2V6M3 10H21"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                {task.event.title}
-                              </TaskEventTag>
-                            )}
-
-                            {task.assignee && (
-                              <TaskAssignee>
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                  <path
-                                    d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                {task.assignee}
-                              </TaskAssignee>
-                            )}
-
-                            {task.createdAt && (
-                              <TaskFooter>
-                                <TaskCreatedAt>
-                                  Created{" "}
-                                  {format(new Date(task.createdAt), "MMM d")}
-                                </TaskCreatedAt>
-                              </TaskFooter>
-                            )}
-                          </TaskCard>
-                        )}
-                      </Draggable>
-                    ))
-                  )}
-                  {provided.placeholder}
-                  <AddTaskButton onClick={() => handleAddTask("next")}>
-                    + Add Task
-                  </AddTaskButton>
-                </TaskList>
-              )}
-            </StrictModeDroppable>
-          </Column>
-
-          {/* In Progress Column */}
-          <Column isDraggingOver={draggingOver === "inProgress"}>
-            <ColumnHeader color="#8b5cf6">
-              <ColumnTitle>
-                In Progress <TaskCount>{inProgressTasks.length}</TaskCount>
-              </ColumnTitle>
-            </ColumnHeader>
-            {draggingOver === "inProgress" &&
-              isDragging &&
-              sourceColumn !== "inProgress" && (
-                <DropIndicator>Move to In Progress</DropIndicator>
-              )}
-            <StrictModeDroppable droppableId="inProgress">
-              {(provided: DroppableProvided) => (
-                <TaskList
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  isDraggingOver={draggingOver === "inProgress" && isDragging}
-                  isSourceColumn={sourceColumn === "inProgress"}
-                >
-                  {inProgressTasks.length === 0 ? (
-                    <EmptyState>
-                      <EmptyStateIcon>🔄</EmptyStateIcon>
-                      <p>No tasks in progress</p>
-                    </EmptyState>
-                  ) : (
-                    inProgressTasks.map((task, index) => (
-                      <Draggable
-                        key={task._id}
-                        draggableId={task._id || ""}
-                        index={index}
-                      >
-                        {(
-                          provided: DraggableProvided,
-                          snapshot: DraggableStateSnapshot
-                        ) => (
-                          <TaskCard
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={getTaskStyle(
-                              snapshot.isDragging,
-                              provided.draggableProps.style
-                            )}
-                            isDragging={snapshot.isDragging}
-                            isColumnDraggingOver={draggingOver === "inProgress"}
-                            isInSourceColumn={sourceColumn === "inProgress"}
-                            onClick={() => handleTaskClick(task._id || "")}
-                          >
-                            <TaskCardHeader>
-                              <TaskTitle>{task.title}</TaskTitle>
-                              <TaskCardBadges>
-                                {task.priority && (
-                                  <TaskBadge
-                                    bgColor={
-                                      task.priority === "high"
-                                        ? "#fee2e2"
-                                        : task.priority === "medium"
-                                        ? "#fef3c7"
-                                        : "#ecfdf5"
-                                    }
-                                    textColor={
-                                      task.priority === "high"
-                                        ? "#b91c1c"
-                                        : task.priority === "medium"
-                                        ? "#92400e"
-                                        : "#065f46"
-                                    }
-                                  >
-                                    {task.priority.charAt(0).toUpperCase() +
-                                      task.priority.slice(1)}
-                                  </TaskBadge>
-                                )}
-                              </TaskCardBadges>
-                            </TaskCardHeader>
-
-                            {task.description && (
-                              <TaskDescription>
-                                {task.description.length > 100
-                                  ? `${task.description.substring(0, 100)}...`
-                                  : task.description}
-                              </TaskDescription>
-                            )}
-
-                            {task.dueDate && (
-                              <TaskDueDate
-                                isOverdue={new Date(task.dueDate) < new Date()}
-                              >
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                {format(new Date(task.dueDate), "MMM d, yyyy")}
-                                {new Date(task.dueDate) < new Date() &&
-                                  " (Overdue)"}
-                              </TaskDueDate>
-                            )}
-
-                            {task.event && (
-                              <TaskEventTag>
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                  <path
-                                    d="M16 2V6M8 2V6M3 10H21"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                {task.event.title}
-                              </TaskEventTag>
-                            )}
-
-                            {task.assignee && (
-                              <TaskAssignee>
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                  <path
-                                    d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                {task.assignee}
-                              </TaskAssignee>
-                            )}
-
-                            {task.createdAt && (
-                              <TaskFooter>
-                                <TaskCreatedAt>
-                                  Created{" "}
-                                  {format(new Date(task.createdAt), "MMM d")}
-                                </TaskCreatedAt>
-                              </TaskFooter>
-                            )}
-                          </TaskCard>
-                        )}
-                      </Draggable>
-                    ))
-                  )}
-                  {provided.placeholder}
-                  <AddTaskButton onClick={() => handleAddTask("inProgress")}>
-                    + Add Task
-                  </AddTaskButton>
-                </TaskList>
-              )}
-            </StrictModeDroppable>
-          </Column>
-
-          {/* Finished Column */}
-          <Column isDraggingOver={draggingOver === "finished"}>
-            <ColumnHeader color="#10b981">
-              <ColumnTitle>
-                Finished <TaskCount>{finishedTasks.length}</TaskCount>
-              </ColumnTitle>
-            </ColumnHeader>
-            {draggingOver === "finished" &&
-              isDragging &&
-              sourceColumn !== "finished" && (
-                <DropIndicator>Move to Finished</DropIndicator>
-              )}
-            <StrictModeDroppable droppableId="finished">
-              {(provided: DroppableProvided) => (
-                <TaskList
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  isDraggingOver={draggingOver === "finished" && isDragging}
-                  isSourceColumn={sourceColumn === "finished"}
-                >
-                  {finishedTasks.length === 0 ? (
-                    <EmptyState>
-                      <EmptyStateIcon>✅</EmptyStateIcon>
-                      <p>No completed tasks</p>
-                    </EmptyState>
-                  ) : (
-                    finishedTasks.map((task, index) => (
-                      <Draggable
-                        key={task._id}
-                        draggableId={task._id || ""}
-                        index={index}
-                      >
-                        {(
-                          provided: DraggableProvided,
-                          snapshot: DraggableStateSnapshot
-                        ) => (
-                          <TaskCard
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={getTaskStyle(
-                              snapshot.isDragging,
-                              provided.draggableProps.style
-                            )}
-                            isDragging={snapshot.isDragging}
-                            isColumnDraggingOver={draggingOver === "finished"}
-                            isInSourceColumn={sourceColumn === "finished"}
-                            onClick={() => handleTaskClick(task._id || "")}
-                          >
-                            <TaskCardHeader>
-                              <TaskTitle>{task.title}</TaskTitle>
-                              <TaskCardBadges>
-                                {task.priority && (
-                                  <TaskBadge
-                                    bgColor={
-                                      task.priority === "high"
-                                        ? "#fee2e2"
-                                        : task.priority === "medium"
-                                        ? "#fef3c7"
-                                        : "#ecfdf5"
-                                    }
-                                    textColor={
-                                      task.priority === "high"
-                                        ? "#b91c1c"
-                                        : task.priority === "medium"
-                                        ? "#92400e"
-                                        : "#065f46"
-                                    }
-                                  >
-                                    {task.priority.charAt(0).toUpperCase() +
-                                      task.priority.slice(1)}
-                                  </TaskBadge>
-                                )}
-                              </TaskCardBadges>
-                            </TaskCardHeader>
-
-                            {task.description && (
-                              <TaskDescription>
-                                {task.description.length > 100
-                                  ? `${task.description.substring(0, 100)}...`
-                                  : task.description}
-                              </TaskDescription>
-                            )}
-
-                            {task.dueDate && (
-                              <TaskDueDate
-                                isOverdue={new Date(task.dueDate) < new Date()}
-                              >
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                {format(new Date(task.dueDate), "MMM d, yyyy")}
-                                {new Date(task.dueDate) < new Date() &&
-                                  " (Overdue)"}
-                              </TaskDueDate>
-                            )}
-
-                            {task.event && (
-                              <TaskEventTag>
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                  <path
-                                    d="M16 2V6M8 2V6M3 10H21"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                {task.event.title}
-                              </TaskEventTag>
-                            )}
-
-                            {task.assignee && (
-                              <TaskAssignee>
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                  <path
-                                    d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                                {task.assignee}
-                              </TaskAssignee>
-                            )}
-
-                            {task.createdAt && (
-                              <TaskFooter>
-                                <TaskCreatedAt>
-                                  Created{" "}
-                                  {format(new Date(task.createdAt), "MMM d")}
-                                </TaskCreatedAt>
-                              </TaskFooter>
-                            )}
-                          </TaskCard>
-                        )}
-                      </Draggable>
-                    ))
-                  )}
-                  {provided.placeholder}
-                  <AddTaskButton onClick={() => handleAddTask("finished")}>
-                    + Add Task
-                  </AddTaskButton>
-                </TaskList>
-              )}
-            </StrictModeDroppable>
-          </Column>
-        </KanbanBoard>
-      </DragDropContext>
-
-      {/* Task Form Modal */}
-      {showTaskModal && (
-        <ModalOverlay>
-          <ModalContent>
-            <ModalHeader>
-              <ModalTitle>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 9V13M12 17H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                Add New Task
-              </ModalTitle>
-            </ModalHeader>
-            <ModalBody>
-              <form onSubmit={handleTaskFormSubmit}>
-                <FormGroup>
-                  <Label htmlFor="eventId">Event *</Label>
-                  <Select
-                    id="eventId"
-                    name="eventId"
-                    value={taskForm.eventId}
-                    onChange={handleTaskFormChange}
-                    required
+        <DragDropContext
+          onDragStart={onDragStart}
+          onDragUpdate={onDragUpdate}
+          onDragEnd={onDragEnd}
+        >
+          <KanbanBoard>
+            {/* Next Column */}
+            <Column isDraggingOver={draggingOver === "next"}>
+              <ColumnHeader color="#3b82f6">
+                <ColumnTitle>
+                  Next <TaskCount>{nextTasks.length}</TaskCount>
+                </ColumnTitle>
+              </ColumnHeader>
+              {draggingOver === "next" &&
+                isDragging &&
+                sourceColumn !== "next" && (
+                  <DropIndicator>Move to Next</DropIndicator>
+                )}
+              <StrictModeDroppable droppableId="next">
+                {(provided: DroppableProvided) => (
+                  <TaskList
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    isDraggingOver={draggingOver === "next" && isDragging}
+                    isSourceColumn={sourceColumn === "next"}
                   >
-                    <option value="">Select an event</option>
-                    {Array.isArray(events) &&
-                      events.map((event) => (
-                        <option key={event._id} value={event._id}>
-                          {event.title}
-                        </option>
-                      ))}
-                  </Select>
-                </FormGroup>
+                    {nextTasks.length === 0 ? (
+                      <EmptyState>
+                        <EmptyStateIcon>📋</EmptyStateIcon>
+                        <p>No tasks yet</p>
+                      </EmptyState>
+                    ) : (
+                      nextTasks.map((task, index) => (
+                        <Draggable
+                          key={task._id}
+                          draggableId={task._id || ""}
+                          index={index}
+                        >
+                          {(
+                            provided: DraggableProvided,
+                            snapshot: DraggableStateSnapshot
+                          ) => (
+                            <TaskCard
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={getTaskStyle(
+                                snapshot.isDragging,
+                                provided.draggableProps.style
+                              )}
+                              isDragging={snapshot.isDragging}
+                              isColumnDraggingOver={draggingOver === "next"}
+                              isInSourceColumn={sourceColumn === "next"}
+                              onClick={() => handleTaskClick(task._id || "")}
+                            >
+                              <TaskCardHeader>
+                                <TaskTitle>{task.title}</TaskTitle>
+                                <TaskCardBadges>
+                                  {task.priority && (
+                                    <TaskBadge
+                                      bgColor={
+                                        task.priority === "high"
+                                          ? "#fee2e2"
+                                          : task.priority === "medium"
+                                          ? "#fef3c7"
+                                          : "#ecfdf5"
+                                      }
+                                      textColor={
+                                        task.priority === "high"
+                                          ? "#b91c1c"
+                                          : task.priority === "medium"
+                                          ? "#92400e"
+                                          : "#065f46"
+                                      }
+                                    >
+                                      {task.priority.charAt(0).toUpperCase() +
+                                        task.priority.slice(1)}
+                                    </TaskBadge>
+                                  )}
+                                </TaskCardBadges>
+                              </TaskCardHeader>
 
-                <FormGroup>
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    name="title"
-                    value={taskForm.title}
-                    onChange={handleTaskFormChange}
-                    placeholder="Enter task title"
-                    required
-                  />
-                </FormGroup>
+                              {task.description && (
+                                <TaskDescription>
+                                  {task.description.length > 100
+                                    ? `${task.description.substring(0, 100)}...`
+                                    : task.description}
+                                </TaskDescription>
+                              )}
 
-                <FormGroup>
-                  <Label htmlFor="description">Description</Label>
-                  <TextArea
-                    id="description"
-                    name="description"
-                    value={taskForm.description}
-                    onChange={handleTaskFormChange}
-                    placeholder="Enter task description"
-                  />
-                </FormGroup>
+                              {task.dueDate && (
+                                <TaskDueDate
+                                  isOverdue={
+                                    new Date(task.dueDate) < new Date()
+                                  }
+                                >
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                  {format(
+                                    new Date(task.dueDate),
+                                    "MMM d, yyyy"
+                                  )}
+                                  {new Date(task.dueDate) < new Date() &&
+                                    " (Overdue)"}
+                                </TaskDueDate>
+                              )}
 
-                <FormRow>
-                  <FormColumn>
-                    <FormGroup>
-                      <Label htmlFor="dueDate">Due Date *</Label>
-                      <Input
-                        id="dueDate"
-                        name="dueDate"
-                        type="date"
-                        value={taskForm.dueDate}
-                        onChange={handleTaskFormChange}
-                        required
-                      />
-                    </FormGroup>
-                  </FormColumn>
-                  <FormColumn>
-                    <FormGroup>
-                      <Label htmlFor="priority">Priority</Label>
-                      <Select
-                        id="priority"
-                        name="priority"
-                        value={taskForm.priority}
-                        onChange={handleTaskFormChange}
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </Select>
-                    </FormGroup>
-                  </FormColumn>
-                </FormRow>
+                              {task.event && (
+                                <TaskEventTag>
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                    <path
+                                      d="M16 2V6M8 2V6M3 10H21"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                  {task.event.title}
+                                </TaskEventTag>
+                              )}
 
-                <FormGroup>
-                  <Label htmlFor="assignee">Assignee</Label>
-                  <Input
-                    id="assignee"
-                    name="assignee"
-                    value={taskForm.assignee}
-                    onChange={handleTaskFormChange}
-                    placeholder="Who is responsible for this task?"
-                  />
-                </FormGroup>
+                              {task.assignee && (
+                                <TaskAssignee>
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                    <path
+                                      d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                  {task.assignee}
+                                </TaskAssignee>
+                              )}
 
-                <FormGroup>
-                  <Label htmlFor="notes">Notes</Label>
-                  <TextArea
-                    id="notes"
-                    name="notes"
-                    value={taskForm.notes}
-                    onChange={handleTaskFormChange}
-                    placeholder="Any additional notes"
-                  />
-                </FormGroup>
+                              {task.createdAt && (
+                                <TaskFooter>
+                                  <TaskCreatedAt>
+                                    Created{" "}
+                                    {format(new Date(task.createdAt), "MMM d")}
+                                  </TaskCreatedAt>
+                                </TaskFooter>
+                              )}
+                            </TaskCard>
+                          )}
+                        </Draggable>
+                      ))
+                    )}
+                    {provided.placeholder}
+                    <AddTaskButton onClick={() => handleAddTask("next")}>
+                      + Add Task
+                    </AddTaskButton>
+                  </TaskList>
+                )}
+              </StrictModeDroppable>
+            </Column>
 
-                {formError && <ErrorMessage>{formError}</ErrorMessage>}
-
-                <ButtonGroup>
-                  <CancelButton
-                    type="button"
-                    onClick={() => setShowTaskModal(false)}
+            {/* In Progress Column */}
+            <Column isDraggingOver={draggingOver === "inProgress"}>
+              <ColumnHeader color="#8b5cf6">
+                <ColumnTitle>
+                  In Progress <TaskCount>{inProgressTasks.length}</TaskCount>
+                </ColumnTitle>
+              </ColumnHeader>
+              {draggingOver === "inProgress" &&
+                isDragging &&
+                sourceColumn !== "inProgress" && (
+                  <DropIndicator>Move to In Progress</DropIndicator>
+                )}
+              <StrictModeDroppable droppableId="inProgress">
+                {(provided: DroppableProvided) => (
+                  <TaskList
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    isDraggingOver={draggingOver === "inProgress" && isDragging}
+                    isSourceColumn={sourceColumn === "inProgress"}
                   >
-                    Cancel
-                  </CancelButton>
-                  <SubmitButton type="submit" disabled={submitting}>
-                    {submitting ? <LoadingSpinner /> : "Add Task"}
-                  </SubmitButton>
-                </ButtonGroup>
-              </form>
-            </ModalBody>
-          </ModalContent>
-        </ModalOverlay>
-      )}
+                    {inProgressTasks.length === 0 ? (
+                      <EmptyState>
+                        <EmptyStateIcon>🔄</EmptyStateIcon>
+                        <p>No tasks in progress</p>
+                      </EmptyState>
+                    ) : (
+                      inProgressTasks.map((task, index) => (
+                        <Draggable
+                          key={task._id}
+                          draggableId={task._id || ""}
+                          index={index}
+                        >
+                          {(
+                            provided: DraggableProvided,
+                            snapshot: DraggableStateSnapshot
+                          ) => (
+                            <TaskCard
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={getTaskStyle(
+                                snapshot.isDragging,
+                                provided.draggableProps.style
+                              )}
+                              isDragging={snapshot.isDragging}
+                              isColumnDraggingOver={
+                                draggingOver === "inProgress"
+                              }
+                              isInSourceColumn={sourceColumn === "inProgress"}
+                              onClick={() => handleTaskClick(task._id || "")}
+                            >
+                              <TaskCardHeader>
+                                <TaskTitle>{task.title}</TaskTitle>
+                                <TaskCardBadges>
+                                  {task.priority && (
+                                    <TaskBadge
+                                      bgColor={
+                                        task.priority === "high"
+                                          ? "#fee2e2"
+                                          : task.priority === "medium"
+                                          ? "#fef3c7"
+                                          : "#ecfdf5"
+                                      }
+                                      textColor={
+                                        task.priority === "high"
+                                          ? "#b91c1c"
+                                          : task.priority === "medium"
+                                          ? "#92400e"
+                                          : "#065f46"
+                                      }
+                                    >
+                                      {task.priority.charAt(0).toUpperCase() +
+                                        task.priority.slice(1)}
+                                    </TaskBadge>
+                                  )}
+                                </TaskCardBadges>
+                              </TaskCardHeader>
 
-      {/* Task Detail Modal - now conditionally rendered based on URL or local state */}
-      {selectedTaskId && (
-        <TaskDetail
-          taskId={selectedTaskId}
-          onClose={handleTaskDetailClose}
-          onTaskUpdated={handleTaskUpdated}
-        />
-      )}
-    </Container>
+                              {task.description && (
+                                <TaskDescription>
+                                  {task.description.length > 100
+                                    ? `${task.description.substring(0, 100)}...`
+                                    : task.description}
+                                </TaskDescription>
+                              )}
+
+                              {task.dueDate && (
+                                <TaskDueDate
+                                  isOverdue={
+                                    new Date(task.dueDate) < new Date()
+                                  }
+                                >
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                  {format(
+                                    new Date(task.dueDate),
+                                    "MMM d, yyyy"
+                                  )}
+                                  {new Date(task.dueDate) < new Date() &&
+                                    " (Overdue)"}
+                                </TaskDueDate>
+                              )}
+
+                              {task.event && (
+                                <TaskEventTag>
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                    <path
+                                      d="M16 2V6M8 2V6M3 10H21"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                  {task.event.title}
+                                </TaskEventTag>
+                              )}
+
+                              {task.assignee && (
+                                <TaskAssignee>
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                    <path
+                                      d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                  {task.assignee}
+                                </TaskAssignee>
+                              )}
+
+                              {task.createdAt && (
+                                <TaskFooter>
+                                  <TaskCreatedAt>
+                                    Created{" "}
+                                    {format(new Date(task.createdAt), "MMM d")}
+                                  </TaskCreatedAt>
+                                </TaskFooter>
+                              )}
+                            </TaskCard>
+                          )}
+                        </Draggable>
+                      ))
+                    )}
+                    {provided.placeholder}
+                    <AddTaskButton onClick={() => handleAddTask("inProgress")}>
+                      + Add Task
+                    </AddTaskButton>
+                  </TaskList>
+                )}
+              </StrictModeDroppable>
+            </Column>
+
+            {/* Finished Column */}
+            <Column isDraggingOver={draggingOver === "finished"}>
+              <ColumnHeader color="#10b981">
+                <ColumnTitle>
+                  Finished <TaskCount>{finishedTasks.length}</TaskCount>
+                </ColumnTitle>
+              </ColumnHeader>
+              {draggingOver === "finished" &&
+                isDragging &&
+                sourceColumn !== "finished" && (
+                  <DropIndicator>Move to Finished</DropIndicator>
+                )}
+              <StrictModeDroppable droppableId="finished">
+                {(provided: DroppableProvided) => (
+                  <TaskList
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    isDraggingOver={draggingOver === "finished" && isDragging}
+                    isSourceColumn={sourceColumn === "finished"}
+                  >
+                    {finishedTasks.length === 0 ? (
+                      <EmptyState>
+                        <EmptyStateIcon>✅</EmptyStateIcon>
+                        <p>No completed tasks</p>
+                      </EmptyState>
+                    ) : (
+                      finishedTasks.map((task, index) => (
+                        <Draggable
+                          key={task._id}
+                          draggableId={task._id || ""}
+                          index={index}
+                        >
+                          {(
+                            provided: DraggableProvided,
+                            snapshot: DraggableStateSnapshot
+                          ) => (
+                            <TaskCard
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={getTaskStyle(
+                                snapshot.isDragging,
+                                provided.draggableProps.style
+                              )}
+                              isDragging={snapshot.isDragging}
+                              isColumnDraggingOver={draggingOver === "finished"}
+                              isInSourceColumn={sourceColumn === "finished"}
+                              onClick={() => handleTaskClick(task._id || "")}
+                            >
+                              <TaskCardHeader>
+                                <TaskTitle>{task.title}</TaskTitle>
+                                <TaskCardBadges>
+                                  {task.priority && (
+                                    <TaskBadge
+                                      bgColor={
+                                        task.priority === "high"
+                                          ? "#fee2e2"
+                                          : task.priority === "medium"
+                                          ? "#fef3c7"
+                                          : "#ecfdf5"
+                                      }
+                                      textColor={
+                                        task.priority === "high"
+                                          ? "#b91c1c"
+                                          : task.priority === "medium"
+                                          ? "#92400e"
+                                          : "#065f46"
+                                      }
+                                    >
+                                      {task.priority.charAt(0).toUpperCase() +
+                                        task.priority.slice(1)}
+                                    </TaskBadge>
+                                  )}
+                                </TaskCardBadges>
+                              </TaskCardHeader>
+
+                              {task.description && (
+                                <TaskDescription>
+                                  {task.description.length > 100
+                                    ? `${task.description.substring(0, 100)}...`
+                                    : task.description}
+                                </TaskDescription>
+                              )}
+
+                              {task.dueDate && (
+                                <TaskDueDate
+                                  isOverdue={
+                                    new Date(task.dueDate) < new Date()
+                                  }
+                                >
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                  {format(
+                                    new Date(task.dueDate),
+                                    "MMM d, yyyy"
+                                  )}
+                                  {new Date(task.dueDate) < new Date() &&
+                                    " (Overdue)"}
+                                </TaskDueDate>
+                              )}
+
+                              {task.event && (
+                                <TaskEventTag>
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                    <path
+                                      d="M16 2V6M8 2V6M3 10H21"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                  {task.event.title}
+                                </TaskEventTag>
+                              )}
+
+                              {task.assignee && (
+                                <TaskAssignee>
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                    <path
+                                      d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                  {task.assignee}
+                                </TaskAssignee>
+                              )}
+
+                              {task.createdAt && (
+                                <TaskFooter>
+                                  <TaskCreatedAt>
+                                    Created{" "}
+                                    {format(new Date(task.createdAt), "MMM d")}
+                                  </TaskCreatedAt>
+                                </TaskFooter>
+                              )}
+                            </TaskCard>
+                          )}
+                        </Draggable>
+                      ))
+                    )}
+                    {provided.placeholder}
+                    <AddTaskButton onClick={() => handleAddTask("finished")}>
+                      + Add Task
+                    </AddTaskButton>
+                  </TaskList>
+                )}
+              </StrictModeDroppable>
+            </Column>
+          </KanbanBoard>
+        </DragDropContext>
+
+        {/* Task Form Modal */}
+        {showTaskModal && (
+          <ModalOverlay>
+            <ModalContent>
+              <ModalHeader>
+                <ModalTitle>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 9V13M12 17H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Add New Task
+                </ModalTitle>
+              </ModalHeader>
+              <ModalBody>
+                <form onSubmit={handleTaskFormSubmit}>
+                  <FormGroup>
+                    <Label htmlFor="eventId">Event *</Label>
+                    <Select
+                      id="eventId"
+                      name="eventId"
+                      value={taskForm.eventId}
+                      onChange={handleTaskFormChange}
+                      required
+                    >
+                      <option value="">Select an event</option>
+                      {Array.isArray(events) &&
+                        events.map((event) => (
+                          <option key={event._id} value={event._id}>
+                            {event.title}
+                          </option>
+                        ))}
+                    </Select>
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      name="title"
+                      value={taskForm.title}
+                      onChange={handleTaskFormChange}
+                      placeholder="Enter task title"
+                      required
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label htmlFor="description">Description</Label>
+                    <TextArea
+                      id="description"
+                      name="description"
+                      value={taskForm.description}
+                      onChange={handleTaskFormChange}
+                      placeholder="Enter task description"
+                    />
+                  </FormGroup>
+
+                  <FormRow>
+                    <FormColumn>
+                      <FormGroup>
+                        <Label htmlFor="dueDate">Due Date *</Label>
+                        <Input
+                          id="dueDate"
+                          name="dueDate"
+                          type="date"
+                          value={taskForm.dueDate}
+                          onChange={handleTaskFormChange}
+                          required
+                        />
+                      </FormGroup>
+                    </FormColumn>
+                    <FormColumn>
+                      <FormGroup>
+                        <Label htmlFor="priority">Priority</Label>
+                        <Select
+                          id="priority"
+                          name="priority"
+                          value={taskForm.priority}
+                          onChange={handleTaskFormChange}
+                        >
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                        </Select>
+                      </FormGroup>
+                    </FormColumn>
+                  </FormRow>
+
+                  <FormGroup>
+                    <Label htmlFor="assignee">Assignee</Label>
+                    <Input
+                      id="assignee"
+                      name="assignee"
+                      value={taskForm.assignee}
+                      onChange={handleTaskFormChange}
+                      placeholder="Who is responsible for this task?"
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label htmlFor="notes">Notes</Label>
+                    <TextArea
+                      id="notes"
+                      name="notes"
+                      value={taskForm.notes}
+                      onChange={handleTaskFormChange}
+                      placeholder="Any additional notes"
+                    />
+                  </FormGroup>
+
+                  {formError && <ErrorMessage>{formError}</ErrorMessage>}
+
+                  <ButtonGroup>
+                    <CancelButton
+                      type="button"
+                      onClick={() => setShowTaskModal(false)}
+                    >
+                      Cancel
+                    </CancelButton>
+                    <SubmitButton type="submit" disabled={submitting}>
+                      {submitting ? <LoadingSpinner /> : "Add Task"}
+                    </SubmitButton>
+                  </ButtonGroup>
+                </form>
+              </ModalBody>
+            </ModalContent>
+          </ModalOverlay>
+        )}
+
+        {/* Task Detail Modal - now conditionally rendered based on URL or local state */}
+        {selectedTaskId && (
+          <TaskDetail
+            taskId={selectedTaskId}
+            onClose={handleTaskDetailClose}
+            onTaskUpdated={handleTaskUpdated}
+          />
+        )}
+      </Container>
+    </PageWrapper>
   );
 };
 

@@ -25,8 +25,11 @@ interface TaskListProps {
       title: string;
       isCompleted: boolean;
       dueDate: string;
+      // Note: These are the only fields available in the events.tasks array
+      // Other Task fields will be populated with defaults
     }[];
   }[];
+  tasks?: Task[]; // Add direct tasks prop
 }
 
 const TaskListContainer = styled.div`
@@ -220,6 +223,7 @@ const TaskList: React.FC<TaskListProps> = ({
   onTaskClick,
   eventId,
   events,
+  tasks: propTasks,
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -231,6 +235,13 @@ const TaskList: React.FC<TaskListProps> = ({
   useEffect(() => {
     let isMounted = true;
 
+    // If direct tasks are provided, use them
+    if (propTasks && propTasks.length > 0) {
+      setTasks(propTasks);
+      setLoading(false);
+      return;
+    }
+
     // If events are provided, extract tasks from them
     if (events && events.length > 0) {
       const extractedTasks: Task[] = [];
@@ -239,25 +250,26 @@ const TaskList: React.FC<TaskListProps> = ({
         if (event.tasks && Array.isArray(event.tasks)) {
           event.tasks.forEach((task) => {
             // Create a task object with all required fields
+            // The event.tasks array contains limited task data, so we need to provide defaults for missing fields
             const taskWithRequiredFields: Task = {
               _id: task._id,
               title: task.title,
               isCompleted: task.isCompleted,
               dueDate: task.dueDate,
-              status: "next", // Default status
+              status: task.isCompleted ? "finished" : "next", // Default status based on completion
               eventId: event._id,
               event: {
                 _id: event._id,
                 title: event.title,
               },
+              // Add optional fields with defaults
               priority: "medium", // Default priority
               description: "", // Default description
+              assignee: "", // Default assignee
+              notes: "", // Default notes
+              createdAt: new Date().toISOString(), // Default creation date
+              updatedAt: new Date().toISOString(), // Default update date
             };
-
-            // If the task is completed, set status to finished
-            if (task.isCompleted) {
-              taskWithRequiredFields.status = "finished";
-            }
 
             extractedTasks.push(taskWithRequiredFields);
           });
@@ -269,6 +281,7 @@ const TaskList: React.FC<TaskListProps> = ({
       return;
     }
 
+    // If neither direct tasks nor events are provided, fetch tasks from API
     const fetchTasks = async () => {
       try {
         setLoading(true);
@@ -279,22 +292,24 @@ const TaskList: React.FC<TaskListProps> = ({
 
         if (!isMounted) return;
 
+        let tasksData: Task[] = [];
+
         // Handle different response formats
         if (Array.isArray(response.data)) {
-          setTasks(response.data);
+          tasksData = response.data;
         } else if (
           response.data &&
           typeof response.data === "object" &&
           Array.isArray(response.data.tasks)
         ) {
-          setTasks(response.data.tasks);
+          tasksData = response.data.tasks;
         } else if (response.data && typeof response.data === "object") {
           // Try to find an array in the response
           let foundTasks = false;
 
           for (const key in response.data) {
             if (Array.isArray(response.data[key])) {
-              setTasks(response.data[key]);
+              tasksData = response.data[key];
               foundTasks = true;
               break;
             }
@@ -303,11 +318,36 @@ const TaskList: React.FC<TaskListProps> = ({
           if (!foundTasks) {
             setTasks([]);
             setError("Received invalid data format from server");
+            return;
           }
         } else {
           setTasks([]);
           setError("Received invalid data format from server");
+          return;
         }
+
+        // Ensure all tasks have the required fields
+        const validatedTasks = tasksData.map((task) => {
+          // Make sure all required fields are present
+          const validatedTask: Task = {
+            _id: task._id || "",
+            title: task.title || "Untitled Task",
+            isCompleted: !!task.isCompleted,
+            dueDate: task.dueDate || new Date().toISOString(),
+            status: task.status || (task.isCompleted ? "finished" : "next"),
+            eventId: task.eventId || "",
+            // Include optional fields if they exist
+            event: task.event,
+            assignee: task.assignee,
+            priority: task.priority,
+            notes: task.notes,
+            createdAt: task.createdAt,
+            updatedAt: task.updatedAt,
+          };
+          return validatedTask;
+        });
+
+        setTasks(validatedTasks);
       } catch (err) {
         if (!isMounted) return;
         console.error("Error fetching tasks:", err);
@@ -325,7 +365,7 @@ const TaskList: React.FC<TaskListProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [eventId, events]); // Add events to the dependency array
+  }, [eventId, events, propTasks]); // Add propTasks to the dependency array
 
   // Check if a date is in the past
   const isPastDue = (dateString: string) => {
