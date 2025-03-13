@@ -154,7 +154,7 @@ export const CloseButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 100%;
   transition: all 0.2s ease;
 
   &:hover {

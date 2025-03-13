@@ -1,30 +1,51 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import Task from '../models/task.model';
 import Event from '../models/event.model';
+import { AuthRequest } from '../types/auth.types';
 
 // Define filter interface
 interface TaskFilter {
-  eventId?: string;
+  eventId?: string | { $in: string[] };
   status?: string;
 }
 
 // Get all tasks (with optional filtering)
-export const getTasks = async (req: Request, res: Response): Promise<void> => {
+export const getTasks = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { eventId, status } = req.query;
+
+    // Get the current user's ID from the auth token
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    // First, get all events owned by the current user
+    const userEvents = await Event.find({ ownerId: userId }, '_id');
+    const userEventIds = userEvents.map((event) => event._id.toString());
 
     // Build filter object
     const filter: TaskFilter = {};
 
     if (eventId && typeof eventId === 'string') {
+      // If a specific event ID is provided, make sure it belongs to the user
+      if (!userEventIds.includes(eventId)) {
+        res.status(403).json({ message: 'Access denied to this event' });
+        return;
+      }
       filter.eventId = eventId;
+    } else {
+      // If no specific event ID is provided, filter by all user's events
+      filter.eventId = { $in: userEventIds };
     }
 
     if (status && typeof status === 'string') {
       filter.status = status;
     }
 
-    // Find tasks with optional filtering
+    // Find tasks with filtering
     const tasks = await Task.find(filter).sort({ createdAt: -1 });
 
     // Get event details for each task - but use a more efficient approach
@@ -60,9 +81,22 @@ export const getTasks = async (req: Request, res: Response): Promise<void> => {
 };
 
 // Get tasks for a specific event
-export const getEventTasks = async (req: Request, res: Response): Promise<void> => {
+export const getEventTasks = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { eventId } = req.params;
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    // Check if the event belongs to the current user
+    const event = await Event.findOne({ _id: eventId, ownerId: userId });
+    if (!event) {
+      res.status(403).json({ message: 'Access denied to this event' });
+      return;
+    }
 
     const tasks = await Task.find({ eventId }).sort({ createdAt: -1 });
 
@@ -74,9 +108,15 @@ export const getEventTasks = async (req: Request, res: Response): Promise<void> 
 };
 
 // Get a single task by ID
-export const getTaskById = async (req: Request, res: Response): Promise<void> => {
+export const getTaskById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { taskId } = req.params;
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
 
     const task = await Task.findById(taskId);
 
@@ -85,9 +125,14 @@ export const getTaskById = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Get event details
-    const event = await Event.findById(task.eventId, 'title');
+    // Check if the task's event belongs to the current user
+    const event = await Event.findOne({ _id: task.eventId, ownerId: userId });
+    if (!event) {
+      res.status(403).json({ message: 'Access denied to this task' });
+      return;
+    }
 
+    // Get event details
     const taskWithEvent = {
       ...task.toObject(),
       event: event ? { _id: event._id, title: event.title } : undefined,
@@ -101,15 +146,21 @@ export const getTaskById = async (req: Request, res: Response): Promise<void> =>
 };
 
 // Create a new task
-export const createTask = async (req: Request, res: Response): Promise<void> => {
+export const createTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { eventId } = req.params;
     const taskData = req.body;
+    const userId = req.user?.sub;
 
-    // Validate event exists
-    const event = await Event.findById(eventId);
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    // Validate event exists and belongs to the current user
+    const event = await Event.findOne({ _id: eventId, ownerId: userId });
     if (!event) {
-      res.status(404).json({ message: 'Event not found' });
+      res.status(403).json({ message: 'Access denied to this event' });
       return;
     }
 
@@ -139,25 +190,46 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
 };
 
 // Update a task
-export const updateTask = async (req: Request, res: Response): Promise<void> => {
+export const updateTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { taskId } = req.params;
     const updates = req.body;
+    const userId = req.user?.sub;
 
-    // Find and update the task
-    const task = await Task.findByIdAndUpdate(taskId, { ...updates, updatedAt: new Date() }, { new: true });
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
 
+    // Find the task
+    const task = await Task.findById(taskId);
     if (!task) {
       res.status(404).json({ message: 'Task not found' });
       return;
     }
 
-    // Get event details
-    const event = await Event.findById(task.eventId, 'title');
+    // Check if the task's event belongs to the current user
+    const event = await Event.findOne({ _id: task.eventId, ownerId: userId });
+    if (!event) {
+      res.status(403).json({ message: 'Access denied to this task' });
+      return;
+    }
+
+    // Update the task
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId,
+      { ...updates, updatedAt: new Date() },
+      { new: true },
+    );
+
+    if (!updatedTask) {
+      res.status(404).json({ message: 'Task not found after update' });
+      return;
+    }
 
     const taskWithEvent = {
-      ...task.toObject(),
-      event: event ? { _id: event._id, title: event.title } : undefined,
+      ...updatedTask.toObject(),
+      event: { _id: event._id, title: event.title },
     };
 
     res.status(200).json({ message: 'Task updated successfully', task: taskWithEvent });
@@ -168,18 +240,38 @@ export const updateTask = async (req: Request, res: Response): Promise<void> => 
 };
 
 // Update task status (for drag and drop functionality)
-export const updateTaskStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateTaskStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { taskId } = req.params;
     const { status } = req.body;
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
 
     if (!['next', 'inProgress', 'finished'].includes(status)) {
       res.status(400).json({ message: 'Invalid status value' });
       return;
     }
 
-    // Update the task status and completion status
-    const task = await Task.findByIdAndUpdate(
+    // Find the task
+    const task = await Task.findById(taskId);
+    if (!task) {
+      res.status(404).json({ message: 'Task not found' });
+      return;
+    }
+
+    // Check if the task's event belongs to the current user
+    const event = await Event.findOne({ _id: task.eventId, ownerId: userId });
+    if (!event) {
+      res.status(403).json({ message: 'Access denied to this task' });
+      return;
+    }
+
+    // Update the task status
+    const updatedTask = await Task.findByIdAndUpdate(
       taskId,
       {
         status,
@@ -189,17 +281,14 @@ export const updateTaskStatus = async (req: Request, res: Response): Promise<voi
       { new: true },
     );
 
-    if (!task) {
-      res.status(404).json({ message: 'Task not found' });
+    if (!updatedTask) {
+      res.status(404).json({ message: 'Task not found after update' });
       return;
     }
 
-    // Get event details
-    const event = await Event.findById(task.eventId, 'title');
-
     const taskWithEvent = {
-      ...task.toObject(),
-      event: event ? { _id: event._id, title: event.title } : undefined,
+      ...updatedTask.toObject(),
+      event: { _id: event._id, title: event.title },
     };
 
     res.status(200).json({ message: 'Task status updated successfully', task: taskWithEvent });
@@ -210,15 +299,27 @@ export const updateTaskStatus = async (req: Request, res: Response): Promise<voi
 };
 
 // Delete a task
-export const deleteTask = async (req: Request, res: Response): Promise<void> => {
+export const deleteTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { taskId } = req.params;
+    const userId = req.user?.sub;
 
-    // Find the task to get its eventId
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    // Find the task
     const task = await Task.findById(taskId);
-
     if (!task) {
       res.status(404).json({ message: 'Task not found' });
+      return;
+    }
+
+    // Check if the task's event belongs to the current user
+    const event = await Event.findOne({ _id: task.eventId, ownerId: userId });
+    if (!event) {
+      res.status(403).json({ message: 'Access denied to this task' });
       return;
     }
 
