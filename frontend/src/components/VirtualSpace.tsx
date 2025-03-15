@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
-import { Event, SponsorDeal } from "../types";
+import { Event, SponsorDeal, FeedbackAnswer, FeedbackQuestion } from "../types";
 
 // Modern color palette with gradients
 const colors = {
@@ -1279,20 +1279,380 @@ const EmptyStateMessage = styled.div`
   }
 `;
 
+const FormTitle = styled.h2`
+  font-size: 24px;
+  font-weight: ${fontWeights.bold};
+  margin-bottom: 12px;
+  color: ${colors.textPrimary};
+`;
+
+const FormDescription = styled.p`
+  font-size: 16px;
+  margin-bottom: 24px;
+  color: ${colors.textSecondary};
+`;
+
+const QuestionLabel = styled.label`
+  display: block;
+  font-weight: ${fontWeights.medium};
+  margin-bottom: 8px;
+  color: ${colors.textPrimary};
+`;
+
+const RequiredMark = styled.span`
+  color: ${colors.error};
+  margin-left: 4px;
+`;
+
+const RatingContainer = styled.div`
+  margin: 16px 0;
+  width: 100%;
+`;
+
+const RatingButtonsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+  width: 100%;
+  justify-content: space-between;
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    gap: 12px;
+  }
+`;
+
+const RatingButton = styled.button<{ isSelected: boolean }>`
+  width: 42px;
+  height: 42px;
+  border-radius: ${designTokens.borderRadius.full};
+  border: 2px solid
+    ${(props) => (props.isSelected ? colors.primary : colors.borderLight)};
+  background-color: ${(props) =>
+    props.isSelected ? colors.primary : colors.backgroundLight};
+  color: ${(props) => (props.isSelected ? "white" : colors.textPrimary)};
+  font-weight: ${fontWeights.semibold};
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  transition: all ${designTokens.animation.fast};
+  box-shadow: ${(props) =>
+    props.isSelected ? designTokens.shadows.md : designTokens.shadows.sm};
+
+  &:hover {
+    background-color: ${(props) =>
+      props.isSelected ? colors.primary : colors.primaryLight};
+    color: ${(props) => (props.isSelected ? "white" : colors.primary)};
+    transform: translateY(-2px);
+    box-shadow: ${designTokens.shadows.md};
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: ${designTokens.shadows.sm};
+  }
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+`;
+
+const RatingLabelsContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 8px;
+`;
+
+const RatingLabel = styled.span`
+  font-size: 14px;
+  color: ${colors.textSecondary};
+  font-weight: ${fontWeights.medium};
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 15px;
+  }
+`;
+
+const OptionsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 12px 0;
+  width: 100%;
+`;
+
+const OptionItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: ${designTokens.borderRadius.md};
+  border: 1px solid ${colors.borderLight};
+  background-color: ${colors.backgroundLight};
+  transition: all ${designTokens.animation.fast};
+  box-shadow: ${designTokens.shadows.sm};
+
+  &:hover {
+    border-color: ${colors.primary};
+    box-shadow: ${designTokens.shadows.md};
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: ${designTokens.shadows.sm};
+  }
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    padding: 14px 18px;
+  }
+`;
+
+const CustomRadioContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 16px;
+  flex-shrink: 0;
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    width: 26px;
+    height: 26px;
+  }
+`;
+
+const CustomRadio = styled.div<{ isSelected?: boolean }>`
+  width: 24px;
+  height: 24px;
+  border-radius: ${designTokens.borderRadius.full};
+  border: 2px solid
+    ${(props) => (props.isSelected ? colors.primary : colors.borderLight)};
+  background-color: ${colors.backgroundLight};
+  position: relative;
+  transition: all ${designTokens.animation.fast};
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: ${(props) => (props.isSelected ? "12px" : "0")};
+    height: ${(props) => (props.isSelected ? "12px" : "0")};
+    border-radius: ${designTokens.borderRadius.full};
+    background-color: ${colors.primary};
+    transition: all ${designTokens.animation.fast};
+  }
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    width: 26px;
+    height: 26px;
+
+    &::after {
+      width: ${(props) => (props.isSelected ? "14px" : "0")};
+      height: ${(props) => (props.isSelected ? "14px" : "0")};
+    }
+  }
+`;
+
+const CustomCheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 16px;
+  flex-shrink: 0;
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    width: 26px;
+    height: 26px;
+  }
+`;
+
+const CustomCheckbox = styled.div<{ isSelected?: boolean }>`
+  width: 24px;
+  height: 24px;
+  border-radius: ${designTokens.borderRadius.md};
+  border: 2px solid
+    ${(props) => (props.isSelected ? colors.primary : colors.borderLight)};
+  background-color: ${(props) =>
+    props.isSelected ? colors.primary : colors.backgroundLight};
+  position: relative;
+  transition: all ${designTokens.animation.fast};
+
+  &::after {
+    content: ${(props) => (props.isSelected ? '"✓"' : '""')};
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 16px;
+    font-weight: ${fontWeights.bold};
+  }
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    width: 26px;
+    height: 26px;
+
+    &::after {
+      font-size: 18px;
+    }
+  }
+`;
+
+const RadioInput = styled.input`
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+`;
+
+const CheckboxInput = styled.input`
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+`;
+
+const OptionLabel = styled.label`
+  font-size: 16px;
+  color: ${colors.textPrimary};
+  cursor: pointer;
+  flex: 1;
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 17px;
+  }
+`;
+
+const RankingContainer = styled.div`
+  margin: 16px 0;
+  width: 100%;
+`;
+
+const RankingList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  width: 100%;
+`;
+
+const RankingItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: ${designTokens.borderRadius.md};
+  border: 1px solid ${colors.borderLight};
+  background-color: ${colors.backgroundLight};
+  transition: all ${designTokens.animation.fast};
+  box-shadow: ${designTokens.shadows.sm};
+  position: relative;
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    padding: 16px 18px;
+  }
+`;
+
+const RankingNumber = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: ${designTokens.borderRadius.full};
+  background-color: ${colors.primary};
+  color: white;
+  font-weight: ${fontWeights.semibold};
+  margin-right: 16px;
+  flex-shrink: 0;
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    width: 32px;
+    height: 32px;
+  }
+`;
+
+const RankingText = styled.div`
+  font-size: 16px;
+  color: ${colors.textPrimary};
+  flex: 1;
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 17px;
+  }
+`;
+
+const RankingControls = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-left: 12px;
+`;
+
+const RankingButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: ${designTokens.borderRadius.full};
+  border: 1px solid ${colors.borderLight};
+  background-color: ${colors.backgroundLight};
+  color: ${colors.textPrimary};
+  cursor: pointer;
+  transition: all ${designTokens.animation.fast};
+
+  &:hover {
+    background-color: ${colors.primaryLight};
+    color: ${colors.primary};
+    transform: translateY(-2px);
+    box-shadow: ${designTokens.shadows.sm};
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    &:hover {
+      background-color: ${colors.backgroundLight};
+      color: ${colors.textPrimary};
+      transform: none;
+      box-shadow: none;
+    }
+  }
+`;
+
+const RankingInstructions = styled.p`
+  font-size: 14px;
+  color: ${colors.textSecondary};
+  margin-bottom: 12px;
+  font-style: italic;
+`;
+
 const VirtualSpace: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
-  const [feedback, setFeedback] = useState("");
-  const [guestName, setGuestName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [feedback, setFeedback] = useState(""); // Keep for backward compatibility
+  const [answers, setAnswers] = useState<FeedbackAnswer[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [currentTime] = useState(new Date());
-
-  // Add state for the sponsor deal popup
   const [selectedDeal, setSelectedDeal] = useState<SponsorDeal | null>(null);
   const [isDealPopupVisible, setIsDealPopupVisible] = useState(false);
+  const [currentTime] = useState(new Date());
 
   // Schedule state - initialize with empty array
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
@@ -1357,6 +1717,34 @@ const VirtualSpace: React.FC = () => {
           setSchedule(fetchedEvent.emailParams.scheduleSrc.items);
         }
 
+        // Initialize answers when the event (and its feedback form) is loaded
+        if (fetchedEvent.feedbackForm?.questions) {
+          const initialAnswers: FeedbackAnswer[] = [];
+
+          for (const question of fetchedEvent.feedbackForm.questions) {
+            const newAnswer: FeedbackAnswer = {
+              questionId: question.id,
+            };
+
+            if (question.type === "text") {
+              newAnswer.textAnswer = "";
+            } else if (question.type === "rating") {
+              newAnswer.ratingAnswer = question.minRating || 0;
+            } else if (
+              question.type === "single_choice" ||
+              question.type === "multiple_choice"
+            ) {
+              newAnswer.selectedOptions = [];
+            } else if (question.type === "ranking") {
+              newAnswer.rankingOrder = [];
+            }
+
+            initialAnswers.push(newAnswer);
+          }
+
+          setAnswers(initialAnswers);
+        }
+
         setLoading(false);
       } catch (error) {
         console.error("Error fetching event:", error);
@@ -1378,9 +1766,78 @@ const VirtualSpace: React.FC = () => {
     setGuestName(e.target.value);
   };
 
+  const handleGuestEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGuestEmail(e.target.value);
+  };
+
   const handleSubmitFeedback = async () => {
-    if (!feedback.trim()) {
-      alert("Please enter your feedback before submitting.");
+    // Handle legacy feedback form
+    if (!event?.feedbackForm) {
+      if (!feedback.trim()) {
+        alert("Please enter your feedback before submitting.");
+        return;
+      }
+
+      try {
+        setSubmitting(true);
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/events/${id}/feedback`,
+          {
+            guestName: guestName.trim() || undefined,
+            content: feedback.trim(),
+          }
+        );
+
+        if (response.data.success) {
+          setSubmitSuccess(true);
+          setFeedback("");
+          setGuestName("");
+
+          // Reset success message after 3 seconds
+          setTimeout(() => {
+            setSubmitSuccess(false);
+          }, 3000);
+        }
+      } catch (err) {
+        console.error("Error submitting feedback:", err);
+        alert("Failed to submit feedback. Please try again.");
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    // Handle structured feedback form
+    // Validate answers
+    if (!answers.length) {
+      alert("Please fill out the feedback form before submitting.");
+      return;
+    }
+
+    // Check if required questions are answered
+    const requiredQuestions =
+      event.feedbackForm.questions.filter((q) => q.required) || [];
+    const unansweredRequired = requiredQuestions.filter((question) => {
+      const answer = answers.find((a) => a.questionId === question.id);
+      if (!answer) return true;
+
+      switch (question.type) {
+        case "text":
+          return !answer.textAnswer || answer.textAnswer.trim() === "";
+        case "rating":
+          return answer.ratingAnswer === undefined;
+        case "single_choice":
+        case "multiple_choice":
+          return !answer.selectedOptions || answer.selectedOptions.length === 0;
+        case "ranking":
+          return !answer.rankingOrder || answer.rankingOrder.length === 0;
+        default:
+          return true;
+      }
+    });
+
+    if (unansweredRequired.length > 0) {
+      alert(`Please answer all required questions before submitting.`);
       return;
     }
 
@@ -1390,14 +1847,44 @@ const VirtualSpace: React.FC = () => {
         `${import.meta.env.VITE_API_BASE_URL}/events/${id}/feedback`,
         {
           guestName: guestName.trim() || undefined,
-          content: feedback.trim(),
+          guestEmail: guestEmail.trim() || undefined,
+          answers: answers,
         }
       );
 
       if (response.data.success) {
         setSubmitSuccess(true);
-        setFeedback("");
+        // Reset form
         setGuestName("");
+        setGuestEmail("");
+
+        // Reset answers
+        if (event.feedbackForm.questions) {
+          const initialAnswers: FeedbackAnswer[] = [];
+
+          for (const question of event.feedbackForm.questions) {
+            const newAnswer: FeedbackAnswer = {
+              questionId: question.id,
+            };
+
+            if (question.type === "text") {
+              newAnswer.textAnswer = "";
+            } else if (question.type === "rating") {
+              newAnswer.ratingAnswer = question.minRating || 0;
+            } else if (
+              question.type === "single_choice" ||
+              question.type === "multiple_choice"
+            ) {
+              newAnswer.selectedOptions = [];
+            } else if (question.type === "ranking") {
+              newAnswer.rankingOrder = [];
+            }
+
+            initialAnswers.push(newAnswer);
+          }
+
+          setAnswers(initialAnswers);
+        }
 
         // Reset success message after 3 seconds
         setTimeout(() => {
@@ -1410,6 +1897,60 @@ const VirtualSpace: React.FC = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Add handlers for different question types
+  const handleTextAnswerChange = (questionId: string, value: string) => {
+    setAnswers((prev) =>
+      prev.map((answer) =>
+        answer.questionId === questionId
+          ? { ...answer, textAnswer: value }
+          : answer
+      )
+    );
+  };
+
+  const handleRatingAnswerChange = (questionId: string, value: number) => {
+    setAnswers((prev) =>
+      prev.map((answer) =>
+        answer.questionId === questionId
+          ? { ...answer, ratingAnswer: value }
+          : answer
+      )
+    );
+  };
+
+  const handleSingleChoiceChange = (questionId: string, optionId: string) => {
+    setAnswers((prev) =>
+      prev.map((answer) =>
+        answer.questionId === questionId
+          ? { ...answer, selectedOptions: [optionId] }
+          : answer
+      )
+    );
+  };
+
+  const handleMultipleChoiceChange = (
+    questionId: string,
+    optionId: string,
+    checked: boolean
+  ) => {
+    setAnswers((prev) =>
+      prev.map((answer) => {
+        if (answer.questionId !== questionId) return answer;
+
+        const currentOptions = answer.selectedOptions || [];
+        let newOptions;
+
+        if (checked) {
+          newOptions = [...currentOptions, optionId];
+        } else {
+          newOptions = currentOptions.filter((id) => id !== optionId);
+        }
+
+        return { ...answer, selectedOptions: newOptions };
+      })
+    );
   };
 
   // Helper function to check if a date is today
@@ -1557,6 +2098,90 @@ const VirtualSpace: React.FC = () => {
     };
   }, []);
 
+  // Add a handler for ranking questions
+  const handleRankingChange = (
+    questionId: string,
+    optionId: string,
+    direction: "up" | "down"
+  ) => {
+    setAnswers((prev) => {
+      return prev.map((answer) => {
+        if (answer.questionId !== questionId) return answer;
+
+        // Get current ranking order or initialize if empty
+        const currentOrder = answer.rankingOrder || [];
+
+        // If the option is not in the ranking yet, add it at the end
+        if (!currentOrder.includes(optionId)) {
+          return { ...answer, rankingOrder: [...currentOrder, optionId] };
+        }
+
+        // Find the current index of the option
+        const currentIndex = currentOrder.indexOf(optionId);
+
+        // Create a new array to avoid mutating the original
+        const newOrder = [...currentOrder];
+
+        if (direction === "up" && currentIndex > 0) {
+          // Move up: swap with the previous item
+          [newOrder[currentIndex], newOrder[currentIndex - 1]] = [
+            newOrder[currentIndex - 1],
+            newOrder[currentIndex],
+          ];
+        } else if (
+          direction === "down" &&
+          currentIndex < currentOrder.length - 1
+        ) {
+          // Move down: swap with the next item
+          [newOrder[currentIndex], newOrder[currentIndex + 1]] = [
+            newOrder[currentIndex + 1],
+            newOrder[currentIndex],
+          ];
+        }
+
+        return { ...answer, rankingOrder: newOrder };
+      });
+    });
+  };
+
+  // Add a handler to add an option to the ranking
+  const handleAddToRanking = (questionId: string, optionId: string) => {
+    setAnswers((prev) => {
+      return prev.map((answer) => {
+        if (answer.questionId !== questionId) return answer;
+
+        // Get current ranking order or initialize if empty
+        const currentOrder = answer.rankingOrder || [];
+
+        // If the option is already in the ranking, don't add it again
+        if (currentOrder.includes(optionId)) {
+          return answer;
+        }
+
+        // Add the option to the end of the ranking
+        return { ...answer, rankingOrder: [...currentOrder, optionId] };
+      });
+    });
+  };
+
+  // Add a handler to remove an option from the ranking
+  const handleRemoveFromRanking = (questionId: string, optionId: string) => {
+    setAnswers((prev) => {
+      return prev.map((answer) => {
+        if (answer.questionId !== questionId) return answer;
+
+        // Get current ranking order or initialize if empty
+        const currentOrder = answer.rankingOrder || [];
+
+        // Remove the option from the ranking
+        return {
+          ...answer,
+          rankingOrder: currentOrder.filter((id) => id !== optionId),
+        };
+      });
+    });
+  };
+
   if (loading) {
     return (
       <SpaceWrapper>
@@ -1697,31 +2322,306 @@ const VirtualSpace: React.FC = () => {
         </SectionHeader>
 
         <Card style={{ padding: `${designTokens.spacing.lg}` }}>
-          <FormGroup>
-            <Label>Your Name (optional)</Label>
-            <Input
-              value={guestName}
-              onChange={handleGuestNameChange}
-              placeholder="Enter your name"
-            />
-          </FormGroup>
+          {submitSuccess && (
+            <SuccessMessage>Feedback submitted successfully!</SuccessMessage>
+          )}
 
-          <FormGroup>
-            <Label>Your Feedback</Label>
-            <TextArea
-              value={feedback}
-              onChange={handleFeedbackChange}
-              placeholder="Let us know what you liked or disliked about the event..."
-            />
-          </FormGroup>
+          {event?.feedbackForm ? (
+            <>
+              <FormTitle>{event.feedbackForm.title}</FormTitle>
+              {event.feedbackForm.description && (
+                <FormDescription>
+                  {event.feedbackForm.description}
+                </FormDescription>
+              )}
 
-          <Button onClick={handleSubmitFeedback} disabled={submitting}>
-            {submitting
-              ? "Submitting..."
-              : submitSuccess
-              ? "Thank you!"
-              : "Submit Feedback"}
-          </Button>
+              <FormGroup>
+                <Label>Your Name (optional)</Label>
+                <Input
+                  value={guestName}
+                  onChange={handleGuestNameChange}
+                  placeholder="Enter your name"
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <Label>Your Email (optional)</Label>
+                <Input
+                  value={guestEmail}
+                  onChange={handleGuestEmailChange}
+                  placeholder="Enter your email"
+                  type="email"
+                />
+              </FormGroup>
+
+              {event.feedbackForm.questions.map(
+                (question: FeedbackQuestion) => (
+                  <FormGroup key={question.id}>
+                    <QuestionLabel>
+                      {question.title}
+                      {question.required && <RequiredMark>*</RequiredMark>}
+                    </QuestionLabel>
+
+                    {question.type === "text" && (
+                      <TextArea
+                        value={
+                          answers.find((a) => a.questionId === question.id)
+                            ?.textAnswer || ""
+                        }
+                        onChange={(e) =>
+                          handleTextAnswerChange(question.id, e.target.value)
+                        }
+                        placeholder="Your answer..."
+                      />
+                    )}
+
+                    {question.type === "rating" && (
+                      <RatingContainer>
+                        <RatingLabelsContainer>
+                          {question.minLabel && (
+                            <RatingLabel>{question.minLabel}</RatingLabel>
+                          )}
+                          {question.maxLabel && (
+                            <RatingLabel>{question.maxLabel}</RatingLabel>
+                          )}
+                        </RatingLabelsContainer>
+                        <RatingButtonsContainer>
+                          {Array.from({
+                            length:
+                              (question.maxRating || 10) -
+                              (question.minRating || 0) +
+                              1,
+                          }).map((_, i) => {
+                            const value = (question.minRating || 0) + i;
+                            const isSelected =
+                              answers.find((a) => a.questionId === question.id)
+                                ?.ratingAnswer === value;
+                            return (
+                              <RatingButton
+                                key={i}
+                                isSelected={isSelected}
+                                onClick={() =>
+                                  handleRatingAnswerChange(question.id, value)
+                                }
+                              >
+                                {value}
+                              </RatingButton>
+                            );
+                          })}
+                        </RatingButtonsContainer>
+                      </RatingContainer>
+                    )}
+
+                    {question.type === "single_choice" && question.options && (
+                      <OptionsContainer>
+                        {question.options.map((option) => {
+                          const isSelected = !!answers
+                            .find((a) => a.questionId === question.id)
+                            ?.selectedOptions?.includes(option.id);
+                          return (
+                            <OptionItem key={option.id}>
+                              <CustomRadioContainer>
+                                <CustomRadio isSelected={isSelected} />
+                              </CustomRadioContainer>
+                              <RadioInput
+                                type="radio"
+                                id={`option-${option.id}`}
+                                name={`question-${question.id}`}
+                                checked={isSelected}
+                                onChange={() =>
+                                  handleSingleChoiceChange(
+                                    question.id,
+                                    option.id
+                                  )
+                                }
+                              />
+                              <OptionLabel htmlFor={`option-${option.id}`}>
+                                {option.text}
+                              </OptionLabel>
+                            </OptionItem>
+                          );
+                        })}
+                      </OptionsContainer>
+                    )}
+
+                    {question.type === "multiple_choice" &&
+                      question.options && (
+                        <OptionsContainer>
+                          {question.options.map((option) => {
+                            const isSelected = !!answers
+                              .find((a) => a.questionId === question.id)
+                              ?.selectedOptions?.includes(option.id);
+                            return (
+                              <OptionItem key={option.id}>
+                                <CustomCheckboxContainer>
+                                  <CustomCheckbox isSelected={isSelected} />
+                                </CustomCheckboxContainer>
+                                <CheckboxInput
+                                  type="checkbox"
+                                  id={`option-${option.id}`}
+                                  checked={isSelected}
+                                  onChange={(e) =>
+                                    handleMultipleChoiceChange(
+                                      question.id,
+                                      option.id,
+                                      e.target.checked
+                                    )
+                                  }
+                                />
+                                <OptionLabel htmlFor={`option-${option.id}`}>
+                                  {option.text}
+                                </OptionLabel>
+                              </OptionItem>
+                            );
+                          })}
+                        </OptionsContainer>
+                      )}
+
+                    {question.type === "ranking" && question.options && (
+                      <RankingContainer>
+                        <RankingInstructions>
+                          Please rank the options by selecting them and using
+                          the up/down arrows to arrange them in order of
+                          preference.
+                        </RankingInstructions>
+                        {/* Show the current ranking */}
+                        {(answers.find((a) => a.questionId === question.id)
+                          ?.rankingOrder?.length ?? 0) > 0 ? (
+                          <RankingList>
+                            {answers
+                              .find((a) => a.questionId === question.id)
+                              ?.rankingOrder?.map((optionId, index) => {
+                                const option = question.options?.find(
+                                  (opt) => opt.id === optionId
+                                );
+                                if (!option) return null;
+
+                                return (
+                                  <RankingItem key={optionId}>
+                                    <RankingNumber>{index + 1}</RankingNumber>
+                                    <RankingText>{option.text}</RankingText>
+                                    <RankingControls>
+                                      <RankingButton
+                                        onClick={() =>
+                                          handleRankingChange(
+                                            question.id,
+                                            optionId,
+                                            "up"
+                                          )
+                                        }
+                                        disabled={index === 0}
+                                        aria-label="Move up"
+                                      >
+                                        ↑
+                                      </RankingButton>
+                                      <RankingButton
+                                        onClick={() =>
+                                          handleRankingChange(
+                                            question.id,
+                                            optionId,
+                                            "down"
+                                          )
+                                        }
+                                        disabled={
+                                          index ===
+                                          (answers.find(
+                                            (a) => a.questionId === question.id
+                                          )?.rankingOrder?.length || 0) -
+                                            1
+                                        }
+                                        aria-label="Move down"
+                                      >
+                                        ↓
+                                      </RankingButton>
+                                      <RankingButton
+                                        onClick={() =>
+                                          handleRemoveFromRanking(
+                                            question.id,
+                                            optionId
+                                          )
+                                        }
+                                        aria-label="Remove"
+                                      >
+                                        ×
+                                      </RankingButton>
+                                    </RankingControls>
+                                  </RankingItem>
+                                );
+                              })}
+                          </RankingList>
+                        ) : (
+                          <p>
+                            No options ranked yet. Select options below to add
+                            them to your ranking.
+                          </p>
+                        )}
+
+                        {/* Show unranked options */}
+                        <h4 style={{ marginTop: "20px", marginBottom: "12px" }}>
+                          Available Options
+                        </h4>
+                        <OptionsContainer>
+                          {(question.options || [])
+                            .filter(
+                              (option) =>
+                                !answers
+                                  .find((a) => a.questionId === question.id)
+                                  ?.rankingOrder?.includes(option.id)
+                            )
+                            .map((option) => (
+                              <OptionItem
+                                key={option.id}
+                                onClick={() =>
+                                  handleAddToRanking(question.id, option.id)
+                                }
+                                style={{ cursor: "pointer" }}
+                              >
+                                <RankingText>{option.text}</RankingText>
+                                <span style={{ color: colors.primary }}>
+                                  + Add to ranking
+                                </span>
+                              </OptionItem>
+                            ))}
+                        </OptionsContainer>
+                      </RankingContainer>
+                    )}
+                  </FormGroup>
+                )
+              )}
+
+              <Button onClick={handleSubmitFeedback} disabled={submitting}>
+                {submitting ? "Submitting..." : "Submit Feedback"}
+              </Button>
+            </>
+          ) : (
+            <>
+              <FormGroup>
+                <Label>Your Name (optional)</Label>
+                <Input
+                  value={guestName}
+                  onChange={handleGuestNameChange}
+                  placeholder="Enter your name"
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <Label>Your Feedback</Label>
+                <TextArea
+                  value={feedback}
+                  onChange={handleFeedbackChange}
+                  placeholder="Let us know what you liked or disliked about the event..."
+                />
+              </FormGroup>
+
+              <Button onClick={handleSubmitFeedback} disabled={submitting}>
+                {submitting
+                  ? "Submitting..."
+                  : submitSuccess
+                  ? "Thank you!"
+                  : "Submit Feedback"}
+              </Button>
+            </>
+          )}
         </Card>
       </ContentSection>
 
@@ -1784,10 +2684,6 @@ const VirtualSpace: React.FC = () => {
             </SimplePopup>
           ))}
       </PopupBackdrop>
-
-      {submitSuccess && (
-        <SuccessMessage>Feedback submitted successfully!</SuccessMessage>
-      )}
     </SpaceWrapper>
   );
 };

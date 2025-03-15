@@ -93,9 +93,52 @@ export type InvoiceAnalysis = {
   lastUpdated: string;
 };
 
+export type FeedbackQuestionType =
+  | "text"
+  | "rating"
+  | "single_choice"
+  | "multiple_choice"
+  | "ranking";
+
+export type FeedbackQuestionOption = {
+  id: string;
+  text: string;
+};
+
+export type FeedbackQuestion = {
+  id: string;
+  title: string;
+  type: FeedbackQuestionType;
+  required: boolean;
+  options?: FeedbackQuestionOption[]; // For choice and ranking questions
+  minRating?: number; // For rating questions (default 0)
+  maxRating?: number; // For rating questions (default 10)
+  minLabel?: string; // Label for the lowest rating
+  maxLabel?: string; // Label for the highest rating
+};
+
+export type FeedbackForm = {
+  title: string;
+  description?: string;
+  questions: FeedbackQuestion[];
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type FeedbackAnswer = {
+  questionId: string;
+  textAnswer?: string;
+  ratingAnswer?: number;
+  selectedOptions?: string[]; // IDs of selected options
+  rankingOrder?: string[]; // IDs of options in ranked order
+};
+
 export type Feedback = {
+  _id?: string;
   guestName?: string;
-  content: string;
+  guestEmail?: string;
+  answers: FeedbackAnswer[];
   createdAt?: string;
 };
 
@@ -176,6 +219,7 @@ export type Event = {
   tasks: Task[];
   invoices?: Invoice[];
   invoiceAnalysis?: InvoiceAnalysis;
+  feedbackForm?: FeedbackForm;
   feedback?: Feedback[];
   feedbackAnalysis?: FeedbackAnalysis;
 };

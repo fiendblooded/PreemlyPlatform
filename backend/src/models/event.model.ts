@@ -75,10 +75,49 @@ const eventSchema = new Schema<Event>({
   feedback: [
     {
       guestName: { type: String },
-      content: { type: String, required: true },
+      guestEmail: { type: String },
+      answers: [
+        {
+          questionId: { type: String, required: true },
+          textAnswer: { type: String },
+          ratingAnswer: { type: Number },
+          selectedOptions: [{ type: String }],
+          rankingOrder: [{ type: String }],
+        },
+      ],
       createdAt: { type: Date, default: Date.now },
     },
   ],
+  feedbackForm: {
+    title: { type: String, default: 'Event Feedback' },
+    description: { type: String },
+    questions: [
+      {
+        id: { type: String, required: true },
+        title: { type: String, required: true },
+        type: {
+          type: String,
+          required: true,
+          enum: ['text', 'rating', 'single_choice', 'multiple_choice', 'ranking'],
+          default: 'text',
+        },
+        required: { type: Boolean, default: false },
+        options: [
+          {
+            id: { type: String },
+            text: { type: String },
+          },
+        ],
+        minRating: { type: Number, default: 0 },
+        maxRating: { type: Number, default: 10 },
+        minLabel: { type: String },
+        maxLabel: { type: String },
+      },
+    ],
+    isEnabled: { type: Boolean, default: true },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+  },
   invoiceAnalysis: {
     budgetSummary: {
       totalSpend: { type: Number },

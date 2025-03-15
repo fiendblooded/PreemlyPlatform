@@ -4,7 +4,7 @@ import { Event, ScheduleItem } from "../types";
 import { getMailHtml, isTablet } from "../common/common";
 import EmailSection from "./EmailSection";
 import ScheduleIcon from "./icons/ScheduleIcon";
-import DiningIcon from "./icons/DiningIcon";
+// import DiningIcon from "./icons/DiningIcon";
 import ParkingIcon from "./icons/ParkingIcon";
 import { PrimaryButton, SecondaryButton } from "./EventGuestsEditor";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
@@ -578,7 +578,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
                 setSchedule({ ...schedule, content: newContent })
               }
             />
-            <EmailSection
+            {/* <EmailSection
               icon={<DiningIcon />}
               title={"Dining"}
               enable={dining.enabled}
@@ -589,7 +589,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
               setContent={(newContent) =>
                 setDining({ ...dining, content: newContent })
               }
-            />
+            /> */}
           </>
         )}
       </EmailSectionsContainer>

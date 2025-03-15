@@ -117,9 +117,53 @@ export interface InvoiceAnalysis {
   lastUpdated: Date;
 }
 
+export enum FeedbackQuestionType {
+  TEXT = 'text',
+  RATING = 'rating',
+  SINGLE_CHOICE = 'single_choice',
+  MULTIPLE_CHOICE = 'multiple_choice',
+  RANKING = 'ranking',
+}
+
+export interface FeedbackQuestionOption {
+  id: string;
+  text: string;
+}
+
+export interface FeedbackQuestion {
+  id: string;
+  title: string;
+  type: FeedbackQuestionType;
+  required: boolean;
+  options?: FeedbackQuestionOption[]; // For choice and ranking questions
+  minRating?: number; // For rating questions (default 0)
+  maxRating?: number; // For rating questions (default 10)
+  minLabel?: string; // Label for the lowest rating
+  maxLabel?: string; // Label for the highest rating
+}
+
+export interface FeedbackForm {
+  title: string;
+  description?: string;
+  questions: FeedbackQuestion[];
+  isEnabled: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface FeedbackAnswer {
+  questionId: string;
+  textAnswer?: string;
+  ratingAnswer?: number;
+  selectedOptions?: string[]; // IDs of selected options
+  rankingOrder?: string[]; // IDs of options in ranked order
+}
+
 export interface Feedback {
+  _id?: string;
   guestName?: string;
-  content: string;
+  guestEmail?: string;
+  answers: FeedbackAnswer[];
   createdAt: Date;
 }
 
@@ -147,6 +191,7 @@ export interface Event {
   emailParams: EmailParams;
   invoices?: Types.ObjectId[];
   invoiceAnalysis?: InvoiceAnalysis;
+  feedbackForm?: FeedbackForm;
   feedback?: Feedback[];
   feedbackAnalysis?: FeedbackAnalysis;
 }
