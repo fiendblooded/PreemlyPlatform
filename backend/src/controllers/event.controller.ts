@@ -465,12 +465,12 @@ export const downloadGuestsToExcel = async (req: Request, res: Response): Promis
 export const addEventFeedback = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { guestName, content } = req.body;
+    const { guestName, guestEmail, answers } = req.body;
 
-    if (!content) {
+    if (!answers || !Array.isArray(answers) || answers.length === 0) {
       res.status(400).json({
         success: false,
-        message: 'Feedback content is required',
+        message: 'Feedback answers are required',
       });
       return;
     }
@@ -481,9 +481,25 @@ export const addEventFeedback = async (req: Request, res: Response): Promise<voi
       return;
     }
 
+    // Validate that all questionIds exist in the feedback form
+    if (event.feedbackForm && event.feedbackForm.questions) {
+      const questionIds = event.feedbackForm.questions.map((q) => q.id);
+      const invalidQuestionIds = answers.filter((a) => !questionIds.includes(a.questionId));
+
+      if (invalidQuestionIds.length > 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Some question IDs are invalid',
+          invalidQuestionIds: invalidQuestionIds.map((a) => a.questionId),
+        });
+        return;
+      }
+    }
+
     const feedback = {
       guestName: guestName || undefined,
-      content,
+      guestEmail: guestEmail || undefined,
+      answers,
       createdAt: new Date(),
     };
 
@@ -501,6 +517,117 @@ export const addEventFeedback = async (req: Request, res: Response): Promise<voi
     });
   } catch (error) {
     console.error('Error adding feedback:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+export const updateFeedbackForm = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const feedbackForm = req.body;
+
+    if (!feedbackForm || !feedbackForm.questions || !Array.isArray(feedbackForm.questions)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid feedback form structure',
+      });
+      return;
+    }
+
+    // Ensure all questions have unique IDs
+    const questionIds = feedbackForm.questions.map((q: { id: string }) => q.id);
+    if (new Set(questionIds).size !== questionIds.length) {
+      res.status(400).json({
+        success: false,
+        message: 'All questions must have unique IDs',
+      });
+      return;
+    }
+
+    // Validate question types
+    const validTypes = ['text', 'rating', 'single_choice', 'multiple_choice', 'ranking'];
+    const invalidQuestions = feedbackForm.questions.filter(
+      (q: { type: string; title: string }) => !validTypes.includes(q.type),
+    );
+    if (invalidQuestions.length > 0) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid question type(s)',
+        invalidQuestions: invalidQuestions.map((q: { title: string }) => q.title),
+      });
+      return;
+    }
+
+    // Ensure choice and ranking questions have options
+    const choiceQuestions = feedbackForm.questions.filter((q: { type: string }) =>
+      ['single_choice', 'multiple_choice', 'ranking'].includes(q.type),
+    );
+
+    const questionsWithoutOptions = choiceQuestions.filter(
+      (q: { options?: any[]; title: string }) =>
+        !q.options || !Array.isArray(q.options) || q.options.length < 2,
+    );
+
+    if (questionsWithoutOptions.length > 0) {
+      res.status(400).json({
+        success: false,
+        message: 'Choice and ranking questions must have at least 2 options',
+        invalidQuestions: questionsWithoutOptions.map((q: { title: string }) => q.title),
+      });
+      return;
+    }
+
+    // Update the feedback form
+    const updatedEvent = await Event.findByIdAndUpdate(
+      id,
+      {
+        feedbackForm: {
+          ...feedbackForm,
+          updatedAt: new Date(),
+        },
+      },
+      { new: true },
+    );
+
+    if (!updatedEvent) {
+      res.status(404).json({ success: false, message: 'Event not found' });
+      return;
+    }
+
+    res.json({
+      success: true,
+      message: 'Feedback form updated successfully',
+      data: updatedEvent.feedbackForm,
+    });
+  } catch (error) {
+    console.error('Error updating feedback form:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+export const getFeedbackForm = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id);
+    if (!event) {
+      res.status(404).json({ success: false, message: 'Event not found' });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: event.feedbackForm || {
+        title: 'Event Feedback',
+        description: 'Please share your thoughts about the event',
+        questions: [],
+        isEnabled: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error('Error getting feedback form:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };

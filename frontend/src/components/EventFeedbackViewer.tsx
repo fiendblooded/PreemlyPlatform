@@ -1,305 +1,260 @@
 import React, { useState } from "react";
-import styled from "styled-components";
-import { Event, Feedback } from "../types";
+import styled, { keyframes } from "styled-components";
 import { format } from "date-fns";
-import { useToast, ToastType } from "./Toasts";
+import {
+  Event,
+  Feedback,
+  type FeedbackAnswer,
+  FeedbackQuestion,
+} from "../types";
+import { ToastType, useToast } from "./Toasts";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { AIButton } from "./EventBudgetEditor";
+import FeedbackFormEditor from "./FeedbackFormEditor";
 
 const colors = {
-  primary: "#6366F1", // Matches sidebar accent
-  primaryHover: "#4F46E5",
-  textPrimary: "#1E293B",
-  textSecondary: "#64748B",
-  borderLight: "#E2E8F0",
-  backgroundLight: "#FFFFFF",
-  backgroundSecondary: "#F8FAFC",
-  yellow: "#e6bf30",
-  green: "#2a9134",
-  blue: "#4F46E5",
-  gray: "#64748B",
-  shadow: "rgba(0, 0, 0, 0.05)",
+  primary: "#6b3ddf",
+  primaryLight: "#8f6df2",
+  primaryDark: "#5a32c0",
+  secondary: "#f5f5f5",
+  text: "#333333",
+  textLight: "#666666",
+  border: "#e0e0e0",
+  success: "#4caf50",
+  warning: "#ff9800",
+  error: "#f44336",
 };
 
-// Styled components for the container
 const FeedbackWrapper = styled.div`
   width: 90%;
-  overflow: hidden;
   margin: 20px auto;
-  margin-bottom: 80px;
-  display: flex;
-  flex-direction: column;
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  box-sizing: border-box;
-`;
-
-const FeedbackHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 24px 28px 0;
-  flex-wrap: wrap;
-`;
-
-const FeedbackTitle = styled.h2`
-  font-size: 24px;
-  font-weight: 600;
-  margin: 0;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const ButtonsContainer = styled.div`
-  display: flex;
-  gap: 12px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  color: #333333;
 `;
 
 const TabsContainer = styled.div`
   display: flex;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  margin: 0 28px 24px;
-  padding-bottom: 2px;
-`;
-
-const Tab = styled.div<{ isActive: boolean }>`
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: ${(props) => (props.isActive ? "600" : "400")};
-  color: ${(props) => (props.isActive ? "#6b3ddf" : "#666")};
-  border-bottom: 2px solid
-    ${(props) => (props.isActive ? "#6b3ddf" : "transparent")};
-  cursor: pointer;
-  transition: all 0.2s ease;
+  border-bottom: 1px solid ${colors.border};
+  background-color: ${colors.secondary};
+  padding: 0 16px;
   position: relative;
-
-  &:hover {
-    color: #6b3ddf;
-  }
 
   &::after {
     content: "";
     position: absolute;
-    bottom: -2px;
+    bottom: -1px;
     left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: ${(props) =>
-      props.isActive ? "#6b3ddf" : "transparent"};
-    transform: scaleX(${(props) => (props.isActive ? "1" : "0")});
-    transform-origin: left;
-    transition: transform 0.3s ease;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(107, 61, 223, 0.2),
+      rgba(107, 61, 223, 0.05),
+      rgba(107, 61, 223, 0)
+    );
+    z-index: 1;
   }
+`;
 
-  &:hover::after {
-    transform: scaleX(1);
-    background-color: #6b3ddf;
+const Tab = styled.div<{ active: boolean }>`
+  padding: 18px 24px;
+  cursor: pointer;
+  font-weight: ${(props) => (props.active ? "600" : "500")};
+  color: ${(props) => (props.active ? colors.primary : colors.textLight)};
+  border-bottom: 3px solid
+    ${(props) => (props.active ? colors.primary : "transparent")};
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+
+  ${(props) =>
+    props.active &&
+    `
+    background-color: rgba(107, 61, 223, 0.05);
+  `}
+
+  &:hover {
+    color: ${colors.primary};
+    background-color: rgba(107, 61, 223, 0.05);
   }
 `;
 
 const FeedbackContent = styled.div`
-  width: 100%;
-  box-sizing: border-box;
+  padding: 28px;
+  min-height: 300px;
+  color: #333333;
 `;
 
-const FeedbackGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-  gap: 24px;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0 28px;
-  margin-top: 20px;
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #333333;
+  background-color: rgba(107, 61, 223, 0.02);
+  border-radius: 12px;
+  border: 1px dashed rgba(107, 61, 223, 0.2);
+`;
+
+const EmptyStateIcon = styled.div`
+  font-size: 48px;
+  margin-bottom: 20px;
+  background-color: rgba(107, 61, 223, 0.1);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+`;
+
+const SearchContainer = styled.div`
+  display: flex;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+  background-color: rgba(107, 61, 223, 0.03);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    padding: 12px;
+  }
+`;
+
+const SearchInput = styled.input`
+  flex: 1;
+  padding: 12px 18px;
+  border: 1px solid ${colors.border};
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  color: #333333;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  &:focus {
+    border-color: ${colors.primary};
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(107, 61, 223, 0.1);
+  }
+
+  &::placeholder {
+    color: rgba(102, 102, 102, 0.7);
+  }
+`;
+
+const AnalyzeButton = styled.button`
+  background: linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark});
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 160px;
+  box-shadow: 0 2px 5px rgba(107, 61, 223, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &::before {
+    content: "✨";
+    font-size: 14px;
+  }
+
+  &:hover {
+    background: linear-gradient(
+      135deg,
+      ${colors.primaryDark},
+      ${colors.primary}
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(107, 61, 223, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(107, 61, 223, 0.2);
+  }
+
+  &:disabled {
+    background: linear-gradient(
+      135deg,
+      ${colors.primaryLight},
+      ${colors.primary}
+    );
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+`;
+
+// Add keyframes for animations
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const pulse = keyframes`
+  0% {
+    box-shadow: 0 0 0 0 rgba(107, 61, 223, 0.2);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(107, 61, 223, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(107, 61, 223, 0);
   }
 `;
 
 const FeedbackCard = styled.div`
   background-color: white;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 24px;
-  border-left: 4px solid #6b3ddf;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  }
-
-  &:hover p::after {
-    opacity: 1;
-    width: 60px;
-  }
-`;
-
-const FeedbackCardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-`;
-
-const GuestName = styled.h3`
-  color: #333;
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  &::before {
-    content: "";
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #6b3ddf;
-  }
-`;
-
-const FeedbackDate = styled.span`
-  color: #888;
-  font-size: 14px;
-  font-weight: 500;
-`;
-
-const FeedbackText = styled.p`
-  color: #444;
-  font-size: 15px;
-  line-height: 1.6;
-  margin: 0;
-  white-space: pre-wrap;
-  flex-grow: 1;
-  position: relative;
-  padding: 4px 0;
-
-  &::first-letter {
-    font-size: 18px;
-    font-weight: 500;
-    color: #6b3ddf;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -8px;
-    left: 0;
-    width: 40px;
-    height: 3px;
-    background: linear-gradient(90deg, #6b3ddf, transparent);
-    opacity: 0;
-    transition: opacity 0.3s ease, width 0.3s ease;
-  }
-`;
-
-// Enhanced empty state
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 60px 0;
-  color: #6b7280;
-  background-color: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  margin: 20px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-`;
-
-const EmptyStateIcon = styled.div`
-  font-size: 48px;
-  margin-bottom: 20px;
-
-  animation: pulse 2s infinite;
-
-  @keyframes pulse {
-    0% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.1);
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
-`;
-
-// Analysis styled components
-const AnalysisContainer = styled.div`
-  width: 100%;
-  padding: 0 28px;
-  box-sizing: border-box;
-`;
-
-// Modern dashboard-style layout with improved spacing
-const AnalysisDashboard = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: 1200px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-`;
-
-const AnalysisHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 28px;
-  grid-column: 1 / -1;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  padding-bottom: 16px;
-`;
-
-const AnalysisTitle = styled.h3`
-  color: #333;
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-// Enhanced card designs with more modern styling
-const AnalysisCard = styled.div`
-  background-color: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  padding: 24px;
-  box-sizing: border-box;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s ease;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 24px;
+  border-left: 4px solid ${colors.primary};
+  color: #333333;
   position: relative;
   overflow: hidden;
+  animation: ${fadeIn} 0.4s ease-out;
+  animation-fill-mode: both;
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  &:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+
+  &:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+
+  &:nth-child(n + 5) {
+    animation-delay: 0.4s;
   }
 
   &::before {
@@ -308,180 +263,344 @@ const AnalysisCard = styled.div`
     top: 0;
     left: 0;
     width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, #6b3ddf, #8b5cf6);
-    opacity: 0.8;
+    height: 6px;
+    background: linear-gradient(
+      90deg,
+      ${colors.primary},
+      ${colors.primaryLight}
+    );
+    opacity: 0.1;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   }
 `;
 
-const OverviewCard = styled(AnalysisCard)`
-  grid-column: 1 / -1;
+const FeedbackHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
-  &::before {
-    background: linear-gradient(90deg, #6b3ddf, #8b5cf6);
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
   }
 `;
 
-const StrengthCard = styled(AnalysisCard)`
-  &::before {
-    background: linear-gradient(90deg, #34d399, #10b981);
-  }
-`;
-
-const WeaknessCard = styled(AnalysisCard)`
-  &::before {
-    background: linear-gradient(90deg, #f87171, #ef4444);
-  }
-`;
-
-const SuggestionCard = styled(AnalysisCard)`
-  &::before {
-    background: linear-gradient(90deg, #fbbf24, #f59e0b);
-  }
-`;
-
-const CardTitle = styled.h3`
-  color: #333;
-  font-size: 18px;
+const GuestName = styled.div`
   font-weight: 600;
-  margin: 0 0 20px 0;
+  color: ${colors.text};
   display: flex;
   align-items: center;
-  gap: 10px;
-  position: relative;
+  flex-wrap: wrap;
+  font-size: 16px;
+  gap: 8px;
 `;
 
-// Icon container for the purple boxes
-const IconContainer = styled.div`
-  width: 32px;
-  height: 32px;
+const GuestEmail = styled.span`
+  font-size: 14px;
+  color: ${colors.textLight};
+  font-weight: normal;
+  display: inline-flex;
+  align-items: center;
+
+  &::before {
+    content: "•";
+    margin-right: 8px;
+    opacity: 0.5;
+  }
+`;
+
+const FeedbackDate = styled.div`
+  font-size: 14px;
+  color: ${colors.textLight};
+  background-color: ${colors.secondary};
+  padding: 4px 10px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+
+  &::before {
+    content: "🕒";
+    margin-right: 6px;
+    font-size: 12px;
+  }
+`;
+
+const FeedbackAnswers = styled.div`
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const FeedbackAnswer = styled.div`
+  margin-bottom: 0;
+  padding: 16px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #6b3ddf, #8b5cf6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
-`;
+  background-color: rgba(0, 0, 0, 0.02);
+  transition: background-color 0.2s ease;
 
-// Specific icon containers for each type
-const StrengthIconContainer = styled(IconContainer)`
-  background: linear-gradient(135deg, #10b981, #34d399);
-`;
-
-const WeaknessIconContainer = styled(IconContainer)`
-  background: linear-gradient(135deg, #ef4444, #f87171);
-`;
-
-const SuggestionIconContainer = styled(IconContainer)`
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-`;
-
-const CardContent = styled.p`
-  color: #4b5563;
-  font-size: 15px;
-  line-height: 1.6;
-  margin: 0;
-`;
-
-// Improved list styling
-const ListItem = styled.li`
-  margin-bottom: 14px;
-  line-height: 1.6;
-  position: relative;
-  padding-left: 28px;
-  color: #4b5563;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
 
   &:last-child {
     margin-bottom: 0;
   }
+`;
 
-  &:before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 8px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #6b3ddf;
+const QuestionTitle = styled.div`
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: ${colors.text};
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+
+  &::before {
+    content: "❯";
+    margin-right: 8px;
+    color: ${colors.primary};
+    font-size: 12px;
   }
 `;
 
-// Improved sentiment indicator with animation
-/* Commented out as it's not currently used
-const SentimentIndicator = styled.div<{
-  sentiment: "positive" | "neutral" | "negative";
-}>`
-  width: 100%;
-  height: 8px;
-  border-radius: 4px;
-  margin-top: 16px;
-  background-color: ${(props) =>
-    props.sentiment === "positive"
-      ? "#10b981"
-      : props.sentiment === "negative"
-      ? "#ef4444"
-      : "#f59e0b"};
-  position: relative;
-  overflow: hidden;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 30%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.2);
-    animation: pulse 1.5s infinite;
-  }
-  
-  @keyframes pulse {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(400%); }
+const AnswerText = styled.div`
+  color: ${colors.text};
+  line-height: 1.6;
+  font-size: 15px;
+  padding: 0 0 0 20px;
+  white-space: pre-wrap;
+`;
+
+const RatingDisplay = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 20px;
+`;
+
+const RatingValue = styled.span`
+  font-size: 20px;
+  font-weight: bold;
+  color: ${colors.primary};
+  margin-right: 8px;
+  background-color: rgba(107, 61, 223, 0.1);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  animation: ${pulse} 2s infinite;
+
+  &:hover {
+    background-color: rgba(107, 61, 223, 0.2);
+    transform: scale(1.1);
   }
 `;
-*/
 
-const LastUpdated = styled.div`
+const RatingScale = styled.span`
+  color: ${colors.textLight};
   font-size: 14px;
-  color: #6b7280;
+`;
+
+const ChoiceDisplay = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 0 0 20px;
+`;
+
+const ChoiceOption = styled.div`
+  background-color: rgba(107, 61, 223, 0.08);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  color: ${colors.text};
+  border: 1px solid rgba(107, 61, 223, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: rgba(107, 61, 223, 0.12);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+`;
+
+const RankingDisplay = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 0 0 20px;
+`;
+
+const RankingItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: rgba(107, 61, 223, 0.04);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: rgba(107, 61, 223, 0.08);
+    transform: translateX(2px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+`;
+
+const RankNumber = styled.span`
+  font-weight: bold;
+  margin-right: 8px;
+  color: ${colors.primary};
+  background-color: rgba(107, 61, 223, 0.1);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+`;
+
+// Analysis tab styled components
+const AnalysisContainer = styled.div`
+  padding: 0 20px;
+  color: #333333;
+`;
+
+const AnalysisSection = styled.div`
+  margin-bottom: 30px;
+`;
+
+const AnalysisHeader = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+`;
+
+const AnalysisTitle = styled.h3`
+  margin: 0;
+  margin-left: 12px;
+  font-size: 18px;
+  color: ${colors.text};
+`;
+
+const AnalysisContent = styled.div`
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #333333;
+`;
+
+const AnalysisText = styled.p`
+  margin: 0;
+  line-height: 1.6;
+  color: ${colors.text};
+`;
+
+const AnalysisList = styled.ul`
+  margin: 0;
+  padding-left: 20px;
+  color: #333333;
+`;
+
+const AnalysisItem = styled.li`
+  margin-bottom: 8px;
+  line-height: 1.5;
+  color: ${colors.text};
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const AnalysisDate = styled.div`
+  font-size: 14px;
+  color: ${colors.textLight};
   margin-top: 16px;
   text-align: right;
-  grid-column: 1 / -1;
-  font-style: italic;
 `;
 
-// Enhanced loading container
-const LoadingContainer = styled.div`
-  text-align: center;
-  padding: 60px 0;
+const NoAnalysisContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #333333;
 `;
 
-// Improved loading spinner
-const LoadingSpinner = styled.div`
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  border: 3px solid rgba(107, 61, 223, 0.2);
-  border-radius: 50%;
-  border-top-color: #6b3ddf;
-  animation: spin 1s ease-in-out infinite;
-  margin-right: 10px;
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
+const AnalyzeButtonLarge = styled(AIButton)`
+  margin-top: 20px;
 `;
+
+// Icons for the analysis section
+const FeedbackIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M7 8H17M7 12H11M12 20L8 16H4C3.44772 16 3 15.5523 3 15V5C3 4.44772 3.44772 4 4 4H20C20.5523 4 21 4.44772 21 5V15C21 15.5523 20.5523 16 20 16H16L12 20Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 const AnalysisIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M16 8V16M12 11V16M8 14V16M4 18H20C20.5523 18 21 17.5523 21 17V7C21 6.44772 20.5523 6 20 6H4C3.44772 6 3 6.44772 3 7V17C3 17.5523 3.44772 18 4 18Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const FormIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const StrengthIcon = () => (
   <svg
     width="24"
     height="24"
@@ -490,388 +609,94 @@ const AnalysisIcon = () => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M19.6385 19.6387C20.1064 20.1066 20.1098 20.8693 19.5976 21.2884C18.2657 22.3778 16.7112 23.1712 15.0376 23.6091C12.9766 24.1484 10.8093 24.1293 8.75816 23.5538C6.70705 22.9783 4.84611 21.8672 3.36652 20.3345C1.88693 18.8018 0.84202 16.9029 0.339136 14.8327C-0.163748 12.7626 -0.106478 10.5959 0.505062 8.55522C1.1166 6.51454 2.26037 4.67345 3.81886 3.22107C5.37735 1.76869 7.29439 0.75739 9.37304 0.291048C11.06 -0.0874224 12.8041 -0.0958826 14.4863 0.260427C15.1353 0.397894 15.4836 1.07846 15.2824 1.70927C15.0808 2.34126 14.4039 2.68214 13.7503 2.56094C12.4788 2.32512 11.1684 2.34792 9.89841 2.63284C8.23549 3.00591 6.70186 3.81496 5.45506 4.97686C4.20827 6.13876 3.29326 7.61163 2.80402 9.24418C2.31479 10.8767 2.26898 12.6101 2.67128 14.2662C3.07359 15.9223 3.90952 17.4414 5.09319 18.6676C6.27687 19.8937 7.76561 20.7827 9.4065 21.2431C11.0474 21.7035 12.7813 21.7187 14.43 21.2873C15.6895 20.9578 16.8646 20.3766 17.8864 19.5834C18.4109 19.1762 19.1691 19.1693 19.6385 19.6387ZM21.3347 4.45945C20.9176 3.94312 20.15 3.9421 19.6779 4.40882C19.2074 4.87404 19.2102 5.6276 19.6132 6.15228C20.839 7.748 21.5389 9.69801 21.5962 11.7295C21.6535 13.7613 21.0646 15.7479 19.9305 17.4103C19.5579 17.9565 19.5979 18.7088 20.0939 19.1468C20.5915 19.5861 21.3575 19.5421 21.7446 19.0035C23.2722 16.8779 24.0697 14.3003 23.9952 11.6618C23.9208 9.02362 22.9794 6.49538 21.3347 4.45945ZM12.6411 5.75815C12.3993 5.22787 11.6376 5.22786 11.3958 5.75815L11.2432 6.0929C10.3865 7.97173 9.27951 9.72884 7.95154 11.3175L7.73017 11.5823C7.52153 11.8319 7.52153 12.1928 7.73017 12.4424L7.95154 12.7072C9.27951 14.2959 10.3865 16.053 11.2432 17.9319L11.3958 18.2666C11.6376 18.7969 12.3993 18.7969 12.6411 18.2666L12.7937 17.9319C13.6504 16.053 14.7574 14.2959 16.0854 12.7072L16.3068 12.4424C16.5154 12.1928 16.5154 11.8319 16.3068 11.5823L16.0854 11.3175C14.7574 9.72884 13.6504 7.97173 12.7937 6.0929L12.6411 5.75815ZM17.9612 1.58272C17.3845 1.25284 16.6689 1.53027 16.3989 2.13631C16.1294 2.74097 16.4067 3.44295 16.9738 3.78616C17.1414 3.88756 17.3058 3.99407 17.4669 4.10554C18.0131 4.48354 18.7706 4.44916 19.2136 3.95485C19.6552 3.46211 19.6169 2.70013 19.0823 2.30958C18.7224 2.04666 18.3481 1.804 17.9612 1.58272Z"
-      fill="white"
-    />
-  </svg>
-);
-
-// New icons for the enhanced UI
-const StrengthIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-      fill="white"
+      d="M9 12L11 14L15 10M7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20Z"
+      stroke={colors.success}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
 
 const WeaknessIcon = () => (
   <svg
-    width="20"
-    height="20"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
-      fill="white"
+      d="M9.5 14.5L11.5 12.5M11.5 12.5L13.5 10.5M11.5 12.5L9.5 10.5M11.5 12.5L13.5 14.5M7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20Z"
+      stroke={colors.error}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
 
 const SuggestionIcon = () => (
   <svg
-    width="20"
-    height="20"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"
-      fill="white"
+      d="M9.5 11.5L11.5 9.5M11.5 9.5L13.5 7.5M11.5 9.5L9.5 7.5M11.5 9.5L13.5 11.5M12 22C12.5917 22 13.1374 21.7454 13.5249 21.3149C13.8346 20.9669 14 20.5109 14 20H10C10 20.5109 10.1654 20.9669 10.4751 21.3149C10.8626 21.7454 11.4083 22 12 22ZM12 2C7.58172 2 4 5.58172 4 4 10C4 11.8487 4.63187 13.551 5.70764 14.9048C6.29595 15.6784 6.99997 16.5484 7.1468 17.568C7.25618 18.3249 7.64762 19 8.5 19H15.5C16.3524 19 16.7438 18.3249 16.8532 17.568C17.0001 16.5484 17.7041 15.6784 18.2924 14.9048C19.3681 13.551 20 11.8487 20 10C20 5.58172 16.4183 2 12 2Z"
+      stroke={colors.warning}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
 
 const InsightIcon = () => (
   <svg
-    width="20"
-    height="20"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
-      fill="white"
+      d="M12 16V21M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM18 8L20 6M6 8L4 6M18 16L20 18M6 16L4 18M21 12H19M5 12H3M12 3V5"
+      stroke={colors.primary}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
 
-const AnalysisInfoContainer = styled.div`
-  text-align: center;
+// Add these styled components near the other styled components
+const RatingLabels = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  background-color: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  max-width: 800px;
-  margin: 0 auto;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 13px;
+  color: ${colors.textLight};
+  width: 100%;
+  max-width: 300px;
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
 `;
 
-const AnalysisInfoTitle = styled.h3`
-  color: #333;
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-`;
-
-const AnalysisInfoText = styled.p`
-  color: #4b5563;
-  font-size: 16px;
-  line-height: 1.6;
-  margin-bottom: 16px;
-`;
-
-const AnalysisFeatureList = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
-  margin: 32px 0;
+const RatingLabelMin = styled.span`
   text-align: left;
+  opacity: 0.8;
+  font-style: italic;
 `;
 
-const AnalysisFeatureItem = styled.div`
-  display: flex;
-  gap: 16px;
+const RatingLabelMax = styled.span`
+  text-align: right;
+  opacity: 0.8;
+  font-style: italic;
 `;
-
-const AnalysisFeatureIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #6b3ddf, #8b5cf6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
-`;
-
-const AnalysisFeatureContent = styled.div`
-  flex: 1;
-`;
-
-const AnalysisFeatureTitle = styled.h4`
-  color: #333;
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-`;
-
-const AnalysisFeatureDescription = styled.p`
-  color: #6b7280;
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0;
-`;
-
-// Replace the search styling with the one from Events.tsx
-const SearchContainer = styled.div`
-  display: flex;
-  align-items: center;
-  background-color: ${colors.backgroundSecondary};
-  border: 1px solid ${colors.borderLight};
-  border-radius: 8px;
-  padding: 10px 14px;
-  margin: 0 28px 20px;
-  width: calc(100% - 56px);
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px ${colors.shadow};
-  box-sizing: border-box;
-
-  &:focus-within {
-    border-color: ${colors.primary};
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
-  }
-`;
-
-const SearchIcon = styled.svg`
-  width: 20px;
-  height: 20px;
-  fill: ${colors.textSecondary};
-  margin-right: 10px;
-  opacity: 0.7;
-`;
-
-const SearchInput = styled.input`
-  font-family: Axiforma, sans-serif;
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  color: ${colors.textPrimary};
-  outline: none;
-
-  &::placeholder {
-    color: ${colors.textSecondary};
-    opacity: 0.6;
-  }
-`;
-
-const ClearButton = styled.div`
-  cursor: pointer;
-  opacity: 0.6;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-`;
-
-// Sample feedback data for testing
-const sampleFeedbackData = [
-  {
-    guestName: "Michael Chen",
-    content:
-      "The workshop was incredibly informative and well-structured. I especially appreciated the hands-on exercises that helped solidify the concepts. However, the venue was a bit cramped and made networking during breaks difficult.",
-  },
-  {
-    guestName: "Sarah Johnson",
-    content:
-      "Great content and engaging speakers! The Q&A sessions were particularly valuable. My only suggestion would be to provide more detailed handouts or resources to reference after the event.",
-  },
-  {
-    guestName: "David Rodriguez",
-    content:
-      "The event started 20 minutes late which was frustrating. While the speakers were knowledgeable, the sound system had issues and it was hard to hear from the back. The content itself was good but the technical problems detracted from the experience.",
-  },
-  {
-    guestName: "Emily Wong",
-    content:
-      "I found the networking opportunities to be the highlight of this event. The speakers were also excellent and provided actionable insights. Like others, I thought the venue was too small for the number of attendees.",
-  },
-  {
-    guestName: "James Wilson",
-    content:
-      "The content was relevant and timely for our industry. I particularly enjoyed the panel discussion. The venue was cramped though, and the temperature control was poor - it was too hot throughout the event.",
-  },
-  {
-    guestName: "Priya Patel",
-    content:
-      "This was one of the best organized events I've attended this year. The agenda flowed logically, and the speakers were top-notch. My only suggestion would be to allow more time for networking.",
-  },
-  {
-    guestName: "Robert Taylor",
-    content:
-      "The content was good but too basic for someone at my experience level. The event description should have been clearer about the target audience. Also, like others mentioned, the venue was uncomfortably crowded.",
-  },
-  {
-    guestName: "Sophia Martinez",
-    content:
-      "I really appreciated the diverse perspectives from the panel of speakers. The Q&A session was particularly insightful. My main complaint would be the lack of adequate refreshments during the breaks, and the venue felt a bit stuffy.",
-  },
-  {
-    guestName: "Thomas Lee",
-    content:
-      "The workshop started late, which cut into valuable learning time. Despite this, the content was excellent and the facilitators were clearly experts in their field. The hands-on activities were very beneficial, though the venue's WiFi kept dropping which affected some of the exercises.",
-  },
-  {
-    guestName: "Aisha Johnson",
-    content:
-      "The speakers were engaging and the content was well-researched. I particularly valued the case studies presented. However, the sound system issues made it difficult to hear some of the presenters, especially during the Q&A portions.",
-  },
-  {
-    guestName: "Daniel Kim",
-    content:
-      "This event exceeded my expectations in terms of content quality. The speakers were not only knowledgeable but also excellent communicators. My only criticism is that the venue was too small for the number of attendees, making it uncomfortable during breakout sessions.",
-  },
-  {
-    guestName: "Olivia Williams",
-    content:
-      "The networking opportunities were valuable, but the event running behind schedule meant less time for these interactions. The temperature in the venue was uncomfortably warm, which became distracting. The speakers and content were excellent though.",
-  },
-  {
-    guestName: "Marcus Johnson",
-    content:
-      "I found the content to be extremely relevant to current industry trends. The speakers were engaging and the Q&A sessions were thought-provoking. Like others have mentioned, the venue was too small and the temperature control was inadequate.",
-  },
-  {
-    guestName: "Jennifer Garcia",
-    content:
-      "The event was well-organized with a clear agenda. I particularly appreciated the depth of knowledge from the speakers. However, the event started late and the venue was not ideal - poor acoustics made it hard to hear from certain areas of the room.",
-  },
-  {
-    guestName: "Raj Patel",
-    content:
-      "The content and speakers were excellent, providing valuable insights for my business. The interactive elements were particularly helpful. My main issues were with the venue - it was cramped, poorly ventilated, and the WiFi was unreliable during the portions that required online participation.",
-  },
-  {
-    guestName: "Lisa Thompson",
-    content:
-      "While the speakers were knowledgeable and the content was good, the technical issues with the presentation equipment were distracting. The event also ran behind schedule, which meant some topics felt rushed toward the end. I would have appreciated more comprehensive handouts.",
-  },
-  {
-    guestName: "Carlos Mendez",
-    content:
-      "The workshop provided excellent value with its practical approach and expert facilitators. The hands-on exercises were particularly useful. However, the cramped venue made collaboration difficult, and starting late meant we couldn't cover all the planned material.",
-  },
-  {
-    guestName: "Natalie Wong",
-    content:
-      "I appreciated the well-structured content and the expertise of the speakers. The networking opportunities were valuable as well. My suggestions would be to improve the sound system quality and provide more detailed resources to reference after the event.",
-  },
-];
-
-// Test component to add sample feedback
-interface TestFeedbackGeneratorProps {
-  event: Event;
-  refetch: () => void;
-  axiosInstance: ReturnType<typeof useAxiosWithAuth>;
-}
-
-const TestFeedbackGenerator: React.FC<TestFeedbackGeneratorProps> = ({
-  event,
-  refetch,
-  axiosInstance,
-}) => {
-  const [isAdding, setIsAdding] = useState(false);
-  const { addToast, Toasts } = useToast();
-
-  const addSampleFeedback = async () => {
-    if (isAdding) return;
-
-    setIsAdding(true);
-    try {
-      // Select 3-5 random reviews from the sample data
-
-      // Add each review sequentially
-      for (const review of sampleFeedbackData) {
-        await axiosInstance.post(`/events/${event._id}/feedback`, {
-          guestName: review.guestName,
-          content: review.content,
-        });
-      }
-
-      addToast(
-        `Added ${sampleFeedbackData.length} sample reviews`,
-        ToastType.SUCCESS
-      );
-      refetch();
-    } catch (err) {
-      console.error("Error adding sample feedback:", err);
-      addToast("Failed to add sample feedback", ToastType.ERROR);
-    } finally {
-      setIsAdding(false);
-    }
-  };
-
-  return (
-    <div style={{ marginTop: "20px" }}>
-      <button
-        onClick={addSampleFeedback}
-        disabled={isAdding}
-        style={{
-          padding: "8px 16px",
-          background: "#f0f0f0",
-          border: "1px solid #ddd",
-          borderRadius: "4px",
-          cursor: isAdding ? "not-allowed" : "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          fontSize: "14px",
-          color: "#333",
-        }}
-      >
-        {isAdding ? (
-          <>
-            <span
-              style={{
-                display: "inline-block",
-                width: "14px",
-                height: "14px",
-                borderRadius: "50%",
-                border: "2px solid #ccc",
-                borderTopColor: "#666",
-                animation: "spin 1s linear infinite",
-              }}
-            ></span>
-            Adding samples...
-          </>
-        ) : (
-          <>🧪 Add Sample Feedback</>
-        )}
-      </button>
-      <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
-        *For testing only adds random sample reviews
-      </div>
-      <Toasts />
-    </div>
-  );
-};
 
 type Props = {
   event: Event;
@@ -879,13 +704,41 @@ type Props = {
 };
 
 const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
-  const [activeTab, setActiveTab] = useState<"feedback" | "analysis">(
+  const [activeTab, setActiveTab] = useState<"feedback" | "analysis" | "form">(
     "feedback"
   );
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { addToast } = useToast();
+  const { addToast, Toasts } = useToast();
   const axiosInstance = useAxiosWithAuth();
+
+  // Memoize filtered feedback to prevent unnecessary recalculations
+  const filteredFeedback = React.useMemo(() => {
+    if (!event.feedback) return [];
+
+    return event.feedback.filter((feedback: Feedback) => {
+      if (!searchQuery.trim()) return true;
+
+      const query = searchQuery.toLowerCase();
+      const guestName = (feedback.guestName || "Anonymous Guest").toLowerCase();
+
+      // Check if guest name matches
+      if (guestName.includes(query)) return true;
+
+      // Check if any answer contains the search query
+      return feedback.answers?.some((answer) => {
+        // For text answers
+        if (answer.textAnswer) {
+          return answer.textAnswer.toLowerCase().includes(query);
+        }
+        // For rating answers
+        if (answer.ratingAnswer !== undefined) {
+          return answer.ratingAnswer.toString().includes(query);
+        }
+        return false;
+      });
+    });
+  }, [event.feedback, searchQuery]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "";
@@ -906,10 +759,7 @@ const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
     setIsAnalyzing(true);
 
     try {
-      await axiosInstance.post(`/events/${event._id}/feedback/analyze`, {
-        eventId: event._id,
-        reviews: event.feedback.map((f) => f.content),
-      });
+      await axiosInstance.post(`/events/${event._id}/feedback/analyze`);
 
       addToast("Feedback analyzed successfully", ToastType.SUCCESS);
       refetch();
@@ -922,20 +772,86 @@ const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
     }
   };
 
-  const renderFeedbackTab = () => {
-    // Filter feedback based on search query
-    const filteredFeedback = event.feedback
-      ? event.feedback.filter((feedback: Feedback) => {
-          const guestName = (
-            feedback.guestName || "Anonymous Guest"
-          ).toLowerCase();
-          const content = feedback.content.toLowerCase();
-          const query = searchQuery.toLowerCase();
+  // Memoize the renderAnswer function to prevent unnecessary re-renders
+  const renderAnswer = React.useCallback(
+    (answer: FeedbackAnswer, question: FeedbackQuestion) => {
+      switch (question.type) {
+        case "text":
+          return (
+            <AnswerText>{answer.textAnswer || "No answer provided"}</AnswerText>
+          );
 
-          return guestName.includes(query) || content.includes(query);
-        })
-      : [];
+        case "rating":
+          if (answer.ratingAnswer === undefined)
+            return <AnswerText>No rating provided</AnswerText>;
 
+          return (
+            <RatingDisplay>
+              <RatingValue>{answer.ratingAnswer}</RatingValue>
+              <RatingScale>
+                out of{" "}
+                {question.maxRating !== undefined ? question.maxRating : 10}
+                {question.minLabel || question.maxLabel ? (
+                  <RatingLabels>
+                    {question.minLabel && (
+                      <RatingLabelMin>{question.minLabel}</RatingLabelMin>
+                    )}
+                    {question.maxLabel && (
+                      <RatingLabelMax>{question.maxLabel}</RatingLabelMax>
+                    )}
+                  </RatingLabels>
+                ) : null}
+              </RatingScale>
+            </RatingDisplay>
+          );
+
+        case "single_choice":
+        case "multiple_choice":
+          if (!answer.selectedOptions || answer.selectedOptions.length === 0) {
+            return <AnswerText>No option selected</AnswerText>;
+          }
+
+          return (
+            <ChoiceDisplay>
+              {answer.selectedOptions.map((optionId) => {
+                const option = question.options?.find(
+                  (opt) => opt.id === optionId
+                );
+                return option ? (
+                  <ChoiceOption key={optionId}>{option.text}</ChoiceOption>
+                ) : null;
+              })}
+            </ChoiceDisplay>
+          );
+
+        case "ranking":
+          if (!answer.rankingOrder || answer.rankingOrder.length === 0) {
+            return <AnswerText>No ranking provided</AnswerText>;
+          }
+
+          return (
+            <RankingDisplay>
+              {answer.rankingOrder.map((optionId, index) => {
+                const option = question.options?.find(
+                  (opt) => opt.id === optionId
+                );
+                return option ? (
+                  <RankingItem key={optionId}>
+                    <RankNumber>{index + 1}.</RankNumber> {option.text}
+                  </RankingItem>
+                ) : null;
+              })}
+            </RankingDisplay>
+          );
+
+        default:
+          return <AnswerText>Unknown question type</AnswerText>;
+      }
+    },
+    []
+  );
+
+  const renderFeedbackTab = React.useCallback(() => {
     return (
       <FeedbackContent>
         {!event.feedback || event.feedback.length === 0 ? (
@@ -949,450 +865,205 @@ const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
                 color: "#333",
               }}
             >
-              No feedback has been submitted for this event yet
+              No feedback yet
             </p>
-            <p
-              style={{
-                fontSize: "15px",
-                color: "#6b7280",
-                maxWidth: "400px",
-                lineHeight: "1.6",
-                margin: "0 auto",
-              }}
-            >
-              Once attendees submit their feedback, it will appear here. You can
-              share your event's feedback link to collect responses.
+            <p style={{ color: "#666", marginBottom: "20px" }}>
+              Feedback from your guests will appear here.
+            </p>
+            <p style={{ color: "#666", fontSize: "14px" }}>
+              Configure your feedback form in the "Form" tab.
             </p>
           </EmptyState>
         ) : (
           <>
             <SearchContainer>
-              <SearchIcon
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clipRule="evenodd"
-                />
-              </SearchIcon>
               <SearchInput
                 type="text"
-                placeholder="Search feedback by name or content..."
+                placeholder="Search feedback..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              {searchQuery && (
-                <ClearButton onClick={() => setSearchQuery("")}>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </ClearButton>
-              )}
+              <AnalyzeButton
+                onClick={handleAnalyzeFeedback}
+                disabled={isAnalyzing}
+              >
+                {isAnalyzing ? "Analyzing..." : "Analyze Feedback"}
+              </AnalyzeButton>
             </SearchContainer>
 
             {filteredFeedback.length === 0 ? (
-              <div style={{ padding: "0 28px" }}>
-                <EmptyState>
-                  <p style={{ fontSize: "16px", color: "#6b7280" }}>
-                    No feedback matches your search.
-                  </p>
-                </EmptyState>
-              </div>
+              <EmptyState>
+                <p>No feedback matches your search.</p>
+              </EmptyState>
             ) : (
-              <>
-                <FeedbackGrid>
-                  {filteredFeedback.map((feedback: Feedback, index: number) => (
-                    <FeedbackCard key={index}>
-                      <FeedbackCardHeader>
-                        <GuestName>
-                          {feedback.guestName || "Anonymous Guest"}
-                        </GuestName>
-                        <FeedbackDate>
-                          {formatDate(feedback.createdAt)}
-                        </FeedbackDate>
-                      </FeedbackCardHeader>
-                      <FeedbackText>{feedback.content}</FeedbackText>
-                    </FeedbackCard>
-                  ))}
-                </FeedbackGrid>
+              filteredFeedback.map((feedback, index) => (
+                <FeedbackCard key={feedback._id || index}>
+                  <FeedbackHeader>
+                    <GuestName>
+                      {feedback.guestName || "Anonymous Guest"}
+                      {feedback.guestEmail && (
+                        <GuestEmail>{feedback.guestEmail}</GuestEmail>
+                      )}
+                    </GuestName>
+                    <FeedbackDate>
+                      {formatDate(feedback.createdAt)}
+                    </FeedbackDate>
+                  </FeedbackHeader>
+                  <FeedbackAnswers>
+                    {feedback.answers &&
+                      feedback.answers.map((answer, answerIndex) => {
+                        // Find the corresponding question
+                        const question = event.feedbackForm?.questions.find(
+                          (q) => q.id === answer.questionId
+                        );
 
-                {searchQuery && (
-                  <div
-                    style={{
-                      marginTop: "12px",
-                      fontSize: "14px",
-                      color: "#6b7280",
-                      textAlign: "center",
-                      padding: "0 28px",
-                    }}
-                  >
-                    Showing {filteredFeedback.length} of {event.feedback.length}{" "}
-                    feedback entries
-                  </div>
-                )}
-              </>
+                        if (!question) return null;
+
+                        return (
+                          <FeedbackAnswer key={answerIndex}>
+                            <QuestionTitle>{question.title}</QuestionTitle>
+                            {renderAnswer(answer, question)}
+                          </FeedbackAnswer>
+                        );
+                      })}
+                  </FeedbackAnswers>
+                </FeedbackCard>
+              ))
             )}
           </>
         )}
       </FeedbackContent>
     );
-  };
+  }, [
+    event.feedback,
+    event.feedbackForm,
+    filteredFeedback,
+    formatDate,
+    handleAnalyzeFeedback,
+    isAnalyzing,
+    renderAnswer,
+    searchQuery,
+  ]);
 
-  const renderAnalysisTab = () => {
-    if (isAnalyzing) {
+  const renderAnalysisTab = React.useCallback(() => {
+    if (!event.feedbackAnalysis) {
       return (
-        <LoadingContainer>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              flexDirection: "column",
-              gap: "16px",
-            }}
-          >
-            <div
-              style={{
-                width: "50px",
-                height: "50px",
-                border: "4px solid rgba(107, 61, 223, 0.2)",
-                borderTop: "4px solid #6b3ddf",
-                borderRadius: "50%",
-                animation: "spin 1.2s linear infinite",
-              }}
-            />
-            <p
-              style={{ fontSize: "16px", color: "#6b7280", fontWeight: "500" }}
-            >
-              Analyzing feedback with AI...
-            </p>
-          </div>
-        </LoadingContainer>
-      );
-    }
-
-    if (!event.feedback || event.feedback.length === 0) {
-      return (
-        <EmptyState>
-          <EmptyStateIcon>📊</EmptyStateIcon>
-          <p style={{ fontSize: "16px", marginBottom: "8px" }}>
-            No feedback available to analyze.
+        <NoAnalysisContainer>
+          <InsightIcon />
+          <h3>No Analysis Available</h3>
+          <p>
+            Analyze your feedback to get insights about strengths, weaknesses,
+            and suggestions for improvement.
           </p>
-          <p style={{ fontSize: "14px", color: "#9ca3af" }}>
-            Collect feedback from your event attendees first.
-          </p>
-        </EmptyState>
-      );
-    }
-
-    // Check if analysis has been performed by looking for lastUpdated
-    if (!event.feedbackAnalysis || !event.feedbackAnalysis.lastUpdated) {
-      return (
-        <AnalysisInfoContainer>
-          <AnalysisInfoTitle>
-            <IconContainer>
-              <AnalysisIcon />
-            </IconContainer>{" "}
-            AI-Powered Feedback Analysis
-          </AnalysisInfoTitle>
-
-          <AnalysisInfoText>
-            Our AI analysis tool processes all your event feedback to provide
-            actionable insights that help you improve future events.
-          </AnalysisInfoText>
-
-          <AnalysisInfoText>
-            With {event.feedback.length}{" "}
-            {event.feedback.length === 1 ? "review" : "reviews"} collected, you
-            can now generate a comprehensive analysis.
-          </AnalysisInfoText>
-
-          <AnalysisFeatureList>
-            <AnalysisFeatureItem>
-              <AnalysisFeatureIcon>
-                <StrengthIcon />
-              </AnalysisFeatureIcon>
-              <AnalysisFeatureContent>
-                <AnalysisFeatureTitle>Identify Strengths</AnalysisFeatureTitle>
-                <AnalysisFeatureDescription>
-                  Discover what attendees loved most about your event
-                </AnalysisFeatureDescription>
-              </AnalysisFeatureContent>
-            </AnalysisFeatureItem>
-
-            <AnalysisFeatureItem>
-              <AnalysisFeatureIcon>
-                <WeaknessIcon />
-              </AnalysisFeatureIcon>
-              <AnalysisFeatureContent>
-                <AnalysisFeatureTitle>
-                  Highlight Areas for Improvement
-                </AnalysisFeatureTitle>
-                <AnalysisFeatureDescription>
-                  Understand what aspects need attention in future events
-                </AnalysisFeatureDescription>
-              </AnalysisFeatureContent>
-            </AnalysisFeatureItem>
-
-            <AnalysisFeatureItem>
-              <AnalysisFeatureIcon>
-                <SuggestionIcon />
-              </AnalysisFeatureIcon>
-              <AnalysisFeatureContent>
-                <AnalysisFeatureTitle>
-                  Get Actionable Suggestions
-                </AnalysisFeatureTitle>
-                <AnalysisFeatureDescription>
-                  Receive specific recommendations to enhance your events
-                </AnalysisFeatureDescription>
-              </AnalysisFeatureContent>
-            </AnalysisFeatureItem>
-
-            <AnalysisFeatureItem>
-              <AnalysisFeatureIcon>
-                <InsightIcon />
-              </AnalysisFeatureIcon>
-              <AnalysisFeatureContent>
-                <AnalysisFeatureTitle>Gain Key Insights</AnalysisFeatureTitle>
-                <AnalysisFeatureDescription>
-                  Get a comprehensive overview of attendee sentiment
-                </AnalysisFeatureDescription>
-              </AnalysisFeatureContent>
-            </AnalysisFeatureItem>
-          </AnalysisFeatureList>
-
-          <AIButton
+          <AnalyzeButtonLarge
             onClick={handleAnalyzeFeedback}
-            disabled={isAnalyzing}
-            style={{ padding: "0 32px", height: "48px", fontSize: "16px" }}
+            disabled={
+              isAnalyzing || !event.feedback || event.feedback.length === 0
+            }
           >
-            {isAnalyzing ? (
-              <>
-                <LoadingSpinner /> Analyzing...
-              </>
-            ) : (
-              <>
-                <AnalysisIcon />
-                Analyze Feedback Now
-              </>
-            )}
-          </AIButton>
-        </AnalysisInfoContainer>
+            {isAnalyzing ? "Analyzing..." : "Analyze Feedback"}
+          </AnalyzeButtonLarge>
+        </NoAnalysisContainer>
       );
     }
-
-    const analysis = event.feedbackAnalysis;
-    console.log({ analysis });
-    // Calculate stats for the enhanced UI
-    const totalStrengths = analysis.strengths.length;
-    const totalWeaknesses = analysis.weaknesses.length;
-    const totalSuggestions = analysis.suggestions.length;
-
-    // Determine overall sentiment - commented out as it's not currently used
-    /*
-    let overallSentiment: "positive" | "neutral" | "negative" = "neutral";
-    if (totalStrengths > totalWeaknesses * 1.5) {
-      overallSentiment = "positive";
-    } else if (totalWeaknesses > totalStrengths) {
-      overallSentiment = "negative";
-    }
-    */
 
     return (
       <AnalysisContainer>
-        <AnalysisHeader>
-          <AnalysisTitle>Feedback Analysis Dashboard</AnalysisTitle>
-          <AIButton
-            onClick={handleAnalyzeFeedback}
-            disabled={isAnalyzing}
-            style={{ padding: "0 16px", height: "38px" }}
-          >
-            {isAnalyzing ? (
-              <>
-                <LoadingSpinner /> Refreshing...
-              </>
-            ) : (
-              <>
-                <AnalysisIcon />
-                Refresh Analysis
-              </>
-            )}
-          </AIButton>
-        </AnalysisHeader>
+        <AnalysisSection>
+          <AnalysisHeader>
+            <AnalysisIcon />
+            <AnalysisTitle>Overview</AnalysisTitle>
+          </AnalysisHeader>
+          <AnalysisContent>
+            <AnalysisText>{event.feedbackAnalysis.overview}</AnalysisText>
+          </AnalysisContent>
+        </AnalysisSection>
 
-        <AnalysisDashboard>
-          {/* Overview Section */}
-          <OverviewCard>
-            <CardTitle>
-              <IconContainer>
-                <InsightIcon />
-              </IconContainer>{" "}
-              Key Insights Overview
-            </CardTitle>
-            <CardContent>{analysis.overview}</CardContent>
-            {/* <SentimentIndicator sentiment={overallSentiment} /> */}
-          </OverviewCard>
+        <AnalysisSection>
+          <AnalysisHeader>
+            <StrengthIcon />
+            <AnalysisTitle>Strengths</AnalysisTitle>
+          </AnalysisHeader>
+          <AnalysisContent>
+            <AnalysisList>
+              {event.feedbackAnalysis.strengths.map((strength, index) => (
+                <AnalysisItem key={index}>{strength}</AnalysisItem>
+              ))}
+            </AnalysisList>
+          </AnalysisContent>
+        </AnalysisSection>
 
-          {/* Strengths Section */}
-          <StrengthCard>
-            <CardTitle>
-              <StrengthIconContainer>
-                <StrengthIcon />
-              </StrengthIconContainer>{" "}
-              Event Strengths ({totalStrengths})
-            </CardTitle>
-            {analysis.strengths.length > 0 ? (
-              <ul
-                style={{ paddingLeft: "0", listStyleType: "none", margin: "0" }}
-              >
-                {analysis.strengths.map((strength, index) => (
-                  <ListItem key={index}>{strength}</ListItem>
-                ))}
-              </ul>
-            ) : (
-              <CardContent>No specific strengths identified.</CardContent>
-            )}
-          </StrengthCard>
+        <AnalysisSection>
+          <AnalysisHeader>
+            <WeaknessIcon />
+            <AnalysisTitle>Areas for Improvement</AnalysisTitle>
+          </AnalysisHeader>
+          <AnalysisContent>
+            <AnalysisList>
+              {event.feedbackAnalysis.weaknesses.map((weakness, index) => (
+                <AnalysisItem key={index}>{weakness}</AnalysisItem>
+              ))}
+            </AnalysisList>
+          </AnalysisContent>
+        </AnalysisSection>
 
-          {/* Weaknesses Section */}
-          <WeaknessCard>
-            <CardTitle>
-              <WeaknessIconContainer>
-                <WeaknessIcon />
-              </WeaknessIconContainer>{" "}
-              Areas for Improvement ({totalWeaknesses})
-            </CardTitle>
-            {analysis.weaknesses.length > 0 ? (
-              <ul
-                style={{ paddingLeft: "0", listStyleType: "none", margin: "0" }}
-              >
-                {analysis.weaknesses.map((weakness, index) => (
-                  <ListItem key={index}>{weakness}</ListItem>
-                ))}
-              </ul>
-            ) : (
-              <CardContent>
-                No specific areas for improvement identified.
-              </CardContent>
-            )}
-          </WeaknessCard>
+        <AnalysisSection>
+          <AnalysisHeader>
+            <SuggestionIcon />
+            <AnalysisTitle>Suggestions</AnalysisTitle>
+          </AnalysisHeader>
+          <AnalysisContent>
+            <AnalysisList>
+              {event.feedbackAnalysis.suggestions.map((suggestion, index) => (
+                <AnalysisItem key={index}>{suggestion}</AnalysisItem>
+              ))}
+            </AnalysisList>
+          </AnalysisContent>
+        </AnalysisSection>
 
-          {/* Suggestions Section */}
-          <SuggestionCard>
-            <CardTitle>
-              <SuggestionIconContainer>
-                <SuggestionIcon />
-              </SuggestionIconContainer>{" "}
-              Actionable Suggestions ({totalSuggestions})
-            </CardTitle>
-            {analysis.suggestions.length > 0 ? (
-              <ul
-                style={{ paddingLeft: "0", listStyleType: "none", margin: "0" }}
-              >
-                {analysis.suggestions.map((suggestion, index) => (
-                  <ListItem key={index}>{suggestion}</ListItem>
-                ))}
-              </ul>
-            ) : (
-              <CardContent>No specific suggestions available.</CardContent>
-            )}
-          </SuggestionCard>
-
-          {/* Only show last updated if there's actual analysis data */}
-          {analysis.lastUpdated &&
-            (analysis.strengths.length > 0 ||
-              analysis.weaknesses.length > 0 ||
-              analysis.suggestions.length > 0) && (
-              <LastUpdated>
-                Last updated: {formatDate(analysis.lastUpdated)}
-              </LastUpdated>
-            )}
-        </AnalysisDashboard>
+        <AnalysisDate>
+          Last updated: {formatDate(event.feedbackAnalysis.lastUpdated)}
+        </AnalysisDate>
       </AnalysisContainer>
     );
-  };
+  }, [
+    event.feedbackAnalysis,
+    event.feedback,
+    formatDate,
+    handleAnalyzeFeedback,
+    isAnalyzing,
+  ]);
+
+  // Update the renderTabs function or the JSX where tabs are rendered
+  const renderTabs = () => (
+    <TabsContainer>
+      <Tab
+        active={activeTab === "feedback"}
+        onClick={() => setActiveTab("feedback")}
+      >
+        <FeedbackIcon /> Feedback
+      </Tab>
+      <Tab
+        active={activeTab === "analysis"}
+        onClick={() => setActiveTab("analysis")}
+      >
+        <AnalysisIcon /> Analysis
+      </Tab>
+      <Tab active={activeTab === "form"} onClick={() => setActiveTab("form")}>
+        <FormIcon /> Form
+      </Tab>
+    </TabsContainer>
+  );
 
   return (
     <FeedbackWrapper>
-      <FeedbackHeader>
-        <FeedbackTitle>Event Feedback</FeedbackTitle>
-
-        {event.feedback &&
-          activeTab === "feedback" &&
-          event.feedback.length >= 3 &&
-          !(!event.feedbackAnalysis || !event.feedbackAnalysis.lastUpdated) && (
-            <ButtonsContainer>
-              <AIButton onClick={handleAnalyzeFeedback} disabled={isAnalyzing}>
-                {isAnalyzing ? (
-                  <>
-                    <LoadingSpinner /> Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <AnalysisIcon />
-                    Analyze with AI
-                  </>
-                )}
-              </AIButton>
-            </ButtonsContainer>
-          )}
-      </FeedbackHeader>
-
-      <TabsContainer>
-        <Tab
-          isActive={activeTab === "feedback"}
-          onClick={() => setActiveTab("feedback")}
-        >
-          Feedback
-        </Tab>
-        <Tab
-          isActive={activeTab === "analysis"}
-          onClick={() => {
-            if (event.feedback && event.feedback.length >= 3) {
-              setActiveTab("analysis");
-            } else if (event.feedback && event.feedback.length > 0) {
-              addToast(
-                "At least 3 feedback submissions are required for analysis",
-                ToastType.INFO
-              );
-            } else {
-              addToast("No feedback available to analyze", ToastType.INFO);
-            }
-          }}
-          style={{
-            cursor:
-              event.feedback && event.feedback.length >= 3
-                ? "pointer"
-                : "not-allowed",
-            opacity: event.feedback && event.feedback.length >= 3 ? 1 : 0.6,
-          }}
-        >
-          Analysis
-        </Tab>
-      </TabsContainer>
-
-      {activeTab === "feedback" ? renderFeedbackTab() : renderAnalysisTab()}
-
-      {/* Add the test component at the bottom */}
-      {/* {process.env.NODE_ENV !== "production" && (
-        <TestFeedbackGenerator
-          event={event}
-          refetch={refetch}
-          axiosInstance={axiosInstance}
-        />
-      )} */}
+      {renderTabs()}
+      {activeTab === "feedback" && renderFeedbackTab()}
+      {activeTab === "analysis" && renderAnalysisTab()}
+      {activeTab === "form" && (
+        <FeedbackFormEditor event={event} refetch={refetch} />
+      )}
+      <Toasts />
     </FeedbackWrapper>
   );
 };

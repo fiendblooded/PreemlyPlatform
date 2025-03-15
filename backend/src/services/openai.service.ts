@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { InvoiceAnalysis } from '../types/event.types';
@@ -17,6 +18,15 @@ interface ReviewAnalysis {
   strengths: string[];
   weaknesses: string[];
   suggestions: string[];
+}
+
+interface StructuredFeedbackItem {
+  guestName: string;
+  answers: {
+    question: string;
+    answer: string;
+    type: string;
+  }[];
 }
 
 const openai = new OpenAI({
@@ -260,5 +270,85 @@ export const rewriteEventDescription = async (description: string): Promise<stri
   } catch (error) {
     console.error('Error rewriting event description:', error);
     throw new Error('Failed to rewrite event description');
+  }
+};
+
+export const analyzeStructuredFeedback = async (
+  feedback: StructuredFeedbackItem[],
+): Promise<ReviewAnalysis> => {
+  try {
+    const systemPrompt = `You are an AI assistant specialized in analyzing structured feedback from event attendees. 
+        Your task is to analyze the provided feedback and provide a comprehensive overview.
+        The feedback is structured with questions and answers of different types (text, rating, choice, ranking).
+        Identify the main strengths, weaknesses, and provide actionable suggestions for improvement.
+        Your response should be in English and structured as a JSON object.`;
+
+    const userPromptTemplate = `Analyze this structured feedback from event attendees and provide a detailed overview.
+        
+        Structured Feedback: {feedback}
+        
+        Please analyze the feedback and extract the following information:
+        
+        1. Overview: A summary of the overall sentiment and key points from the feedback.
+        
+        2. Strengths: A list of the main strengths mentioned in the feedback.
+        
+        3. Weaknesses: A list of the main weaknesses mentioned in the feedback.
+        
+        4. Suggestions: A list of actionable suggestions for improvement based on the feedback.
+        
+        Return your analysis as a valid JSON object with this structure:
+        {
+          "overview": string,
+          "strengths": string[],
+          "weaknesses": string[],
+          "suggestions": string[]
+        }
+        
+        If any data point cannot be determined, use null or omit it. 
+        For string values that can't be determined, use "N/A".
+        
+        IMPORTANT: Do not make up or generate any data. Only use the information provided in the feedback.
+        Pay special attention to the different question types and how they should be interpreted:
+        - text: Free-form text responses
+        - rating: Numerical ratings (typically 0-10)
+        - single_choice/multiple_choice: Selected options from a list
+        - ranking: Items ranked in order of preference`;
+
+    const userPrompt = userPromptTemplate.replace('{feedback}', JSON.stringify(feedback));
+
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: systemPrompt,
+      },
+      {
+        role: 'user',
+        content: userPrompt,
+      },
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages,
+      temperature: 0.2,
+      response_format: { type: 'json_object' },
+    });
+
+    const analysisText = response.choices[0].message.content;
+    if (!analysisText) {
+      throw new Error('No analysis received from OpenAI');
+    }
+
+    try {
+      const analysis = JSON.parse(analysisText) as ReviewAnalysis;
+      return analysis;
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      throw new Error('Failed to parse analysis from OpenAI');
+    }
+  } catch (error) {
+    console.error('Error in OpenAI analysis:', error);
+    throw error;
   }
 };

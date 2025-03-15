@@ -1,6 +1,7 @@
+/* eslint-disable indent */
 import { Request, Response } from 'express';
 import Event from '../models/event.model';
-import { analyzeReviews } from '../services/openai.service';
+import { analyzeStructuredFeedback } from '../services/openai.service';
 
 export const analyzeEventFeedback = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -26,11 +27,70 @@ export const analyzeEventFeedback = async (req: Request, res: Response): Promise
       return;
     }
 
-    // Extract feedback content
-    const feedbackContents = event.feedback.map((feedback) => feedback.content);
+    // Check if the event has a feedback form
+    if (!event.feedbackForm || !event.feedbackForm.questions || event.feedbackForm.questions.length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'No feedback form structure available',
+      });
+      return;
+    }
+
+    // Prepare structured feedback for analysis
+    const structuredFeedback = event.feedback.map((feedback) => {
+      // Process answers and filter out nulls
+      const processedAnswers = [];
+
+      for (const answer of feedback.answers) {
+        // Find the corresponding question
+        const question = event.feedbackForm?.questions.find((q) => q.id === answer.questionId);
+        if (!question) continue;
+
+        let formattedAnswer = '';
+
+        switch (question.type) {
+          case 'text':
+            formattedAnswer = answer.textAnswer || '';
+            break;
+          case 'rating':
+            formattedAnswer = answer.ratingAnswer?.toString() || '';
+            break;
+          case 'single_choice':
+          case 'multiple_choice':
+            if (answer.selectedOptions && answer.selectedOptions.length > 0) {
+              const selectedTexts = answer.selectedOptions.map((optionId) => {
+                const option = question.options?.find((opt) => opt.id === optionId);
+                return option ? option.text : optionId;
+              });
+              formattedAnswer = selectedTexts.join(', ');
+            }
+            break;
+          case 'ranking':
+            if (answer.rankingOrder && answer.rankingOrder.length > 0) {
+              const rankedTexts = answer.rankingOrder.map((optionId, index) => {
+                const option = question.options?.find((opt) => opt.id === optionId);
+                return `${index + 1}. ${option ? option.text : optionId}`;
+              });
+              formattedAnswer = rankedTexts.join('; ');
+            }
+            break;
+        }
+
+        processedAnswers.push({
+          question: question.title,
+          answer: formattedAnswer,
+          type: question.type as string, // Cast to string to match the interface
+        });
+      }
+
+      return {
+        guestName: feedback.guestName || 'Anonymous',
+        answers: processedAnswers,
+      };
+    });
 
     // Analyze the feedback using OpenAI
-    const analysis = await analyzeReviews(feedbackContents);
+    const analysis = await analyzeStructuredFeedback(structuredFeedback);
 
     // Update the event with the analysis results
     event.feedbackAnalysis = {
