@@ -4,10 +4,10 @@ export type Guest = {
   age: number;
   phoneNumber: string;
   email: string;
-  attendance_status?: boolean;
-  email_sent?: boolean;
-  reminder_email_date?: string; // Add this field
-  gdpr_consent?: boolean; // Add this field
+  attendance_status: boolean;
+  email_sent: boolean;
+  reminder_email_date?: string;
+  gdpr_consent: boolean;
 };
 export type Task = {
   _id?: string;
