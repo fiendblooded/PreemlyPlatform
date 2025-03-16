@@ -549,6 +549,21 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         qrContent
       )}&size=320x320&color=000000&bgcolor=FFFFFF`;
 
+      const parkingModule = {
+        enabled: true,
+        content: eventDetails.emailParams.parking
+      };
+
+      const scheduleModule = {
+        enabled: true,
+        content: eventDetails.emailParams.scheduleSrc
+      };
+
+      const diningModule = {
+        enabled: true,
+        content: eventDetails.emailParams.dining
+      };
+
       const htmlContent = getMailHtml(
         guest.fullName,
         qrCodeBase64,
@@ -557,9 +572,9 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         eventDetails.description,
         eventDetails.date,
         eventDetails.endDate,
-        eventDetails.emailParams.parking,
-        eventDetails.emailParams.scheduleSrc,
-        eventDetails.emailParams.dining,
+        parkingModule,
+        scheduleModule,
+        diningModule,
         eventDetails.location.address || ""
       );
 
@@ -580,9 +595,9 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         eventDetails.description,
         eventDetails.date,
         eventDetails.endDate,
-        eventDetails.emailParams.parking,
-        eventDetails.emailParams.scheduleSrc,
-        eventDetails.emailParams.dining,
+        { enabled: true, content: eventDetails.emailParams.parking },
+        { enabled: true, content: eventDetails.emailParams.scheduleSrc },
+        { enabled: true, content: eventDetails.emailParams.dining },
         eventDetails.location.address || ""
       ),
       emails
@@ -687,7 +702,21 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
           qrContent
         )}&size=320x320&color=000000&bgcolor=FFFFFF`;
 
-        // Generate HTML content for this guest
+        const parkingModule = {
+          enabled: true,
+          content: event.emailParams.parking
+        };
+
+        const scheduleModule = {
+          enabled: true,
+          content: event.emailParams.scheduleSrc
+        };
+
+        const diningModule = {
+          enabled: true,
+          content: event.emailParams.dining
+        };
+
         const htmlContent = getMailHtml(
           guest.fullName,
           qrCodeUrl,
@@ -696,9 +725,9 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
           event.description,
           event.date,
           event.endDate,
-          event.emailParams.parking,
-          event.emailParams.scheduleSrc,
-          event.emailParams.dining,
+          parkingModule,
+          scheduleModule,
+          diningModule,
           event.location.address || ""
         );
 

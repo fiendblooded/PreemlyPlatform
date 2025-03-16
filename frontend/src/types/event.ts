@@ -4,7 +4,7 @@ export interface Event {
   description: string;
   date: string;
   endDate: string;
-  poster?: string;
+  poster?: string | null;
   location: {
     address?: string;
   };
