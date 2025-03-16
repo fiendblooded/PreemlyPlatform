@@ -2,27 +2,44 @@ import type { Request, Response } from 'express';
 import sendEmail from '../services/mailgun.service';
 import ScheduledEmail from '../models/scheduledEmail.model';
 import mongoose from 'mongoose';
+import type { EmailData } from '../types/mail.types';
+import Guest from '../models/guest.model';
 
 export const sendMailController = async (req: Request, res: Response): Promise<void> => {
-  const { recipient, subject, htmlContent } = req.body;
+  const { subject, htmlTemplate, emails } = req.body;
 
-  if (!recipient || !subject || !htmlContent) {
+  if (!subject || !htmlTemplate || !emails || !Array.isArray(emails)) {
     res.status(400).json({
       success: false,
-      message: 'Please provide all fields',
+      message: 'Please provide all fields. Emails must be an array.',
     });
     return;
   }
 
   try {
-    console.log('Data:', recipient, subject, htmlContent);
-    await sendEmail(recipient, subject, htmlContent);
+    const recipients: string[] = [];
+    const personalizedHtmlContents: string[] = [];
+    
+    for (const email of emails as EmailData[]) {
+      if (!email.recipient || !email.guestName || !email.qrCode) {
+        throw new Error('Each email must contain recipient, guestName and qrCode');
+      }
+      
+      recipients.push(email.recipient);
+      
+      let content = htmlTemplate;
+      content = content.replace(/{{guestName}}/g, email.guestName);
+      content = content.replace(/{{qrCode}}/g, email.qrCode);
+      personalizedHtmlContents.push(content);
+    }
+
+    await sendEmail(recipients, subject, personalizedHtmlContents);
     res.status(204).send();
   } catch (error) {
     console.error('Error in Send Email:', error);
     res.status(500).json({
       success: false,
-      message: 'Server Error',
+      message: error instanceof Error ? error.message : 'Server Error',
     });
   }
 };
@@ -39,7 +56,6 @@ export const scheduleReminderEmailsController = async (req: Request, res: Respon
   }
 
   try {
-    // Validate that reminder time is in the future
     const now = new Date();
     const scheduledTime = new Date(reminderTime);
 
@@ -64,7 +80,6 @@ export const scheduleReminderEmailsController = async (req: Request, res: Respon
         continue;
       }
 
-      // Create a scheduled email record
       const scheduledEmail = new ScheduledEmail({
         eventId: new mongoose.Types.ObjectId(eventId),
         guestId: new mongoose.Types.ObjectId(guestId),
@@ -77,7 +92,6 @@ export const scheduleReminderEmailsController = async (req: Request, res: Respon
 
       await scheduledEmail.save();
 
-      // If the email is scheduled within the next 72 hours, schedule it with Mailgun
       if (scheduledTime <= threeHoursFromNow) {
         try {
           const emailResult = await sendEmail(recipient, emailSubject, htmlContent, scheduledTime);
@@ -106,6 +120,7 @@ export const scheduleReminderEmailsController = async (req: Request, res: Respon
         });
       }
     }
+
 
     res.status(200).json({
       success: true,
@@ -146,6 +161,36 @@ export const getScheduledEmailsController = async (req: Request, res: Response):
     res.status(500).json({
       success: false,
       message: 'Server Error',
+    });
+  }
+};
+
+export const updateEmailStatusController = async (req: Request, res: Response): Promise<void> => {
+  const { guestIds } = req.body;
+
+  if (!guestIds || !Array.isArray(guestIds)) {
+    res.status(400).json({
+      success: false,
+      message: 'Please provide an array of guest IDs',
+    });
+    return;
+  }
+
+  try {
+    await Guest.updateMany(
+      { _id: { $in: guestIds.map(id => new mongoose.Types.ObjectId(id)) } },
+      { $set: { email_sent: true } }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Email status updated for ${guestIds.length} guests`,
+    });
+  } catch (error) {
+    console.error('Error updating email status:', error);
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'Server Error',
     });
   }
 };

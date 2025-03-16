@@ -1,12 +1,21 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import { Event } from "../types";
+import { Event } from "../types/event";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { ToastType, useToast } from "./Toasts";
 import { getMailHtml, SvgSC } from "../common/common";
 import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
 // import { ActivityStatus } from "./EventDetail";
+
+interface Props {
+  event: Event;
+  refetch: () => void;
+}
+
+interface StyledProps {
+  isTablet?: boolean;
+  width?: number;
+}
 
 const GuestsWrapper = styled.div`
   width: 90%;
@@ -28,11 +37,6 @@ const GuestTableHeaderContainer = styled.div`
   margin-bottom: 20px;
   padding: 16px 20px 0;
   flex-wrap: wrap;
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    align-items: stretch;
-  }
 `;
 
 const SearchContainer = styled.div`
@@ -182,6 +186,7 @@ const ActivityStatus = styled.div<{ color: string }>`
   background-color: ${(props) => props.color}15; /* 10% opacity */
 `;
 
+
 const ReminderStatus = styled.div<{ color: string }>`
   color: ${(props) => props.color};
   font-size: 13px;
@@ -308,47 +313,6 @@ const ExcelIcon = () => (
   </svg>
 );
 
-// Add a TestButton component
-// const TestButton = styled.button`
-//   display: flex;
-//   align-items: center;
-//   gap: 8px;
-//   background-color: #f3f4f6;
-//   color: #4b5563;
-//   border: 1px solid #d1d5db;
-//   border-radius: 6px;
-//   padding: 8px 12px;
-//   font-size: 14px;
-//   font-weight: 500;
-//   cursor: pointer;
-//   transition: all 0.2s ease;
-
-//   &:hover {
-//     background-color: #e5e7eb;
-//   }
-
-//   &:disabled {
-//     opacity: 0.6;
-//     cursor: not-allowed;
-//   }
-// `;
-
-// Add a TestIcon component
-// const TestIcon = () => (
-//   <svg
-//     width="16"
-//     height="16"
-//     viewBox="0 0 24 24"
-//     fill="none"
-//     xmlns="http://www.w3.org/2000/svg"
-//   >
-//     <path
-//       d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z"
-//       fill="currentColor"
-//     />
-//   </svg>
-// );
-
 export const GuestActionsButtonsContainer = styled.div<{ width?: number }>`
   display: flex;
   gap: 6px;
@@ -388,6 +352,7 @@ export const Panel = styled.div`
   z-index: 1000;
   transition: all 0.3s ease;
   border: 1px solid rgba(107, 61, 223, 0.1);
+
 
   /* Add a subtle animation when the panel appears */
   animation: slideUp 0.3s ease-out;
@@ -518,654 +483,7 @@ const ReminderPreview = styled.div`
 const ButtonGroup = styled.div`
   display: flex;
   gap: 12px;
-
-  button {
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-
-    svg {
-      width: 18px;
-      height: 18px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  @media (max-width: 480px) {
-    width: 100%;
-    justify-content: center;
-    margin-top: 10px;
-  }
-`;
-
-type Props = {
-  event: Event;
-  refetch: () => void;
-};
-
-// Add this component for the Upload icon
-const UploadIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-    <path d="M11 16V7.85l-2.6 2.6L7 9l5-5 5 5-1.4 1.45-2.6-2.6V16h-2zm-5 4c-.55 0-1.02-.2-1.41-.59A1.93 1.93 0 0 1 4 18v-3h2v3h12v-3h2v3c0 .55-.2 1.02-.59 1.41-.39.4-.86.59-1.41.59H6z" />
-  </svg>
-);
-
-// Update the UploadArea styled component with better animations
-const UploadArea = styled.div`
-  border: 2px dashed #d1d5db;
-  border-radius: 8px;
-  padding: 20px;
-  box-sizing: border-box;
-  text-align: center;
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-  background-color: #f9fafb;
-  position: relative;
-
-  h3 {
-    margin-top: 0;
-    font-size: 18px;
-    color: #374151;
-  }
-
-  &:hover {
-    background-color: #f3f4f6;
-    border-color: #9ca3af;
-  }
-
-  &.dragging {
-    background-color: #e0f2fe;
-    border-color: #0ea5e9;
-    border-width: 3px;
-    box-shadow: 0 0 15px rgba(14, 165, 233, 0.3);
-    transform: scale(1.01);
-  }
-
-  &.dragging::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(224, 242, 254, 0.7);
-    border-radius: 6px;
-    z-index: 1;
-    animation: pulse 1.5s infinite;
-  }
-
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4);
-    }
-    70% {
-      box-shadow: 0 0 0 10px rgba(14, 165, 233, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
-    }
-  }
-`;
-
-// Add a styled component for the drop overlay
-const DropOverlay = styled.div`
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(224, 242, 254, 0.9);
-  z-index: 2;
   align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  border-radius: 6px;
-
-  .dragging & {
-    display: flex;
-    animation: fadeIn 0.3s ease-in-out;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  svg {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 16px;
-    animation: bounce 1s infinite alternate;
-
-    path {
-      fill: #0ea5e9;
-    }
-  }
-
-  @keyframes bounce {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(-10px);
-    }
-  }
-
-  h2 {
-    font-size: 24px;
-    font-weight: 600;
-    color: #0ea5e9;
-    margin: 0 0 8px 0;
-  }
-
-  p {
-    font-size: 16px;
-    color: #0369a1;
-    margin: 0;
-  }
-`;
-
-// Update the DropIcon for the overlay
-const DropOverlayIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 16L7 11H10V4H14V11H17L12 16Z" fill="currentColor" />
-    <path d="M19 18H5V20H19V18Z" fill="currentColor" />
-  </svg>
-);
-
-// Style the drop zone area
-const DropZone = styled.div`
-  margin: 20px 0;
-  padding: 25px;
-  border-radius: 6px;
-  background-color: #f3f4f6;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    margin-bottom: 10px;
-  }
-
-  p {
-    margin: 8px 0 0;
-    font-size: 14px;
-    color: #6b7280;
-  }
-`;
-
-const UploadButton = styled(ExcelButton)`
-  background-color: #4f46e5;
-  color: white;
-
-  &:hover {
-    background-color: #4338ca;
-  }
-`;
-
-const TemplateButton = styled(ExcelButton)`
-  background-color: #ffffff;
-  color: #4f46e5;
-  border: 1px solid #4f46e5;
-
-  &:hover {
-    background-color: #f3f4f6;
-  }
-`;
-
-const UploadInput = styled.input`
-  display: none;
-`;
-
-const UploadInstructions = styled.div`
-  margin-top: 16px;
-  font-size: 14px;
-  color: #6b7280;
-  max-width: 500px;
-  margin: 16px auto;
-`;
-
-const UploadButtonGroup = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 16px;
-
-  button {
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-
-    svg {
-      width: 18px;
-      height: 18px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    max-width: 300px;
-    margin: 16px auto 0;
-
-    button {
-      width: 100%;
-    }
-  }
-`;
-
-// Add a DropIcon component
-const DropIcon = () => (
-  <svg
-    width="48"
-    height="48"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M12 16L7 11H10V4H14V11H17L12 16Z" fill="#9ca3af" />
-    <path d="M19 18H5V20H19V18Z" fill="#9ca3af" />
-  </svg>
-);
-
-// Update the EmptyStateContainer styling for a more detailed view
-const EmptyStateContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  background-color: #f9fafb;
-  border-radius: 8px;
-  border: 1px dashed #d1d5db;
-  margin-bottom: 20px;
-  text-align: center;
-`;
-
-const EmptyStateIcon = styled.div`
-  width: 80px;
-  height: 80px;
-  margin-bottom: 20px;
-  color: #9ca3af;
-
-  svg {
-    width: 100%;
-    height: 100%;
-  }
-`;
-
-const EmptyStateTitle = styled.h3`
-  font-size: 18px;
-  font-weight: 600;
-  color: #374151;
-  margin: 0 0 10px 0;
-`;
-
-const EmptyStateDescription = styled.p`
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0 0 25px 0;
-  max-width: 500px;
-`;
-
-// Update the EmptyStateInstructions styling for a more detailed view
-const EmptyStateInstructions = styled.div`
-  margin: 0 auto 25px;
-  max-width: 600px;
-  text-align: left;
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #374151;
-    margin: 0 0 12px 0;
-  }
-  p {
-    color: #374151;
-  }
-
-  ul {
-    margin: 0;
-    padding-left: 20px;
-  }
-
-  li {
-    margin-bottom: 8px;
-    color: #4b5563;
-  }
-
-  .method {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #e5e7eb;
-
-    &:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-  }
-
-  .method-icon {
-    width: 40px;
-    height: 40px;
-    background-color: #f3f4f6;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 16px;
-    flex-shrink: 0;
-
-    svg {
-      width: 24px;
-      height: 24px;
-      color: #6b7280;
-    }
-  }
-
-  .method-content {
-    flex: 1;
-  }
-`;
-
-// Update the EmptyStateActions styling for better button layout
-const EmptyStateActions = styled.div`
-  display: flex;
-  gap: 16px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-
-  button {
-    min-width: 180px;
-    padding: 10px 16px;
-    white-space: nowrap;
-
-    svg {
-      margin-right: 8px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    width: 100%;
-    max-width: 300px;
-
-    button {
-      width: 100%;
-    }
-  }
-`;
-
-// Add a styled component for action buttons with icons
-const ActionButton = styled(PrimaryButton)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-`;
-
-const ActionSecondaryButton = styled(SecondaryButton)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-`;
-
-const ActionTemplateButton = styled(TemplateButton)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-`;
-
-// Add a plus icon component
-const PlusIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M12 5V19M5 12H19"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-// Add an icon for the empty state
-const EmptyGuestsIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"
-      fill="currentColor"
-    />
-    <circle
-      cx="19"
-      cy="5"
-      r="3"
-      fill="#e5e7eb"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-    <path
-      d="M21 8L17 4"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-// Update the tooltip component to ensure it's fully visible
-const Tooltip = styled.div`
-  position: fixed; // Change to fixed positioning to break out of any container constraints
-  transform: translate(-50%, -100%); // Position above the cursor
-  margin-top: -10px; // Add some margin to position it better
-  background-color: #374151;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s, visibility 0.2s;
-  pointer-events: none;
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border-width: 5px;
-    border-style: solid;
-    border-color: #374151 transparent transparent transparent;
-  }
-`;
-
-// Update the EditableField component to handle tooltip positioning
-const EditableField = styled.span`
-  cursor: pointer;
-  display: block;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-  position: relative;
-
-  &:hover {
-    background-color: #f3f4f6;
-  }
-
-  &:hover::after {
-    content: "✎";
-    position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 12px;
-    color: #6b7280;
-    opacity: 0.7;
-  }
-`;
-
-// Add back the EditInput component
-const EditInput = styled.input`
-  width: 100%;
-  padding: 6px 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  outline: none;
-  font-size: 14px;
-  color: #374151;
-  background-color: white;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-
-  &:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-  }
-
-  &:hover:not(:focus) {
-    border-color: #9ca3af;
-  }
-`;
-
-// Add back the EditInputContainer
-const EditInputContainer = styled.div`
-  position: relative;
-  width: 100%;
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 8px;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0), white);
-    pointer-events: none;
-  }
-`;
-
-// Update the EditableFieldWithTooltip component to handle tooltip positioning
-const EditableFieldWithTooltip = ({
-  children,
-  onDoubleClick,
-}: {
-  children: React.ReactNode;
-  onDoubleClick: () => void;
-}) => {
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [showTooltip, setShowTooltip] = useState(false);
-  const fieldRef = useRef<HTMLSpanElement>(null);
-
-  const handleMouseEnter = () => {
-    if (fieldRef.current) {
-      const rect = fieldRef.current.getBoundingClientRect();
-      setTooltipPosition({
-        x: rect.left + rect.width / 2,
-        y: rect.top,
-      });
-      setShowTooltip(true);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setShowTooltip(false);
-  };
-
-  return (
-    <>
-      <EditableField
-        ref={fieldRef}
-        onDoubleClick={onDoubleClick}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {children}
-      </EditableField>
-      {showTooltip && (
-        <Tooltip
-          style={{
-            opacity: 1,
-            visibility: "visible",
-            left: `${tooltipPosition.x}px`,
-            top: `${tooltipPosition.y}px`,
-          }}
-        >
-          Double-click to edit
-        </Tooltip>
-      )}
-    </>
-  );
-};
-
-// Add a styled dropdown component for editing boolean fields
-const EditDropdown = styled.select`
-  width: 100%;
-  padding: 6px 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  outline: none;
-  font-size: 14px;
-  color: #374151;
-  background-color: white;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-
-  &:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-  }
-
-  &:hover:not(:focus) {
-    border-color: #9ca3af;
-  }
 `;
 
 const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
@@ -1184,16 +502,6 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   const [reminderTime, setReminderTime] = useState("12:00"); // Default to noon
   const [showSendEmailDialog, setShowSendEmailDialog] = useState(false);
   const [showDeleteGuestsDialog, setShowDeleteGuestsDialog] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [showUploadArea, setShowUploadArea] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Add state for editing guests
-  const [editingGuest, setEditingGuest] = useState<{
-    id: string;
-    field: string;
-    value: string;
-  } | null>(null);
 
   const addNewGuestRow = () => {
     if (newGuests === null) {
@@ -1210,13 +518,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     }
   };
 
-  // Update the toggleGuestSelection function to handle checkbox clicks
-  const toggleGuestSelection = (guestId: string, e?: React.MouseEvent) => {
-    // If the event exists, stop propagation to prevent row click from triggering
-    if (e) {
-      e.stopPropagation();
-    }
-
+  const toggleGuestSelection = (guestId: string) => {
     setSelectedGuests((prevSelected) =>
       prevSelected.includes(guestId)
         ? prevSelected.filter((id) => id !== guestId)
@@ -1232,67 +534,55 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     }
   };
 
-  const sendGuestEmail = async (
-    guestName: string,
-    toEmail: string,
-    qrContent: string,
-    eventDetails: Event
-  ) => {
-    const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-      qrContent
-    )}&size=320x320&color=000000&bgcolor=FFFFFF`;
 
-    const htmlContent = getMailHtml(
-      guestName,
-      qrCodeBase64,
-      eventDetails.title,
-      event.poster || "",
-      eventDetails.description,
-      eventDetails.date,
-      eventDetails.endDate,
-      eventDetails.emailParams.parking,
-      {
-        enabled: eventDetails.emailParams.scheduleSrc.enabled,
-        content: eventDetails.emailParams.scheduleSrc.content,
-        items: eventDetails.emailParams.scheduleSrc.items || [],
-      },
-      eventDetails.emailParams.dining,
-      event.location.address || "",
-      false,
-      eventDetails.emailParams.customHtmlTemplate?.enabled
-        ? eventDetails.emailParams.customHtmlTemplate.content
-        : undefined
-    );
+  const sendGuestEmails = async (selectedGuests: string[], eventDetails: Event) => {
+    const emails = selectedGuests.map(guestId => {
+      const guest = eventDetails.guests.find((g) => g._id === guestId);
+      if (!guest) return null;
+
+      const qrContent = guest._id.toString();
+      const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+        qrContent
+      )}&size=320x320&color=000000&bgcolor=FFFFFF`;
+
+      const htmlContent = getMailHtml(
+        guest.fullName,
+        qrCodeBase64,
+        eventDetails.title,
+        eventDetails.poster || "",
+        eventDetails.description,
+        eventDetails.date,
+        eventDetails.endDate,
+        eventDetails.emailParams.parking,
+        eventDetails.emailParams.scheduleSrc,
+        eventDetails.emailParams.dining,
+        eventDetails.location.address || ""
+      );
+
+      return {
+        recipient: guest.email.toLowerCase(),
+        guestName: guest.fullName,
+        qrCode: qrCodeBase64
+      };
+    }).filter(email => email !== null);
 
     await axiosInstance.post(`/mail`, {
-      recipient: toEmail,
       subject: `Reminder : Your ticket for ${eventDetails.title}`,
-      htmlContent: htmlContent,
+      htmlTemplate: getMailHtml(
+        "{{guestName}}",
+        "{{qrCode}}",
+        eventDetails.title,
+        eventDetails.poster || "",
+        eventDetails.description,
+        eventDetails.date,
+        eventDetails.endDate,
+        eventDetails.emailParams.parking,
+        eventDetails.emailParams.scheduleSrc,
+        eventDetails.emailParams.dining,
+        eventDetails.location.address || ""
+      ),
+      emails
     });
-  };
-
-  const openSendEmailDialog = () => {
-    if (selectedGuests.length === 0) {
-      addToast("No guests selected to send emails to.", ToastType.INFO);
-      return;
-    }
-    setShowSendEmailDialog(true);
-  };
-
-  const closeSendEmailDialog = () => {
-    setShowSendEmailDialog(false);
-  };
-
-  const openDeleteGuestsDialog = () => {
-    if (selectedGuests.length === 0) {
-      addToast("No guests selected to delete.", ToastType.INFO);
-      return;
-    }
-    setShowDeleteGuestsDialog(true);
-  };
-
-  const closeDeleteGuestsDialog = () => {
-    setShowDeleteGuestsDialog(false);
   };
 
   const sendEmailsToGuests = async () => {
@@ -1302,64 +592,29 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       return;
     }
 
-    const results: Array<{
-      guestId: string;
-      status: "success" | "failure";
-      name: string;
-      error?: string;
-    }> = [];
+    try {
+      await sendGuestEmails(selectedGuests, event);
+      
+      // Обновляем статус отправки для всех гостей одним запросом
+      await axiosInstance.post('/mail/update-status', {
+        guestIds: selectedGuests
+      });
 
-    for (const guestId of selectedGuests) {
-      const guest = event.guests.find((g) => g._id === guestId);
-      if (guest) {
-        const qrContent = guest._id.toString();
-        try {
-          await sendGuestEmail(
-            guest.fullName,
-            guest.email.toLowerCase(),
-            qrContent,
-            event
-          );
-          await axiosInstance.put(`/guests/${guestId}/emailstatus`);
-          results.push({ guestId, status: "success", name: guest.fullName });
-        } catch (error) {
-          console.error(
-            `Failed to send email to ${guest.fullName} (${guest.email}):`,
-            error
-          );
-          results.push({
-            guestId,
-            status: "failure",
-            name: guest.fullName,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
-    }
-
-    const successes = results.filter((r) => r.status === "success");
-    const failures = results.filter((r) => r.status === "failure");
-
-    console.log("Email sending results:");
-    console.log("Successes:", successes);
-    console.log("Failures:", failures);
-
-    if (failures.length > 0) {
-      const failedNames = failures.map((f) => f.name).join(", ");
-      addToast(
-        `${failures.length} email(s) failed to send: ${failedNames}. Check the console for details.`,
-        ToastType.ERROR
-      );
-    } else {
       addToast(
         "Emails sent successfully to all selected guests!",
         ToastType.SUCCESS
       );
+      
+      setSelectedGuests([]);
+      refetch();
+      setShowSendEmailDialog(false);
+    } catch (error) {
+      console.error("Failed to send emails:", error);
+      addToast(
+        "Failed to send emails. Please try again.",
+        ToastType.ERROR
+      );
     }
-
-    setSelectedGuests([]);
-    refetch();
-    closeSendEmailDialog();
   };
 
   const isEventInPast = () => {
@@ -1416,6 +671,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       return;
     }
 
+
     // Prepare email data for each selected guest
     const emailsData = selectedGuests
       .map((guestId) => {
@@ -1437,17 +693,9 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
           event.date,
           event.endDate,
           event.emailParams.parking,
-          {
-            enabled: event.emailParams.scheduleSrc.enabled,
-            content: event.emailParams.scheduleSrc.content,
-            items: event.emailParams.scheduleSrc.items || [],
-          },
+          event.emailParams.scheduleSrc,
           event.emailParams.dining,
-          event.location.address || "",
-          false,
-          event.emailParams.customHtmlTemplate?.enabled
-            ? event.emailParams.customHtmlTemplate.content
-            : undefined
+          event.location.address || ""
         );
 
         return {
@@ -1566,930 +814,238 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         }
       );
 
+
       // Create a filename with event name and date
       const fileName = `${event.title
-        .replace(/[^a-z0-9]/gi, "_")
-        .toLowerCase()}_guests.xlsx`;
-      saveAs(new Blob([response.data]), fileName);
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase()}_guests.xlsx`;
+    saveAs(new Blob([response.data]), fileName);
 
-      addToast("Guest list downloaded successfully", ToastType.SUCCESS);
-    } catch (error) {
-      console.error("Error downloading guest list:", error);
-      addToast("Failed to download guest list", ToastType.ERROR);
-    }
-  };
+    addToast("Guest list downloaded successfully", ToastType.SUCCESS);
+  } catch (error) {
+    console.error("Error downloading guest list:", error);
+    addToast("Failed to download guest list", ToastType.ERROR);
+  }
+};
 
-  // Update the handleFileUpload function to provide more helpful error messages
-  const handleFileUpload = async (file: File) => {
-    if (!file) return;
-
-    // Check file type
-    const fileExtension = file.name.split(".").pop()?.toLowerCase();
-    if (fileExtension !== "xlsx" && fileExtension !== "xls") {
-      addToast("Please upload an Excel file (.xlsx or .xls)", ToastType.ERROR);
-      return;
-    }
-
-    // Create form data for the file upload
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      // Show loading toast
-      addToast("Uploading guests...", ToastType.INFO);
-
-      const response = await axiosInstance.put(
-        `/events/${event._id}/guests/import`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      if (response.data.success) {
-        addToast(
-          response.data.message || "Guests imported successfully",
-          ToastType.SUCCESS
-        );
-        refetch(); // Refresh the event data
-      } else {
-        addToast(
-          response.data.message || "Failed to import guests",
-          ToastType.ERROR
-        );
-      }
-    } catch (error: unknown) {
-      console.error("Error uploading guests:", error);
-
-      // Type guard to check if error has response property
-      if (
-        error &&
-        typeof error === "object" &&
-        "response" in error &&
-        error.response &&
-        typeof error.response === "object" &&
-        "data" in error.response
-      ) {
-        // Define a type for the response data
-        interface ErrorResponseData {
-          message?: string;
-          invalidRows?: Array<{
-            rowNumber: number;
-            fullName: string;
-            email: string;
-          }>;
-        }
-
-        const responseData = error.response.data as ErrorResponseData;
-
-        if (responseData) {
-          // Check if we have invalid rows information
-          if (
-            responseData.invalidRows &&
-            Array.isArray(responseData.invalidRows)
-          ) {
-            const invalidRows = responseData.invalidRows;
-            let errorMessage =
-              responseData.message || "Some rows have missing required fields.";
-
-            // Add details about the first few invalid rows
-            if (invalidRows.length > 0) {
-              errorMessage += "\n\nProblems found in rows:";
-              const rowsToShow = Math.min(invalidRows.length, 3);
-
-              for (let i = 0; i < rowsToShow; i++) {
-                const row = invalidRows[i];
-                errorMessage += `\nRow ${row.rowNumber}: `;
-
-                if (row.fullName === "[MISSING]") {
-                  errorMessage += "Missing Full Name";
-                }
-
-                if (row.email === "[MISSING]") {
-                  errorMessage +=
-                    row.fullName === "[MISSING]"
-                      ? " and Email"
-                      : "Missing Email";
-                }
-              }
-
-              if (invalidRows.length > rowsToShow) {
-                errorMessage += `\n...and ${
-                  invalidRows.length - rowsToShow
-                } more rows with issues.`;
-              }
-
-              errorMessage +=
-                "\n\nTry downloading our template and using it as a guide.";
-            }
-
-            addToast(errorMessage, ToastType.ERROR);
-            return;
-          }
-
-          // If we have a message in the response data, use it
-          if (responseData.message) {
-            addToast(
-              responseData.message +
-                "\n\nTry downloading our template and using it as a guide.",
-              ToastType.ERROR
-            );
-            return;
-          }
-        }
-      }
-
-      // Default error message
-      addToast(
-        "Failed to upload guests. Please check your file format and ensure all required fields are filled. Try downloading our template for the correct format.",
-        ToastType.ERROR
-      );
-    }
-  };
-
-  // Handle file selection from input
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileUpload(files[0]);
-    }
-    // Reset the input value so the same file can be uploaded again if needed
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  // Handle drag events
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      handleFileUpload(files[0]);
-    }
-  };
-
-  // Toggle upload area visibility
-  const toggleUploadArea = () => {
-    setShowUploadArea(!showUploadArea);
-  };
-
-  // Trigger file input click
-  const triggerFileInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  // Update the downloadGuestTemplate function to create a template that will pass validation
-  const downloadGuestTemplate = () => {
-    // Create a simple Excel template with headers and valid example data
-    const worksheet = XLSX.utils.aoa_to_sheet([
-      ["Full Name", "Email", "Phone Number"],
-      ["John Doe", "john.doe@example.com", "123-456-7890"],
-      ["Jane Smith", "jane.smith@example.com", "098-765-4321"],
-    ]);
-
-    // Set column widths for better readability
-    const wscols = [
-      { wch: 25 }, // Full Name
-      { wch: 30 }, // Email
-      { wch: 20 }, // Phone Number
-    ];
-
-    worksheet["!cols"] = wscols;
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Guests");
-
-    // Generate the Excel file
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const fileName = `guest_template.xlsx`;
-    saveAs(new Blob([excelBuffer]), fileName);
-
-    addToast(
-      "Guest template downloaded successfully. You can use this template to add your own guests.",
-      ToastType.SUCCESS
-    );
-  };
-
-  const filteredGuests = event?.guests.filter(
-    (guest) =>
-      guest.fullName.toLowerCase().includes(filterText.toLowerCase()) ||
-      guest.email.toLowerCase().includes(filterText.toLowerCase())
-  );
-
-  // Add a handler for dragEnter to ensure we catch all drag events
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  // Add a function to handle editing a guest
-  const startEditing = (guestId: string, field: string, value: string) => {
-    setEditingGuest({ id: guestId, field, value });
-  };
-
-  // Update the saveEditedGuest function to check if the value has actually changed
-  const saveEditedGuest = async (
-    guestId: string,
-    field: string,
-    value: string
-  ) => {
-    try {
-      // Find the current guest to compare values
-      const currentGuest = event.guests.find((guest) => guest._id === guestId);
-
-      if (!currentGuest) {
-        console.error("Guest not found:", guestId);
-        return;
-      }
-
-      // Get the current value of the field
-      const currentValue = currentGuest[field as keyof typeof currentGuest];
-
-      // Check if the value has actually changed
-      if (value === currentValue) {
-        // No change, just clear the editing state without sending a request
-        setEditingGuest(null);
-        return;
-      }
-
-      // Create an update object with the field being edited
-      const updateData: Record<string, string | number> = {};
-      updateData[field] = value;
-
-      // Send the update to the backend
-      await axiosInstance.put(`/guests/${guestId}`, updateData);
-
-      // Refresh the event data
-      refetch();
-
-      // Clear the editing state
-      setEditingGuest(null);
-
-      // Show success message
-      addToast("Guest updated successfully", ToastType.SUCCESS);
-    } catch (error) {
-      console.error("Error updating guest:", error);
-      addToast("Failed to update guest", ToastType.ERROR);
-    }
-  };
-
-  // Add a function to handle key press events in the edit input
-  const handleEditKeyPress = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    guestId: string,
-    field: string,
-    value: string
-  ) => {
-    if (e.key === "Enter") {
-      saveEditedGuest(guestId, field, value);
-    } else if (e.key === "Escape") {
-      setEditingGuest(null);
-    }
-  };
-
-  // Add a function to handle changes in the edit input
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (editingGuest) {
-      setEditingGuest({
-        ...editingGuest,
-        value: e.target.value,
-      });
-    }
-  };
-
-  // Add a function to handle dropdown changes
-  const handleDropdownChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-    guestId: string,
-    field: string
-  ) => {
-    let value: boolean | null = null;
-
-    if (e.target.value === "true") {
-      value = true;
-    } else if (e.target.value === "false") {
-      value = false;
-    }
-
-    // Create an update object with the field being edited
-    const updateData: Record<string, boolean | null> = {};
-    updateData[field] = value;
-
-    // Send the update to the backend
-    axiosInstance
-      .put(`/guests/${guestId}`, updateData)
-      .then(() => {
-        // Refresh the event data
-        refetch();
-
-        // Show success message
-        addToast("Guest updated successfully", ToastType.SUCCESS);
-      })
-      .catch((error: unknown) => {
-        console.error("Error updating guest:", error);
-        addToast("Failed to update guest", ToastType.ERROR);
-      });
-  };
-
-  // Add a function to start editing a boolean field
-  const startEditingBoolean = (guestId: string, field: string) => {
-    setEditingGuest({ id: guestId, field, value: "" });
-  };
-
-  return (
-    <GuestsWrapper>
-      {/* Only show the header if there are guests or if we're adding a new guest */}
-      {(event.guests.length > 0 || newGuests) && (
-        <GuestTableHeaderContainer>
-          <SearchContainer>
-            <SearchIcon
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </SearchIcon>
-            <SearchInput
-              type="text"
-              placeholder="Search by name or email..."
-              value={filterText}
-              onChange={(e) => setFilterText(e.target.value)}
-            />
-          </SearchContainer>
-
-          <ButtonGroup>
-            <SecondaryButton onClick={toggleUploadArea}>
-              <UploadIcon />
-              {showUploadArea ? "Hide Upload" : "Upload"}
-            </SecondaryButton>
-            {event.guests.length > 0 && (
-              <ExcelButton onClick={downloadGuestsExcel}>
-                <ExcelIcon />
-                Download
-              </ExcelButton>
-            )}
-            <PrimaryButton onClick={addNewGuestRow}>
-              <PlusIcon />
-              Add Guest
-            </PrimaryButton>
-          </ButtonGroup>
-        </GuestTableHeaderContainer>
-      )}
-
-      {showUploadArea && (
-        <UploadArea
-          className={isDragging ? "dragging" : ""}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onDragEnter={handleDragEnter}
+const filteredGuests = event?.guests.filter(
+  (guest) =>
+    guest.fullName.toLowerCase().includes(filterText.toLowerCase()) ||
+    guest.email.toLowerCase().includes(filterText.toLowerCase())
+);
+console.log(event.guests);
+return (
+  <GuestsWrapper>
+    <GuestTableHeaderContainer>
+      <SearchContainer>
+        <SearchIcon
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <DropOverlay>
-            <DropOverlayIcon />
-            <h2>Drop to Upload</h2>
-            <p>Release your file to start uploading</p>
-          </DropOverlay>
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </SearchIcon>
+        <SearchInput
+          type="text"
+          placeholder="Search by name or email..."
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+        />
+      </SearchContainer>
 
-          <h3>Upload Guest List</h3>
-          <DropZone>
-            <DropIcon />
-            <p>Drag and drop your Excel file here, or click "Select File"</p>
-          </DropZone>
-          <UploadInstructions>
-            Upload an Excel file (.xlsx or .xls) with your guest list. The file
-            should have the following structure:
-            <br />
-            <br />
-            <strong>Required Format:</strong>
-            <ul style={{ textAlign: "left", display: "inline-block" }}>
-              <li>
-                <strong>First row:</strong> Header row with column names
-              </li>
-              <li>
-                <strong>First column:</strong> Full Name (required)
-              </li>
-              <li>
-                <strong>Second column:</strong> Email (required)
-              </li>
-              <li>
-                <strong>Third column:</strong> Phone Number (optional)
-              </li>
-            </ul>
-            <br />
-            <div
-              style={{
-                marginTop: "10px",
-                padding: "10px",
-                backgroundColor: "#f8f9fa",
-                borderRadius: "4px",
-                textAlign: "left",
-              }}
-            >
-              <strong>Tips:</strong>
-              <ul>
-                <li>Download our template for the correct format</li>
-                <li>
-                  The template includes example data that you can use as-is or
-                  replace
-                </li>
-                <li>Make sure all guests have both a name and email</li>
-                <li>Empty rows will be ignored</li>
-              </ul>
-            </div>
-          </UploadInstructions>
+      <ButtonGroup>
+        {event.guests.length && (
+          <ExcelButton onClick={downloadGuestsExcel}>
+            <ExcelIcon />
+            Download Excel
+          </ExcelButton>
+        )}
+        <PrimaryButton onClick={addNewGuestRow}>+ Add Guest</PrimaryButton>
+      </ButtonGroup>
+    </GuestTableHeaderContainer>
 
-          <UploadButtonGroup>
-            <TemplateButton onClick={downloadGuestTemplate}>
-              <ExcelIcon />
-              Get Template
-            </TemplateButton>
-            <UploadButton onClick={triggerFileInput}>
-              <UploadIcon />
-              Select File
-            </UploadButton>
-          </UploadButtonGroup>
-
-          {/* Add a button to go back to the empty state */}
-          {event.guests.length === 0 && !newGuests && (
-            <div style={{ marginTop: "20px" }}>
-              <SecondaryButton onClick={toggleUploadArea} width={200}>
-                ← Back to Overview
-              </SecondaryButton>
-            </div>
+    <ScrollableTable>
+      <table>
+        <thead>
+          <tr>
+            <th>
+              <StyledCheckbox
+                checked={
+                  selectedGuests.length === event.guests.length &&
+                  event.guests.length > 0
+                }
+                onChange={toggleSelectAll}
+              />
+            </th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Email Sent</th>
+            <th>Reminder Email</th>
+            <th>Phone</th>
+            <th>Attendance</th>
+            <th>GDPR Consent</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {newGuests != null && (
+            <tr>
+              <td></td>
+              <td>
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={newGuests.fullName}
+                  onChange={(e) =>
+                    handleGuestChange("fullName", e.target.value)
+                  }
+                />
+              </td>
+              <td>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={newGuests.email}
+                  onChange={(e) => handleGuestChange("email", e.target.value)}
+                />
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>
+                <GuestActionsButtonsContainer>
+                  <PrimaryButton width={80} onClick={saveGuests}>
+                    Add
+                  </PrimaryButton>
+                  <SecondaryButton
+                    width={80}
+                    onClick={() => {
+                      setNewGuests(null);
+                    }}
+                  >
+                    Cancel
+                  </SecondaryButton>
+                </GuestActionsButtonsContainer>
+              </td>
+            </tr>
           )}
+          {filteredGuests?.map((guest) => (
+            <tr
+              key={guest._id}
+              onClick={() => toggleGuestSelection(guest._id)}
+            >
+              <td>
+                <StyledCheckbox
 
-          <UploadInput
-            type="file"
-            ref={fileInputRef}
-            accept=".xlsx,.xls"
-            onChange={handleFileSelect}
-          />
-        </UploadArea>
-      )}
+checked={selectedGuests.includes(guest._id)}
+/>
+</td>
+<td>{guest.fullName}</td>
+<td
+style={{
+  textOverflow: "ellipsis",
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+}}
+>
+{guest.email}
+</td>
+<td
+style={{
+  color: guest.email_sent ? "green" : "red",
+  fontWeight: "semibold",
+}}
+>
+<ActivityStatus
+  color={guest.email_sent ? "#2a9134" : "#e40000"}
+>
+  {guest.email_sent ? "Sent" : "Not Sent"}
+</ActivityStatus>
+</td>
+<td>
+{guest.reminder_email_date ? (
+  <ReminderStatus
+    color={
+      new Date(guest.reminder_email_date) < new Date()
+        ? "#2a9134" // Green for sent
+        : "#00aef0" // Blue for scheduled
+    }
+  >
+    <span className="status-text">
+      {formatReminderDate(guest.reminder_email_date).status}
+    </span>
+    <span className="date-time">
+      {formatReminderDate(guest.reminder_email_date).dateTime}
+    </span>
+  </ReminderStatus>
+) : (
+  <ReminderStatus color="#e40000">
+    {" "}
+    {/* Red for not set */}
+    <span className="status-text">Not set</span>
+  </ReminderStatus>
+)}
+</td>
+<td>{guest.phoneNumber || "-"}</td>
+<td>{guest.attendance_status ? "+" : "-"}</td>
+<td>
+<div style={{ textAlign: "center" }}>
+  {guest.gdpr_consent ? (
+    <span style={{ color: "#4caf50" }}>Yes</span>
+  ) : (
+    <span style={{ color: "#f44336" }}>No</span>
+  )}
+</div>
+</td>
+<td>
+<DeleteButton
+  onClick={(e) => {
+    e.stopPropagation();
+    deleteGuest(guest._id);
+  }}
+>
+  <SvgSC
+    width="24"
+    height="24"
+    size={24}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M8.5 7H15.5M8.5 7H6.5M8.5 7C8.5 7 8.5 3.5 12 3.5C15.5 3.5 15.5 7 15.5 7M15.5 7H17.5M4.5 7H6.5M6.5 7V18.5C6.5 19.6046 7.39543 20.5 8.5 20.5H15.5C16.6046 20.5 17.5 19.6046 17.5 18.5V7M17.5 7H19.5M14 9.5V17.5M10 9.5V17.5"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="square"
+      strokeLinejoin="round"
+    />
+  </SvgSC>
+</DeleteButton>
+</td>
+</tr>
+))}
+</tbody>
+</table>
+</ScrollableTable>
+<Toasts />
+{/* Reminder Dialog */}
+{showReminderDialog && (
+<DialogOverlay onClick={closeReminderDialog}>
+<DialogContent onClick={(e) => e.stopPropagation()}>
+<DialogTitle>Schedule Reminder Emails</DialogTitle>
+<DialogDescription>
+Set when reminder emails should be sent to your guests. Choose how
+many days before the event and at what time.
+</DialogDescription>
 
-      {event.guests.length === 0 && !newGuests && !showUploadArea ? (
-        <EmptyStateContainer>
-          <EmptyStateIcon>
-            <EmptyGuestsIcon />
-          </EmptyStateIcon>
-          <EmptyStateTitle>No Guests Added Yet</EmptyStateTitle>
-          <EmptyStateDescription>
-            Start adding guests to your event. You can add guests individually
-            or upload a list from an Excel file.
-          </EmptyStateDescription>
 
-          <EmptyStateInstructions>
-            <div className="method">
-              <div className="method-icon">
-                <UploadIcon />
-              </div>
-              <div className="method-content">
-                <h4>Upload a Guest List</h4>
-                <p>The fastest way to add multiple guests at once:</p>
-                <ul>
-                  <li>Download our Excel template below</li>
-                  <li>
-                    Fill in your guests' information (name and email required)
-                  </li>
-                  <li>Upload the completed file</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="method">
-              <div className="method-icon">
-                <PlusIcon />
-              </div>
-              <div className="method-content">
-                <h4>Add Guests Manually</h4>
-                <p>Add guests one by one with these required fields:</p>
-                <ul>
-                  <li>Full Name</li>
-                  <li>Email Address</li>
-                  <li>Optional: Phone Number</li>
-                </ul>
-              </div>
-            </div>
-          </EmptyStateInstructions>
-
-          <EmptyStateActions>
-            <ActionButton onClick={addNewGuestRow}>
-              <PlusIcon />
-              Add Manually
-            </ActionButton>
-            <ActionSecondaryButton onClick={toggleUploadArea}>
-              <UploadIcon />
-              Upload List
-            </ActionSecondaryButton>
-            <ActionTemplateButton onClick={downloadGuestTemplate}>
-              <ExcelIcon />
-              Get Template
-            </ActionTemplateButton>
-          </EmptyStateActions>
-        </EmptyStateContainer>
-      ) : (
-        <ScrollableTable>
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  <StyledCheckbox
-                    checked={
-                      selectedGuests.length === event.guests.length &&
-                      event.guests.length > 0
-                    }
-                    onChange={toggleSelectAll}
-                  />
-                </th>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Email Sent</th>
-                <th>Reminder Email</th>
-                <th>Phone</th>
-                <th>Attendance</th>
-                <th>GDPR Consent</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {newGuests != null && (
-                <tr>
-                  <td></td>
-                  <td>
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      value={newGuests.fullName}
-                      onChange={(e) =>
-                        handleGuestChange("fullName", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      value={newGuests.email}
-                      onChange={(e) =>
-                        handleGuestChange("email", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td>
-                    <GuestActionsButtonsContainer>
-                      <PrimaryButton width={80} onClick={saveGuests}>
-                        Add
-                      </PrimaryButton>
-                      <SecondaryButton
-                        width={80}
-                        onClick={() => {
-                          setNewGuests(null);
-                        }}
-                      >
-                        Cancel
-                      </SecondaryButton>
-                    </GuestActionsButtonsContainer>
-                  </td>
-                </tr>
-              )}
-              {filteredGuests?.map((guest) => (
-                <tr key={guest._id}>
-                  <td onClick={(e) => toggleGuestSelection(guest._id, e)}>
-                    <StyledCheckbox
-                      checked={selectedGuests.includes(guest._id)}
-                      onChange={() => {}} // Add empty onChange to avoid React warning about controlled component
-                    />
-                  </td>
-                  <td>
-                    {editingGuest &&
-                    editingGuest.id === guest._id &&
-                    editingGuest.field === "fullName" ? (
-                      <EditInputContainer>
-                        <EditInput
-                          type="text"
-                          value={editingGuest.value}
-                          onChange={handleEditChange}
-                          onKeyDown={(
-                            e: React.KeyboardEvent<HTMLInputElement>
-                          ) =>
-                            handleEditKeyPress(
-                              e,
-                              guest._id,
-                              "fullName",
-                              editingGuest.value
-                            )
-                          }
-                          onBlur={() =>
-                            saveEditedGuest(
-                              guest._id,
-                              "fullName",
-                              editingGuest.value
-                            )
-                          }
-                          autoFocus
-                          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                        />
-                      </EditInputContainer>
-                    ) : (
-                      <EditableFieldWithTooltip
-                        onDoubleClick={() =>
-                          startEditing(guest._id, "fullName", guest.fullName)
-                        }
-                      >
-                        {guest.fullName}
-                      </EditableFieldWithTooltip>
-                    )}
-                  </td>
-                  <td
-                    style={{
-                      textOverflow: "ellipsis",
-                      overflow: "hidden",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {editingGuest &&
-                    editingGuest.id === guest._id &&
-                    editingGuest.field === "email" ? (
-                      <EditInputContainer>
-                        <EditInput
-                          type="email"
-                          value={editingGuest.value}
-                          onChange={handleEditChange}
-                          onKeyDown={(
-                            e: React.KeyboardEvent<HTMLInputElement>
-                          ) =>
-                            handleEditKeyPress(
-                              e,
-                              guest._id,
-                              "email",
-                              editingGuest.value
-                            )
-                          }
-                          onBlur={() =>
-                            saveEditedGuest(
-                              guest._id,
-                              "email",
-                              editingGuest.value
-                            )
-                          }
-                          autoFocus
-                          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                        />
-                      </EditInputContainer>
-                    ) : (
-                      <EditableFieldWithTooltip
-                        onDoubleClick={() =>
-                          startEditing(guest._id, "email", guest.email)
-                        }
-                      >
-                        {guest.email}
-                      </EditableFieldWithTooltip>
-                    )}
-                  </td>
-                  <td
-                    style={{
-                      color: guest.email_sent ? "green" : "red",
-                      fontWeight: "semibold",
-                    }}
-                  >
-                    <ActivityStatus
-                      color={guest.email_sent ? "#2a9134" : "#e40000"}
-                    >
-                      {guest.email_sent ? "Sent" : "Not Sent"}
-                    </ActivityStatus>
-                  </td>
-                  <td>
-                    {guest.reminder_email_date ? (
-                      <ReminderStatus
-                        color={
-                          new Date(guest.reminder_email_date) < new Date()
-                            ? "#2a9134" // Green for sent
-                            : "#00aef0" // Blue for scheduled
-                        }
-                      >
-                        <span className="status-text">
-                          {formatReminderDate(guest.reminder_email_date).status}
-                        </span>
-                        <span className="date-time">
-                          {
-                            formatReminderDate(guest.reminder_email_date)
-                              .dateTime
-                          }
-                        </span>
-                      </ReminderStatus>
-                    ) : (
-                      <ReminderStatus color="#e40000">
-                        {" "}
-                        {/* Red for not set */}
-                        <span className="status-text">Not set</span>
-                      </ReminderStatus>
-                    )}
-                  </td>
-                  <td>
-                    {editingGuest &&
-                    editingGuest.id === guest._id &&
-                    editingGuest.field === "phoneNumber" ? (
-                      <EditInputContainer>
-                        <EditInput
-                          type="text"
-                          value={editingGuest.value}
-                          onChange={handleEditChange}
-                          onKeyDown={(
-                            e: React.KeyboardEvent<HTMLInputElement>
-                          ) =>
-                            handleEditKeyPress(
-                              e,
-                              guest._id,
-                              "phoneNumber",
-                              editingGuest.value
-                            )
-                          }
-                          onBlur={() =>
-                            saveEditedGuest(
-                              guest._id,
-                              "phoneNumber",
-                              editingGuest.value
-                            )
-                          }
-                          autoFocus
-                          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                        />
-                      </EditInputContainer>
-                    ) : (
-                      <EditableFieldWithTooltip
-                        onDoubleClick={() =>
-                          startEditing(
-                            guest._id,
-                            "phoneNumber",
-                            guest.phoneNumber || ""
-                          )
-                        }
-                      >
-                        {guest.phoneNumber || "-"}
-                      </EditableFieldWithTooltip>
-                    )}
-                  </td>
-                  <td>
-                    {editingGuest &&
-                    editingGuest.id === guest._id &&
-                    editingGuest.field === "attendance_status" ? (
-                      <EditInputContainer>
-                        <EditDropdown
-                          value={
-                            guest.attendance_status === true
-                              ? "true"
-                              : guest.attendance_status === false
-                              ? "false"
-                              : "null"
-                          }
-                          onChange={(e) =>
-                            handleDropdownChange(
-                              e,
-                              guest._id,
-                              "attendance_status"
-                            )
-                          }
-                          onBlur={() => setEditingGuest(null)}
-                          autoFocus
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <option value="null">Not Set</option>
-                          <option value="true">Yes</option>
-                          <option value="false">No</option>
-                        </EditDropdown>
-                      </EditInputContainer>
-                    ) : (
-                      <EditableFieldWithTooltip
-                        onDoubleClick={() =>
-                          startEditingBoolean(guest._id, "attendance_status")
-                        }
-                      >
-                        {guest.attendance_status === true
-                          ? "Yes"
-                          : guest.attendance_status === false
-                          ? "No"
-                          : "Not Set"}
-                      </EditableFieldWithTooltip>
-                    )}
-                  </td>
-                  <td>
-                    {editingGuest &&
-                    editingGuest.id === guest._id &&
-                    editingGuest.field === "gdpr_consent" ? (
-                      <EditInputContainer>
-                        <EditDropdown
-                          value={
-                            guest.gdpr_consent === true
-                              ? "true"
-                              : guest.gdpr_consent === false
-                              ? "false"
-                              : "null"
-                          }
-                          onChange={(e) =>
-                            handleDropdownChange(e, guest._id, "gdpr_consent")
-                          }
-                          onBlur={() => setEditingGuest(null)}
-                          autoFocus
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <option value="null">Not Set</option>
-                          <option value="true">Yes</option>
-                          <option value="false">No</option>
-                        </EditDropdown>
-                      </EditInputContainer>
-                    ) : (
-                      <EditableFieldWithTooltip
-                        onDoubleClick={() =>
-                          startEditingBoolean(guest._id, "gdpr_consent")
-                        }
-                      >
-                        <div style={{ textAlign: "center" }}>
-                          {guest.gdpr_consent === true ? (
-                            <span style={{ color: "#4caf50" }}>Yes</span>
-                          ) : guest.gdpr_consent === false ? (
-                            <span style={{ color: "#f44336" }}>No</span>
-                          ) : (
-                            <span style={{ color: "#9ca3af" }}>Not Set</span>
-                          )}
-                        </div>
-                      </EditableFieldWithTooltip>
-                    )}
-                  </td>
-                  <td>
-                    <DeleteButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteGuest(guest._id);
-                      }}
-                    >
-                      <SvgSC
-                        width="24"
-                        height="24"
-                        size={24}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M8.5 7H15.5M8.5 7H6.5M8.5 7C8.5 7 8.5 3.5 12 3.5C15.5 3.5 15.5 7 15.5 7M15.5 7H17.5M4.5 7H6.5M6.5 7V18.5C6.5 19.6046 7.39543 20.5 8.5 20.5H15.5C16.6046 20.5 17.5 19.6046 17.5 18.5V7M17.5 7H19.5M14 9.5V17.5M10 9.5V17.5"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          strokeLinecap="square"
-                          strokeLinejoin="round"
-                        />
-                      </SvgSC>
-                    </DeleteButton>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </ScrollableTable>
-      )}
-
-      <Toasts />
-      {/* Reminder Dialog */}
-      {showReminderDialog && (
-        <DialogOverlay onClick={closeReminderDialog}>
-          <DialogContent onClick={(e) => e.stopPropagation()}>
-            <DialogTitle>Schedule Reminder Emails</DialogTitle>
-            <DialogDescription>
-              Set when reminder emails should be sent to your guests. Choose how
-              many days before the event and at what time.
-            </DialogDescription>
-
-            <InputGroup>
+<InputGroup>
               <Label htmlFor="daysBefore">Days before event:</Label>
               <Input
                 id="daysBefore"
@@ -2598,6 +1154,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
               event. This action cannot be undone. Any scheduled emails for
               these guests will also be canceled.
             </DialogDescription>
+
 
             <DialogButtons>
               <SecondaryButton onClick={closeDeleteGuestsDialog} width={120}>
