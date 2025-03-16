@@ -57,7 +57,7 @@ const sendEmail = async (
       }
 
       if (i > 0) {
-        await delay(500);
+        await delay(800);
       }
 
       const response = await mg.messages.create('mail.preemly.eu', emailPayload);
