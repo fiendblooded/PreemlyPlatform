@@ -1197,6 +1197,7 @@ const WelcomeScreen: React.FC = () => {
           phoneNumber: phoneNumber,
           eventId: id,
           attendance_status: true,
+          email_sent: false,
           gdpr_consent: gdprConsent,
         });
 
@@ -1206,6 +1207,7 @@ const WelcomeScreen: React.FC = () => {
           fullName: manualName,
           email: manualEmail,
           attendance_status: true,
+          email_sent: false,
           age: 0,
           phoneNumber: phoneNumber,
           gdpr_consent: gdprConsent,
