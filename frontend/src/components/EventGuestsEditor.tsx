@@ -530,14 +530,18 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     if (selectedGuests.length === event.guests.length) {
       setSelectedGuests([]);
     } else {
-      setSelectedGuests(event.guests.map((guest) => guest._id));
+      setSelectedGuests(event.guests.map((guest: Event['guests'][0]) => guest._id));
     }
   };
 
+  const openSendEmailDialog = () => setShowSendEmailDialog(true);
+  const closeSendEmailDialog = () => setShowSendEmailDialog(false);
+  const openDeleteGuestsDialog = () => setShowDeleteGuestsDialog(true);
+  const closeDeleteGuestsDialog = () => setShowDeleteGuestsDialog(false);
 
   const sendGuestEmails = async (selectedGuests: string[], eventDetails: Event) => {
     const emails = selectedGuests.map(guestId => {
-      const guest = eventDetails.guests.find((g) => g._id === guestId);
+      const guest = eventDetails.guests.find((g: Event['guests'][0]) => g._id === guestId);
       if (!guest) return null;
 
       const qrContent = guest._id.toString();
@@ -675,7 +679,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     // Prepare email data for each selected guest
     const emailsData = selectedGuests
       .map((guestId) => {
-        const guest = event.guests.find((g) => g._id === guestId);
+        const guest = event.guests.find((g: Event['guests'][0]) => g._id === guestId);
         if (!guest) return null;
 
         const qrContent = guest._id.toString();
@@ -829,7 +833,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
 };
 
 const filteredGuests = event?.guests.filter(
-  (guest) =>
+  (guest: Event['guests'][0]) =>
     guest.fullName.toLowerCase().includes(filterText.toLowerCase()) ||
     guest.email.toLowerCase().includes(filterText.toLowerCase())
 );
@@ -935,7 +939,7 @@ return (
               </td>
             </tr>
           )}
-          {filteredGuests?.map((guest) => (
+          {filteredGuests?.map((guest: Event['guests'][0]) => (
             <tr
               key={guest._id}
               onClick={() => toggleGuestSelection(guest._id)}
