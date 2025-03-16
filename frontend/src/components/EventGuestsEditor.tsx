@@ -551,17 +551,17 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
 
       const parkingModule = {
         enabled: true,
-        content: eventDetails.emailParams.parking
+        content: eventDetails.emailParams.parking.content
       };
 
       const scheduleModule = {
         enabled: true,
-        content: eventDetails.emailParams.scheduleSrc
+        content: eventDetails.emailParams.scheduleSrc.content
       };
 
       const diningModule = {
         enabled: true,
-        content: eventDetails.emailParams.dining
+        content: eventDetails.emailParams.dining.content
       };
 
       const htmlContent = getMailHtml(
@@ -595,9 +595,9 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         eventDetails.description,
         eventDetails.date,
         eventDetails.endDate,
-        { enabled: true, content: eventDetails.emailParams.parking },
-        { enabled: true, content: eventDetails.emailParams.scheduleSrc },
-        { enabled: true, content: eventDetails.emailParams.dining },
+        { enabled: true, content: eventDetails.emailParams.parking.content },
+        { enabled: true, content: eventDetails.emailParams.scheduleSrc.content },
+        { enabled: true, content: eventDetails.emailParams.dining.content },
         eventDetails.location.address || ""
       ),
       emails
@@ -704,17 +704,17 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
 
         const parkingModule = {
           enabled: true,
-          content: event.emailParams.parking
+          content: event.emailParams.parking.content
         };
 
         const scheduleModule = {
           enabled: true,
-          content: event.emailParams.scheduleSrc
+          content: event.emailParams.scheduleSrc.content
         };
 
         const diningModule = {
           enabled: true,
-          content: event.emailParams.dining
+          content: event.emailParams.dining.content
         };
 
         const htmlContent = getMailHtml(

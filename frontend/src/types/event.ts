@@ -9,9 +9,18 @@ export interface Event {
     address?: string;
   };
   emailParams: {
-    parking: string;
-    scheduleSrc: string;
-    dining: string;
+    parking: {
+      enabled: boolean;
+      content: string;
+    };
+    scheduleSrc: {
+      enabled: boolean;
+      content: string;
+    };
+    dining: {
+      enabled: boolean;
+      content: string;
+    };
   };
   guests: {
     _id: string;
