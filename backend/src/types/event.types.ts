@@ -65,6 +65,9 @@ export interface EmailParams {
   scheduleSrc: ScheduleModule;
   dining: EmailExtraModule;
   sponsorDeals: SponsorDealsModule;
+  virtualSpace?: {
+    enabled: boolean;
+  };
 }
 
 export interface CategoryBreakdown {

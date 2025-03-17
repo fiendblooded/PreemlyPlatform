@@ -23,6 +23,7 @@ const eventSchema = new Schema<Event>({
     isManualCheckin: { type: Boolean },
     isGdpr: { type: Boolean },
     videoUrl: { type: String },
+    inactivityTimeout: { type: Number, default: 30 },
   },
   emailParams: {
     customHtmlTemplate: {
@@ -65,6 +66,9 @@ const eventSchema = new Schema<Event>({
           linkUrl: { type: String },
         },
       ],
+    },
+    virtualSpace: {
+      enabled: { type: Boolean, default: false },
     },
   },
   _id: {

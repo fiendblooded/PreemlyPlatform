@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
-import { getDateRangeDetails } from "../common/common";
+import { getDateRangeDetails, loadGoogleMapsScript } from "../common/common";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { PrimaryButton, SecondaryButton } from "./EventGuestsEditor";
+import PosterUploadModal from "./PosterUploadModal";
 
 // Modern color palette to match other components
 const colors = {
@@ -28,8 +29,9 @@ const EventDetailsWrapper = styled.div`
   margin: auto;
   justify-content: space-between;
   margin-top: 0;
-  gap: 20px;
+  gap: 24px;
   font-family: Axiforma, sans-serif;
+  padding-bottom: 40px;
 `;
 
 export const StyledDatePickerWrapper = styled.div`
@@ -43,7 +45,7 @@ export const StyledDatePickerWrapper = styled.div`
 
   svg {
     position: absolute;
-    left: 12px;
+    left: 14px;
     color: ${colors.primary};
     z-index: 1;
   }
@@ -53,10 +55,10 @@ export const StyledDatePickerWrapper = styled.div`
     background-color: ${colors.backgroundLight};
     color: ${colors.textPrimary};
     border: 1px solid ${colors.borderLight};
-    border-radius: 8px;
-    box-shadow: 0 4px 12px ${colors.shadow};
-    padding: 8px;
-    transition: all 0.2s ease;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px ${colors.shadow};
+    padding: 12px;
+    transition: all 0.3s ease;
     font-family: Axiforma, sans-serif;
   }
 
@@ -64,19 +66,19 @@ export const StyledDatePickerWrapper = styled.div`
     background-color: ${colors.backgroundSecondary};
     border-bottom: none;
     padding-top: 12px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
   }
 
   .react-datepicker__day--selected {
     background-color: ${colors.primary};
     color: white;
-    border-radius: 4px;
+    border-radius: 6px;
   }
 
   .react-datepicker__day:hover {
     background-color: rgba(99, 102, 241, 0.1);
-    border-radius: 4px;
+    border-radius: 6px;
   }
 
   .react-datepicker__current-month {
@@ -98,25 +100,25 @@ export const StyledDatePickerWrapper = styled.div`
   .react-datepicker__input-container input {
     background-color: ${colors.backgroundLight};
     border: 1px solid ${colors.borderLight};
-    border-radius: 8px;
-    padding: 10px 14px 10px 40px;
-    font-size: 14px;
+    border-radius: 10px;
+    padding: 12px 16px 12px 42px;
+    font-size: 15px;
     font-weight: 500;
     color: ${colors.textPrimary};
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${colors.shadow};
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px ${colors.shadow};
     width: 100%;
     font-family: Axiforma, sans-serif;
     box-sizing: border-box;
     &:hover {
       border-color: rgba(99, 102, 241, 0.6);
-      box-shadow: 0 4px 8px ${colors.shadow};
+      box-shadow: 0 4px 12px ${colors.shadow};
     }
 
     &:focus {
       border-color: ${colors.primary};
       outline: none;
-      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     }
 
     &::placeholder {
@@ -134,39 +136,40 @@ const EventDetails = styled.div`
   width: 100%;
   background-color: ${colors.backgroundLight};
   color: ${colors.textPrimary};
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px ${colors.shadow};
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px ${colors.shadow};
   box-sizing: border-box;
   position: relative;
   border: 1px solid ${colors.borderLight};
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 
   &:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
   }
 `;
 
 const SectionTitle = styled.div`
   font-weight: 600;
-  font-size: 18px;
-  margin-bottom: 16px;
+  font-size: 20px;
+  margin-bottom: 20px;
   color: ${colors.textPrimary};
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 
   svg {
     color: ${colors.primary};
-    opacity: 0.8;
+    opacity: 0.9;
   }
 `;
 
 const SectionContent = styled.div`
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.7;
   color: ${colors.textSecondary};
+  white-space: pre-wrap;
 `;
 
 const GuestActionsButtonsContainer = styled.div`
@@ -179,12 +182,12 @@ const GuestActionsButtonsContainer = styled.div`
 
 const EditButton = styled.button`
   position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 36px;
-  height: 36px;
+  top: 24px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -192,7 +195,7 @@ const EditButton = styled.button`
   padding: 0;
   color: ${colors.textSecondary};
   background-color: transparent;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 
   &:hover {
     background-color: rgba(99, 102, 241, 0.1);
@@ -205,8 +208,8 @@ const EditButton = styled.button`
   }
 
   svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
 `;
 
@@ -214,22 +217,23 @@ const StyledTextarea = styled.textarea`
   background-color: ${colors.backgroundLight};
   color: ${colors.textPrimary};
   border: 1px solid ${colors.borderLight};
-  border-radius: 8px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 16px 18px;
   width: 100%;
-  min-height: 120px;
+  min-height: 150px;
   max-width: 100%;
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.7;
   box-sizing: border-box;
   font-family: Axiforma, sans-serif;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   resize: vertical;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
 
   &:focus {
     border-color: ${colors.primary};
     outline: none;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
   }
 
   &::placeholder {
@@ -241,11 +245,13 @@ const StyledTextarea = styled.textarea`
 const EventTypeSelector = styled.div`
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   background-color: ${colors.backgroundSecondary};
-  border-radius: 12px;
-  padding: 8px;
-  margin-top: 8px;
+  border-radius: 16px;
+  padding: 10px;
+  margin-top: 16px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  border: 1px solid ${colors.borderLight};
 `;
 
 const SelectorOption = styled.label<{ selected: boolean }>`
@@ -253,23 +259,30 @@ const SelectorOption = styled.label<{ selected: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 16px;
-  font-size: 15px;
-  font-weight: 500;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
   color: ${({ selected }) =>
     selected ? colors.textPrimary : colors.textSecondary};
   background-color: ${({ selected }) =>
     selected ? colors.yellow : "transparent"};
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   box-shadow: ${({ selected }) =>
-    selected ? `0 4px 12px ${colors.yellowShadow}` : "none"};
+    selected ? `0 6px 16px ${colors.yellowShadow}` : "none"};
+  border: 1px solid
+    ${({ selected }) => (selected ? colors.yellow : "transparent")};
 
   &:hover {
     background-color: ${({ selected }) =>
       selected ? colors.yellowHover : "rgba(0, 0, 0, 0.03)"};
-    transform: ${({ selected }) => (selected ? "translateY(-2px)" : "none")};
+    transform: ${({ selected }) =>
+      selected ? "translateY(-3px)" : "translateY(-1px)"};
+    box-shadow: ${({ selected }) =>
+      selected
+        ? `0 8px 20px ${colors.yellowShadow}`
+        : "0 2px 8px rgba(0, 0, 0, 0.03)"};
   }
 
   input {
@@ -282,8 +295,13 @@ const SelectorOption = styled.label<{ selected: boolean }>`
 `;
 
 const EventTypeIcon = styled.span`
-  margin-right: 10px;
-  font-size: 20px;
+  margin-right: 12px;
+  font-size: 24px;
+  transition: transform 0.3s ease;
+
+  ${SelectorOption}:hover & {
+    transform: scale(1.2);
+  }
 `;
 
 const EmptyState = styled.div`
@@ -319,22 +337,31 @@ const EmptyStateActions = styled.div`
 const DateTimeContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: ${colors.textSecondary};
   flex-wrap: wrap;
+  font-size: 16px;
+  background-color: ${colors.backgroundSecondary};
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-top: 10px;
+  border: 1px solid ${colors.borderLight};
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 
   svg {
     color: ${colors.primary};
-    opacity: 0.7;
+    opacity: 0.8;
+    width: 22px;
+    height: 22px;
   }
 `;
 
 const DateTimeGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
   width: 100%;
-  margin-top: 16px;
+  margin-top: 20px;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -344,15 +371,25 @@ const DateTimeGrid = styled.div`
 const DateTimeInputGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
 `;
 
 const DateTimeLabel = styled.label`
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: ${colors.textSecondary};
   margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    color: ${colors.primary};
+    opacity: 0.7;
+  }
 `;
 
 const EventTypeEditor: React.FC<{
@@ -366,23 +403,36 @@ const EventTypeEditor: React.FC<{
   ];
 
   return (
-    <EventTypeSelector>
-      {options.map((option) => (
-        <SelectorOption
-          key={option.value}
-          selected={eventType === option.value}
-        >
-          <input
-            type="radio"
-            name="event-type"
-            checked={eventType === option.value}
-            onChange={() => setEventType(option.value)}
-          />
-          <EventTypeIcon>{option.icon}</EventTypeIcon>
-          {option.label}
-        </SelectorOption>
-      ))}
-    </EventTypeSelector>
+    <>
+      <EventTypeSelector>
+        {options.map((option) => (
+          <SelectorOption
+            key={option.value}
+            selected={eventType === option.value}
+          >
+            <input
+              type="radio"
+              name="event-type"
+              checked={eventType === option.value}
+              onChange={() => setEventType(option.value)}
+            />
+            <EventTypeIcon>{option.icon}</EventTypeIcon>
+            {option.label}
+          </SelectorOption>
+        ))}
+      </EventTypeSelector>
+      <div
+        style={{
+          fontSize: "14px",
+          color: colors.textSecondary,
+          marginTop: "12px",
+          textAlign: "center",
+          opacity: 0.8,
+        }}
+      >
+        Select the type of event you're organizing
+      </div>
+    </>
   );
 };
 
@@ -392,6 +442,13 @@ interface Event {
   date: string | null;
   endDate: string | null;
   eventType: string;
+  poster: string | null;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+    placeId?: string;
+  };
 }
 
 // Import or define the AIButton component
@@ -528,13 +585,215 @@ const HintIcon = () => (
 );
 
 const AIHint = styled.div`
-  margin-top: 8px;
+  margin-top: 12px;
+  margin-bottom: 16px;
   font-size: 14px;
   color: ${colors.textSecondary};
-  background-color: rgba(94, 131, 251, 0.1);
-  padding: 8px 12px;
-  border-radius: 6px;
-  border-left: 3px solid ${colors.primary};
+  background-color: rgba(94, 131, 251, 0.08);
+  padding: 12px 16px;
+  border-radius: 10px;
+  border-left: 4px solid ${colors.primary};
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+`;
+
+const PosterSection = styled(EventDetails)`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 30px;
+  overflow: hidden;
+  position: relative;
+`;
+
+const PosterContent = styled.div`
+  width: 100%;
+  position: relative;
+  margin-top: 16px;
+`;
+
+const PosterImage = styled.div<{ imageUrl: string }>`
+  width: 100%;
+  height: 600px;
+  border-radius: 12px;
+  position: relative;
+  box-shadow: 0 8px 24px ${colors.shadow};
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Blurred background (full width) */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url(${(props) => props.imageUrl});
+    background-size: cover;
+    background-position: center;
+    filter: blur(15px);
+    transform: scale(1.1); /* Prevent blur edges */
+    opacity: 0.7;
+  }
+
+  /* Main image container (centered at 70% width) */
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+    z-index: 2;
+  }
+
+  /* The actual main image */
+  .poster-main-image {
+    width: 70%;
+    height: 90%;
+    background-image: url(${(props) => props.imageUrl});
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    z-index: 1;
+    border-radius: 8px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const PosterPlaceholder = styled.div`
+  width: 100%;
+  height: 350px;
+  border-radius: 12px;
+  background-color: ${colors.backgroundSecondary};
+  background-image: linear-gradient(
+    45deg,
+    #f8fafc 25%,
+    #f1f5f9 25%,
+    #f1f5f9 50%,
+    #f8fafc 50%,
+    #f8fafc 75%,
+    #f1f5f9 75%,
+    #f1f5f9 100%
+  );
+  background-size: 20px 20px;
+  color: ${colors.textSecondary};
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 4px 16px ${colors.shadow};
+  border: 2px dashed ${colors.borderLight};
+
+  &:hover {
+    background-color: ${colors.backgroundLight};
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+    border-color: ${colors.primary}40;
+  }
+`;
+
+const ChangePosterButton = styled(PrimaryButton)`
+  width: 180px;
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+`;
+
+const PosterIcon = styled.div`
+  width: 64px;
+  height: 64px;
+  background-color: ${colors.backgroundLight};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: ${colors.primary};
+  transition: all 0.3s ease;
+
+  svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  ${PosterPlaceholder}:hover & {
+    transform: scale(1.1);
+    background-color: ${colors.primary};
+    color: white;
+  }
+`;
+
+// Add location editor styled components
+const MapContainer = styled.div`
+  height: 400px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 16px;
+  box-shadow: 0 4px 16px ${colors.shadow};
+  border: 1px solid ${colors.borderLight};
+`;
+
+const AddressInput = styled.input`
+  width: 100%;
+  font-family: Axiforma, sans-serif;
+  border-radius: 10px;
+  background: ${colors.backgroundLight};
+  font-size: 15px;
+  height: 46px;
+  color: ${colors.textPrimary};
+  outline: none;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  border: 1px solid ${colors.borderLight};
+  padding: 8px 16px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px ${colors.shadow};
+  transition: all 0.3s ease;
+
+  &::placeholder {
+    color: ${colors.textSecondary};
+    opacity: 0.6;
+  }
+
+  &:focus {
+    border-color: ${colors.primary};
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  }
+`;
+
+const LocationActions = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-top: 16px;
 `;
 
 const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
@@ -549,6 +808,129 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
   const [endDate, setEndDate] = useState(new Date(event.endDate || ""));
   const [eventType, setEventType] = useState(event.eventType);
   const [isRewritingDescription, setIsRewritingDescription] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
+
+  // Add location state and refs
+  const mapRef = useRef<HTMLDivElement>(null);
+  const autocompleteRef = useRef<HTMLInputElement>(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
+  const [location, setLocation] = useState({
+    latitude: event.location?.latitude || 37.7749, // Default to San Francisco
+    longitude: event.location?.longitude || -122.4194,
+    address: event.location?.address || "",
+    placeId: event.location?.placeId || "",
+  });
+  const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
+  const gmapsKey = import.meta.env.VITE_GOOGLE_MAPS_API;
+
+  // Add location initialization effect
+  useEffect(() => {
+    const initializeMap = async () => {
+      if (eventType !== "Online") {
+        try {
+          await loadGoogleMapsScript(gmapsKey); // Ensure the script is loaded
+
+          if (!mapRef.current) return;
+
+          const mapInstance = new google.maps.Map(mapRef.current, {
+            center: { lat: location.latitude, lng: location.longitude },
+            zoom: 15,
+          });
+
+          const markerInstance = new google.maps.Marker({
+            position: { lat: location.latitude, lng: location.longitude },
+            map: mapInstance,
+            draggable: true,
+          });
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          markerInstance.addListener("dragend", (event: any) => {
+            const newLat = event.latLng?.lat() ?? 0;
+            const newLng = event.latLng?.lng() ?? 0;
+
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode(
+              { location: { lat: newLat, lng: newLng } },
+              (results, status) => {
+                if (status === "OK" && results && results[0]) {
+                  setLocation({
+                    latitude: newLat,
+                    longitude: newLng,
+                    address: results[0].formatted_address,
+                    placeId: results[0].place_id || "",
+                  });
+                } else {
+                  console.error("Geocoding failed: ", status);
+                }
+              }
+            );
+          });
+
+          setMap(mapInstance);
+          setMarker(markerInstance);
+        } catch (error) {
+          console.error("Failed to load Google Maps script:", error);
+        }
+      }
+    };
+
+    initializeMap();
+  }, [eventType, gmapsKey, location.latitude, location.longitude]);
+
+  // Add autocomplete effect
+  useEffect(() => {
+    if (!autocompleteRef.current || !map || eventType === "Online") return;
+
+    const autocomplete = new google.maps.places.Autocomplete(
+      autocompleteRef.current,
+      {
+        fields: ["formatted_address", "geometry", "place_id"],
+      }
+    );
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      if (place.geometry && place.geometry.location) {
+        const newLat = place.geometry.location.lat();
+        const newLng = place.geometry.location.lng();
+        const newAddress = place.formatted_address || "";
+        const newPlaceId = place.place_id || "";
+
+        setLocation({
+          latitude: newLat,
+          longitude: newLng,
+          address: newAddress,
+          placeId: newPlaceId,
+        });
+
+        if (marker) {
+          marker.setPosition({ lat: newLat, lng: newLng });
+        }
+
+        if (map) {
+          map.setCenter({ lat: newLat, lng: newLng });
+        }
+      }
+    });
+  }, [map, marker, eventType]);
+
+  // Add location save handler
+  const handleSaveLocation = async () => {
+    setIsUpdatingLocation(true);
+
+    try {
+      await axiosInstance.put(`/events/${event._id}`, {
+        ...event,
+        location,
+      });
+      refetch();
+    } catch (error) {
+      console.error("Error updating location:", error);
+    } finally {
+      setIsUpdatingLocation(false);
+    }
+  };
 
   const updateDescription = async () => {
     await axiosInstance.put(`/events/${event._id}`, {
@@ -602,24 +984,94 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
 
   return (
     <EventDetailsWrapper>
+      <PosterSection>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <SectionTitle>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M2 12.5V6.5C2 5.39543 2.89543 4.5 4 4.5H20C21.1046 4.5 22 5.39543 22 6.5V17.5C22 18.6046 21.1046 19.5 20 19.5H4C2.89543 19.5 2 18.6046 2 17.5V12.5ZM2 12.5H22"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Event Poster
+          </SectionTitle>
+          <EditButton onClick={() => setModalOpen(true)}>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15.4998 5.50067L18.3282 8.3291M13 21H21M3 21.0004L3.04745 20.6683C3.21536 19.4929 3.29932 18.9052 3.49029 18.3565C3.65975 17.8697 3.89124 17.4067 4.17906 16.979C4.50341 16.497 4.92319 16.0772 5.76274 15.2377L17.4107 3.58969C18.1918 2.80865 19.4581 2.80864 20.2392 3.58969C21.0202 4.37074 21.0202 5.63707 20.2392 6.41812L8.37744 18.2798C7.61579 19.0415 7.23497 19.4223 6.8012 19.7252C6.41618 19.994 6.00093 20.2167 5.56398 20.3887C5.07171 20.5824 4.54375 20.6889 3.48793 20.902L3 21.0004Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </EditButton>
+        </div>
+
+        <PosterContent>
+          {event.poster ? (
+            <PosterImage imageUrl={`${event.poster}`}>
+              <div className="poster-main-image"></div>
+            </PosterImage>
+          ) : (
+            <PosterPlaceholder onClick={() => setModalOpen(true)}>
+              <PosterIcon>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 16L8.586 11.414C8.961 11.039 9.47 10.828 10 10.828C10.53 10.828 11.039 11.039 11.414 11.414L16 16M14 14L15.586 12.414C15.961 12.039 16.47 11.828 17 11.828C17.53 11.828 18.039 12.039 18.414 12.414L20 14M14 8H14.01M6 20H18C18.53 20 19.039 19.789 19.414 19.414C19.789 19.039 20 18.53 20 18V6C20 5.47 19.789 4.961 19.414 4.586C19.039 4.211 18.53 4 18 4H6C5.47 4 4.961 4.211 4.586 4.586C4.211 4.961 4 5.47 4 6V18C4 18.53 4.211 19.039 4.586 19.414C4.961 19.789 5.47 20 6 20Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </PosterIcon>
+              <div>Add an event poster</div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginTop: "8px",
+                  fontWeight: "normal",
+                  opacity: 0.8,
+                }}
+              >
+                Recommended size: 1200 × 630 pixels
+              </div>
+              <ChangePosterButton onClick={() => setModalOpen(true)}>
+                Upload Poster
+              </ChangePosterButton>
+            </PosterPlaceholder>
+          )}
+        </PosterContent>
+      </PosterSection>
+
       <EventDetails>
-        <EditButton onClick={() => setIsEditingDescription(true)}>
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M15.4998 5.50067L18.3282 8.3291M13 21H21M3 21.0004L3.04745 20.6683C3.21536 19.4929 3.29932 18.9052 3.49029 18.3565C3.65975 17.8697 3.89124 17.4067 4.17906 16.979C4.50341 16.497 4.92319 16.0772 5.76274 15.2377L17.4107 3.58969C18.1918 2.80865 19.4581 2.80864 20.2392 3.58969C21.0202 4.37074 21.0202 5.63707 20.2392 6.41812L8.37744 18.2798C7.61579 19.0415 7.23497 19.4223 6.8012 19.7252C6.41618 19.994 6.00093 20.2167 5.56398 20.3887C5.07171 20.5824 4.54375 20.6889 3.48793 20.902L3 21.0004Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </EditButton>
         <SectionTitle>
           <svg
             width="20"
@@ -638,6 +1090,23 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
           </svg>
           About this event
         </SectionTitle>
+        <EditButton onClick={() => setIsEditingDescription(true)}>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M15.4998 5.50067L18.3282 8.3291M13 21H21M3 21.0004L3.04745 20.6683C3.21536 19.4929 3.29932 18.9052 3.49029 18.3565C3.65975 17.8697 3.89124 17.4067 4.17906 16.979C4.50341 16.497 4.92319 16.0772 5.76274 15.2377L17.4107 3.58969C18.1918 2.80865 19.4581 2.80864 20.2392 3.58969C21.0202 4.37074 21.0202 5.63707 20.2392 6.41812L8.37744 18.2798C7.61579 19.0415 7.23497 19.4223 6.8012 19.7252C6.41618 19.994 6.00093 20.2167 5.56398 20.3887C5.07171 20.5824 4.54375 20.6889 3.48793 20.902L3 21.0004Z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </EditButton>
         {isEditingDescription ? (
           <>
             <StyledTextarea
@@ -866,7 +1335,60 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
           Event type
         </SectionTitle>
         <EventTypeEditor eventType={eventType} setEventType={setEventType} />
+
+        {/* Add location editor section */}
+        {eventType !== "Online" && (
+          <>
+            <SectionTitle style={{ marginTop: "24px" }}>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.7 15C4.03377 15.6353 3 16.5205 3 17.4997C3 19.4329 7.02944 21 12 21C16.9706 21 21 19.4329 21 17.4997C21 16.5205 19.9662 15.6353 18.3 15M12 9H12.01M18 9C18 13.0637 13.5 15 12 18C10.5 15 6 13.0637 6 9C6 5.68629 8.68629 3 12 3C15.3137 3 18 5.68629 18 9ZM13 9C13 9.55228 12.5523 10 12 10C11.4477 10 11 9.55228 11 9C11 8.44772 11.4477 8 12 8C12.5523 8 13 8.44772 13 9Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Event location
+            </SectionTitle>
+            <AddressInput
+              ref={autocompleteRef}
+              type="text"
+              placeholder="Search for a location..."
+              defaultValue={location.address}
+            />
+            <MapContainer ref={mapRef}></MapContainer>
+            <LocationActions>
+              <PrimaryButton
+                onClick={handleSaveLocation}
+                disabled={
+                  isUpdatingLocation ||
+                  (event.location?.latitude === location.latitude &&
+                    event.location?.longitude === location.longitude &&
+                    event.location?.address === location.address)
+                }
+              >
+                {isUpdatingLocation ? "Saving..." : "Save Location"}
+              </PrimaryButton>
+            </LocationActions>
+          </>
+        )}
       </EventDetails>
+
+      {isModalOpen && (
+        <PosterUploadModal
+          eventId={event._id}
+          initialPoster={event.poster}
+          onClose={() => setModalOpen(false)}
+          onPosterUpdated={refetch}
+        />
+      )}
     </EventDetailsWrapper>
   );
 };

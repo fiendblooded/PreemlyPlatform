@@ -222,6 +222,47 @@ type Props = {
   refetch: () => void;
 };
 
+// Add a VirtualSpaceIcon component
+const VirtualSpaceIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ color: "black" }}
+  >
+    <path
+      d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M3.6001 9H20.4001"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M3.6001 15H20.4001"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 20.7999C14.2091 20.7999 16 16.8375 16 11.9999C16 7.16236 14.2091 3.19995 12 3.19995C9.79086 3.19995 8 7.16236 8 11.9999C8 16.8375 9.79086 20.7999 12 20.7999Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 export type EmailExtraModule = {
   enabled: boolean;
   content: string;
@@ -243,6 +284,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
     scheduleSrc: { enabled: false, content: "", items: [] },
     dining: { enabled: false, content: "" },
     customHtmlTemplate: { enabled: false, content: "" },
+    virtualSpace: { enabled: false },
   };
 
   // Merge default values with actual values
@@ -261,6 +303,10 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
       ...defaultEmailParams.customHtmlTemplate,
       ...eventEmailParams.customHtmlTemplate,
     },
+    virtualSpace: {
+      ...defaultEmailParams.virtualSpace,
+      ...eventEmailParams.virtualSpace,
+    },
   };
 
   const [parking, setParking] = useState<EmailExtraModule>(
@@ -274,6 +320,9 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
   );
   const [customTemplate, setCustomTemplate] = useState<CustomHtmlTemplate>(
     normalizedEmailParams.customHtmlTemplate
+  );
+  const [virtualSpace, setVirtualSpace] = useState<{ enabled: boolean }>(
+    normalizedEmailParams.virtualSpace
   );
   const [hasChanges, setHasChanges] = useState(false);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -298,9 +347,25 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
     const hasCustomTemplate =
       JSON.stringify(customTemplate) !==
       JSON.stringify(normalizedEmailParams.customHtmlTemplate);
+    const hasVirtualSpace =
+      JSON.stringify(virtualSpace) !==
+      JSON.stringify(normalizedEmailParams.virtualSpace);
 
-    setHasChanges(hasParking || hasSchedule || hasDining || hasCustomTemplate);
-  }, [parking, schedule, dining, customTemplate, event?.emailParams]);
+    setHasChanges(
+      hasParking ||
+        hasSchedule ||
+        hasDining ||
+        hasCustomTemplate ||
+        hasVirtualSpace
+    );
+  }, [
+    parking,
+    schedule,
+    dining,
+    customTemplate,
+    virtualSpace,
+    event?.emailParams,
+  ]);
 
   const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
     "123467474"
@@ -319,7 +384,10 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
     dining,
     event.location.address || "",
     false,
-    customTemplate.enabled ? customTemplate.content : undefined
+    customTemplate.enabled ? customTemplate.content : undefined,
+    virtualSpace.enabled
+      ? `https://platform.preemly.eu/space/${event._id}`
+      : undefined
   );
 
   // Update iframe content when htmlContent changes
@@ -373,6 +441,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
             items: schedule.items || [],
           },
           dining,
+          virtualSpace,
         },
       };
 
@@ -394,6 +463,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
     setSchedule(normalizedEmailParams.scheduleSrc);
     setDining(normalizedEmailParams.dining);
     setCustomTemplate(normalizedEmailParams.customHtmlTemplate);
+    setVirtualSpace(normalizedEmailParams.virtualSpace);
     setHasChanges(false);
   };
 
@@ -573,10 +643,18 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
               setEnable={() =>
                 setSchedule({ ...schedule, enabled: !schedule.enabled })
               }
-              content={schedule.content}
-              setContent={(newContent) =>
-                setSchedule({ ...schedule, content: newContent })
+              toggleOnly={true}
+              description="Include the event schedule in the email. The schedule will be automatically generated from the event's schedule items."
+            />
+            <EmailSection
+              icon={<VirtualSpaceIcon />}
+              title={"Virtual Space Link"}
+              enable={virtualSpace.enabled}
+              setEnable={() =>
+                setVirtualSpace({ enabled: !virtualSpace.enabled })
               }
+              toggleOnly={true}
+              description="Include a button to access the event's virtual space. Guests will be able to join the virtual space directly from the email."
             />
             {/* <EmailSection
               icon={<DiningIcon />}

@@ -161,7 +161,8 @@ export function getMailHtml(
   diningOptions: EmailExtraModule,
   eventLocation: string,
   bodyOnly?: boolean,
-  customHtmlContent?: string
+  customHtmlContent?: string,
+  virtualSpaceUrl?: string
 ): string {
   // If a custom HTML template is provided, use it with placeholders
   if (customHtmlContent) {
@@ -285,6 +286,25 @@ export function getMailHtml(
                    <tr>
                       <td align='center' style='padding: 20px; padding-bottom: 40px;'>
                         <table border='0' cellspacing='0' cellpadding='0' width='100%'>
+                          ${
+                            virtualSpaceUrl
+                              ? `
+                          <tr>
+                            <td align='center' style='padding: 0 10px 10px 10px;'>
+                              <a href="${virtualSpaceUrl}" target="_blank" rel="noopener noreferrer" style="border: 2px solid #6B3DDF; color: #6B3DDF; padding: 12px 16px; text-decoration: none; font-size: 15px; border-radius: 5px; font-weight: bold; display: inline-block; width:100%; max-width:300px; text-align: center; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;">
+                                  <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <path d="M3.6001 9H20.4001" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <path d="M3.6001 15H20.4001" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <path d="M12 20.7999C14.2091 20.7999 16 16.8375 16 11.9999C16 7.16236 14.2091 3.19995 12 3.19995C9.79086 3.19995 8 7.16236 8 11.9999C8 16.8375 9.79086 20.7999 12 20.7999Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Join Virtual Space
+                              </a>
+                            </td>
+                          </tr>
+                          `
+                              : ""
+                          }
                           <tr>
                             <td align='center' style='padding: 0 10px 10px 10px;'>
                               <a href="${generateGoogleCalendarUrl(

@@ -37,52 +37,25 @@ const FeedbackWrapper = styled.div`
 
 const TabsContainer = styled.div`
   display: flex;
-  border-bottom: 1px solid ${colors.border};
-  background-color: ${colors.secondary};
-  padding: 0 16px;
-  position: relative;
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      rgba(107, 61, 223, 0.2),
-      rgba(107, 61, 223, 0.05),
-      rgba(107, 61, 223, 0)
-    );
-    z-index: 1;
-  }
+  border-bottom: 1px solid #eee;
+  margin: 0 20px 20px;
 `;
 
 const Tab = styled.div<{ active: boolean }>`
-  padding: 18px 24px;
-  cursor: pointer;
-  font-weight: ${(props) => (props.active ? "600" : "500")};
-  color: ${(props) => (props.active ? colors.primary : colors.textLight)};
-  border-bottom: 3px solid
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: ${(props) => (props.active ? "600" : "400")};
+  color: ${(props) => (props.active ? colors.primary : "#666")};
+  border-bottom: 2px solid
     ${(props) => (props.active ? colors.primary : "transparent")};
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 2;
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
-
-  ${(props) =>
-    props.active &&
-    `
-    background-color: rgba(107, 61, 223, 0.05);
-  `}
 
   &:hover {
     color: ${colors.primary};
-    background-color: rgba(107, 61, 223, 0.05);
   }
 `;
 

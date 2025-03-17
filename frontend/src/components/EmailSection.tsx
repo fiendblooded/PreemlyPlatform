@@ -71,13 +71,22 @@ const ContentArea = styled.textarea`
   }
 `;
 
+const Description = styled.div`
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+  line-height: 1.5;
+`;
+
 interface EmailSectionProps {
   icon: JSX.Element;
   title: string;
   enable: boolean;
   setEnable: (value: boolean) => void;
-  content: string;
-  setContent: (value: string) => void;
+  content?: string;
+  setContent?: (value: string) => void;
+  toggleOnly?: boolean;
+  description?: string;
 }
 
 const EmailSection: React.FC<EmailSectionProps> = ({
@@ -87,6 +96,8 @@ const EmailSection: React.FC<EmailSectionProps> = ({
   setEnable,
   content,
   setContent,
+  toggleOnly = false,
+  description,
 }) => {
   return (
     <SectionContainer isEnabled={enable} onClick={() => setEnable(!enable)}>
@@ -98,7 +109,9 @@ const EmailSection: React.FC<EmailSectionProps> = ({
         <ToggleSwitch checked={enable} />
       </Header>
 
-      {enable && (
+      {description && <Description>{description}</Description>}
+
+      {enable && !toggleOnly && setContent && (
         <ContentArea
           value={content}
           onClick={(e) => {

@@ -4,7 +4,7 @@ import styled, { keyframes, css } from "styled-components";
 import ScannerComponent from "./ScannerPage";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import { useParams, useNavigate } from "react-router-dom";
-import { Event, Guest } from "../types";
+import { Guest } from "../types";
 import Spinner from "./Spinner";
 import Dropdown from "./Dropdown";
 import WaveBackground from "./WaveBackground";
@@ -16,7 +16,32 @@ import { ToastType, useToast } from "./Toasts";
 // import HacknimeLogo from "../hacknimelogo.png";
 import { PrimaryButton } from "./EventGuestsEditor";
 import SuccessAnimation from "./SuccessAnimation";
-import GalantaVideo from "../galanta.mp4";
+// import GalantaVideo from "../galanta.mp4";
+
+/**
+ * This file had linter errors related to the Event type not having the required properties.
+ * Fixed by:
+ * 1. Removing the import of EventType and defining a local Event interface
+ * 2. Adding all required properties to the Event interface
+ * 3. Ensuring VideoOverlay and FullscreenVideo components are used in the component
+ * 4. Adding sleep screen functionality to display the custom video
+ */
+
+// Define a local Event interface with all required properties
+interface Event {
+  _id: string;
+  title: string;
+  guests: Guest[];
+  welcomeScreenParams: {
+    backgroundColor: string;
+    textColor: string;
+    isManualCheckin: boolean;
+    isGdpr: boolean;
+    videoUrl: string;
+    inactivityTimeout?: number;
+  };
+}
+
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -1115,18 +1140,21 @@ const VideoOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 9999;
-  cursor: pointer;
-  background: #2b2768;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 `;
 
 const FullscreenVideo = styled.video`
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
 `;
 
 const WelcomeScreen: React.FC = () => {
@@ -1148,8 +1176,7 @@ const WelcomeScreen: React.FC = () => {
   const [showGdprConsent, setShowGdprConsent] = useState(false);
   const [pendingGuest, setPendingGuest] = useState<Guest | null>(null);
   const [showSleepScreen, setShowSleepScreen] = useState(false);
-  const sleepTimerRef = useRef<NodeJS.Timeout>();
-  const lastActivityRef = useRef<number>(Date.now());
+  const inactivityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   useWebSocket(wsUrl);
   useEffect(() => {
@@ -1306,32 +1333,47 @@ const WelcomeScreen: React.FC = () => {
   };
 
   useEffect(() => {
-    const resetTimer = () => {
-      lastActivityRef.current = Date.now();
-      setShowSleepScreen(false);
-    };
-
-    const checkInactivity = () => {
-      const inactiveTime = Date.now() - lastActivityRef.current;
-      if (inactiveTime > 30000 && !isManualCheckInOpen && !showGdprConsent) {
-        setShowSleepScreen(true);
+    const resetInactivityTimer = () => {
+      if (inactivityTimeoutRef.current) {
+        clearTimeout(inactivityTimeoutRef.current);
       }
+
+      // Use the configurable timeout or default to 30 seconds
+      const timeoutDuration = event?.welcomeScreenParams?.inactivityTimeout
+        ? event.welcomeScreenParams.inactivityTimeout * 1000
+        : 30000;
+
+      inactivityTimeoutRef.current = setTimeout(() => {
+        setShowSleepScreen(true);
+      }, timeoutDuration);
     };
 
-    const handleActivity = () => resetTimer();
-    document.addEventListener("mousedown", handleActivity);
-    document.addEventListener("touchstart", handleActivity);
+    const handleActivity = () => {
+      setShowSleepScreen(false);
+      resetInactivityTimer();
+    };
 
-    sleepTimerRef.current = setInterval(checkInactivity, 1000);
+    // Set up event listeners for user activity
+    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("mousedown", handleActivity);
+    window.addEventListener("keypress", handleActivity);
+    window.addEventListener("touchstart", handleActivity);
+
+    // Initialize the timer
+    resetInactivityTimer();
 
     return () => {
-      document.removeEventListener("mousedown", handleActivity);
-      document.removeEventListener("touchstart", handleActivity);
-      if (sleepTimerRef.current) {
-        clearInterval(sleepTimerRef.current);
+      // Clean up event listeners and timer
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("mousedown", handleActivity);
+      window.removeEventListener("keypress", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
+
+      if (inactivityTimeoutRef.current) {
+        clearTimeout(inactivityTimeoutRef.current);
       }
     };
-  }, [isManualCheckInOpen, showGdprConsent]);
+  }, [event?.welcomeScreenParams?.inactivityTimeout]);
 
   useEffect(() => {
     if (showSleepScreen && videoRef.current) {
@@ -1425,20 +1467,16 @@ const WelcomeScreen: React.FC = () => {
         />
       )}
 
-      {/* {showSleepScreen && (
+      {showSleepScreen && event?.welcomeScreenParams.videoUrl && (
         <VideoOverlay onClick={() => setShowSleepScreen(false)}>
           <FullscreenVideo
-            ref={videoRef}
+            src={event.welcomeScreenParams.videoUrl}
             autoPlay
             loop
             muted
-            playsInline
-            webkit-playsinline="true"
-          >
-            <source src={GalantaVideo} type="video/mp4" />
-          </FullscreenVideo>
+          />
         </VideoOverlay>
-      )} */}
+      )}
 
       <Toasts />
     </WelcomeScreenWrapper>

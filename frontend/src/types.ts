@@ -191,6 +191,8 @@ export type Event = {
     textColor: string;
     isManualCheckin: boolean;
     isGdpr: boolean;
+    videoUrl: string;
+    inactivityTimeout?: number;
   };
   emailParams: {
     customHtmlTemplate?: {

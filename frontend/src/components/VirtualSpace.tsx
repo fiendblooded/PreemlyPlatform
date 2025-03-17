@@ -2655,7 +2655,7 @@ const VirtualSpace: React.FC = () => {
                 >
                   {selectedDeal.title.includes("Learn")
                     ? "Learn More"
-                    : "Apply Now"}
+                    : "View Deal"}
                 </PopupButton>
               </PopupContent>
             </DescriptionPopup>
@@ -2678,7 +2678,7 @@ const VirtualSpace: React.FC = () => {
                 >
                   {selectedDeal.title.includes("Learn")
                     ? "Learn More"
-                    : "Apply Now"}
+                    : "View Deal"}
                 </PopupButton>
               </PopupContent>
             </SimplePopup>

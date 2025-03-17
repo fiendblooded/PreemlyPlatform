@@ -82,6 +82,9 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
           content: '',
           items: [],
         },
+        virtualSpace: {
+          enabled: false,
+        },
       },
     });
     await newEvent.save();
@@ -849,6 +852,62 @@ export const rewriteDescription = async (req: Request, res: Response): Promise<v
       success: false,
       message: 'Server Error',
       data: null,
+    });
+  }
+};
+
+export const uploadSleepVideo = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, message: 'No video file provided' });
+      return;
+    }
+
+    // Check file type
+    const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid file type. Only MP4, WebM, and Ogg video formats are supported.',
+      });
+      return;
+    }
+
+    // Check file size (limit to 100MB)
+    const maxSize = 100 * 1024 * 1024; // 100MB in bytes
+    if (req.file.size > maxSize) {
+      res.status(400).json({
+        success: false,
+        message: 'File is too large. Maximum size is 100MB.',
+      });
+      return;
+    }
+
+    // Convert the file buffer to base64 for Cloudinary upload
+    const base64Video = req.file.buffer.toString('base64');
+    const dataURI = `data:${req.file.mimetype};base64,${base64Video}`;
+
+    // Upload to Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(dataURI, {
+      resource_type: 'video',
+      folder: 'sleep_videos',
+      // Add transformation options if needed
+      transformation: [{ quality: 'auto' }, { fetch_format: 'auto' }],
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Video uploaded successfully',
+      data: {
+        url: uploadResponse.secure_url,
+        publicId: uploadResponse.public_id,
+      },
+    });
+  } catch (error) {
+    console.error('Error uploading sleep video:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload video',
     });
   }
 };

@@ -34,6 +34,9 @@ router.post('/:id/feedback/analyze', verifyUser, feedbackAnalysisController.anal
 // Add a new route for uploading sponsor deal images
 router.post('/sponsor-deal-image', verifyUser, eventController.uploadSponsorDealImage);
 
+// Add a new route for uploading sleep videos
+router.post('/upload-sleep-video', verifyUser, upload.single('video'), eventController.uploadSleepVideo);
+
 // Task routes
 router.get('/:eventId/tasks', eventController.getEventTasks);
 router.post('/:eventId/tasks', verifyUser, eventController.addEventTask);

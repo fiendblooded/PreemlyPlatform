@@ -3,13 +3,11 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { Event } from "../types";
 
-import PosterUploadModal from "./PosterUploadModal";
-
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 
 import { ActiveStatusButton } from "./Events";
 import EventDetailsEditor from "./EventDetailsEditor";
-import EventGuestsEditor, { PrimaryButton } from "./EventGuestsEditor";
+import EventGuestsEditor from "./EventGuestsEditor";
 import {
   getDateRangeDetails,
   getDateTimeStatus,
@@ -33,8 +31,6 @@ import { useAuth0 } from "@auth0/auth0-react";
 import ErrorBigIcon from "./icons/ErrorBigIcon";
 import EventBudgetEditor from "./EventBudgetEditor";
 import BudgetSettingsIcon from "./icons/BudgetSettingsIcon";
-import EventLocationEditor from "./EventLocationEditor";
-import LocationSettingsIcon from "./icons/LocationSettingsIcon";
 import ScheduleEditor from "./ScheduleEditor";
 import SponsorDealsEditor from "./SponsorDealsEditor";
 
@@ -82,81 +78,6 @@ const ActiveStatusContainer = styled.div<{ isDetail?: boolean }>`
 
   /* Hide scrollbar for IE and Edge */
   -ms-overflow-style: none;
-`;
-
-const ChangePosterModalButton = styled(PrimaryButton)`
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  width: 120px;
-
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-  opacity: 0;
-  visibility: hidden;
-`;
-
-const PosterImage = styled.div<{ imageUrl: string }>`
-  width: 90%;
-  min-height: 400px;
-  max-height: 40%;
-  margin: 20px auto;
-  margin-top: 40px;
-  border-radius: 12px;
-  background-image: url(${(props) => props.imageUrl});
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
-
-    ${ChangePosterModalButton} {
-      opacity: 1;
-      visibility: visible;
-    }
-  }
-`;
-
-const PosterPlaceholder = styled.div`
-  width: 90%;
-  min-height: 400px;
-  max-height: 40%;
-  margin: 20px auto;
-  margin-top: 40px;
-  border-radius: 12px;
-  background-color: #2c2c2c;
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-
-  &:hover {
-    background-color: #3c3c3c;
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
-
-    ${ChangePosterModalButton} {
-      opacity: 1;
-      visibility: visible;
-    }
-  }
 `;
 
 const LoadingMessage = styled.p`
@@ -562,7 +483,6 @@ const EventDetail: React.FC = () => {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
-  const [isModalOpen, setModalOpen] = useState(false);
   const tabletMode = isTablet();
   const { user } = useAuth0();
 
@@ -659,17 +579,6 @@ const EventDetail: React.FC = () => {
 
         {!(event && user && event.ownerId != user.sub) ? (
           <>
-            {event.poster ? (
-              <PosterImage imageUrl={`${event.poster}`}>
-                <ChangePosterModalButton onClick={() => setModalOpen(true)}>
-                  Change
-                </ChangePosterModalButton>
-              </PosterImage>
-            ) : (
-              <PosterPlaceholder onClick={() => setModalOpen(true)}>
-                No poster provided. Click here to upload
-              </PosterPlaceholder>
-            )}
             <Header>
               <SeamlessInput
                 value={title}
@@ -820,14 +729,6 @@ const EventDetail: React.FC = () => {
                 Email
               </ActiveStatusButton>
               <ActiveStatusButton
-                isActive={openSection === "location"}
-                onClick={() => handleTabChange("location")}
-                borderColor="#e6bf30"
-              >
-                <LocationSettingsIcon color={"currentColor"} />
-                Location
-              </ActiveStatusButton>
-              <ActiveStatusButton
                 isActive={openSection === "welcome"}
                 onClick={() => handleTabChange("welcome")}
                 borderColor="#e6bf30"
@@ -874,9 +775,6 @@ const EventDetail: React.FC = () => {
             {openSection === "attendance" && (
               <EventGuestsEditor event={event} refetch={fetchEvent} />
             )}
-            {openSection === "location" && (
-              <EventLocationEditor event={event} refetch={fetchEvent} />
-            )}
             {openSection === "welcome" && (
               <WelcomeScreenEditor event={event} refetch={fetchEvent} />
             )}
@@ -897,14 +795,6 @@ const EventDetail: React.FC = () => {
             )}
             {openSection === "sponsors" && event && (
               <SponsorDealsEditor event={event} refetch={fetchEvent} />
-            )}
-            {isModalOpen && (
-              <PosterUploadModal
-                eventId={id!}
-                initialPoster={event.poster}
-                onClose={() => setModalOpen(false)}
-                onPosterUpdated={fetchEvent}
-              />
             )}
           </>
         ) : (

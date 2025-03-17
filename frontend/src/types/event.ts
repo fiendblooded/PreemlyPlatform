@@ -8,6 +8,14 @@ export interface Event {
   location: {
     address?: string;
   };
+  welcomeScreenParams: {
+    backgroundColor: string;
+    textColor: string;
+    isManualCheckin: boolean;
+    isGdpr: boolean;
+    videoUrl: string;
+    inactivityTimeout?: number;
+  };
   emailParams: {
     parking: {
       enabled: boolean;
@@ -24,6 +32,9 @@ export interface Event {
     customHtmlTemplate?: {
       enabled: boolean;
       content: string;
+    };
+    virtualSpace?: {
+      enabled: boolean;
     };
   };
   guests: {
