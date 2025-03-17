@@ -6,7 +6,12 @@ export interface EmailResponse {
   status: number
 }
 
+export interface EmailData {
+  recipient: string
+  guestName: string
+  qrCode: string
+}
+
 export type MailgunClientOptions = MGClientOptions
 
 export type EmailPayload = MailgunMessageData
-

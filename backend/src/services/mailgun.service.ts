@@ -25,47 +25,50 @@ const validateEmail = (email: string): boolean => {
   return re.test(email);
 };
 
-const sendEmail = async (
-  recipient: string | string[],
-  subject: string,
-  htmlContent: string,
-  scheduledTime?: Date,
-): Promise<EmailResponse[]> => {
-  const recipients = Array.isArray(recipient) ? recipient : [recipient];
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Основная функция для отправки email
+const sendEmail = async (
+  recipients: string[],
+  subject: string,
+  htmlContents: string[],
+  scheduledTime?: Date,
+): Promise<EmailResponse> => {
+  // Валидируем все email адреса
   for (const email of recipients) {
     if (!validateEmail(email)) {
       throw new Error(`Invalid email address: ${email}`);
     }
   }
 
-  const responses: EmailResponse[] = [];
-  const chunkSize = 26;
-
-  for (let i = 0; i < recipients.length; i += chunkSize) {
-    const chunk = recipients.slice(i, i + chunkSize);
-
-    try {
+  try {
+    const responses = [];
+    for (let i = 0; i < recipients.length; i++) {
+      const recipient = recipients[i];
       const emailPayload: EmailPayload = {
         from: 'Preemly <noreply@mail.preemly.eu>',
-        to: chunk,
+        to: recipient,
         subject: subject,
-        html: htmlContent,
+        html: htmlContents[i],
       };
 
       if (scheduledTime && scheduledTime > new Date()) {
         emailPayload['o:deliverytime'] = Math.floor(scheduledTime.getTime() / 1000).toString();
       }
 
-      const response = await mg.messages.create('mail.preemly.eu', emailPayload);
-      responses.push(response as EmailResponse);
-    } catch (error) {
-      console.error('Error sending email with Mailgun:', error);
-      throw error;
-    }
-  }
+      if (i > 0) {
+        await delay(200);
+      }
 
-  return responses;
+      const response = await mg.messages.create('mail.preemly.eu', emailPayload);
+      responses.push(response);
+    }
+
+    return responses[0] as EmailResponse;
+  } catch (error) {
+    console.error('Error sending email with Mailgun:', error);
+    throw error;
+  }
 };
 
 export default sendEmail;
