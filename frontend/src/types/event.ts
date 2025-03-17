@@ -21,6 +21,10 @@ export interface Event {
       enabled: boolean;
       content: string;
     };
+    customHtmlTemplate?: {
+      enabled: boolean;
+      content: string;
+    };
   };
   guests: {
     _id: string;
