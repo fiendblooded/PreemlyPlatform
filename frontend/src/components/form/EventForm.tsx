@@ -1,45 +1,89 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import styled from "styled-components";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import useAxiosWithAuth from "../auth/useAxiosWithAuth";
 import useAuthSetup from "../../useAuthSetup";
-import FileDropArea from "../FileDropArea";
-import PopupOverlay from "./PopupOverlay";
-import { PrimaryButton } from "../EventGuestsEditor";
 
-// Modern color palette to match other components
+import PopupOverlay from "./PopupOverlay";
+
+// Modern color palette that matches with our other UI components
 const colors = {
-  primary: "#6366F1", // Matches sidebar accent
-  primaryHover: "#4F46E5",
-  textPrimary: "#1E293B",
-  textSecondary: "#64748B",
+  primary: "#6B3DDF", // Purple that matches our EventDetail
+  primaryHover: "#5F35C8",
+  primaryLight: "rgba(107, 61, 223, 0.1)",
+  textPrimary: "#191D23",
+  textSecondary: "#5A6072",
   borderLight: "#E2E8F0",
   backgroundLight: "#FFFFFF",
   backgroundSecondary: "#F8FAFC",
   shadow: "rgba(0, 0, 0, 0.1)",
-  error: "#EF4444",
+  error: "#DC2626",
   success: "#10B981",
+  focusRing: "rgba(107, 61, 223, 0.2)",
 };
 
 const FormTitle = styled.h2`
   color: ${colors.textPrimary};
   text-align: center;
-  margin-bottom: 24px;
-  font-family: Axiforma, sans-serif;
-  font-weight: 600;
+  margin-bottom: 12px;
+  font-family: "Inter", Axiforma, sans-serif;
+  font-weight: 700;
   font-size: 24px;
+  line-height: 32px;
+`;
+
+const FormSubtitle = styled.p`
+  color: ${colors.textSecondary};
+  text-align: center;
+  margin-bottom: 32px;
+  font-size: 14px;
+  line-height: 20px;
+  max-width: 400px;
 `;
 
 const FormContainer = styled.form`
   width: 100%;
-  max-width: 600px;
+  max-width: 520px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-  font-family: Axiforma, sans-serif;
+  gap: 24px;
+  font-family: "Inter", Axiforma, sans-serif;
+`;
+
+const FormSection = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const Label = styled.label`
+  font-size: 14px;
+  font-weight: 500;
+  color: ${colors.textPrimary};
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const RequiredMark = styled.span`
+  color: ${colors.error};
+  font-size: 14px;
+  line-height: 0;
+`;
+
+const FormRow = styled.div`
+  display: flex;
+  width: 100%;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+  }
 `;
 
 const Input = styled.input`
@@ -49,82 +93,97 @@ const Input = styled.input`
   border-radius: 8px;
   background-color: ${colors.backgroundLight};
   font-size: 15px;
-  font-family: Axiforma, sans-serif;
+  font-family: "Inter", Axiforma, sans-serif;
   color: ${colors.textPrimary};
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px ${colors.shadow};
+  box-sizing: border-box;
 
   &:hover {
-    border-color: rgba(99, 102, 241, 0.6);
+    border-color: rgba(107, 61, 223, 0.6);
     box-shadow: 0 4px 8px ${colors.shadow};
   }
 
   &:focus {
     border-color: ${colors.primary};
     outline: none;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 0 2px ${colors.focusRing};
   }
 
   &::placeholder {
     color: ${colors.textSecondary};
-    opacity: 1;
+    opacity: 0.7;
+  }
+
+  &:disabled {
+    background-color: ${colors.backgroundSecondary};
+    cursor: not-allowed;
+    opacity: 0.7;
   }
 `;
 
-const SuccessMessage = styled.p`
-  color: ${colors.success};
-  text-align: center;
-  margin-top: 16px;
-  font-family: Axiforma, sans-serif;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+const Select = styled.select`
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid ${colors.borderLight};
+  border-radius: 8px;
+  background-color: ${colors.backgroundLight};
+  font-size: 15px;
+  font-family: "Inter", Axiforma, sans-serif;
+  color: ${colors.textPrimary};
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px ${colors.shadow};
+  box-sizing: border-box;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='7' viewBox='0 0 12 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%235A6072' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
 
-  &::before {
-    content: "✓";
-    display: inline-block;
-    font-weight: bold;
+  &:hover {
+    border-color: rgba(107, 61, 223, 0.6);
+    box-shadow: 0 4px 8px ${colors.shadow};
+  }
+
+  &:focus {
+    border-color: ${colors.primary};
+    outline: none;
+    box-shadow: 0 0 0 2px ${colors.focusRing};
   }
 `;
 
-const ErrorMessage = styled.p`
-  color: ${colors.error};
+const StatusMessage = styled.div<{ type: "success" | "error" }>`
+  color: ${(props) =>
+    props.type === "success" ? colors.success : colors.error};
   text-align: center;
   margin-top: 16px;
-  font-family: Axiforma, sans-serif;
+  font-family: "Inter", Axiforma, sans-serif;
   font-weight: 500;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-
-  &::before {
-    content: "!";
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    line-height: 18px;
-    text-align: center;
-    background-color: ${colors.error};
-    color: white;
-    border-radius: 50%;
-    font-weight: bold;
-  }
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: ${(props) =>
+    props.type === "success"
+      ? `rgba(16, 185, 129, 0.1)`
+      : `rgba(220, 38, 38, 0.1)`};
+  width: 100%;
 `;
 
 const PopupContent = styled.div`
   position: relative;
   background-color: ${colors.backgroundLight};
-  padding: 36px;
-  border-radius: 12px;
+  padding: 40px;
+  border-radius: 16px;
   width: 90%;
-  max-width: 800px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  max-width: 640px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: auto;
-  font-family: Axiforma, sans-serif;
+  font-family: "Inter", Axiforma, sans-serif;
   animation: fadeIn 0.3s ease;
 
   @keyframes fadeIn {
@@ -136,6 +195,11 @@ const PopupContent = styled.div`
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  @media (max-width: 600px) {
+    padding: 24px;
+    width: 95%;
   }
 `;
 
@@ -163,53 +227,128 @@ export const CloseButton = styled.button`
   }
 `;
 
-const PosterPreview = styled.div`
-  width: 120px;
-  height: 120px;
+const Button = styled.button<{
+  variant: "primary" | "secondary";
+  fullWidth?: boolean;
+}>`
+  background-color: ${(props) =>
+    props.variant === "primary" ? colors.primary : "transparent"};
+  color: ${(props) =>
+    props.variant === "primary" ? "white" : colors.textSecondary};
+  border: ${(props) =>
+    props.variant === "primary" ? "none" : `1px solid ${colors.borderLight}`};
+  padding: 12px 24px;
   border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px ${colors.shadow};
+  font-size: 15px;
+  font-weight: 600;
+  width: ${(props) => (props.fullWidth ? "100%" : "auto")};
+  max-width: ${(props) => (props.fullWidth ? "240px" : "none")};
+  cursor: pointer;
   transition: all 0.2s ease;
-  position: relative;
-
-  &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-const RemoveButton = styled.button`
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  border: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 14px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-
-  ${PosterPreview}:hover & {
-    opacity: 1;
-  }
+  gap: 8px;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px ${colors.shadow};
+    background-color: ${(props) =>
+      props.variant === "primary"
+        ? colors.primaryHover
+        : colors.backgroundSecondary};
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background-color: ${(props) =>
+      props.variant === "primary"
+        ? `${colors.primary}80`
+        : colors.backgroundSecondary};
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 `;
+
+const HintText = styled.p`
+  color: ${colors.textSecondary};
+  font-size: 13px;
+  margin-top: 4px;
+`;
+
+const ButtonRow = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  margin-top: 16px;
+`;
+
+const LoaderIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ animation: "spin 1s linear infinite" }}
+  >
+    <style>
+      {`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}
+    </style>
+    <path
+      d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 9.27455 20.9097 6.80375 19.1414 5"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const SuccessIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M7.5 12L10.5 15L16.5 9M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const ErrorIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 interface EventFormProps {
   onClose: () => void;
@@ -217,58 +356,74 @@ interface EventFormProps {
 
 const EventForm: React.FC<EventFormProps> = ({ onClose }) => {
   const [title, setTitle] = useState("");
-  const [poster, setPoster] = useState<File | null>(null);
+  const [eventType, setEventType] = useState("Offline");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+
   useAuthSetup();
   const navigate = useNavigate();
   const { user } = useAuth0();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const axiosInstance = useAxiosWithAuth();
 
-  const handleFileDrop = (file: File) => {
-    setPoster(file);
-  };
-
-  const handleRemoveFile = () => {
-    setPoster(null);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!title.trim()) {
+      setError("Event title is required");
+      return;
+    }
+
     setLoading(true);
     setSuccess(false);
     setError("");
 
     try {
-      let base64Poster = "";
+      // If endDate is set but startDate isn't, use endDate as startDate too
+      let formattedStartDate = new Date().toISOString(); // Default to current date/time
+      let formattedEndDate = undefined;
 
-      if (poster) {
-        // Convert file to base64 if a poster is present
-        base64Poster = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(poster);
-        });
+      if (startDate) {
+        formattedStartDate = new Date(startDate).toISOString();
+      }
+
+      if (endDate) {
+        formattedEndDate = new Date(endDate).toISOString();
+        // If only end date is set, use it for start date too
+        if (!startDate) {
+          formattedStartDate = formattedEndDate;
+        }
       }
 
       const response = await axiosInstance.post(`/events`, {
         title,
         description: "",
         ownerId: user?.sub || "random",
-        poster: base64Poster,
+        poster: "",
         guests: [],
-        date: new Date().toISOString(),
+        date: formattedStartDate,
+        endDate: formattedEndDate,
+        eventType,
       });
 
       const eventId = response.data.message._id;
-      navigate(`/events/${eventId}`);
       setSuccess(true);
+
+      // Reset form
       setTitle("");
-      setPoster(null);
-      onClose();
+      setEventType("Offline");
+      setStartDate("");
+      setEndDate("");
+
+      // Redirect after short delay for user to see success message
+      setTimeout(() => {
+        navigate(`/events/${eventId}`);
+        onClose();
+      }, 1000);
     } catch (err) {
       console.error("Error creating event:", err);
       setError("Failed to create event. Please try again.");
@@ -282,42 +437,105 @@ const EventForm: React.FC<EventFormProps> = ({ onClose }) => {
       <PopupContent onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={onClose}>&times;</CloseButton>
         <FormTitle>Create New Event</FormTitle>
-        <FormContainer onSubmit={handleSubmit}>
-          <Input
-            type="text"
-            placeholder="Event Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
+        <FormSubtitle>
+          Fill in the basic details to get started. You can add more information
+          later.
+        </FormSubtitle>
 
-          <FileDropArea
-            onFileDrop={handleFileDrop}
-            onRemoveFile={handleRemoveFile}
-            accept="image/*"
-            message="Drag & Drop poster image here or click to browse. (Optional)"
-            hoverMessage="Drop the image here!"
-          />
+        <FormContainer onSubmit={handleSubmit} ref={formRef}>
+          <FormSection>
+            <Label htmlFor="title">
+              Event Title <RequiredMark>*</RequiredMark>
+            </Label>
+            <Input
+              id="title"
+              type="text"
+              placeholder="e.g. Annual Company Conference 2023"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </FormSection>
 
-          {poster && (
-            <PosterPreview>
-              <img src={URL.createObjectURL(poster)} alt="Poster Preview" />
-              <RemoveButton onClick={handleRemoveFile}>×</RemoveButton>
-            </PosterPreview>
+          <FormSection>
+            <Label htmlFor="eventType">Event Type</Label>
+            <Select
+              id="eventType"
+              value={eventType}
+              onChange={(e) => setEventType(e.target.value)}
+              disabled={loading}
+            >
+              <option value="Offline">In-Person</option>
+              <option value="Online">Virtual</option>
+              <option value="Hybrid">Hybrid</option>
+            </Select>
+          </FormSection>
+
+          <FormRow>
+            <FormSection>
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                id="startDate"
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                disabled={loading}
+              />
+              {!startDate && (
+                <HintText>
+                  Optional. Current date will be used if not specified.
+                </HintText>
+              )}
+            </FormSection>
+
+            <FormSection>
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                id="endDate"
+                type="datetime-local"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                min={startDate || undefined}
+                disabled={loading}
+              />
+              {!endDate && (
+                <HintText>Optional. Will match start date if not set.</HintText>
+              )}
+            </FormSection>
+          </FormRow>
+
+          {error && (
+            <StatusMessage type="error">
+              <ErrorIcon />
+              {error}
+            </StatusMessage>
           )}
 
-          <PrimaryButton
-            type="submit"
-            disabled={loading}
-            style={{ width: "100%", maxWidth: "200px" }}
-          >
-            {loading ? "Creating..." : "Create Event"}
-          </PrimaryButton>
+          {success && (
+            <StatusMessage type="success">
+              <SuccessIcon />
+              Event created successfully! Redirecting...
+            </StatusMessage>
+          )}
+
+          <ButtonRow>
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <LoaderIcon /> Creating...
+                </>
+              ) : (
+                "Create Event"
+              )}
+            </Button>
+          </ButtonRow>
         </FormContainer>
-        {success && (
-          <SuccessMessage>Event created successfully!</SuccessMessage>
-        )}
-        {error && <ErrorMessage>{error}</ErrorMessage>}
       </PopupContent>
     </PopupOverlay>
   );

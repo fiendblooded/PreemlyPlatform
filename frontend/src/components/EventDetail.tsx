@@ -340,7 +340,7 @@ const DateTime = styled.div`
 `;
 
 const SeamlessInput = styled.input`
-  font-family: Axiforma, sans-serif;
+  font-family: "Inter", Axiforma, sans-serif;
   font-size: 32px;
   line-height: 34px;
   font-weight: bold;
@@ -353,10 +353,16 @@ const SeamlessInput = styled.input`
   width: 80%;
   padding: 4px 0;
   margin-bottom: 4px;
-  border-bottom: 1px solid transparent;
+  border-radius: 4px;
   transition: all 0.2s ease;
 
+  &:hover {
+    background-color: rgba(107, 61, 223, 0.03);
+  }
+
   &:focus {
+    background-color: rgba(107, 61, 223, 0.05);
+    padding-left: 8px;
     border-bottom: 1px solid #6b3ddf;
   }
 

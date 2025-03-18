@@ -184,32 +184,63 @@ const EditButton = styled.button`
   position: absolute;
   top: 24px;
   right: 24px;
-  width: 40px;
   height: 40px;
+  padding: 0 12px;
   border: none;
   border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  gap: 6px;
   color: ${colors.textSecondary};
   background-color: transparent;
-  transition: all 0.3s ease;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+
+  /* Text styling */
+  font-size: 14px;
+  font-weight: 500;
+
+  /* Fixed initial width - crucial for smooth transition */
+  width: 44px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  span {
+    opacity: 0;
+    width: 0;
+    white-space: nowrap;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.3s ease 0.15s,
+      margin-left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
 
   &:hover {
     background-color: rgba(99, 102, 241, 0.1);
     color: ${colors.primary};
     transform: translateY(-2px);
+    width: 88px;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.08);
+
+    span {
+      opacity: 1;
+      width: 30px;
+      margin-left: 6px;
+    }
+
+    svg {
+      transform: scale(1.1);
+    }
   }
 
   &:active {
     transform: translateY(0);
-  }
-
-  svg {
-    width: 22px;
-    height: 22px;
   }
 `;
 
@@ -710,20 +741,6 @@ const PosterPlaceholder = styled.div`
   }
 `;
 
-const ChangePosterButton = styled(PrimaryButton)`
-  width: 180px;
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-  }
-`;
-
 const PosterIcon = styled.div`
   width: 64px;
   height: 64px;
@@ -1013,8 +1030,8 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
           </SectionTitle>
           <EditButton onClick={() => setModalOpen(true)}>
             <svg
-              width="22"
-              height="22"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -1027,6 +1044,7 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
                 strokeLinejoin="round"
               />
             </svg>
+            <span>Edit</span>
           </EditButton>
         </div>
 
@@ -1044,7 +1062,7 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M4 16L8.586 11.414C8.961 11.039 9.47 10.828 10 10.828C10.53 10.828 11.039 11.039 11.414 11.414L16 16M14 14L15.586 12.414C15.961 12.039 16.47 11.828 17 11.828C17.53 11.828 18.039 12.039 18.414 12.414L20 14M14 8H14.01M6 20H18C18.53 20 19.039 19.789 19.414 19.414C19.789 19.039 20 18.53 20 18V6C20 5.47 19.789 4.961 19.414 4.586C19.039 4.211 18.53 4 18 4H6C5.47 4 4.961 4.211 4.586 4.586C4.211 4.961 4 5.47 4 6V18C4 18.53 4.211 19.039 4.586 19.414C4.961 19.789 5.47 20 6 20Z"
+                    d="M4 16L8.586 11.414C8.961 11.039 9.47 10.828 10 10.828C10.53 10.828 11.039 11.039 11.414 11.414L16 16M14 14L15.586 12.414C15.961 12.039 16.47 11.828 17 11.828C17.53 11.828 18.039 12.039 18.414 12.414L20 14M14 8H14.01M6 20H18C18.53 20 19.039 19.789 19.414 19.414C19.789 19.039 20 18.53 20 18V6C20 5.47 19.789 4.961 19.414 4.586C19.039 4.211 18.53 4 18 4H6C5.47 4 4.961 4.211 4.586 4.586C4.211 4.586 4 5.47 4 6V18C4 18.53 4.211 19.039 4.586 19.414C4.961 19.789 5.47 20 6 20Z"
                     stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
@@ -1063,9 +1081,6 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
               >
                 Recommended size: 1200 × 630 pixels
               </div>
-              <ChangePosterButton onClick={() => setModalOpen(true)}>
-                Upload Poster
-              </ChangePosterButton>
             </PosterPlaceholder>
           )}
         </PosterContent>
@@ -1106,6 +1121,7 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
               strokeLinejoin="round"
             />
           </svg>
+          <span>Edit</span>
         </EditButton>
         {isEditingDescription ? (
           <>
@@ -1163,7 +1179,10 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
               of your event, and you can enhance it with AI later.
             </p>
             <EmptyStateActions>
-              <AIButton onClick={() => setIsEditingDescription(true)}>
+              <PrimaryButton
+                onClick={() => setIsEditingDescription(true)}
+                width={200}
+              >
                 <svg
                   width="16"
                   height="16"
@@ -1180,7 +1199,7 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
                   />
                 </svg>
                 Write Description
-              </AIButton>
+              </PrimaryButton>
             </EmptyStateActions>
           </EmptyState>
         )}
@@ -1203,6 +1222,7 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
               strokeLinejoin="round"
             />
           </svg>
+          <span>Edit</span>
         </EditButton>
         <SectionTitle>
           <svg
