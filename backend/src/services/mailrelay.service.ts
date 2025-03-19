@@ -65,13 +65,13 @@ const sendEmail = async (
     return responses[0];
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error('Error sending email with Mailrelay:', {
+      console.error('Error sending email with Mailrelay:', JSON.stringify({
         message: error.message,
         status: error.response?.status,
         data: error.response?.data,
-      });
+      }));
     } else {
-      console.error('Unexpected error:', error);
+      console.error('Unexpected error:', JSON.stringify(error));
     }
     throw error;
   }
