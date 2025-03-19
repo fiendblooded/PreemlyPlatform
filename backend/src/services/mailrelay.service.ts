@@ -4,7 +4,7 @@ import type { EmailResponse, EmailPayload } from '../types/mail.types';
 
 dotenv.config();
 
-const mailrelayUrl = 'https://preemly.ipzmarketing.com'; //process.env.MAILRELAY_URL;
+const mailrelayUrl = 'https://preemly.ipzmarketing.com/api/v1'; //process.env.MAILRELAY_URL;
 const mailrelayKey = 'iXRJq_CP5kbW7BbP5SaNoXXRKkzxZL_VH5RBV24_'; //process.env.MAILRELAY_KEY;
 
 if (!mailrelayUrl || !mailrelayKey) {
