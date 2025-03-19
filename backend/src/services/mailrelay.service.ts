@@ -59,7 +59,8 @@ const sendEmail = async (
 
       const response = await axios.post(`${mailrelayUrl}/send_emails`, emailPayload, {
         headers: {
-          'Authorization': `Bearer ${mailrelayKey}`,
+          'X-AUTH-TOKEN': mailrelayKey,
+          // 'Authorization': `Bearer ${mailrelayKey}`,
           'Content-Type': 'application/json',
         },
       });
