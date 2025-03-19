@@ -43,7 +43,6 @@ const sendEmail = async (
         }],
         subject: subject,
         html_part: htmlContents[i] || '<html>\n<head></head>\n<body><p>My html content.</p></body>\n</html>',
-        text_part: 'My text content.', // Добавлено
         text_part_auto: true, // Добавлено
         headers: { 'X-CustomHeader': 'Header value' }, // Добавлено
         smtp_tags: ['example_tag'], // Добавлено
