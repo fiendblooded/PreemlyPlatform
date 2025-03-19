@@ -40,10 +40,9 @@ const sendEmail = async (
     for (let i = 0; i < recipients.length; i++) {
       const recipient = recipients[i];
       const emailPayload = {
-        from: 'Preemly <noreply@mail.preemly.eu>',
+        from: { email: 'noreply@mail.preemly.eu' },
         to: [{
           email: recipient,
-          name: 'Dear User' 
         }],
         subject: subject,
         html_part: htmlContents[i],
@@ -61,7 +60,6 @@ const sendEmail = async (
         headers: {
           'X-AUTH-TOKEN': mailrelayKey,
           // 'Authorization': `Bearer ${mailrelayKey}`,
-          'Content-Type': 'application/json',
         },
       });
 
