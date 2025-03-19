@@ -19,7 +19,7 @@ const validateEmail = (email: string): boolean => {
   return re.test(email);
 };
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+// const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Основная функция для отправки email
 const sendEmail = async (
@@ -40,9 +40,10 @@ const sendEmail = async (
     for (let i = 0; i < recipients.length; i++) {
       const recipient = recipients[i];
       const emailPayload = {
-        from: { email: 'noreply@mail.preemly.eu' },
+        from: { email: 'noreply@mail.preemly.eu', name: 'Preemly' },
         to: [{
           email: recipient,
+          name: 'Dear User'
         }],
         subject: subject,
         html_part: htmlContents[i],
@@ -52,14 +53,14 @@ const sendEmail = async (
       //   emailPayload['scheduled_time'] = Math.floor(scheduledTime.getTime() / 1000).toString();
       // }
 
-      if (i > 0) {
-        await delay(200);
-      }
+      // if (i > 0) {
+      //   await delay(200);
+      // }
 
       const response = await axios.post(`${mailrelayUrl}/send_emails`, emailPayload, {
         headers: {
           'X-AUTH-TOKEN': mailrelayKey,
-          // 'Authorization': `Bearer ${mailrelayKey}`,
+          'Content-Type': 'application/json',
         },
       });
 
