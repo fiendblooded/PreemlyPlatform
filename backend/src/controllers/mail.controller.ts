@@ -1,9 +1,10 @@
 import type { Request, Response } from 'express';
-import sendEmail from '../services/mailgun.service';
+// import sendEmail from '../services/mailgun.service';
 import ScheduledEmail from '../models/scheduledEmail.model';
 import mongoose from 'mongoose';
 import type { EmailData } from '../types/mail.types';
 import Guest from '../models/guest.model';
+import sendEmail from '../services/mailrelay.service';
 
 export const sendMailController = async (req: Request, res: Response): Promise<void> => {
   const { subject, htmlTemplate, emails } = req.body;

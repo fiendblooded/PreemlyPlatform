@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import ScheduledEmail from '../models/scheduledEmail.model';
-import sendEmail from './mailgun.service';
+// import sendEmail from './mailgun.service';
 import Guest from '../models/guest.model';
 
 export function startEmailScheduler() {
