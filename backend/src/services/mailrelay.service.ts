@@ -40,15 +40,19 @@ const sendEmail = async (
     for (let i = 0; i < recipients.length; i++) {
       const recipient = recipients[i];
       const emailPayload = {
-        from: { email: 'noreply@mail.preemly.eu', name: 'Preemly' },
-        to: [{
-          email: recipient,
-          name: 'Dear User'
+        'from': {
+          'email': 'noreply@mail.preemly.eu',
+          'name': 'Preemly'
+        },
+        'to': [{
+          'email': recipient,
+          'name': 'Dear User'
         }],
-        subject: subject,
-        html_part: htmlContents[i],
+        'subject': subject,
+        'html_part': '<html>\n<head></head>\n<body><p>My html content.</p>' // htmlContents[i],
       };
-
+      console.log('htmlContents', htmlContents[i]);
+      console.log('emailPayload123', emailPayload);
       // if (scheduledTime && scheduledTime > new Date()) {
       //   emailPayload['scheduled_time'] = Math.floor(scheduledTime.getTime() / 1000).toString();
       // }
@@ -67,7 +71,7 @@ const sendEmail = async (
       responses.push(response.data);
     }
 
-    return responses[0] as EmailResponse;
+    return responses[0];
   } catch (error) {
     console.error('Error sending email with Mailrelay:', error);
     throw error;
