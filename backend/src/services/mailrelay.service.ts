@@ -34,7 +34,7 @@ const sendEmail = async (
       const recipient = recipients[i];
       const emailPayload = {
         from: {
-          email: 'noreply@mail.preemly.eu',
+          email: 'bmyrinets@preemly.eu',
           name: 'Preemly',
         },
         to: [{
