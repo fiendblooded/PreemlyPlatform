@@ -1,6 +1,9 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-import type { EmailResponse, EmailPayload } from '../types/mail.types';
+import type {
+  EmailResponse,
+  // EmailPayload
+} from '../types/mail.types';
 
 dotenv.config();
 
@@ -23,7 +26,7 @@ const sendEmail = async (
   recipients: string[],
   subject: string,
   htmlContents: string[],
-  scheduledTime?: Date,
+  // scheduledTime?: Date,
 ): Promise<EmailResponse> => {
   // Валидируем все email адреса
   for (const email of recipients) {
@@ -36,22 +39,25 @@ const sendEmail = async (
     const responses = [];
     for (let i = 0; i < recipients.length; i++) {
       const recipient = recipients[i];
-      const emailPayload: EmailPayload = {
+      const emailPayload = {
         from: 'Preemly <noreply@mail.preemly.eu>',
-        to: recipient,
+        to: [{
+          email: recipient,
+          name: 'Dear User' 
+        }],
         subject: subject,
-        html: htmlContents[i],
+        html_part: htmlContents[i],
       };
 
-      if (scheduledTime && scheduledTime > new Date()) {
-        emailPayload['scheduled_time'] = Math.floor(scheduledTime.getTime() / 1000).toString();
-      }
+      // if (scheduledTime && scheduledTime > new Date()) {
+      //   emailPayload['scheduled_time'] = Math.floor(scheduledTime.getTime() / 1000).toString();
+      // }
 
       if (i > 0) {
         await delay(200);
       }
 
-      const response = await axios.post(`${mailrelayUrl}/send`, emailPayload, {
+      const response = await axios.post(`${mailrelayUrl}/send_emails`, emailPayload, {
         headers: {
           'Authorization': `Bearer ${mailrelayKey}`,
           'Content-Type': 'application/json',

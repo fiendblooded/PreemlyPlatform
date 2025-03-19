@@ -95,7 +95,7 @@ export const scheduleReminderEmailsController = async (req: Request, res: Respon
 
       if (scheduledTime <= threeHoursFromNow) {
         try {
-          const emailResult = await sendEmail(recipient, emailSubject, htmlContent, scheduledTime);
+          const emailResult = await sendEmail(recipient, emailSubject, htmlContent/**, scheduledTime*/);
 
           scheduledEmail.status = 'scheduled';
           await scheduledEmail.save();
