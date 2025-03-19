@@ -73,7 +73,7 @@ const sendEmail = async (
 
     return responses[0];
   } catch (error) {
-    console.error('Error sending email with Mailrelay:', error);
+    console.error('Error sending email with Mailrelay:', JSON.stringify(error));
     throw error;
   }
 };
