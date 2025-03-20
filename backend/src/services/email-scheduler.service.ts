@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import ScheduledEmail from '../models/scheduledEmail.model';
-// import sendEmail from './mailgun.service';
+import sendEmail from './mailgun.service';
 import Guest from '../models/guest.model';
 
 export function startEmailScheduler() {
@@ -23,12 +23,12 @@ export function startEmailScheduler() {
       for (const email of pendingEmails) {
         try {
           // Schedule the email with Mailgun
-          // await sendEmail(
-          //   email.recipient,
-          //   email.subject,
-          //   email.htmlContent,
-          //   email.scheduledTime,
-          // );
+          await sendEmail(
+            [email.recipient],
+            email.subject,
+            [email.htmlContent],
+            email.scheduledTime,
+          );
 
           // Update status to scheduled
           email.status = 'scheduled';

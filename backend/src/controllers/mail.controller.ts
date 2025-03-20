@@ -34,8 +34,18 @@ export const sendMailController = async (req: Request, res: Response): Promise<v
       personalizedHtmlContents.push(content);
     }
 
-    await sendEmail(recipients, subject, personalizedHtmlContents);
-    res.status(204).send();
+    sendEmail(recipients, subject, personalizedHtmlContents)
+      .then(() => {
+        console.log('Emails sent successfully');
+      })
+      .catch((error) => {
+        console.error('Error sending emails:', error);
+      });
+
+    res.status(202).json({
+      success: true,
+      message: 'Email sending process has started.',
+    });
   } catch (error) {
     console.error('Error in Send Email:', error);
     res.status(500).json({
