@@ -25,7 +25,7 @@ const validateEmail = (email: string): boolean => {
   return re.test(email);
 };
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+// const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Основная функция для отправки email
 const sendEmail = async (
@@ -56,9 +56,9 @@ const sendEmail = async (
         emailPayload['o:deliverytime'] = Math.floor(scheduledTime.getTime() / 1000).toString();
       }
 
-      if (i > 0) {
-        await delay(200);
-      }
+      // if (i > 0) {
+      //   await delay(200);
+      // }
 
       const response = await mg.messages.create('mail.preemly.eu', emailPayload);
       responses.push(response);
