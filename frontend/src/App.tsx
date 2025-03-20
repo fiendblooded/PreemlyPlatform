@@ -179,24 +179,69 @@ const AppContent: React.FC = () => {
 
   return (
     <AppWrapper>
-      {!isFullWidth && (
-        <ProtectedRoute>
-          <Sidebar />
-        </ProtectedRoute>
-      )}
+      {!isFullWidth && <Sidebar />}
       <ContentWrapper
         fullWidth={isFullWidth || tabletMode}
         fullHeight={isFullWidth}
       >
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/events/:id" element={<EventDetail />} />
-          <Route path="/events/:id/:tab" element={<EventDetail />} />
-          <Route path="/help" element={<PreemlyFAQ />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/events"
+            element={
+              <ProtectedRoute>
+                <Events />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/events/:id"
+            element={
+              <ProtectedRoute>
+                <EventDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/events/:id/:tab"
+            element={
+              <ProtectedRoute>
+                <EventDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/help"
+            element={
+              <ProtectedRoute>
+                <PreemlyFAQ />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
           {/* <Route path="/scanner" element={<ScannerPage />} /> */}
           <Route path="/space/:id" element={<VirtualSpace />} />
           <Route

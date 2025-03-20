@@ -7,6 +7,31 @@ import { useAuth0 } from "@auth0/auth0-react";
 import useAuthSetup from "../useAuthSetup";
 import UserSearch from "./UserSearch";
 
+// Spinner components (same as Dashboard)
+const SpinnerContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 200px;
+  width: 100%;
+  height: 50vh;
+`;
+
+const CustomSpinner = styled.div`
+  border: 4px solid rgba(107, 61, 223, 0.1);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border-left-color: #6b3ddf;
+  animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 // Styled Components
 const ProfileLayout = styled.div`
   display: flex;
@@ -61,19 +86,6 @@ const ProfileNameWrapper = styled.div`
   align-items: center;
   margin-top: 16px;
   gap: 8px;
-`;
-
-const VerifiedBadge = styled.div`
-  color: #4caf50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    width: 20px;
-    height: 20px;
-    stroke: #4caf50;
-  }
 `;
 
 const ProfileEmail = styled.div`
@@ -191,37 +203,6 @@ const CardTitle = styled.h3`
   border-bottom: 1px solid #eee;
 `;
 
-const InfoRow = styled.div`
-  display: flex;
-  margin-bottom: 16px;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-`;
-
-const InfoLabel = styled.div`
-  width: 180px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #666;
-
-  @media (max-width: 768px) {
-    width: 100%;
-    margin-bottom: 4px;
-  }
-`;
-
-const InfoValue = styled.div`
-  flex: 1;
-  font-size: 14px;
-  color: #333;
-`;
-
-const ActivityCard = styled(ProfileCard)`
-  margin-top: 24px;
-`;
-
 const DangerZone = styled(ProfileCard)`
   margin-top: 24px;
   border: 1px solid rgba(255, 77, 79, 0.2);
@@ -306,61 +287,6 @@ const SeamlessInput = styled.input`
   }
 `;
 
-// Additional styled components for the enhanced profile page
-const EditButton = styled.button`
-  background: none;
-  border: none;
-  color: #aaa;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-
-  &:hover {
-    color: rgb(107, 61, 223);
-    background-color: rgba(107, 61, 223, 0.08);
-  }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-`;
-
-const EmptyStateMessage = styled.div`
-  color: #888;
-  font-size: 14px;
-  text-align: center;
-  padding: 20px;
-
-  a {
-    color: rgb(107, 61, 223);
-    cursor: pointer;
-    font-weight: 500;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
-
-const Badge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(107, 61, 223, 0.1);
-  color: rgb(107, 61, 223);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-left: 8px;
-`;
-
 const ActivityItem = styled.div`
   display: flex;
   align-items: flex-start;
@@ -369,51 +295,6 @@ const ActivityItem = styled.div`
 
   &:last-child {
     border-bottom: none;
-  }
-`;
-
-const ActivityIcon = styled.div`
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: rgba(107, 61, 223, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-  flex-shrink: 0;
-
-  svg {
-    width: 20px;
-    height: 20px;
-    stroke: rgb(107, 61, 223);
-  }
-`;
-
-const ActivityContent = styled.div`
-  flex: 1;
-`;
-
-const ActivityTitle = styled.div`
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 4px;
-`;
-
-const ActivityTime = styled.div`
-  font-size: 12px;
-  color: #888;
-`;
-
-const SeletedGuestsSC = styled.div`
-  font-size: 14px;
-  color: #666;
-  display: flex;
-  align-items: center;
-
-  b {
-    margin-right: 4px;
-    color: #333;
   }
 `;
 
@@ -582,7 +463,16 @@ const Profile: React.FC = () => {
   };
 
   if (loading) {
-    return <PageWrapper>Loading...</PageWrapper>;
+    return (
+      <PageWrapper>
+        <TopBar sectionTitle="Account Settings" />
+        <ContentWrapper>
+          <SpinnerContainer>
+            <CustomSpinner />
+          </SpinnerContainer>
+        </ContentWrapper>
+      </PageWrapper>
+    );
   }
 
   return (
@@ -603,23 +493,6 @@ const Profile: React.FC = () => {
                   onChange={(e) => setNewName(e.target.value)}
                   onBlur={() => handleNameUpdate()}
                 />
-                {/* {profile.email_verified && (
-                  <VerifiedBadge title="Email verified">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </VerifiedBadge>
-                )} */}
               </ProfileNameWrapper>
               <ProfileEmail>{profile.email || "N/A"}</ProfileEmail>
             </ProfilePictureSection>

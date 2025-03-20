@@ -1102,7 +1102,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       .filter((email) => email !== null);
 
     await axiosInstance.post(`/mail`, {
-      subject: `Your ticket for ${eventDetails.title}`,
+      subject: `${eventDetails.title} - you're invited!`,
       htmlTemplate: getMailHtml(
         "{{guestName}}",
         "{{qrCode}}",

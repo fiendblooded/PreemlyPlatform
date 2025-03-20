@@ -6,7 +6,6 @@ import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 
 import CalendarBox from "./CalendarBox";
 import TaskList from "./TaskList";
-import Spinner from "./Spinner";
 import { isTablet, getDateTimeStatus, SvgSC } from "../common/common";
 import EventForm from "./form/EventForm";
 import { Task } from "../types";
@@ -64,14 +63,32 @@ const PageWrapper = styled.div`
   flex-direction: column;
   min-height: 100vh;
   background-color: #f8f9fc;
+  overflow-x: hidden;
+  width: 100%;
 `;
 
 const SpinnerContainer = styled.div`
   display: flex;
-  justify-content: center;
   align-items: center;
-  height: 100%;
+  justify-content: center;
+  margin-top: 200px;
   width: 100%;
+  height: 50vh;
+`;
+
+const CustomSpinner = styled.div`
+  border: 4px solid rgba(107, 61, 223, 0.1);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border-left-color: #6b3ddf;
+  animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 `;
 
 const DashboardContainer = styled.div<{ tabletMode: boolean }>`
@@ -79,6 +96,8 @@ const DashboardContainer = styled.div<{ tabletMode: boolean }>`
   width: 100%;
   height: 100%;
   box-sizing: border-box;
+  overflow-x: hidden;
+  max-width: 100%;
 
   h1 {
     font-size: 28px;
@@ -220,6 +239,8 @@ const DashboardSection = styled.div<{
   display: flex;
   flex-direction: column;
   animation: ${bounceIn} 0.6s ease-out ${(props) => props.delay || 0}s both;
+  overflow: hidden;
+  max-width: 100%;
 
   @media (max-width: 768px) {
     width: 100%;
@@ -242,12 +263,15 @@ const SectionTitle = styled.h2`
 
 const EventsCarousel = styled.div`
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   display: flex;
   gap: 16px;
   padding: 4px 0 16px 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  flex-wrap: nowrap;
+  box-sizing: border-box;
 
   &::-webkit-scrollbar {
     height: 6px;
@@ -268,6 +292,7 @@ const EventsCarousel = styled.div`
 
 const EventCard = styled.div`
   flex: 0 0 280px;
+  max-width: 280px;
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -276,6 +301,7 @@ const EventCard = styled.div`
   cursor: pointer;
   border: 1px solid #eee;
   scroll-snap-align: start;
+  box-sizing: border-box;
 
   &:hover {
     transform: translateY(-4px);
@@ -366,17 +392,19 @@ const DashboardRow = styled.div`
 `;
 
 const ContentWrapper = styled.div<{ tabletMode: boolean }>`
-  width: ${(props) => (props.tabletMode ? "100%" : "75%")};
-  height: ${(props) => (props.tabletMode ? "100%" : "90%")};
-  margin: auto;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
   background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
 
   @media (max-width: 1024px) {
     width: 100%;
-    max-height: 100%;
+    max-width: 100%;
     height: 100%;
   }
 `;
@@ -546,7 +574,7 @@ const Dashboard: React.FC = () => {
       <ContentWrapper tabletMode={tabletMode}>
         {loading ? (
           <SpinnerContainer>
-            <Spinner isVisible={true} />
+            <CustomSpinner />
           </SpinnerContainer>
         ) : (
           <DashboardContainer tabletMode={tabletMode}>
