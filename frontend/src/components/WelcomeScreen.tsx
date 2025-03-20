@@ -39,6 +39,7 @@ interface Event {
     isGdpr: boolean;
     videoUrl: string;
     inactivityTimeout?: number;
+    checkinSuccessTimeout?: number;
   };
 }
 
@@ -1255,10 +1256,15 @@ const WelcomeScreen: React.FC = () => {
     let timeout: NodeJS.Timeout;
 
     if (guest) {
+      // Use the configurable timeout or default to 10 seconds
+      const timeoutDuration = event?.welcomeScreenParams?.checkinSuccessTimeout
+        ? event.welcomeScreenParams.checkinSuccessTimeout * 1000
+        : 10000;
+
       timeout = setTimeout(() => {
         setGuest(null);
         fetchEvent();
-      }, 10000);
+      }, timeoutDuration);
     }
 
     return () => clearTimeout(timeout);

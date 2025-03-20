@@ -14,6 +14,7 @@ interface Event {
     isGdpr: boolean;
     videoUrl: string;
     inactivityTimeout?: number;
+    checkinSuccessTimeout?: number;
   };
 }
 
@@ -26,12 +27,21 @@ const Container = styled.div`
   margin: 16px;
   width: calc(90% - 32px);
   margin: 20px auto;
+
+  @media (max-width: 1024px) {
+    width: calc(95% - 32px);
+    padding: 12px;
+  }
 `;
 
 const ContentContainer = styled.div`
   display: flex;
   gap: 32px;
   align-items: stretch;
+
+  @media (max-width: 1024px) {
+    gap: 24px;
+  }
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -47,8 +57,16 @@ const Form = styled.div<{ isAppearanceTab?: boolean }>`
   background: #f8f9fc;
   border-radius: 12px;
   box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    width: ${(props) => (props.isAppearanceTab ? "40%" : "100%")};
+    padding: 20px;
+    gap: 20px;
+  }
+
   @media (max-width: 768px) {
     width: 100%;
+    padding: 16px;
   }
 `;
 
@@ -68,6 +86,15 @@ const Preview = styled.div<{
   color: ${(props) => props.textcolor};
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease, color 0.3s ease;
+
+  @media (max-width: 1024px) {
+    min-height: 350px;
+    font-size: 28px;
+  }
+
+  @media (max-width: 768px) {
+    min-height: 300px;
+  }
 `;
 
 const Label = styled.label`
@@ -82,6 +109,14 @@ const ThemeGrid = styled.div`
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-bottom: 16px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 `;
 
 const ThemeButton = styled.button<{
@@ -89,38 +124,55 @@ const ThemeButton = styled.button<{
   textColor: string;
   isSelected: boolean;
 }>`
-  width: 50px;
-  height: 50px;
+  width: 100%;
+  aspect-ratio: 1.6 / 1;
+  border: 2px solid ${(props) => (props.isSelected ? "#6b3ddf" : "#e0e0e0")};
   border-radius: 8px;
+  background-color: ${(props) => props.bgColor};
+  color: ${(props) => props.textColor};
   cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
-  border: 3px solid ${(props) => (props.isSelected ? "#6b3ddf" : "transparent")};
   box-shadow: ${(props) =>
-    props.isSelected
-      ? "0 4px 8px rgba(107, 61, 223, 0.3)"
-      : "0 2px 4px rgba(0, 0, 0, 0.1)"};
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+    props.isSelected ? "0 0 0 2px rgba(107, 61, 223, 0.3)" : "none"};
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
-  &::before {
-    content: "";
+  &::after {
+    content: "${(props) => (props.isSelected ? "✓" : "")}";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      135deg,
-      ${(props) => props.bgColor} 0%,
-      ${(props) => props.bgColor} 50%,
-      ${(props) => props.textColor} 50%,
-      ${(props) => props.textColor} 100%
-    );
+    bottom: 4px;
+    right: 4px;
+    background-color: ${(props) =>
+      props.isSelected ? "#6b3ddf" : "transparent"};
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  @media (max-width: 1024px) {
+    aspect-ratio: 1.5 / 1;
+
+    &::after {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    aspect-ratio: 1.4 / 1;
   }
 `;
 
@@ -186,12 +238,28 @@ const SectionTitle = styled.div`
     height: 20px;
     color: rgb(107, 61, 223);
   }
+
+  @media (max-width: 1024px) {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
 `;
 
 const TabsContainer = styled.div`
   display: flex;
   border-bottom: 1px solid #eee;
   margin: 0 0 20px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+
+  @media (max-width: 768px) {
+    padding-bottom: 4px;
+  }
 `;
 
 const Tab = styled.div<{ active: boolean }>`
@@ -203,9 +271,15 @@ const Tab = styled.div<{ active: boolean }>`
     ${(props) => (props.active ? "#6b3ddf" : "transparent")};
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 
   &:hover {
     color: #6b3ddf;
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px 16px;
+    font-size: 15px;
   }
 `;
 
@@ -222,6 +296,10 @@ const VideoPreviewContainer = styled.div`
   align-items: center;
   justify-content: center;
   flex: 1;
+
+  @media (max-width: 768px) {
+    min-height: 240px;
+  }
 `;
 
 const UploadButton = styled.button`
@@ -239,6 +317,7 @@ const UploadButton = styled.button`
   transition: all 0.2s ease;
   width: 100%;
   margin-bottom: 16px;
+  word-break: break-word;
 
   &:hover {
     background-color: rgba(107, 61, 223, 0.1);
@@ -247,6 +326,17 @@ const UploadButton = styled.button`
   svg {
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px 14px;
+    font-size: 14px;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
   }
 `;
 
@@ -254,6 +344,40 @@ const VideoInfo = styled.div`
   font-size: 14px;
   color: #757575;
   margin-top: 8px;
+`;
+
+const VideoStatusContainer = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-color: #f0f8ff;
+  border: 1px solid #b3d7ff;
+  margin: 12px 0;
+
+  svg {
+    color: #2b7de9;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+`;
+
+const VideoStatusText = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  span:first-child {
+    font-weight: 500;
+    font-size: 14px;
+    color: #2c2c2c;
+    margin-bottom: 2px;
+  }
+
+  span:last-child {
+    font-size: 13px;
+    color: #666;
+    word-break: break-all;
+  }
 `;
 
 const NoVideoMessage = styled.div`
@@ -274,35 +398,52 @@ const NoVideoMessage = styled.div`
     margin-bottom: 16px;
     width: 64px;
     height: 64px;
+
+    @media (max-width: 768px) {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+    }
   }
 
   p {
     margin: 4px 0;
+
+    @media (max-width: 768px) {
+      font-size: 14px;
+    }
   }
 
   p:first-of-type {
     font-weight: 600;
     font-size: 18px;
     color: #555;
+
+    @media (max-width: 768px) {
+      font-size: 16px;
+    }
   }
 `;
 
 const LoadingSpinner = styled.div`
-  border: 3px solid rgba(0, 0, 0, 0.1);
-  border-top: 3px solid #6b3ddf;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  animation: spin 1s linear infinite;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
   margin-right: 8px;
 
   @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
+    to {
       transform: rotate(360deg);
     }
+  }
+
+  @media (max-width: 768px) {
+    width: 14px;
+    height: 14px;
+    border-width: 1.5px;
   }
 `;
 
@@ -312,6 +453,11 @@ const TwoColumnLayout = styled.div`
   grid-template-columns: 40% 60%;
   gap: 24px;
   width: 100%;
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    grid-template-columns: 45% 55%;
+    gap: 20px;
+  }
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -330,12 +476,30 @@ const colorThemes = [
 ];
 
 // Move the styled components outside the component function
-const TimeoutInputContainer = styled.div`
+const EnhancedTimeoutInputContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-top: 12px;
-  margin-bottom: 16px;
+  padding: 16px;
+  background: #f0f4fa;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  border: 1px solid #e9eff9;
+  box-sizing: border-box;
+  &:hover {
+    background: #e9f0fc;
+  }
+
+  @media (max-width: 1024px) {
+    padding: 14px;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
 `;
 
 const NumberInput = styled.input`
@@ -350,19 +514,28 @@ const NumberInput = styled.input`
   text-align: center;
   outline: none;
   transition: all 0.2s ease;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
   &:focus {
     border-color: #6b3ddf;
     box-shadow: 0 0 0 2px rgba(107, 61, 223, 0.2);
   }
 
-  /* Make the spinner buttons more stable */
+  /* Custom styling for the spinner buttons */
   &::-webkit-inner-spin-button,
   &::-webkit-outer-spin-button {
-    opacity: 1;
-    height: 30px;
+    -webkit-appearance: none;
+    appearance: none;
     margin: 0;
-    position: relative;
+  }
+
+  /* Firefox */
+  -moz-appearance: textfield;
+
+  @media (max-width: 1024px) {
+    height: 44px;
+    font-size: 17px;
   }
 `;
 
@@ -370,6 +543,86 @@ const TimeoutLabel = styled.div`
   font-size: 16px;
   font-weight: 500;
   color: #2c2c2c;
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 1024px) {
+    font-size: 15px;
+  }
+`;
+
+const EnhancedNumberInput = styled(NumberInput)`
+  border-color: #d8e1ee;
+  background-color: white;
+  width: 90px;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #5a30c2;
+  box-shadow: 0 2px 6px rgba(107, 61, 223, 0.08);
+  padding-right: 36px; /* Make room for custom stepper buttons */
+  position: relative;
+
+  @media (max-width: 1024px) {
+    width: 100px;
+    height: 48px;
+    font-size: 18px;
+  }
+
+  &:focus {
+    border-color: #6b3ddf;
+    box-shadow: 0 0 0 2px rgba(107, 61, 223, 0.15);
+  }
+
+  &:hover {
+    border-color: #b9c7e0;
+  }
+`;
+
+const NumberControls = styled.div`
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
+  width: 24px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e6edf8;
+
+  button {
+    flex: 1;
+    border: none;
+    background: white;
+    color: #5a30c2;
+    font-size: 12px;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s;
+    margin: 0;
+    height: 50%;
+
+    &:hover {
+      background-color: #f0f4fa;
+    }
+
+    &:active {
+      background-color: #e6edf8;
+    }
+
+    &:first-child {
+      border-bottom: 1px solid #e6edf8;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
 `;
 
 const VideoPreviewWrapper = styled.div`
@@ -381,12 +634,28 @@ const VideoPreviewWrapper = styled.div`
   padding: 24px;
   box-sizing: border-box;
   height: 100%;
+
+  @media (max-width: 1024px) {
+    padding: 20px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `;
 
 const VideoControlsContainer = styled.div`
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    flex-wrap: wrap;
+  }
 `;
 
 const FormSection = styled.div`
@@ -398,12 +667,130 @@ const FormLabel = styled.div`
   font-size: 16px;
   margin-bottom: 8px;
   color: #2c2c2c;
+
+  @media (max-width: 1024px) {
+    font-size: 15px;
+  }
 `;
 
 const FormDescription = styled.div`
   font-size: 14px;
   color: #666;
   margin-bottom: 12px;
+
+  @media (max-width: 1024px) {
+    font-size: 13px;
+  }
+`;
+
+// Add these new styled components
+const FunctionalityGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  width: 100%;
+  margin-bottom: 24px;
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    gap: 20px;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+`;
+
+const SettingCard = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (max-width: 1024px) {
+    padding: 20px;
+    gap: 16px;
+  }
+`;
+
+const SettingHeader = styled.div`
+  margin-bottom: 8px;
+`;
+
+const SettingTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin: 0 0 8px 0;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+`;
+
+const SettingDescription = styled.p`
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+
+  @media (max-width: 1024px) {
+    font-size: 13px;
+  }
+`;
+
+const EnhancedToggleContainer = styled(
+  typeof ToggleContainer !== "undefined" ? ToggleContainer : "div"
+)`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f8f9fc;
+  border-radius: 8px;
+  margin-bottom: 8px;
+
+  @media (max-width: 1024px) {
+    padding: 14px;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+`;
+
+const EnhancedToggleLabel = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+`;
+
+const EnhancedToggleName = styled.span`
+  font-weight: 500;
+  font-size: 16px;
+  color: #2c2c2c;
+
+  @media (max-width: 1024px) {
+    font-size: 15px;
+  }
+`;
+
+const EnhancedToggleDescription = styled.span`
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+
+  @media (max-width: 1024px) {
+    font-size: 12px;
+  }
 `;
 
 // Component
@@ -424,9 +811,20 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
     event.welcomeScreenParams.isManualCheckin
   );
   const [isGdpr, setGdpr] = useState(event.welcomeScreenParams.isGdpr);
+
+  // Fix: Use exact number values with parseInt to ensure consistency
   const [inactivityTimeout, setInactivityTimeout] = useState(
-    event.welcomeScreenParams.inactivityTimeout || 30
+    event.welcomeScreenParams.inactivityTimeout
+      ? parseInt(event.welcomeScreenParams.inactivityTimeout.toString(), 10)
+      : 30
   );
+
+  const [checkinSuccessTimeout, setCheckinSuccessTimeout] = useState(
+    event.welcomeScreenParams.checkinSuccessTimeout
+      ? parseInt(event.welcomeScreenParams.checkinSuccessTimeout.toString(), 10)
+      : 10
+  );
+
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Video upload state
@@ -437,9 +835,12 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Add a new state for the input value
+  // Fix: Ensure input values are synchronized with state initially
   const [timeoutInputValue, setTimeoutInputValue] = useState(
     inactivityTimeout.toString()
+  );
+  const [checkinTimeoutInputValue, setCheckinTimeoutInputValue] = useState(
+    checkinSuccessTimeout.toString()
   );
 
   const handleThemeSelect = (bgColor: string, textColor: string) => {
@@ -457,15 +858,59 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
           ...event.welcomeScreenParams,
           backgroundColor,
           textColor,
-          isManualCheckin,
-          isGdpr,
-          inactivityTimeout,
         },
       });
       refetch();
     } catch (error) {
       console.error("Error updating appearance:", error);
       alert("Failed to update appearance settings.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleSaveFunctionality = async () => {
+    setIsUpdating(true);
+
+    try {
+      // Fix: Ensure we're sending the exact numeric values, not strings or calculations
+      const inactivityTimeoutValue = parseInt(timeoutInputValue, 10);
+      const checkinSuccessTimeoutValue = parseInt(checkinTimeoutInputValue, 10);
+
+      // Validate values before sending to ensure they're within bounds
+      const validInactivityTimeout =
+        !isNaN(inactivityTimeoutValue) &&
+        inactivityTimeoutValue >= 5 &&
+        inactivityTimeoutValue <= 300
+          ? inactivityTimeoutValue
+          : inactivityTimeout;
+
+      const validCheckinTimeout =
+        !isNaN(checkinSuccessTimeoutValue) &&
+        checkinSuccessTimeoutValue >= 2 &&
+        checkinSuccessTimeoutValue <= 60
+          ? checkinSuccessTimeoutValue
+          : checkinSuccessTimeout;
+
+      await axiosInstance.put(`/events/${event._id}`, {
+        ...event,
+        welcomeScreenParams: {
+          ...event.welcomeScreenParams,
+          isManualCheckin,
+          isGdpr,
+          inactivityTimeout: validInactivityTimeout,
+          checkinSuccessTimeout: validCheckinTimeout,
+        },
+      });
+
+      // Update local state with exact values we sent
+      setInactivityTimeout(validInactivityTimeout);
+      setCheckinSuccessTimeout(validCheckinTimeout);
+
+      refetch();
+    } catch (error) {
+      console.error("Error updating functionality settings:", error);
+      alert("Failed to update functionality settings.");
     } finally {
       setIsUpdating(false);
     }
@@ -644,15 +1089,15 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
     }
   };
 
-  // Update the handleTimeoutChange function
+  // Fix: Update handler to prevent any unintended conversions
   const handleTimeoutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Only update the input value, not the actual timeout yet
     setTimeoutInputValue(e.target.value);
   };
 
-  // Add a function to update the actual timeout on blur
+  // Fix: Ensure exact number parsing
   const handleTimeoutBlur = () => {
-    const value = parseInt(timeoutInputValue);
+    const value = parseInt(timeoutInputValue, 10);
     if (!isNaN(value) && value >= 5 && value <= 300) {
       setInactivityTimeout(value);
     } else {
@@ -661,41 +1106,160 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
     }
   };
 
-  // Add a specific function for saving the inactivity timeout
-  const handleSaveTimeout = async () => {
-    setIsUpdating(true);
+  // Fix: Update handler to prevent any unintended conversions
+  const handleCheckinTimeoutChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setCheckinTimeoutInputValue(e.target.value);
+  };
 
+  // Fix: Ensure exact number parsing
+  const handleCheckinTimeoutBlur = () => {
+    const value = parseInt(checkinTimeoutInputValue, 10);
+    if (!isNaN(value) && value >= 2 && value <= 60) {
+      setCheckinSuccessTimeout(value);
+    } else {
+      // Reset to valid value if input is invalid
+      setCheckinTimeoutInputValue(checkinSuccessTimeout.toString());
+    }
+  };
+
+  // Update the implementation for the timeout inputs in the functionality tab
+  const renderTimeoutInput = (
+    value: string,
+    min: number,
+    max: number,
+    step: number,
+    handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+    handleBlur: () => void,
+    ariaLabel: string,
+    setStateDirectly: (value: number) => void
+  ) => {
+    const handleIncrement = () => {
+      const currentValue = parseInt(value, 10);
+      if (!isNaN(currentValue) && currentValue < max) {
+        const newValue = Math.min(currentValue + step, max);
+
+        // Update the input value
+        const event = {
+          target: { value: newValue.toString() },
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleChange(event);
+
+        // Also directly update the state value
+        setStateDirectly(newValue);
+      }
+    };
+
+    const handleDecrement = () => {
+      const currentValue = parseInt(value, 10);
+      if (!isNaN(currentValue) && currentValue > min) {
+        const newValue = Math.max(currentValue - step, min);
+
+        // Update the input value
+        const event = {
+          target: { value: newValue.toString() },
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleChange(event);
+
+        // Also directly update the state value
+        setStateDirectly(newValue);
+      }
+    };
+
+    return (
+      <div style={{ position: "relative", display: "inline-block" }}>
+        <EnhancedNumberInput
+          type="number"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          aria-label={ariaLabel}
+        />
+        <NumberControls>
+          <button type="button" onClick={handleIncrement} aria-label="Increase">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M16 14L12 10L8 14"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <button type="button" onClick={handleDecrement} aria-label="Decrease">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 10L12 14L16 10"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </NumberControls>
+      </div>
+    );
+  };
+
+  // Fix: Add an effect to sync state when event data changes (like after refresh)
+  React.useEffect(() => {
+    // Ensure these are always exact integer values
+    const inactivityTimeoutValue = event.welcomeScreenParams.inactivityTimeout
+      ? parseInt(event.welcomeScreenParams.inactivityTimeout.toString(), 10)
+      : 30;
+
+    const checkinSuccessTimeoutValue = event.welcomeScreenParams
+      .checkinSuccessTimeout
+      ? parseInt(event.welcomeScreenParams.checkinSuccessTimeout.toString(), 10)
+      : 10;
+
+    setInactivityTimeout(inactivityTimeoutValue);
+    setCheckinSuccessTimeout(checkinSuccessTimeoutValue);
+
+    setTimeoutInputValue(inactivityTimeoutValue.toString());
+    setCheckinTimeoutInputValue(checkinSuccessTimeoutValue.toString());
+  }, [
+    event.welcomeScreenParams.inactivityTimeout,
+    event.welcomeScreenParams.checkinSuccessTimeout,
+  ]);
+
+  // Add a function to extract filename from Cloudinary URL
+  const extractFilenameFromUrl = (url: string): string => {
+    if (!url) return "";
+
+    // Try to extract filename from Cloudinary URL
+    const parts = url.split("/");
+    const fileWithExtension = parts[parts.length - 1];
+
+    // Remove any query parameters
+    const filename = fileWithExtension.split("?")[0];
+
+    // Decode URI components to handle special characters
     try {
-      await axiosInstance.put(`/events/${event._id}`, {
-        ...event,
-        welcomeScreenParams: {
-          ...event.welcomeScreenParams,
-          inactivityTimeout,
-        },
-      });
-      alert("Inactivity timeout saved successfully!");
-      refetch();
-    } catch (error) {
-      console.error("Error updating inactivity timeout:", error);
-      alert("Failed to update inactivity timeout.");
-    } finally {
-      setIsUpdating(false);
+      return decodeURIComponent(filename);
+    } catch {
+      // Return the raw filename if decoding fails
+      return filename;
     }
   };
 
   return (
     <Container>
-      <SectionTitle>
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M12 16V8M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
-        Welcome Screen Settings
-      </SectionTitle>
+      <SectionTitle>Check-in Screen Settings</SectionTitle>
 
       <TabsContainer>
         <Tab
@@ -703,6 +1267,12 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
           onClick={() => setActiveTab("appearance")}
         >
           Appearance
+        </Tab>
+        <Tab
+          active={activeTab === "functionality"}
+          onClick={() => setActiveTab("functionality")}
+        >
+          Functionality
         </Tab>
         <Tab
           active={activeTab === "sleep-video"}
@@ -739,36 +1309,134 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
               </ThemeGrid>
             </div>
 
-            <ToggleContainer>
-              <ToggleLabel>Manual Check-in</ToggleLabel>
-              <ToggleSwitch
-                checked={isManualCheckin}
-                onChange={() => setManualCheckin(!isManualCheckin)}
-              />
-            </ToggleContainer>
-
-            <ToggleContainer>
-              <ToggleLabel>GDPR Compliance</ToggleLabel>
-              <ToggleSwitch
-                checked={isGdpr}
-                onChange={() => setGdpr(!isGdpr)}
-              />
-            </ToggleContainer>
             <PrimaryButton
               onClick={handleSaveAppearance}
               disabled={
                 isUpdating ||
                 (event.welcomeScreenParams.backgroundColor ===
                   backgroundColor &&
-                  event.welcomeScreenParams.textColor === textColor &&
-                  event.welcomeScreenParams.isManualCheckin ===
-                    isManualCheckin &&
+                  event.welcomeScreenParams.textColor === textColor)
+              }
+              style={{ width: "100%" }}
+            >
+              {isUpdating ? (
+                <>{isUpdating && <LoadingSpinner />} Saving...</>
+              ) : (
+                "Save Appearance"
+              )}
+            </PrimaryButton>
+          </Form>
+        </ContentContainer>
+      )}
+
+      {activeTab === "functionality" && (
+        <ContentContainer>
+          <Form>
+            <SettingHeader>
+              <SettingTitle>Welcome Screen Behavior Settings</SettingTitle>
+              <SettingDescription>
+                Configure how your welcome screen behaves for event check-ins
+                and user interactions.
+              </SettingDescription>
+            </SettingHeader>
+
+            <FunctionalityGrid>
+              <SettingCard>
+                <SettingTitle>Check-in Options</SettingTitle>
+
+                <EnhancedToggleContainer>
+                  <EnhancedToggleLabel>
+                    <EnhancedToggleName>Manual Check-in</EnhancedToggleName>
+                    <EnhancedToggleDescription>
+                      Allow guests to check in manually without scanning a QR
+                      code
+                    </EnhancedToggleDescription>
+                  </EnhancedToggleLabel>
+                  <ToggleSwitch
+                    checked={isManualCheckin}
+                    onChange={() => setManualCheckin(!isManualCheckin)}
+                  />
+                </EnhancedToggleContainer>
+
+                <EnhancedToggleContainer>
+                  <EnhancedToggleLabel>
+                    <EnhancedToggleName>GDPR Compliance</EnhancedToggleName>
+                    <EnhancedToggleDescription>
+                      Require guests to accept GDPR consent before check-in
+                    </EnhancedToggleDescription>
+                  </EnhancedToggleLabel>
+                  <ToggleSwitch
+                    checked={isGdpr}
+                    onChange={() => setGdpr(!isGdpr)}
+                  />
+                </EnhancedToggleContainer>
+              </SettingCard>
+
+              <SettingCard>
+                <SettingTitle>Timing Settings</SettingTitle>
+
+                <div>
+                  <FormLabel>Check-in Success Message</FormLabel>
+                  <SettingDescription style={{ marginBottom: "12px" }}>
+                    How long to display the success message after a guest checks
+                    in
+                  </SettingDescription>
+                  <EnhancedTimeoutInputContainer>
+                    {renderTimeoutInput(
+                      checkinTimeoutInputValue,
+                      2,
+                      60,
+                      1,
+                      handleCheckinTimeoutChange,
+                      handleCheckinTimeoutBlur,
+                      "Check-in success timeout in seconds",
+                      setCheckinSuccessTimeout
+                    )}
+                    <TimeoutLabel>seconds</TimeoutLabel>
+                  </EnhancedTimeoutInputContainer>
+                </div>
+
+                <div>
+                  <FormLabel>Sleep Screen Timeout</FormLabel>
+                  <SettingDescription style={{ marginBottom: "12px" }}>
+                    Time of inactivity before the sleep screen appears
+                  </SettingDescription>
+                  <EnhancedTimeoutInputContainer>
+                    {renderTimeoutInput(
+                      timeoutInputValue,
+                      5,
+                      300,
+                      5,
+                      handleTimeoutChange,
+                      handleTimeoutBlur,
+                      "Sleep screen timeout in seconds",
+                      setInactivityTimeout
+                    )}
+                    <TimeoutLabel>seconds</TimeoutLabel>
+                  </EnhancedTimeoutInputContainer>
+                </div>
+              </SettingCard>
+            </FunctionalityGrid>
+
+            <PrimaryButton
+              onClick={handleSaveFunctionality}
+              style={{ width: "100%", maxWidth: "300px", margin: "0 auto" }}
+              disabled={
+                isUpdating ||
+                (event.welcomeScreenParams.isManualCheckin ===
+                  isManualCheckin &&
                   event.welcomeScreenParams.isGdpr === isGdpr &&
                   event.welcomeScreenParams.inactivityTimeout ===
-                    inactivityTimeout)
+                    inactivityTimeout &&
+                  event.welcomeScreenParams.checkinSuccessTimeout ===
+                    checkinSuccessTimeout)
               }
             >
-              {isUpdating ? "Saving..." : "Save"}
+              {isUpdating ? (
+                <>{isUpdating && <LoadingSpinner />} Saving...</>
+              ) : (
+                "Save Functionality"
+              )}
             </PrimaryButton>
           </Form>
         </ContentContainer>
@@ -779,43 +1447,20 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
           <TwoColumnLayout>
             <Form>
               <FormSection>
-                <FormLabel>Inactivity Timeout</FormLabel>
-                <FormDescription>
-                  Set how long (in seconds) before the sleep screen appears due
-                  to inactivity
-                </FormDescription>
-                <TimeoutInputContainer>
-                  <NumberInput
-                    type="number"
-                    min={5}
-                    max={300}
-                    step={5}
-                    value={timeoutInputValue}
-                    onChange={handleTimeoutChange}
-                    onBlur={handleTimeoutBlur}
-                  />
-                  <TimeoutLabel>seconds</TimeoutLabel>
-                </TimeoutInputContainer>
-                <SecondaryButton
-                  onClick={handleSaveTimeout}
-                  disabled={
-                    isUpdating ||
-                    inactivityTimeout < 5 ||
-                    inactivityTimeout ===
-                      event.welcomeScreenParams.inactivityTimeout
-                  }
-                  style={{ marginTop: "12px" }}
-                >
-                  {isUpdating ? <LoadingSpinner /> : "Save Timeout"}
-                </SecondaryButton>
-              </FormSection>
-
-              <FormSection>
                 <FormLabel>Sleep Screen Video</FormLabel>
                 <FormDescription>
-                  Upload a video to be displayed when the welcome screen goes to
-                  sleep
+                  Upload a video to be displayed when the check-in screen goes
+                  to sleep
                 </FormDescription>
+
+                {videoPreviewUrl && (
+                  <VideoStatusContainer>
+                    <VideoStatusText>
+                      <span>Current Video:</span>
+                      <span>{extractFilenameFromUrl(videoPreviewUrl)}</span>
+                    </VideoStatusText>
+                  </VideoStatusContainer>
+                )}
 
                 <input
                   type="file"
@@ -825,81 +1470,110 @@ const WelcomeScreenEditor: React.FC<{ event: Event; refetch: () => void }> = ({
                   style={{ display: "none" }}
                 />
 
-                <UploadButton onClick={() => fileInputRef.current?.click()}>
+                <UploadButton
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{ marginTop: "12px" }}
+                >
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
                     viewBox="0 0 24 24"
-                    stroke="currentColor"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
+                      d="M12 16V8M8 12H16M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                   </svg>
-                  {videoFile ? videoFile.name : "Choose a video file"}
+                  {videoFile
+                    ? `Selected: ${videoFile.name.substring(0, 20)}${
+                        videoFile.name.length > 20 ? "..." : ""
+                      }`
+                    : videoPreviewUrl
+                    ? "Change Video"
+                    : "Choose a Video File"}
                 </UploadButton>
+
+                <VideoInfo>
+                  Recommended: MP4 format, max 100MB, landscape orientation
+                </VideoInfo>
 
                 <VideoControlsContainer>
                   {isUploading ? (
-                    <SecondaryButton disabled>
+                    <SecondaryButton disabled style={{ flex: 1 }}>
                       <LoadingSpinner /> Uploading...
                     </SecondaryButton>
                   ) : (
                     videoFile && (
-                      <SecondaryButton onClick={handleUpload}>
+                      <SecondaryButton
+                        onClick={handleUpload}
+                        style={{ flex: 1 }}
+                      >
                         Upload Video
                       </SecondaryButton>
                     )
                   )}
 
                   {videoPreviewUrl && (
-                    <SecondaryButton onClick={handleRemoveVideo}>
+                    <SecondaryButton
+                      onClick={handleRemoveVideo}
+                      style={{ flex: 1 }}
+                    >
                       Remove Video
                     </SecondaryButton>
                   )}
                 </VideoControlsContainer>
-
-                <VideoInfo>
-                  Supported formats: MP4, WebM, Ogg
-                  <br />
-                  Maximum file size: 100MB
-                </VideoInfo>
               </FormSection>
             </Form>
 
             <VideoPreviewWrapper>
+              <FormLabel>
+                {videoPreviewUrl ? "Video Preview" : "No Video Uploaded"}
+              </FormLabel>
               <VideoPreviewContainer>
                 {videoPreviewUrl ? (
                   <video
-                    src={videoPreviewUrl}
                     controls
+                    src={videoPreviewUrl}
                     style={{
                       width: "100%",
                       height: "100%",
                       objectFit: "contain",
-                      maxHeight: "400px",
                     }}
                   />
                 ) : (
                   <NoVideoMessage>
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
+                        d="M12.53 20.42H6.21C3.05 20.42 2 18.32 2 16.21V7.79C2 4.63 3.05 3.58 6.21 3.58H12.53C15.69 3.58 16.74 4.63 16.74 7.79V16.21C16.74 19.37 15.68 20.42 12.53 20.42Z"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                      <path
+                        d="M19.52 17.1L16.74 15.15V8.84L19.52 6.89C20.88 5.94 22 6.52 22 8.19V15.81C22 17.48 20.88 18.06 19.52 17.1Z"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M11.5 11C12.3284 11 13 10.3284 13 9.5C13 8.67157 12.3284 8 11.5 8C10.6716 8 10 8.67157 10 9.5C10 10.3284 10.6716 11 11.5 11Z"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
-                    <p>No video uploaded</p>
-                    <p>Upload a video to see a preview here</p>
+                    <p>No Video Uploaded</p>
+                    <p>Upload a video to see the preview</p>
                   </NoVideoMessage>
                 )}
               </VideoPreviewContainer>

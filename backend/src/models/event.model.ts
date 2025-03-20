@@ -24,6 +24,7 @@ const eventSchema = new Schema<Event>({
     isGdpr: { type: Boolean },
     videoUrl: { type: String },
     inactivityTimeout: { type: Number, default: 30 },
+    checkinSuccessTimeout: { type: Number, default: 5 },
   },
   emailParams: {
     customHtmlTemplate: {

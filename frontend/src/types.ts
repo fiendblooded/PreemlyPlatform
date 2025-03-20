@@ -193,6 +193,7 @@ export type Event = {
     isGdpr: boolean;
     videoUrl: string;
     inactivityTimeout?: number;
+    checkinSuccessTimeout?: number;
   };
   emailParams: {
     customHtmlTemplate?: {
