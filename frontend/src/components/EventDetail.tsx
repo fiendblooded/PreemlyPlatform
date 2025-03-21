@@ -405,30 +405,30 @@ const VirtualSpaceButton = styled.div`
   }
 `;
 
-const ErrorNotYourEvent = styled.div`
-  width: 60%;
-  height: 100%;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  font-family: Axiforma, sans-serif;
-  font-size: 20px;
-  color: black;
-  gap: 24px;
-  padding: 40px 0;
+// const ErrorNotYourEvent = styled.div`
+//   width: 60%;
+//   height: 100%;
+//   margin: auto;
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: center;
+//   align-items: center;
+//   text-align: center;
+//   font-family: Axiforma, sans-serif;
+//   font-size: 20px;
+//   color: black;
+//   gap: 24px;
+//   padding: 40px 0;
 
-  svg {
-    margin-bottom: 16px;
-    transition: transform 0.3s ease;
-  }
+//   svg {
+//     margin-bottom: 16px;
+//     transition: transform 0.3s ease;
+//   }
 
-  &:hover svg {
-    transform: scale(1.05);
-  }
-`;
+//   &:hover svg {
+//     transform: scale(1.05);
+//   }
+// `;
 
 // Add a ScheduleIcon component
 const ScheduleIcon = ({ color }: { color: string }) => (
@@ -583,240 +583,240 @@ const EventDetail: React.FC = () => {
       <EventDetailWrapper tabletMode={tabletMode}>
         <CloseButton onClick={() => navigate(-1)}>&times;</CloseButton>
 
-        {!(event && user && event.ownerId != user.sub) ? (
-          <>
-            <Header>
-              <SeamlessInput
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onBlur={() => {
-                  if (title != event?.title) updateTitle();
-                }}
-              />
-              <HeaderButtonsContainer>
-                <VirtualSpaceButton
-                  onClick={() => navigate(`/space/${event._id}`)}
-                  title="Go to Virtual Space"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    style={{ marginRight: 4 }}
-                  >
-                    <path
-                      d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M3.6001 9H20.4001"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M3.6001 15H20.4001"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M12 20.7999C14.2091 20.7999 16 16.8375 16 11.9999C16 7.16236 14.2091 3.19995 12 3.19995C9.79086 3.19995 8 7.16236 8 11.9999C8 16.8375 9.79086 20.7999 12 20.7999Z"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <div style={{ paddingTop: 4 }}>Space</div>
-                </VirtualSpaceButton>
-                <WelcomeScreenButton
-                  onClick={() => navigate(`/welcome/${event._id}`)}
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M4 12H4.01M8 12H8.01M16 12H16.01M12 12H12.01M20 12H20.01M8.5 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V8.5M15.5 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.07989 20 7.2V8.5M20 15.5V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H15.5M4 15.5V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H8.5"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                  <div style={{ paddingTop: 4, marginLeft: 2 }}>Check in</div>
-                </WelcomeScreenButton>
-                <DeleteButton onClick={deleteEvent}>
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M8.5 7H15.5M8.5 7H6.5M8.5 7C8.5 7 8.5 3.5 12 3.5C15.5 3.5 15.5 7 15.5 7M15.5 7H17.5M4.5 7H6.5M6.5 7V18.5C6.5 19.6046 7.39543 20.5 8.5 20.5H15.5C16.6046 20.5 17.5 19.6046 17.5 18.5V7M17.5 7H19.5M14 9.5V17.5M10 9.5V17.5"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                      strokeLinecap="square"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </DeleteButton>
-              </HeaderButtonsContainer>
-            </Header>
-            <DetailsHeader>
-              <ActivityStatus color={dateTimeStatus.color}>
-                {dateTimeStatus.type}
-              </ActivityStatus>
-              <DateTime>
+        {/* {!(event && user && event.ownerId != user.sub) ? ( */}
+        <>
+          <Header>
+            <SeamlessInput
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={() => {
+                if (title != event?.title) updateTitle();
+              }}
+            />
+            <HeaderButtonsContainer>
+              <VirtualSpaceButton
+                onClick={() => navigate(`/space/${event._id}`)}
+                title="Go to Virtual Space"
+              >
                 <svg
                   width="20"
                   height="20"
-                  viewBox="0 0 24 20"
+                  viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  style={{ marginRight: 4 }}
                 >
                   <path
-                    d="M17 11C14.2386 11 12 13.2386 12 16C12 18.7614 14.2386 21 17 21C19.7614 21 22 18.7614 22 16C22 13.2386 19.7614 11 17 11ZM17 11V9M2 9V15.8C2 16.9201 2 17.4802 2.21799 17.908C2.40973 18.2843 2.71569 18.5903 3.09202 18.782C3.51984 19 4.0799 19 5.2 19H13M2 9V8.2C2 7.0799 2 6.51984 2.21799 6.09202C2.40973 5.71569 2.71569 5.40973 3.09202 5.21799C3.51984 5 4.0799 5 5.2 5H13.8C14.9201 5 15.4802 5 15.908 5.21799C16.2843 5.40973 16.5903 5.71569 16.782 6.09202C17 6.51984 17 7.0799 17 8.2V9M2 9H17M5 3V5M14 3V5M15 16H17M17 16H19M17 16V14M17 16V18"
-                    stroke="rgb(98, 98, 98)"
+                    d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3.6001 9H20.4001"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3.6001 15H20.4001"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M12 20.7999C14.2091 20.7999 16 16.8375 16 11.9999C16 7.16236 14.2091 3.19995 12 3.19995C9.79086 3.19995 8 7.16236 8 11.9999C8 16.8375 9.79086 20.7999 12 20.7999Z"
+                    stroke="currentColor"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </svg>
-                {getDateRangeDetails(event.date || "", event.endDate || "")}
-              </DateTime>
-            </DetailsHeader>
+                <div style={{ paddingTop: 4 }}>Space</div>
+              </VirtualSpaceButton>
+              <WelcomeScreenButton
+                onClick={() => navigate(`/welcome/${event._id}`)}
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 12H4.01M8 12H8.01M16 12H16.01M12 12H12.01M20 12H20.01M8.5 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V8.5M15.5 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.07989 20 7.2V8.5M20 15.5V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H15.5M4 15.5V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H8.5"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                <div style={{ paddingTop: 4, marginLeft: 2 }}>Check in</div>
+              </WelcomeScreenButton>
+              <DeleteButton onClick={deleteEvent}>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M8.5 7H15.5M8.5 7H6.5M8.5 7C8.5 7 8.5 3.5 12 3.5C15.5 3.5 15.5 7 15.5 7M15.5 7H17.5M4.5 7H6.5M6.5 7V18.5C6.5 19.6046 7.39543 20.5 8.5 20.5H15.5C16.6046 20.5 17.5 19.6046 17.5 18.5V7M17.5 7H19.5M14 9.5V17.5M10 9.5V17.5"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                    strokeLinecap="square"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </DeleteButton>
+            </HeaderButtonsContainer>
+          </Header>
+          <DetailsHeader>
+            <ActivityStatus color={dateTimeStatus.color}>
+              {dateTimeStatus.type}
+            </ActivityStatus>
+            <DateTime>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17 11C14.2386 11 12 13.2386 12 16C12 18.7614 14.2386 21 17 21C19.7614 21 22 18.7614 22 16C22 13.2386 19.7614 11 17 11ZM17 11V9M2 9V15.8C2 16.9201 2 17.4802 2.21799 17.908C2.40973 18.2843 2.71569 18.5903 3.09202 18.782C3.51984 19 4.0799 19 5.2 19H13M2 9V8.2C2 7.0799 2 6.51984 2.21799 6.09202C2.40973 5.71569 2.71569 5.40973 3.09202 5.21799C3.51984 5 4.0799 5 5.2 5H13.8C14.9201 5 15.4802 5 15.908 5.21799C16.2843 5.40973 16.5903 5.71569 16.782 6.09202C17 6.51984 17 7.0799 17 8.2V9M2 9H17M5 3V5M14 3V5M15 16H17M17 16H19M17 16V14M17 16V18"
+                  stroke="rgb(98, 98, 98)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {getDateRangeDetails(event.date || "", event.endDate || "")}
+            </DateTime>
+          </DetailsHeader>
 
-            <ActiveStatusContainer isDetail>
-              <ActiveStatusButton
-                marginLeft={0}
-                isActive={openSection === "info"}
-                onClick={() => handleTabChange("info")}
-                borderColor="#e6bf30"
-              >
-                <GeneralSettingsIcon color={"currentColor"} />
-                General
-              </ActiveStatusButton>
-              <ActiveStatusButton
-                isActive={openSection === "tasks"}
-                onClick={() => handleTabChange("tasks")}
-                borderColor="#e6bf30"
-              >
-                <TasksSettingsIcon color={"currentColor"} />
-                Tasks
-              </ActiveStatusButton>
-              <ActiveStatusButton
-                isActive={openSection === "attendance"}
-                onClick={() => handleTabChange("attendance")}
-                borderColor="#e6bf30"
-              >
-                <GuestsSettingsIcon color={"currentColor"} />
-                Guests
-              </ActiveStatusButton>
-              <ActiveStatusButton
-                isActive={openSection === "email"}
-                onClick={() => handleTabChange("email")}
-                borderColor="#e6bf30"
-              >
-                <EmailSettingsIcon color={"currentColor"} />
-                Email
-              </ActiveStatusButton>
-              <ActiveStatusButton
-                isActive={openSection === "welcome"}
-                onClick={() => handleTabChange("welcome")}
-                borderColor="#e6bf30"
-              >
-                <WelcomeScreenSettingsIcon color={"currentColor"} />
-                Check-in
-              </ActiveStatusButton>
-              <ActiveStatusButton
-                isActive={openSection === "budget"}
-                onClick={() => handleTabChange("budget")}
-                borderColor="#e6bf30"
-              >
-                <BudgetSettingsIcon color={"currentColor"} />
-                Budget
-              </ActiveStatusButton>
-              <ActiveStatusButton
-                isActive={openSection === "feedback"}
-                onClick={() => handleTabChange("feedback")}
-                borderColor="#e6bf30"
-              >
-                <FeedbackSettingsIcon color={"currentColor"} />
-                Feedback
-              </ActiveStatusButton>
-              <ActiveStatusButton
-                isActive={openSection === "schedule"}
-                onClick={() => handleTabChange("schedule")}
-                borderColor="#e6bf30"
-              >
-                <ScheduleIcon color={"currentColor"} />
-                Schedule
-              </ActiveStatusButton>
-              <ActiveStatusButton
-                isActive={openSection === "sponsors"}
-                onClick={() => handleTabChange("sponsors")}
-                borderColor="#e6bf30"
-              >
-                <SponsorDealsIcon color={"currentColor"} />
-                Sponsors
-              </ActiveStatusButton>
-            </ActiveStatusContainer>
-            {openSection === "info" && (
-              <EventDetailsEditor event={event} refetch={fetchEvent} />
-            )}
-            {openSection === "attendance" && (
-              <EventGuestsEditor event={event} refetch={fetchEvent} />
-            )}
-            {openSection === "welcome" && (
-              <WelcomeScreenEditor event={event} refetch={fetchEvent} />
-            )}
-            {openSection === "tasks" && (
-              <EventTasksEditor event={event} refetch={fetchEvent} />
-            )}
-            {openSection === "email" && (
-              <EmailTemplateEditor event={event} refetch={fetchEvent} />
-            )}
-            {openSection === "budget" && (
-              <EventBudgetEditor event={event} refetch={fetchEvent} />
-            )}
-            {openSection === "feedback" && (
-              <EventFeedbackViewer event={event} refetch={fetchEvent} />
-            )}
-            {openSection === "schedule" && event && (
-              <ScheduleEditor event={event} refetch={fetchEvent} />
-            )}
-            {openSection === "sponsors" && event && (
-              <SponsorDealsEditor event={event} refetch={fetchEvent} />
-            )}
-          </>
-        ) : (
-          <ErrorNotYourEvent>
-            <ErrorBigIcon color="#FF8C00" />
-            <div>
-              You don't have <b>permission</b> to access this event. If you
-              believe this is an error, please contact the event administrator
-              or our support team.
-            </div>
-            <ContactButton href="mailto:info@preemly.eu?subject=Event Access Issue">
-              Contact Support
-            </ContactButton>
-            <SecondaryButton onClick={() => navigate(-1)}>Back</SecondaryButton>
-          </ErrorNotYourEvent>
-        )}
+          <ActiveStatusContainer isDetail>
+            <ActiveStatusButton
+              marginLeft={0}
+              isActive={openSection === "info"}
+              onClick={() => handleTabChange("info")}
+              borderColor="#e6bf30"
+            >
+              <GeneralSettingsIcon color={"currentColor"} />
+              General
+            </ActiveStatusButton>
+            <ActiveStatusButton
+              isActive={openSection === "tasks"}
+              onClick={() => handleTabChange("tasks")}
+              borderColor="#e6bf30"
+            >
+              <TasksSettingsIcon color={"currentColor"} />
+              Tasks
+            </ActiveStatusButton>
+            <ActiveStatusButton
+              isActive={openSection === "attendance"}
+              onClick={() => handleTabChange("attendance")}
+              borderColor="#e6bf30"
+            >
+              <GuestsSettingsIcon color={"currentColor"} />
+              Guests
+            </ActiveStatusButton>
+            <ActiveStatusButton
+              isActive={openSection === "email"}
+              onClick={() => handleTabChange("email")}
+              borderColor="#e6bf30"
+            >
+              <EmailSettingsIcon color={"currentColor"} />
+              Email
+            </ActiveStatusButton>
+            <ActiveStatusButton
+              isActive={openSection === "welcome"}
+              onClick={() => handleTabChange("welcome")}
+              borderColor="#e6bf30"
+            >
+              <WelcomeScreenSettingsIcon color={"currentColor"} />
+              Check-in
+            </ActiveStatusButton>
+            <ActiveStatusButton
+              isActive={openSection === "budget"}
+              onClick={() => handleTabChange("budget")}
+              borderColor="#e6bf30"
+            >
+              <BudgetSettingsIcon color={"currentColor"} />
+              Budget
+            </ActiveStatusButton>
+            <ActiveStatusButton
+              isActive={openSection === "feedback"}
+              onClick={() => handleTabChange("feedback")}
+              borderColor="#e6bf30"
+            >
+              <FeedbackSettingsIcon color={"currentColor"} />
+              Feedback
+            </ActiveStatusButton>
+            <ActiveStatusButton
+              isActive={openSection === "schedule"}
+              onClick={() => handleTabChange("schedule")}
+              borderColor="#e6bf30"
+            >
+              <ScheduleIcon color={"currentColor"} />
+              Schedule
+            </ActiveStatusButton>
+            <ActiveStatusButton
+              isActive={openSection === "sponsors"}
+              onClick={() => handleTabChange("sponsors")}
+              borderColor="#e6bf30"
+            >
+              <SponsorDealsIcon color={"currentColor"} />
+              Sponsors
+            </ActiveStatusButton>
+          </ActiveStatusContainer>
+          {openSection === "info" && (
+            <EventDetailsEditor event={event} refetch={fetchEvent} />
+          )}
+          {openSection === "attendance" && (
+            <EventGuestsEditor event={event} refetch={fetchEvent} />
+          )}
+          {openSection === "welcome" && (
+            <WelcomeScreenEditor event={event} refetch={fetchEvent} />
+          )}
+          {openSection === "tasks" && (
+            <EventTasksEditor event={event} refetch={fetchEvent} />
+          )}
+          {openSection === "email" && (
+            <EmailTemplateEditor event={event} refetch={fetchEvent} />
+          )}
+          {openSection === "budget" && (
+            <EventBudgetEditor event={event} refetch={fetchEvent} />
+          )}
+          {openSection === "feedback" && (
+            <EventFeedbackViewer event={event} refetch={fetchEvent} />
+          )}
+          {openSection === "schedule" && event && (
+            <ScheduleEditor event={event} refetch={fetchEvent} />
+          )}
+          {openSection === "sponsors" && event && (
+            <SponsorDealsEditor event={event} refetch={fetchEvent} />
+          )}
+        </>
+        {/* ) : (
+           <ErrorNotYourEvent>
+             <ErrorBigIcon color="#FF8C00" />
+             <div>
+               You don't have <b>permission</b> to access this event. If you
+               believe this is an error, please contact the event administrator
+               or our support team.
+             </div>
+             <ContactButton href="mailto:info@preemly.eu?subject=Event Access Issue">
+               Contact Support
+             </ContactButton>
+             <SecondaryButton onClick={() => navigate(-1)}>Back</SecondaryButton>
+           </ErrorNotYourEvent>
+         )}*/}
       </EventDetailWrapper>
     </PageWrapper>
   );

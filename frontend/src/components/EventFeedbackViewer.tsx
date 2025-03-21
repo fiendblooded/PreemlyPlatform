@@ -1,16 +1,13 @@
 import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { format } from "date-fns";
-import {
-  Event,
-  Feedback,
-  type FeedbackAnswer,
-  FeedbackQuestion,
-} from "../types";
-import { ToastType, useToast } from "./Toasts";
-import useAxiosWithAuth from "./auth/useAxiosWithAuth";
+import { Event } from "../types";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import FeedbackPDF from "./FeedbackPDF";
 import { AIButton } from "./EventBudgetEditor";
 import FeedbackFormEditor from "./FeedbackFormEditor";
+import { exportToExcel } from "../utils/feedbackExport";
+import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 
 const colors = {
   primary: "#6b3ddf",
@@ -59,12 +56,6 @@ const Tab = styled.div<{ active: boolean }>`
   }
 `;
 
-const FeedbackContent = styled.div`
-  padding: 28px;
-  min-height: 300px;
-  color: #333333;
-`;
-
 const EmptyState = styled.div`
   display: flex;
   flex-direction: column;
@@ -76,18 +67,6 @@ const EmptyState = styled.div`
   background-color: rgba(107, 61, 223, 0.02);
   border-radius: 12px;
   border: 1px dashed rgba(107, 61, 223, 0.2);
-`;
-
-const EmptyStateIcon = styled.div`
-  font-size: 48px;
-  margin-bottom: 20px;
-  background-color: rgba(107, 61, 223, 0.1);
-  width: 80px;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
 `;
 
 const SearchContainer = styled.div`
@@ -127,130 +106,6 @@ const SearchInput = styled.input`
   }
 `;
 
-const AnalyzeButton = styled.button`
-  background: linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark});
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  min-width: 160px;
-  box-shadow: 0 2px 5px rgba(107, 61, 223, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  &::before {
-    content: "✨";
-    font-size: 14px;
-  }
-
-  &:hover {
-    background: linear-gradient(
-      135deg,
-      ${colors.primaryDark},
-      ${colors.primary}
-    );
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(107, 61, 223, 0.3);
-  }
-
-  &:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(107, 61, 223, 0.2);
-  }
-
-  &:disabled {
-    background: linear-gradient(
-      135deg,
-      ${colors.primaryLight},
-      ${colors.primary}
-    );
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-`;
-
-// Add keyframes for animations
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const pulse = keyframes`
-  0% {
-    box-shadow: 0 0 0 0 rgba(107, 61, 223, 0.2);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(107, 61, 223, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(107, 61, 223, 0);
-  }
-`;
-
-const FeedbackCard = styled.div`
-  background-color: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  margin-bottom: 24px;
-  border-left: 4px solid ${colors.primary};
-  color: #333333;
-  position: relative;
-  overflow: hidden;
-  animation: ${fadeIn} 0.4s ease-out;
-  animation-fill-mode: both;
-
-  &:nth-child(2) {
-    animation-delay: 0.1s;
-  }
-
-  &:nth-child(3) {
-    animation-delay: 0.2s;
-  }
-
-  &:nth-child(4) {
-    animation-delay: 0.3s;
-  }
-
-  &:nth-child(n + 5) {
-    animation-delay: 0.4s;
-  }
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 6px;
-    background: linear-gradient(
-      90deg,
-      ${colors.primary},
-      ${colors.primaryLight}
-    );
-    opacity: 0.1;
-  }
-
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  }
-`;
-
 const FeedbackHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -277,20 +132,6 @@ const GuestName = styled.div`
   gap: 8px;
 `;
 
-const GuestEmail = styled.span`
-  font-size: 14px;
-  color: ${colors.textLight};
-  font-weight: normal;
-  display: inline-flex;
-  align-items: center;
-
-  &::before {
-    content: "•";
-    margin-right: 8px;
-    opacity: 0.5;
-  }
-`;
-
 const FeedbackDate = styled.div`
   font-size: 14px;
   color: ${colors.textLight};
@@ -307,45 +148,6 @@ const FeedbackDate = styled.div`
   }
 `;
 
-const FeedbackAnswers = styled.div`
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-`;
-
-const FeedbackAnswer = styled.div`
-  margin-bottom: 0;
-  padding: 16px;
-  border-radius: 8px;
-  background-color: rgba(0, 0, 0, 0.02);
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.03);
-  }
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
-const QuestionTitle = styled.div`
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: ${colors.text};
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-
-  &::before {
-    content: "❯";
-    margin-right: 8px;
-    color: ${colors.primary};
-    font-size: 12px;
-  }
-`;
-
 const AnswerText = styled.div`
   color: ${colors.text};
   line-height: 1.6;
@@ -354,98 +156,6 @@ const AnswerText = styled.div`
   white-space: pre-wrap;
 `;
 
-const RatingDisplay = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 0 0 0 20px;
-`;
-
-const RatingValue = styled.span`
-  font-size: 20px;
-  font-weight: bold;
-  color: ${colors.primary};
-  margin-right: 8px;
-  background-color: rgba(107, 61, 223, 0.1);
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  animation: ${pulse} 2s infinite;
-
-  &:hover {
-    background-color: rgba(107, 61, 223, 0.2);
-    transform: scale(1.1);
-  }
-`;
-
-const RatingScale = styled.span`
-  color: ${colors.textLight};
-  font-size: 14px;
-`;
-
-const ChoiceDisplay = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0 0 0 20px;
-`;
-
-const ChoiceOption = styled.div`
-  background-color: rgba(107, 61, 223, 0.08);
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 14px;
-  color: ${colors.text};
-  border: 1px solid rgba(107, 61, 223, 0.1);
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: rgba(107, 61, 223, 0.12);
-    transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-`;
-
-const RankingDisplay = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 0 0 0 20px;
-`;
-
-const RankingItem = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background-color: rgba(107, 61, 223, 0.04);
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: rgba(107, 61, 223, 0.08);
-    transform: translateX(2px);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  }
-`;
-
-const RankNumber = styled.span`
-  font-weight: bold;
-  margin-right: 8px;
-  color: ${colors.primary};
-  background-color: rgba(107, 61, 223, 0.1);
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 12px;
-`;
-
-// Analysis tab styled components
 const AnalysisContainer = styled.div`
   padding: 0 20px;
   color: #333333;
@@ -519,199 +229,138 @@ const AnalyzeButtonLarge = styled(AIButton)`
   margin-top: 20px;
 `;
 
-// Icons for the analysis section
-const FeedbackIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M7 8H17M7 12H11M12 20L8 16H4C3.44772 16 3 15.5523 3 15V5C3 4.44772 3.44772 4 4 4H20C20.5523 4 21 4.44772 21 5V15C21 15.5523 20.5523 16 20 16H16L12 20Z"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+const ExportDropdown = styled.div`
+  position: relative;
+  display: inline-block;
+`;
 
-const AnalysisIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M16 8V16M12 11V16M8 14V16M4 18H20C20.5523 18 21 17.5523 21 17V7C21 6.44772 20.5523 6 20 6H4C3.44772 6 3 6.44772 3 7V17C3 17.5523 3.44772 18 4 18Z"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const FormIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const StrengthIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M9 12L11 14L15 10M7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20Z"
-      stroke={colors.success}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const WeaknessIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M9.5 14.5L11.5 12.5M11.5 12.5L13.5 10.5M11.5 12.5L9.5 10.5M11.5 12.5L13.5 14.5M7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.0799 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20Z"
-      stroke={colors.error}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const SuggestionIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M9.5 11.5L11.5 9.5M11.5 9.5L13.5 7.5M11.5 9.5L9.5 7.5M11.5 9.5L13.5 11.5M12 22C12.5917 22 13.1374 21.7454 13.5249 21.3149C13.8346 20.9669 14 20.5109 14 20H10C10 20.5109 10.1654 20.9669 10.4751 21.3149C10.8626 21.7454 11.4083 22 12 22ZM12 2C7.58172 2 4 5.58172 4 4 10C4 11.8487 4.63187 13.551 5.70764 14.9048C6.29595 15.6784 6.99997 16.5484 7.1468 17.568C7.25618 18.3249 7.64762 19 8.5 19H15.5C16.3524 19 16.7438 18.3249 16.8532 17.568C17.0001 16.5484 17.7041 15.6784 18.2924 14.9048C19.3681 13.551 20 11.8487 20 10C20 5.58172 16.4183 2 12 2Z"
-      stroke={colors.warning}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const InsightIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M12 16V21M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM18 8L20 6M6 8L4 6M18 16L20 18M6 16L4 18M21 12H19M5 12H3M12 3V5"
-      stroke={colors.primary}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-// Add these styled components near the other styled components
-const RatingLabels = styled.div`
-  display: flex;
-  justify-content: space-between;
+const DropdownContent = styled.div<{ isOpen: boolean }>`
+  display: ${(props) => (props.isOpen ? "block" : "none")};
+  position: absolute;
+  right: 0;
+  background-color: white;
+  min-width: 160px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  border-radius: 8px;
+  overflow: hidden;
   margin-top: 8px;
-  font-size: 13px;
-  color: ${colors.textLight};
-  width: 100%;
-  max-width: 300px;
-  padding: 4px 8px;
-  background-color: rgba(0, 0, 0, 0.02);
-  border-radius: 4px;
 `;
 
-const RatingLabelMin = styled.span`
-  text-align: left;
-  opacity: 0.8;
-  font-style: italic;
+const DropdownItem = styled.div`
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+
+  &:first-child {
+    border-bottom: 1px solid #eee;
+  }
 `;
 
-const RatingLabelMax = styled.span`
-  text-align: right;
-  opacity: 0.8;
-  font-style: italic;
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
 `;
 
+const Button = styled(AIButton)`
+  min-width: 120px;
+`;
+
+const ExportButton = styled(AIButton)`
+  background: linear-gradient(135deg, #4caf50, #45a049);
+  margin-left: 12px;
+
+  &:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+  }
+
+  &:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+`;
+
+const FeedbackList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+`;
+
+const FeedbackItem = styled.div`
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const FeedbackContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+`;
+
+const AnswerItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const QuestionText = styled.div`
+  font-weight: 500;
+  color: #333;
+`;
+
+const EmptyStateText = styled.p`
+  color: #666;
+  text-align: center;
+  margin: 0;
+`;
+
+// Update Props type
 type Props = {
   event: Event;
   refetch: () => void;
 };
 
-const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
+const EventFeedbackViewer: React.FC<Props> = ({
+  event,
+  refetch,
+}): JSX.Element => {
   const [activeTab, setActiveTab] = useState<"feedback" | "analysis" | "form">(
     "feedback"
   );
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const { addToast, Toasts } = useToast();
   const axiosInstance = useAxiosWithAuth();
 
-  // Memoize filtered feedback to prevent unnecessary recalculations
-  const filteredFeedback = React.useMemo(() => {
-    if (!event.feedback) return [];
+  const handleAnalyzeFeedback = React.useCallback(async () => {
+    if (!event.feedback || event.feedback.length === 0) {
+      return;
+    }
 
-    return event.feedback.filter((feedback: Feedback) => {
-      if (!searchQuery.trim()) return true;
+    setIsAnalyzing(true);
 
-      const query = searchQuery.toLowerCase();
-      const guestName = (feedback.guestName || "Anonymous Guest").toLowerCase();
-
-      // Check if guest name matches
-      if (guestName.includes(query)) return true;
-
-      // Check if any answer contains the search query
-      return feedback.answers?.some((answer) => {
-        // For text answers
-        if (answer.textAnswer) {
-          return answer.textAnswer.toLowerCase().includes(query);
-        }
-        // For rating answers
-        if (answer.ratingAnswer !== undefined) {
-          return answer.ratingAnswer.toString().includes(query);
-        }
-        return false;
-      });
-    });
-  }, [event.feedback, searchQuery]);
+    try {
+      await axiosInstance.post(`/events/${event._id}/feedback/analyze`);
+      refetch();
+      setActiveTab("analysis");
+    } catch (err) {
+      console.error("Error analyzing feedback:", err);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [event.feedback, event._id, axiosInstance, refetch, setActiveTab]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "";
@@ -723,206 +372,136 @@ const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
     }
   };
 
-  const handleAnalyzeFeedback = async () => {
-    if (!event.feedback || event.feedback.length === 0) {
-      addToast("No feedback to analyze", ToastType.ERROR);
-      return;
-    }
+  // Update the renderFeedbackTab function to be a proper React component
+  const FeedbackTab: React.FC<{ event: Event }> = ({ event }) => {
+    const [isExportOpen, setIsExportOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
-    setIsAnalyzing(true);
+    // Filter feedback based on search query
+    const filteredFeedback =
+      event.feedback?.filter((feedback) => {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          feedback.guestName?.toLowerCase().includes(searchLower) ||
+          feedback.guestEmail?.toLowerCase().includes(searchLower)
+        );
+      }) || [];
 
-    try {
-      await axiosInstance.post(`/events/${event._id}/feedback/analyze`);
+    return (
+      <div>
+        <SearchContainer>
+          <SearchInput
+            type="text"
+            placeholder="Search feedback..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <ButtonContainer>
+            <Button onClick={handleAnalyzeFeedback}>Analyze Feedback</Button>
+            <ExportDropdown>
+              <ExportButton
+                onClick={() => setIsExportOpen(!isExportOpen)}
+                disabled={!event.feedback || event.feedback.length === 0}
+              >
+                Export
+              </ExportButton>
+              <DropdownContent isOpen={isExportOpen}>
+                <PDFDownloadLink
+                  document={<FeedbackPDF event={event} />}
+                  fileName={`feedback-report-${format(
+                    new Date(),
+                    "yyyy-MM-dd"
+                  )}.pdf`}
+                  className="text-decoration-none"
+                >
+                  {({ loading }) => (
+                    <DropdownItem onClick={() => setIsExportOpen(false)}>
+                      {loading ? "Generating PDF..." : "Export as PDF"}
+                    </DropdownItem>
+                  )}
+                </PDFDownloadLink>
+                <DropdownItem
+                  onClick={() => {
+                    exportToExcel(event);
+                    setIsExportOpen(false);
+                  }}
+                >
+                  Export as Excel
+                </DropdownItem>
+              </DropdownContent>
+            </ExportDropdown>
+          </ButtonContainer>
+        </SearchContainer>
+        {filteredFeedback.length > 0 ? (
+          <FeedbackList>
+            {filteredFeedback.map((feedback) => (
+              <FeedbackItem key={feedback._id}>
+                <FeedbackHeader>
+                  <GuestName>
+                    {feedback.guestName || "Anonymous Guest"}
+                  </GuestName>
+                  <FeedbackDate>
+                    {format(new Date(feedback.createdAt || ""), "MMM d, yyyy")}
+                  </FeedbackDate>
+                </FeedbackHeader>
+                <FeedbackContent>
+                  {feedback.answers.map((answer) => {
+                    const question = event.feedbackForm?.questions.find(
+                      (q) => q.id === answer.questionId
+                    );
+                    if (!question) return null;
 
-      addToast("Feedback analyzed successfully", ToastType.SUCCESS);
-      refetch();
-      setActiveTab("analysis");
-    } catch (err) {
-      console.error("Error analyzing feedback:", err);
-      addToast("Failed to analyze feedback", ToastType.ERROR);
-    } finally {
-      setIsAnalyzing(false);
-    }
+                    let answerText = "";
+                    if (answer.textAnswer) {
+                      answerText = answer.textAnswer;
+                    } else if (answer.ratingAnswer !== undefined) {
+                      answerText = `${answer.ratingAnswer} out of ${
+                        question.maxRating || 10
+                      }`;
+                    } else if (answer.selectedOptions?.length) {
+                      answerText = answer.selectedOptions
+                        .map(
+                          (optId) =>
+                            question.options?.find((opt) => opt.id === optId)
+                              ?.text
+                        )
+                        .filter(Boolean)
+                        .join(", ");
+                    }
+
+                    return (
+                      <AnswerItem key={answer.questionId}>
+                        <QuestionText>{question.title}</QuestionText>
+                        <AnswerText>{answerText}</AnswerText>
+                      </AnswerItem>
+                    );
+                  })}
+                </FeedbackContent>
+              </FeedbackItem>
+            ))}
+          </FeedbackList>
+        ) : (
+          <EmptyState>
+            <EmptyStateText>
+              {searchQuery
+                ? "No feedback matches your search"
+                : "No feedback has been submitted yet"}
+            </EmptyStateText>
+          </EmptyState>
+        )}
+      </div>
+    );
   };
 
-  // Memoize the renderAnswer function to prevent unnecessary re-renders
-  const renderAnswer = React.useCallback(
-    (answer: FeedbackAnswer, question: FeedbackQuestion) => {
-      switch (question.type) {
-        case "text":
-          return (
-            <AnswerText>{answer.textAnswer || "No answer provided"}</AnswerText>
-          );
-
-        case "rating":
-          if (answer.ratingAnswer === undefined)
-            return <AnswerText>No rating provided</AnswerText>;
-
-          return (
-            <RatingDisplay>
-              <RatingValue>{answer.ratingAnswer}</RatingValue>
-              <RatingScale>
-                out of{" "}
-                {question.maxRating !== undefined ? question.maxRating : 10}
-                {question.minLabel || question.maxLabel ? (
-                  <RatingLabels>
-                    {question.minLabel && (
-                      <RatingLabelMin>{question.minLabel}</RatingLabelMin>
-                    )}
-                    {question.maxLabel && (
-                      <RatingLabelMax>{question.maxLabel}</RatingLabelMax>
-                    )}
-                  </RatingLabels>
-                ) : null}
-              </RatingScale>
-            </RatingDisplay>
-          );
-
-        case "single_choice":
-        case "multiple_choice":
-          if (!answer.selectedOptions || answer.selectedOptions.length === 0) {
-            return <AnswerText>No option selected</AnswerText>;
-          }
-
-          return (
-            <ChoiceDisplay>
-              {answer.selectedOptions.map((optionId) => {
-                const option = question.options?.find(
-                  (opt) => opt.id === optionId
-                );
-                return option ? (
-                  <ChoiceOption key={optionId}>{option.text}</ChoiceOption>
-                ) : null;
-              })}
-            </ChoiceDisplay>
-          );
-
-        case "ranking":
-          if (!answer.rankingOrder || answer.rankingOrder.length === 0) {
-            return <AnswerText>No ranking provided</AnswerText>;
-          }
-
-          return (
-            <RankingDisplay>
-              {answer.rankingOrder.map((optionId, index) => {
-                const option = question.options?.find(
-                  (opt) => opt.id === optionId
-                );
-                return option ? (
-                  <RankingItem key={optionId}>
-                    <RankNumber>{index + 1}.</RankNumber> {option.text}
-                  </RankingItem>
-                ) : null;
-              })}
-            </RankingDisplay>
-          );
-
-        default:
-          return <AnswerText>Unknown question type</AnswerText>;
-      }
-    },
-    []
-  );
-
-  const renderFeedbackTab = React.useCallback(() => {
-    return (
-      <FeedbackContent>
-        {!event.feedback || event.feedback.length === 0 ? (
-          <EmptyState>
-            <EmptyStateIcon>📝</EmptyStateIcon>
-            <p
-              style={{
-                fontSize: "18px",
-                fontWeight: "500",
-                marginBottom: "12px",
-                color: "#333",
-              }}
-            >
-              No feedback yet
-            </p>
-            <p style={{ color: "#666", marginBottom: "20px" }}>
-              Feedback from your guests will appear here.
-            </p>
-            <p style={{ color: "#666", fontSize: "14px" }}>
-              Configure your feedback form in the "Form" tab.
-            </p>
-          </EmptyState>
-        ) : (
-          <>
-            <SearchContainer>
-              <SearchInput
-                type="text"
-                placeholder="Search feedback..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <AnalyzeButton
-                onClick={handleAnalyzeFeedback}
-                disabled={isAnalyzing}
-              >
-                {isAnalyzing ? "Analyzing..." : "Analyze Feedback"}
-              </AnalyzeButton>
-            </SearchContainer>
-
-            {filteredFeedback.length === 0 ? (
-              <EmptyState>
-                <p>No feedback matches your search.</p>
-              </EmptyState>
-            ) : (
-              filteredFeedback.map((feedback, index) => (
-                <FeedbackCard key={feedback._id || index}>
-                  <FeedbackHeader>
-                    <GuestName>
-                      {feedback.guestName || "Anonymous Guest"}
-                      {feedback.guestEmail && (
-                        <GuestEmail>{feedback.guestEmail}</GuestEmail>
-                      )}
-                    </GuestName>
-                    <FeedbackDate>
-                      {formatDate(feedback.createdAt)}
-                    </FeedbackDate>
-                  </FeedbackHeader>
-                  <FeedbackAnswers>
-                    {feedback.answers &&
-                      feedback.answers.map((answer, answerIndex) => {
-                        // Find the corresponding question
-                        const question = event.feedbackForm?.questions.find(
-                          (q) => q.id === answer.questionId
-                        );
-
-                        if (!question) return null;
-
-                        return (
-                          <FeedbackAnswer key={answerIndex}>
-                            <QuestionTitle>{question.title}</QuestionTitle>
-                            {renderAnswer(answer, question)}
-                          </FeedbackAnswer>
-                        );
-                      })}
-                  </FeedbackAnswers>
-                </FeedbackCard>
-              ))
-            )}
-          </>
-        )}
-      </FeedbackContent>
-    );
-  }, [
-    event.feedback,
-    event.feedbackForm,
-    filteredFeedback,
-    formatDate,
-    handleAnalyzeFeedback,
-    isAnalyzing,
-    renderAnswer,
-    searchQuery,
-  ]);
+  // Fix the return type of renderFeedbackTab
+  const renderFeedbackTab = (): JSX.Element => {
+    return <FeedbackTab event={event} />;
+  };
 
   const renderAnalysisTab = React.useCallback(() => {
     if (!event.feedbackAnalysis) {
       return (
         <NoAnalysisContainer>
-          <InsightIcon />
           <h3>No Analysis Available</h3>
           <p>
             Analyze your feedback to get insights about strengths, weaknesses,
@@ -944,7 +523,6 @@ const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
       <AnalysisContainer>
         <AnalysisSection>
           <AnalysisHeader>
-            <AnalysisIcon />
             <AnalysisTitle>Overview</AnalysisTitle>
           </AnalysisHeader>
           <AnalysisContent>
@@ -954,7 +532,6 @@ const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
 
         <AnalysisSection>
           <AnalysisHeader>
-            <StrengthIcon />
             <AnalysisTitle>Strengths</AnalysisTitle>
           </AnalysisHeader>
           <AnalysisContent>
@@ -968,7 +545,6 @@ const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
 
         <AnalysisSection>
           <AnalysisHeader>
-            <WeaknessIcon />
             <AnalysisTitle>Areas for Improvement</AnalysisTitle>
           </AnalysisHeader>
           <AnalysisContent>
@@ -982,7 +558,6 @@ const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
 
         <AnalysisSection>
           <AnalysisHeader>
-            <SuggestionIcon />
             <AnalysisTitle>Suggestions</AnalysisTitle>
           </AnalysisHeader>
           <AnalysisContent>
@@ -1014,16 +589,16 @@ const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
         active={activeTab === "feedback"}
         onClick={() => setActiveTab("feedback")}
       >
-        <FeedbackIcon /> Feedback
+        Feedback
       </Tab>
       <Tab
         active={activeTab === "analysis"}
         onClick={() => setActiveTab("analysis")}
       >
-        <AnalysisIcon /> Analysis
+        Analysis
       </Tab>
       <Tab active={activeTab === "form"} onClick={() => setActiveTab("form")}>
-        <FormIcon /> Form
+        Form
       </Tab>
     </TabsContainer>
   );
@@ -1036,7 +611,6 @@ const EventFeedbackViewer: React.FC<Props> = ({ event, refetch }) => {
       {activeTab === "form" && (
         <FeedbackFormEditor event={event} refetch={refetch} />
       )}
-      <Toasts />
     </FeedbackWrapper>
   );
 };
