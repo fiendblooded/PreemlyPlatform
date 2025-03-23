@@ -25,8 +25,6 @@ const validateEmail = (email: string): boolean => {
   return re.test(email);
 };
 
-// const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 // Основная функция для отправки email
 const sendEmail = async (
   recipients: string[],
@@ -46,7 +44,7 @@ const sendEmail = async (
     for (let i = 0; i < recipients.length; i++) {
       const recipient = recipients[i];
       const emailPayload: EmailPayload = {
-        from: 'Preemly <noreply@mail.preemly.eu>',
+        from: 'Preemly <support@mail.preemly.eu>',
         to: recipient,
         subject: subject,
         html: htmlContents[i],
@@ -55,10 +53,6 @@ const sendEmail = async (
       if (scheduledTime && scheduledTime > new Date()) {
         emailPayload['o:deliverytime'] = Math.floor(scheduledTime.getTime() / 1000).toString();
       }
-
-      // if (i > 0) {
-      //   await delay(200);
-      // }
 
       const response = await mg.messages.create('mail.preemly.eu', emailPayload);
       responses.push(response);

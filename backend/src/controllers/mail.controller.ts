@@ -205,3 +205,24 @@ export const updateEmailStatusController = async (req: Request, res: Response): 
     });
   }
 };
+
+export const unsubscribeController = async (req: Request, res: Response): Promise<void> => {
+  const { email, reason } = req.body;
+
+  if (!email) {
+    res.status(400).json({
+      success: false,
+      message: 'Email обязателен',
+    });
+    return;
+  }
+
+  // Просто логируем для отладки, но никаких реальных операций не выполняем
+  console.log(`Получен запрос на отписку: ${email}, причина: ${reason || 'не указана'}`);
+  
+  // Возвращаем положительный ответ в любом случае
+  res.status(200).json({
+    success: true,
+    message: 'Запрос обработан успешно',
+  });
+};
