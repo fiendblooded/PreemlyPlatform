@@ -1311,11 +1311,22 @@ const RatingContainer = styled.div`
 
 const RatingButtonsContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
   margin: 12px 0;
   width: 100%;
-  justify-content: space-between;
+  justify-content: center;
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    gap: 12px;
+  }
+`;
+
+const RatingRow = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
 
   @media (min-width: ${designTokens.breakpoints.md}) {
     gap: 12px;
@@ -2386,28 +2397,79 @@ const VirtualSpace: React.FC = () => {
                           )}
                         </RatingLabelsContainer>
                         <RatingButtonsContainer>
-                          {Array.from({
-                            length:
-                              (question.maxRating || 10) -
-                              (question.minRating || 0) +
-                              1,
-                          }).map((_, i) => {
-                            const value = (question.minRating || 0) + i;
-                            const isSelected =
-                              answers.find((a) => a.questionId === question.id)
-                                ?.ratingAnswer === value;
-                            return (
-                              <RatingButton
-                                key={i}
-                                isSelected={isSelected}
-                                onClick={() =>
-                                  handleRatingAnswerChange(question.id, value)
+                          <RatingRow>
+                            {(() => {
+                              const minRating = question.minRating || 0;
+                              const maxRating = question.maxRating || 10;
+                              const totalNumbers = maxRating - minRating + 1;
+                              const firstRowLength = Math.ceil(
+                                totalNumbers / 2
+                              );
+
+                              return Array.from(
+                                { length: firstRowLength },
+                                (_, i) => {
+                                  const value = minRating + i;
+                                  const isSelected =
+                                    answers.find(
+                                      (a) => a.questionId === question.id
+                                    )?.ratingAnswer === value;
+                                  return (
+                                    <RatingButton
+                                      key={value}
+                                      isSelected={isSelected}
+                                      onClick={() =>
+                                        handleRatingAnswerChange(
+                                          question.id,
+                                          value
+                                        )
+                                      }
+                                    >
+                                      {value}
+                                    </RatingButton>
+                                  );
                                 }
-                              >
-                                {value}
-                              </RatingButton>
-                            );
-                          })}
+                              );
+                            })()}
+                          </RatingRow>
+                          <RatingRow>
+                            {(() => {
+                              const minRating = question.minRating || 0;
+                              const maxRating = question.maxRating || 10;
+                              const totalNumbers = maxRating - minRating + 1;
+                              const firstRowLength = Math.ceil(
+                                totalNumbers / 2
+                              );
+                              const secondRowLength = Math.floor(
+                                totalNumbers / 2
+                              );
+
+                              return Array.from(
+                                { length: secondRowLength },
+                                (_, i) => {
+                                  const value = minRating + firstRowLength + i;
+                                  const isSelected =
+                                    answers.find(
+                                      (a) => a.questionId === question.id
+                                    )?.ratingAnswer === value;
+                                  return (
+                                    <RatingButton
+                                      key={value}
+                                      isSelected={isSelected}
+                                      onClick={() =>
+                                        handleRatingAnswerChange(
+                                          question.id,
+                                          value
+                                        )
+                                      }
+                                    >
+                                      {value}
+                                    </RatingButton>
+                                  );
+                                }
+                              );
+                            })()}
+                          </RatingRow>
                         </RatingButtonsContainer>
                       </RatingContainer>
                     )}
