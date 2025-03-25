@@ -4,37 +4,48 @@ import ScheduledEmail from '../models/scheduledEmail.model';
 import mongoose from 'mongoose';
 import type { EmailData } from '../types/mail.types';
 import Guest from '../models/guest.model';
+import Event from '../models/event.model';
 // import sendEmail from '../services/mailrelay.service';
 
 export const sendMailController = async (req: Request, res: Response): Promise<void> => {
-  const { subject, htmlTemplate, emails } = req.body;
+  const { subject, htmlTemplate, emails, eventId } = req.body;
 
-  if (!subject || !htmlTemplate || !emails || !Array.isArray(emails)) {
+  if (!subject || !htmlTemplate || !emails || !Array.isArray(emails) || !eventId) {
     res.status(400).json({
       success: false,
-      message: 'Please provide all fields. Emails must be an array.',
+      message: 'Please provide all fields. Emails must be an array and eventId is required.',
     });
     return;
   }
 
   try {
+    // Get the event to access emailIdentifier
+    const event = await Event.findById(eventId);
+    if (!event) {
+      res.status(404).json({
+        success: false,
+        message: 'Event not found',
+      });
+      return;
+    }
+
     const recipients: string[] = [];
     const personalizedHtmlContents: string[] = [];
-    
+
     for (const email of emails as EmailData[]) {
       if (!email.recipient || !email.guestName || !email.qrCode) {
         throw new Error('Each email must contain recipient, guestName and qrCode');
       }
-      
+
       recipients.push(email.recipient);
-      
+
       let content = htmlTemplate;
       content = content.replace(/{{guestName}}/g, email.guestName);
       content = content.replace(/{{qrCode}}/g, email.qrCode);
       personalizedHtmlContents.push(content);
     }
 
-    sendEmail(recipients, subject, personalizedHtmlContents)
+    sendEmail(recipients, subject, personalizedHtmlContents, undefined, event.emailParams.emailIdentifier)
       .then(() => {
         console.log('Emails sent successfully');
       })
@@ -105,7 +116,7 @@ export const scheduleReminderEmailsController = async (req: Request, res: Respon
 
       if (scheduledTime <= threeHoursFromNow) {
         try {
-          const emailResult = await sendEmail(recipient, emailSubject, htmlContent/**, scheduledTime*/);
+          const emailResult = await sendEmail(recipient, emailSubject, htmlContent /**, scheduledTime*/);
 
           scheduledEmail.status = 'scheduled';
           await scheduledEmail.save();
@@ -131,7 +142,6 @@ export const scheduleReminderEmailsController = async (req: Request, res: Respon
         });
       }
     }
-
 
     res.status(200).json({
       success: true,
@@ -189,8 +199,8 @@ export const updateEmailStatusController = async (req: Request, res: Response): 
 
   try {
     await Guest.updateMany(
-      { _id: { $in: guestIds.map(id => new mongoose.Types.ObjectId(id)) } },
-      { $set: { email_sent: true } }
+      { _id: { $in: guestIds.map((id) => new mongoose.Types.ObjectId(id)) } },
+      { $set: { email_sent: true } },
     );
 
     res.status(200).json({
@@ -218,7 +228,7 @@ export const unsubscribeController = async (req: Request, res: Response): Promis
   }
 
   console.log(`Получен запрос на отписку: ${email}, причина: ${reason || 'не указана'}`);
-  
+
   res.status(200).json({
     success: true,
     message: 'Запрос обработан успешно',

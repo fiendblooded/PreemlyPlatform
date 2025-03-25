@@ -17,6 +17,7 @@ import { ToastType, useToast } from "./Toasts";
 import { PrimaryButton } from "./EventGuestsEditor";
 import SuccessAnimation from "./SuccessAnimation";
 // import GalantaVideo from "../galanta.mp4";
+import { QRCodeSVG } from "qrcode.react";
 
 /**
  * This file had linter errors related to the Event type not having the required properties.
@@ -1158,6 +1159,103 @@ const FullscreenVideo = styled.video`
   left: 0;
 `;
 
+const VirtualSpaceToggle = styled.button<{ isActive: boolean }>`
+  position: absolute;
+  top: 14px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: ${(props) => (props.isActive ? "#3b82f6" : "none")};
+  border: 2px solid #3b82f6;
+  color: ${(props) => (props.isActive ? "white" : "#3b82f6")};
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 104025023002350;
+
+  &:hover {
+    background: ${(props) =>
+      props.isActive ? "#2563eb" : "rgba(59, 130, 246, 0.1)"};
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const VirtualSpaceContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  gap: 24px;
+  padding: 40px;
+`;
+
+const QRCodeWrapper = styled.div`
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0px;
+`;
+
+const QRCodeTitle = styled.div`
+  font-size: 36px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+`;
+
+const SpaceIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M3.6001 9H20.4001"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M3.6001 15H20.4001"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 20.7999C14.2091 20.7999 16 16.8375 16 11.9999C16 7.16236 14.2091 3.19995 12 3.19995C9.79086 3.19995 8 7.16236 8 11.9999C8 16.8375 9.79086 20.7999 12 20.7999Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const WelcomeScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
@@ -1179,6 +1277,7 @@ const WelcomeScreen: React.FC = () => {
   const [showSleepScreen, setShowSleepScreen] = useState(false);
   const inactivityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVirtualSpaceMode, setIsVirtualSpaceMode] = useState(false);
   useWebSocket(wsUrl);
   useEffect(() => {
     if (!loading) {
@@ -1408,26 +1507,39 @@ const WelcomeScreen: React.FC = () => {
         {id ? "Back" : "Exit"}
       </BackButton>
 
-      {/* <GuestWelcomeView
-        guest={{
-          _id: "000",
-          fullName: "LongNamee LongSurnammee",
-          email: "john.doe@example.com",
-          attendance_status: true,
-          age: 0,
-          phoneNumber: "1234567890",
-        }}
-        event={event}
-      /> */}
+      {id && (
+        <VirtualSpaceToggle
+          isActive={isVirtualSpaceMode}
+          onClick={() => setIsVirtualSpaceMode(!isVirtualSpaceMode)}
+        >
+          <SpaceIcon />
+          Virtual Space
+        </VirtualSpaceToggle>
+      )}
+
       <WaveBackground
         color={"#00AEF0"}
-        isVisible={guest === null && !isManualCheckInOpen}
+        isVisible={
+          guest === null && !isManualCheckInOpen && !isVirtualSpaceMode
+        }
       />
       {showSpinner ? (
         <Spinner isVisible={loading} />
       ) : id ? (
         <>
-          {guest ? (
+          {isVirtualSpaceMode ? (
+            <VirtualSpaceContainer>
+              <QRCodeWrapper>
+                <QRCodeTitle>Scan to enter Virtual Space</QRCodeTitle>
+                <QRCodeSVG
+                  value={`${window.location.origin}/space/${id}`}
+                  size={500}
+                  level="H"
+                  includeMargin={true}
+                />
+              </QRCodeWrapper>
+            </VirtualSpaceContainer>
+          ) : guest ? (
             <GuestWelcomeView guest={guest} event={event} />
           ) : (
             <Container isVisible={guest === null}>

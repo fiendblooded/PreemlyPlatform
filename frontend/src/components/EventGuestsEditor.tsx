@@ -1124,6 +1124,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
           : undefined
       ),
       emails,
+      eventId: eventDetails._id,
     });
   };
 

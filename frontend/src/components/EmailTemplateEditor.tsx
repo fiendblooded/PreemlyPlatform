@@ -217,6 +217,29 @@ const PlaceholderButton = styled(ToolbarButton)`
   }
 `;
 
+const StyledInput = styled.input`
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  box-sizing: border-box;
+  background-color: #fff;
+  transition: border-color 0.2s ease-in-out;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+  }
+
+  &::placeholder {
+    color: #999;
+  }
+`;
+
 type Props = {
   event: Event;
   refetch: () => void;
@@ -285,6 +308,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
     dining: { enabled: false, content: "" },
     customHtmlTemplate: { enabled: false, content: "" },
     virtualSpace: { enabled: false },
+    emailIdentifier: "",
   };
 
   // Merge default values with actual values
@@ -307,6 +331,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
       ...defaultEmailParams.virtualSpace,
       ...eventEmailParams.virtualSpace,
     },
+    emailIdentifier: eventEmailParams.emailIdentifier || "",
   };
 
   const [parking, setParking] = useState<EmailExtraModule>(
@@ -323,6 +348,9 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
   );
   const [virtualSpace, setVirtualSpace] = useState<{ enabled: boolean }>(
     normalizedEmailParams.virtualSpace
+  );
+  const [emailIdentifier, setEmailIdentifier] = useState<string>(
+    normalizedEmailParams.emailIdentifier
   );
   const [hasChanges, setHasChanges] = useState(false);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -350,13 +378,16 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
     const hasVirtualSpace =
       JSON.stringify(virtualSpace) !==
       JSON.stringify(normalizedEmailParams.virtualSpace);
+    const hasEmailIdentifier =
+      emailIdentifier !== normalizedEmailParams.emailIdentifier;
 
     setHasChanges(
       hasParking ||
         hasSchedule ||
         hasDining ||
         hasCustomTemplate ||
-        hasVirtualSpace
+        hasVirtualSpace ||
+        hasEmailIdentifier
     );
   }, [
     parking,
@@ -364,6 +395,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
     dining,
     customTemplate,
     virtualSpace,
+    emailIdentifier,
     event?.emailParams,
   ]);
 
@@ -442,6 +474,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
           },
           dining,
           virtualSpace,
+          emailIdentifier,
         },
       };
 
@@ -464,6 +497,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
     setDining(normalizedEmailParams.dining);
     setCustomTemplate(normalizedEmailParams.customHtmlTemplate);
     setVirtualSpace(normalizedEmailParams.virtualSpace);
+    setEmailIdentifier(normalizedEmailParams.emailIdentifier);
     setHasChanges(false);
   };
 
@@ -557,6 +591,26 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
             </ToggleSwitch>
           </ToggleContainer>
         </Header>
+
+        <SectionContainer>
+          <Header>
+            <HeaderTitle>Email Sender Name</HeaderTitle>
+          </Header>
+          <InfoBox>
+            <p>
+              Set the name that will appear in the "From" field of your emails.
+              This will be displayed as "[Your Name]
+              &lt;tickets@preemly.eu&gt;". If left empty, it will default to
+              "Preemly".
+            </p>
+          </InfoBox>
+          <StyledInput
+            type="text"
+            value={emailIdentifier}
+            onChange={(e) => setEmailIdentifier(e.target.value)}
+            placeholder="Enter sender name (e.g., Event Organizer)"
+          />
+        </SectionContainer>
 
         {customTemplate.enabled ? (
           <SectionContainer>
@@ -656,18 +710,6 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
               toggleOnly={true}
               description="Include a button to access the event's virtual space. Guests will be able to join the virtual space directly from the email."
             />
-            {/* <EmailSection
-              icon={<DiningIcon />}
-              title={"Dining"}
-              enable={dining.enabled}
-              setEnable={() =>
-                setDining({ ...dining, enabled: !dining.enabled })
-              }
-              content={dining.content}
-              setContent={(newContent) =>
-                setDining({ ...dining, content: newContent })
-              }
-            /> */}
           </>
         )}
       </EmailSectionsContainer>

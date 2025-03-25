@@ -31,6 +31,7 @@ const sendEmail = async (
   subject: string,
   htmlContents: string[],
   scheduledTime?: Date,
+  emailIdentifier?: string,
 ): Promise<EmailResponse> => {
   // Валидируем все email адреса
   for (const email of recipients) {
@@ -43,8 +44,12 @@ const sendEmail = async (
     const responses = [];
     for (let i = 0; i < recipients.length; i++) {
       const recipient = recipients[i];
+      const fromField = emailIdentifier
+        ? `${emailIdentifier} <tickets@preemly.eu>`
+        : 'Preemly <tickets@preemly.eu>';
+
       const emailPayload: EmailPayload = {
-        from: 'Preemly <tickets@preemly.eu>',
+        from: fromField,
         to: recipient,
         subject: subject,
         html: htmlContents[i],

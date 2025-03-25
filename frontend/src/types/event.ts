@@ -37,6 +37,7 @@ export interface Event {
     virtualSpace?: {
       enabled: boolean;
     };
+    emailIdentifier?: string;
   };
   guests: {
     _id: string;

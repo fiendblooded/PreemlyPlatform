@@ -71,6 +71,7 @@ const eventSchema = new Schema<Event>({
     virtualSpace: {
       enabled: { type: Boolean, default: false },
     },
+    emailIdentifier: { type: String },
   },
   _id: {
     type: Schema.Types.ObjectId,

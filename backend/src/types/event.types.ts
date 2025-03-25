@@ -68,6 +68,7 @@ export interface EmailParams {
   virtualSpace?: {
     enabled: boolean;
   };
+  emailIdentifier?: string;
 }
 
 export interface CategoryBreakdown {
