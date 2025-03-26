@@ -2477,23 +2477,39 @@ const VirtualSpace: React.FC = () => {
                             .find((a) => a.questionId === question.id)
                             ?.selectedOptions?.includes(option.id);
                           return (
-                            <OptionItem key={option.id}>
-                              <CustomRadioContainer>
-                                <CustomRadio isSelected={isSelected} />
+                            <OptionItem
+                              key={option.id}
+                              onClick={() =>
+                                handleSingleChoiceChange(question.id, option.id)
+                              }
+                              style={{ cursor: "pointer" }}
+                            >
+                              <CustomRadioContainer
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <CustomRadio
+                                  isSelected={isSelected}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSingleChoiceChange(
+                                      question.id,
+                                      option.id
+                                    );
+                                  }}
+                                  style={{ cursor: "pointer" }}
+                                />
                               </CustomRadioContainer>
                               <RadioInput
                                 type="radio"
                                 id={`option-${option.id}`}
                                 name={`question-${question.id}`}
                                 checked={isSelected}
-                                onChange={() =>
-                                  handleSingleChoiceChange(
-                                    question.id,
-                                    option.id
-                                  )
-                                }
+                                onChange={() => {}}
                               />
-                              <OptionLabel htmlFor={`option-${option.id}`}>
+                              <OptionLabel
+                                htmlFor={`option-${option.id}`}
+                                onClick={(e) => e.preventDefault()}
+                              >
                                 {option.text}
                               </OptionLabel>
                             </OptionItem>
@@ -2510,23 +2526,43 @@ const VirtualSpace: React.FC = () => {
                               .find((a) => a.questionId === question.id)
                               ?.selectedOptions?.includes(option.id);
                             return (
-                              <OptionItem key={option.id}>
-                                <CustomCheckboxContainer>
-                                  <CustomCheckbox isSelected={isSelected} />
+                              <OptionItem
+                                key={option.id}
+                                onClick={() =>
+                                  handleMultipleChoiceChange(
+                                    question.id,
+                                    option.id,
+                                    !isSelected
+                                  )
+                                }
+                                style={{ cursor: "pointer" }}
+                              >
+                                <CustomCheckboxContainer
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <CustomCheckbox
+                                    isSelected={isSelected}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleMultipleChoiceChange(
+                                        question.id,
+                                        option.id,
+                                        !isSelected
+                                      );
+                                    }}
+                                    style={{ cursor: "pointer" }}
+                                  />
                                 </CustomCheckboxContainer>
                                 <CheckboxInput
                                   type="checkbox"
                                   id={`option-${option.id}`}
                                   checked={isSelected}
-                                  onChange={(e) =>
-                                    handleMultipleChoiceChange(
-                                      question.id,
-                                      option.id,
-                                      e.target.checked
-                                    )
-                                  }
+                                  onChange={() => {}}
                                 />
-                                <OptionLabel htmlFor={`option-${option.id}`}>
+                                <OptionLabel
+                                  htmlFor={`option-${option.id}`}
+                                  onClick={(e) => e.preventDefault()}
+                                >
                                   {option.text}
                                 </OptionLabel>
                               </OptionItem>
