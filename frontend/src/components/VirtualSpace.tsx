@@ -219,7 +219,7 @@ const ContentSection = styled.div`
   box-sizing: border-box;
   position: relative;
   z-index: 2;
-
+  margin-bottom: 32px;
   /* Add more padding on larger screens */
   @media (min-width: ${designTokens.breakpoints.md}) {
     padding: ${designTokens.spacing.xl} ${designTokens.spacing.lg};
@@ -589,10 +589,6 @@ const ActiveIndicator = styled.div`
 // Modern form elements
 const FormGroup = styled.div`
   margin-bottom: ${designTokens.spacing.xl};
-
-  @media (min-width: ${designTokens.breakpoints.md}) {
-    margin-bottom: ${designTokens.spacing.lg};
-  }
 `;
 
 const Label = styled.label`
@@ -698,7 +694,7 @@ const Button = styled.button`
   position: relative;
   overflow: hidden;
   height: 56px; /* Set explicit height for better touch target */
-
+  margin-bottom: 32px;
   &::before {
     content: "";
     position: absolute;
