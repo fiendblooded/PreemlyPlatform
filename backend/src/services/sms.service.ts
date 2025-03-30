@@ -20,29 +20,39 @@ if (!BULKGATE_APP_ID || !BULKGATE_APP_TOKEN) {
 
 export const sendSMS = async (phoneNumbers: string[], message: string): Promise<SMSResponse> => {
   try {
-    const responses = await Promise.all(
-      phoneNumbers.map(async (phone) => {
-        const updatedMessage = message; // TODO: add url for user's qr code
+    const messageWithSignature = `${message}\n\nPreemly`;
 
-        const response = await axios.post(BULKGATE_API_URL, {
-          application_id: BULKGATE_APP_ID,
-          application_token: BULKGATE_APP_TOKEN,
-          number: phone,
-          text: updatedMessage,
-        });
-        return response.data;
+    Promise.all(
+      phoneNumbers.map(async (phone) => {
+        try {
+          const response = await axios.post(BULKGATE_API_URL, {
+            application_id: BULKGATE_APP_ID,
+            application_token: BULKGATE_APP_TOKEN,
+            number: phone,
+            text: messageWithSignature,
+            sender_id: 'Preemly',
+            sender_id_value: 'Preemly'
+          });
+          console.log(`SMS successfully sent to ${phone}`);
+          return response.data;
+        } catch (error) {
+          console.error(`Error sending SMS to ${phone}:`, error);
+          return null;
+        }
       })
-    );
+    ).catch((error) => {
+      console.error('Error in bulk SMS sending process:', error);
+    });
 
     return {
       data: {
-        status: 'success',
-        message: `SMS sent successfully to ${responses.length} recipients`,
+        status: 'processing',
+        message: `SMS queued for sending to ${phoneNumbers.length} recipients`,
       },
     };
   } catch (error) {
-    throw new Error(`SMS sending error: ${error instanceof Error
-      ? error.message
+    throw new Error(`SMS preparation error: ${error instanceof Error 
+      ? error.message 
       : 'Internal server error'}`
     );
   }
