@@ -32,7 +32,7 @@ export const sendSMS = async (phoneNumbers: string[], message: string): Promise<
             application_token: BULKGATE_APP_TOKEN,
             number: phone,
             text: messageWithSignature,
-            sender_id: 'text',
+            sender_id: 'gProfile',
             sender_id_value: BULKGATE_SENDER_ID
           });
           console.log(`SMS successfully sent to ${phone}`);
