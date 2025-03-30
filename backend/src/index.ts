@@ -11,6 +11,7 @@ import userRoutes from './routes/user.routes';
 import openaiAssistantRoutes from './routes/openai-assistant.routes';
 import taskRoutes from './routes/task.routes';
 import { startEmailScheduler } from './services/email-scheduler.service';
+import smsRoutes from './routes/sms.routes';
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.use('/api/mail', mailRoutes);
 app.use('/api/openai', openaiAssistantRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/sms', smsRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err.message === 'Not allowed by CORS') {
