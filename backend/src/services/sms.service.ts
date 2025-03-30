@@ -14,7 +14,7 @@ const BULKGATE_API_URL = 'https://portal.bulkgate.com/api/1.0/simple/transaction
 const BULKGATE_APP_ID = process.env.BULKGATE_APP_ID;
 const BULKGATE_APP_TOKEN = process.env.BULKGATE_APP_TOKEN;
 const BULKGATE_SENDER_ID = 'Preemly';
-const BULKGATE_SENDER_ID_VALUE = process.env.BULKGATE_SENDER_ID_VALUE;
+// const BULKGATE_SENDER_ID_VALUE = process.env.BULKGATE_SENDER_ID_VALUE;
 
 if (!BULKGATE_APP_ID || !BULKGATE_APP_TOKEN) {
   throw new Error('BULKGATE_APP_ID and BULKGATE_APP_TOKEN must be defined in the environment variables.');
@@ -33,7 +33,7 @@ export const sendSMS = async (phoneNumbers: string[], message: string): Promise<
             number: phone,
             text: messageWithSignature,
             sender_id: BULKGATE_SENDER_ID,
-            sender_id_value: BULKGATE_SENDER_ID_VALUE
+            sender_id_value: BULKGATE_SENDER_ID
           });
           console.log(`SMS successfully sent to ${phone}`);
           return response.data;
