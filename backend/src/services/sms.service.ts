@@ -13,8 +13,8 @@ interface SMSResponse {
 const BULKGATE_API_URL = 'https://portal.bulkgate.com/api/1.0/simple/transactional';
 const BULKGATE_APP_ID = process.env.BULKGATE_APP_ID;
 const BULKGATE_APP_TOKEN = process.env.BULKGATE_APP_TOKEN;
-const BULKGATE_SENDER_ID = 'gProfile';
-const BULKGATE_SENDER_ID_VALUE = 'Preemly';
+const BULKGATE_SENDER_ID = 16407;
+const BULKGATE_SENDER_ID_VALUE = 'gText';
 
 if (!BULKGATE_APP_ID || !BULKGATE_APP_TOKEN) {
   throw new Error('BULKGATE_APP_ID and BULKGATE_APP_TOKEN must be defined in the environment variables.');
