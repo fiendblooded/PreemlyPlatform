@@ -2,10 +2,11 @@ import { Router } from 'express';
 import {
   sendMailController,
   scheduleReminderEmailsController,
-  getScheduledEmailsController,
   updateEmailStatusController,
-  unsubscribeController,
-} from '../controllers/mail.controller';
+  getScheduledEmailsController,
+  unsubscribeController
+} from './mail.controller';
+
 
 const router = Router();
 

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import Invoice from '../models/invoice.model';
-import Event from '../models/event.model';
-import cloudinary from '../config/cloudinary';
+import Invoice from '../../models/invoice.model';
+import Event from '../../models/event.model';
+import cloudinary from '../../config/cloudinary';
 
 export const uploadInvoice = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;

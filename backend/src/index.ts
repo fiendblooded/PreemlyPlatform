@@ -3,15 +3,17 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import { connectDB } from './config/db';
-import eventRoutes from './routes/event.routes';
-import reviewRoutes from './routes/reviews.routers';
-import guestRoutes from './routes/guest.routes';
-import mailRoutes from './routes/mail.routes';
-import userRoutes from './routes/user.routes';
-import openaiAssistantRoutes from './routes/openai-assistant.routes';
-import taskRoutes from './routes/task.routes';
-import { startEmailScheduler } from './services/email-scheduler.service';
-import smsRoutes from './routes/sms.routes';
+
+import { startEmailScheduler } from './domains/mails/mail-scheduler.service';
+
+import reviewRoutes from './domains/reviews/reviews.router';
+import guestRoutes from './domains/guests/guests.router';
+import userRoutes from './domains/users/users.router';
+import openaiAssistantRoutes from './domains/openai-wrapper/openai-wrapper.router';
+import taskRoutes from './domains/tasks/tasks.router';
+import smsRoutes from './domains/sms/sms.router';
+import eventRoutes from './domains/events/events.router';
+import mailRoutes from './domains/mails/mail.router';
 
 dotenv.config();
 
@@ -45,14 +47,14 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use('/api/events', eventRoutes);
-app.use('/api/guests', guestRoutes);
+app.use('/api/events', eventRoutes); // 
+app.use('/api/guests', guestRoutes); // 
 app.use('/api/users', userRoutes);
-app.use('/api/mail', mailRoutes);
+app.use('/api/mail', mailRoutes); // 
 app.use('/api/openai', openaiAssistantRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/reviews', reviewRoutes);
-app.use('/api/sms', smsRoutes);
+app.use('/api/sms', smsRoutes); //
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err.message === 'Not allowed by CORS') {

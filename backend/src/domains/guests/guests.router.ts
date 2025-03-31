@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import * as guestController from '../controllers/guest.controller';
-
+import * as guestController from './guests.controller';
 const router = Router();
 
 router.post('/', guestController.createGuest);

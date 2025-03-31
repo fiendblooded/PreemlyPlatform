@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { sendSMS } from '../services/sms.service';
+import { sendSMS } from './sms.service';
 
 export const sendSMSController = async (req: Request, res: Response): Promise<void> => {
   const { template, phoneNumbers } = req.body;

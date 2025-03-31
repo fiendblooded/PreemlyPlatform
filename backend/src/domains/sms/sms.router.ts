@@ -1,5 +1,5 @@
 import express from 'express';
-import { sendSMSController } from '../controllers/sms.controller';
+import { sendSMSController } from './sms.controller';
 
 const router = express.Router();
 

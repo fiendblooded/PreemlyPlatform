@@ -1,7 +1,7 @@
 import { Response } from 'express';
-import Task from '../models/task.model';
-import Event from '../models/event.model';
-import { AuthRequest } from '../types/auth.types';
+import Task from '../../models/task.model';
+import Event from '../../models/event.model';
+import { AuthRequest } from '../../types/auth.types';
 
 // Define filter interface
 interface TaskFilter {

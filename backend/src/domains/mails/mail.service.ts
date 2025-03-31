@@ -1,7 +1,7 @@
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 import dotenv from 'dotenv';
-import type { MailgunClientOptions, EmailResponse, EmailPayload } from '../types/mail.types';
+import type { MailgunClientOptions, EmailResponse, EmailPayload } from '../../types/mail.types';
 
 dotenv.config();
 

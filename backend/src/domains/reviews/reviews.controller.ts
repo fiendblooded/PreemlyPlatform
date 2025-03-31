@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { analyzeReviews } from '../services/openai.service';
-import Event from '../models/event.model';
+import { analyzeReviews } from './openai.service';
+import Event from '../../models/event.model';
 
 export const analyzeCustomerReviews = async (req: Request, res: Response): Promise<void> => {
   const { eventId, reviews } = req.body;

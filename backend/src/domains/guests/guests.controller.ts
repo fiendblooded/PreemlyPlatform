@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import Guest from '../models/guest.model';
-import Event from '../models/event.model';
+import Guest from '../../models/guest.model';
+import Event from '../../models/event.model';
 import { ObjectId } from 'mongodb';
 
 export const createGuest = async (req: Request, res: Response): Promise<void> => {

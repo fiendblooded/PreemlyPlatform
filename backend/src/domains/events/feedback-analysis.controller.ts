@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Request, Response } from 'express';
-import Event from '../models/event.model';
-import { analyzeStructuredFeedback } from '../services/openai.service';
+import Event from '../../models/event.model';
+import { analyzeStructuredFeedback } from './openai.service';
 
 export const analyzeEventFeedback = async (req: Request, res: Response): Promise<void> => {
   try {

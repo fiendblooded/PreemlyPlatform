@@ -1,8 +1,8 @@
 import cron from 'node-cron';
-import ScheduledEmail from '../models/scheduledEmail.model';
-import sendEmail from './mailgun.service';
-import Guest from '../models/guest.model';
-import Event from '../models/event.model';
+import ScheduledEmail from '../../models/scheduledEmail.model';
+import sendEmail from './mail.service';
+import Guest from '../../models/guest.model';
+import Event from '../../models/event.model';
 
 export function startEmailScheduler() {
   // Run every hour

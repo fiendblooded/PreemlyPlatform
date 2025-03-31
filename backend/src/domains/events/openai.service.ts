@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import { InvoiceAnalysis } from '../types/event.types';
+import { InvoiceAnalysis } from '../../types/event.types';
 
 dotenv.config();
 
