@@ -5,7 +5,7 @@ import Invoice from '../../models/invoice.model';
 import cloudinary from '../../config/cloudinary';
 import { uploadImage } from '../../config/cloudinary';
 import { extractPublicId } from '../../utils/helpers';
-import { extractTextFromPdf } from '../../services/pdf.service';
+import { extractTextFromPdf } from './pdf.service';
 import xlsx from 'xlsx';
 import {
   analyzeInvoices,
