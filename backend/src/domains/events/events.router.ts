@@ -27,12 +27,6 @@ router.post('/:id/feedback', eventsController.addEventFeedback);
 router.get('/:id/feedback-form', verifyUser, eventsController.getFeedbackForm);
 router.put('/:id/feedback-form', verifyUser, eventsController.updateFeedbackForm);
 
-// Invoice routes
-router.get('/:id/invoices', verifyUser, eventsController.getEventInvoices);
-router.post('/:id/invoices', verifyUser, upload.single('invoice'), eventsController.uploadInvoice);
-router.delete('/invoices/:id', verifyUser, eventsController.deleteInvoice);
-router.post('/:id/invoices/analyze', verifyUser, eventsController.analyzeEventInvoices);
-
 // Analysis routes
 router.post('/:id/feedback/analyze', verifyUser, eventsController.analyzeEventFeedback);
 
