@@ -6,7 +6,6 @@ import { ObjectId } from 'mongodb';
 export const createGuest = async (req: Request, res: Response): Promise<void> => {
   try {
     const { eventId, fullName, email, age, attendance_status, phoneNumber, gdpr_consent } = req.body;
-    console.log({ gdpr_consent });
     const event = await Event.findById(eventId);
     if (!event) {
       res.status(404).json({ success: false, message: 'Event not found' });
@@ -118,6 +117,24 @@ export const updateReminderEmailDate = async (req: Request, res: Response): Prom
     res.json({ success: true, data: guest });
   } catch (error) {
     console.error('Error in Update Reminder Email Date:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+export const getGuestById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const guest = await Guest.findById(req.params.id);
+    if (!guest) {
+      res.status(404).json({ success: false, message: 'Guest not found' });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: guest,
+    });
+  } catch (error) {
+    console.error('Error in Get Guest:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };

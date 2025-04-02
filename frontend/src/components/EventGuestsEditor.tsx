@@ -1020,6 +1020,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   const [reminderTime, setReminderTime] = useState("12:00"); // Default to noon
   const [showSendEmailDialog, setShowSendEmailDialog] = useState(false);
   const [showDeleteGuestsDialog, setShowDeleteGuestsDialog] = useState(false);
+  const [showSendSMSDialog, setShowSendSMSDialog] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showUploadArea, setShowUploadArea] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1075,6 +1076,23 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   const closeSendEmailDialog = () => setShowSendEmailDialog(false);
   const openDeleteGuestsDialog = () => setShowDeleteGuestsDialog(true);
   const closeDeleteGuestsDialog = () => setShowDeleteGuestsDialog(false);
+  const openSendSMSDialog = () => {
+    // Check if any selected guests have phone numbers
+    const guestsWithPhones = selectedGuests.filter((guestId) => {
+      const guest = event.guests.find((g) => g._id === guestId);
+      return guest?.phoneNumber;
+    });
+
+    if (guestsWithPhones.length === 0) {
+      addToast("No selected guests have phone numbers", ToastType.ERROR);
+      return;
+    }
+
+    setShowSendSMSDialog(true);
+  };
+  const closeSendSMSDialog = () => {
+    setShowSendSMSDialog(false);
+  };
 
   const sendGuestEmails = async (
     selectedGuests: string[],
@@ -1613,6 +1631,52 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       guest.email.toLowerCase().includes(filterText.toLowerCase())
   );
   console.log(event.guests);
+
+  const sendSMSToGuests = async () => {
+    try {
+      // Filter guests with phone numbers
+      const guestsWithPhones = selectedGuests.filter((guestId) => {
+        const guest = event.guests.find((g) => g._id === guestId);
+        return guest?.phoneNumber;
+      });
+
+      if (guestsWithPhones.length === 0) {
+        addToast("No selected guests have phone numbers", ToastType.ERROR);
+        return;
+      }
+
+      // Get phone numbers for selected guests
+      const phoneNumbers = guestsWithPhones
+        .map((guestId) => {
+          const guest = event.guests.find((g) => g._id === guestId);
+          return guest?.phoneNumber;
+        })
+        .filter((phone): phone is string => !!phone);
+
+      // Create personalized messages with invite links
+      const messages = guestsWithPhones.map((guestId) => {
+        const guest = event.guests.find((g) => g._id === guestId);
+        const inviteLink = `https://platform.preemly.eu/invites/${event._id}/${guestId}`;
+        return `Hi ${guest?.fullName}, you've been invited to ${event.title}! Get your ticket here: ${inviteLink}`;
+      });
+
+      await axiosInstance.post("/sms/send", {
+        template: messages[0], // Using the first message as template since we're sending to multiple numbers
+        phoneNumbers,
+      });
+
+      addToast(
+        `SMS sent successfully to ${phoneNumbers.length} guests`,
+        ToastType.SUCCESS
+      );
+      setSelectedGuests([]);
+      closeSendSMSDialog();
+    } catch (error) {
+      console.error("Failed to send SMS:", error);
+      addToast("Failed to send SMS. Please try again.", ToastType.ERROR);
+    }
+  };
+
   return (
     <GuestsWrapper>
       <GuestTableHeaderContainer>
@@ -2246,6 +2310,13 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
             Email selected
           </SecondaryButton>
 
+          <SecondaryButton
+            onClick={openSendSMSDialog}
+            disabled={selectedGuests.length === 0}
+          >
+            SMS selected
+          </SecondaryButton>
+
           {!isEventInPast() && (
             <SecondaryButton
               onClick={openReminderDialog}
@@ -2301,6 +2372,41 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                 style={{ backgroundColor: "rgb(220, 53, 69)" }} // Red color for delete button
               >
                 Delete Guests
+              </PrimaryButton>
+            </DialogButtons>
+          </DialogContent>
+        </DialogOverlay>
+      )}
+      {showSendSMSDialog && (
+        <DialogOverlay onClick={closeSendSMSDialog}>
+          <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogTitle>Send SMS to Selected Guests</DialogTitle>
+            <DialogDescription>
+              You are about to send SMS messages to{" "}
+              {
+                selectedGuests.filter((guestId) => {
+                  const guest = event.guests.find((g) => g._id === guestId);
+                  return guest?.phoneNumber;
+                }).length
+              }{" "}
+              selected guests with phone numbers. Each guest will receive a
+              personalized message with their name and event details.
+            </DialogDescription>
+
+            <ReminderPreview>
+              <strong>Message Example:</strong>
+              <p style={{ marginTop: "8px", color: "#4b5563" }}>
+                Hi John Doe, you've been invited to {event.title}! Get your
+                ticket here: [Invite Link]
+              </p>
+            </ReminderPreview>
+
+            <DialogButtons>
+              <SecondaryButton onClick={closeSendSMSDialog} width={120}>
+                Cancel
+              </SecondaryButton>
+              <PrimaryButton onClick={sendSMSToGuests} width={180}>
+                Send SMS
               </PrimaryButton>
             </DialogButtons>
           </DialogContent>

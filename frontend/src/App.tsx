@@ -21,6 +21,7 @@ import VirtualSpace from "./components/VirtualSpace";
 import EventDetail from "./components/EventDetail";
 import Financials from "./components/Financials";
 import Tasks from "./components/Tasks";
+import InvitePage from "./components/InvitePage";
 
 export const GlobalStyle = createGlobalStyle`
   /* Font loading optimization */
@@ -164,11 +165,18 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const tabletMode = isTablet();
   // Define routes where the sidebar should not be displayed
-  const noSidebarRoutes = ["/login", "/welcome", "/preembot", "/space"];
+  const noSidebarRoutes = [
+    "/login",
+    "/welcome",
+    "/preembot",
+    "/space",
+    "/invites",
+  ];
   const isFullWidth =
     noSidebarRoutes.includes(location.pathname) ||
     location.pathname.startsWith("/welcome/") ||
-    location.pathname.startsWith("/space/");
+    location.pathname.startsWith("/space/") ||
+    location.pathname.startsWith("/invites/");
 
   // Don't show chatbot on login, welcome, or dedicated chatbot page
   // const hideChatbot =
@@ -292,6 +300,7 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="/invites/:eventId/:guestId" element={<InvitePage />} />
         </Routes>
       </ContentWrapper>
 
