@@ -16,4 +16,8 @@ router.delete('/:id', verifyUser, userController.deleteUser);
 // Update user's name
 router.patch('/:id/name', verifyUser, userController.updateUserName);
 
+// Subscription routes
+router.post('/subscription', userController.updateSubscriptionLevel);
+router.get('/subscription', verifyUser, userController.getUserSubscription);
+
 export default router;

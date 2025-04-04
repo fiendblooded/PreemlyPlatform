@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken';
 import jwksRsa from 'jwks-rsa';
 import type { AuthRequest } from '../types/auth.types';
 import dotenv from 'dotenv';
+import { UsersService } from '../domains/users/users.service';
+
+const usersService = new UsersService();
 
 dotenv.config();
 
@@ -17,7 +20,7 @@ const client = jwksRsa({
   jwksUri: `https://${auth0Domain}/.well-known/jwks.json`,
 });
 
-export const verifyUser = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const verifyUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
     return res.status(401).json({
@@ -46,7 +49,7 @@ export const verifyUser = (req: AuthRequest, res: Response, next: NextFunction) 
       issuer: `https://${auth0Domain}/`,
       algorithms: ['RS256'],
     },
-    (err, decoded) => {
+    async (err, decoded) => {
       if (err) {
         console.error('JWT verification failed:', err);
         return res.status(401).json({
@@ -55,6 +58,13 @@ export const verifyUser = (req: AuthRequest, res: Response, next: NextFunction) 
         });
       }
       req.user = decoded as AuthRequest['user'];
+      
+      // Добавляем уровень подписки
+      if (req.user && req.user.sub) {
+        const subscriptionLevel = await usersService.getUserSubscriptionLevel(req.user.sub);
+        req.user.subscriptionLevel = subscriptionLevel;
+      }
+      
       next();
     },
   );

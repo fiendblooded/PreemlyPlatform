@@ -18,6 +18,12 @@ import invoiceRoutes from './domains/invoices/invoices.route';
 
 dotenv.config();
 
+export const SUBSCRIPTION_API_KEY = process.env.SUBSCRIPTION_API_KEY
+  || 'default-subscription-key-change-in-prod';
+export const ALLOWED_TILDA_ORIGINS = [
+  'https://project123456.tilda.ws'
+];
+
 const app: Application = express();
 
 const corsOptions: cors.CorsOptions = {
@@ -73,7 +79,6 @@ app.listen(PORT, () => {
   connectDB();
   console.log(`Server is running on PORT:${PORT}`);
 
-  // Start the email scheduler
   startEmailScheduler();
   console.log('Email scheduler started');
 });

@@ -32,6 +32,8 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
   }
 
   try {
+    console.log(`Создание события пользователем с уровнем подписки: ${req.user.subscriptionLevel}`);
+    
     const newEvent = await eventsService.createEvent(event, req.user.sub);
     res.json({
       success: true,
