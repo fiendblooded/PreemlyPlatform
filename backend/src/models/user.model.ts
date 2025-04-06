@@ -5,7 +5,6 @@ export interface User {
   auth0Id: string;
   subscriptionLevel: SubscriptionLevel;
   updatedAt: Date;
-  expiresAt: Date | null;
 }
 
 const UserSchema = new Schema<User>({
@@ -15,8 +14,7 @@ const UserSchema = new Schema<User>({
     enum: Object.values(SubscriptionLevel),
     default: SubscriptionLevel.FREE
   },
-  updatedAt: { type: Date, default: Date.now },
-  expiresAt: { type: Date, default: null }
+  updatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
 export default mongoose.model<User>('User', UserSchema); 
