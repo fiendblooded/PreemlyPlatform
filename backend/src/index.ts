@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import { connectDB } from './config/db';
 
 import { startEmailScheduler } from './domains/mails/mail-scheduler.service';
+import { startSubscriptionChecker } from './scheduler/subscription-checker';
 
 import reviewRoutes from './domains/reviews/reviews.router';
 import guestRoutes from './domains/guests/guests.router';
@@ -81,4 +82,7 @@ app.listen(PORT, () => {
 
   startEmailScheduler();
   console.log('Email scheduler started');
+  
+  startSubscriptionChecker();
+  console.log('Subscription checker started');
 });

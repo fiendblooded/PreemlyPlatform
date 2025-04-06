@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import multer from 'multer';
 import { EventsService } from '../events/events.service';
+import { AuthRequest } from '../../types/auth.types';
+import { subscriptionLimitsService } from '../../services/subscription-limits.service';
+import { usageStatsService } from '../../services/usage-stats.service';
+import { SubscriptionLevel } from '../../types/subscription.types';
 
 const eventsService = new EventsService();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -55,13 +59,42 @@ export const deleteInvoice = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const analyzeEventInvoices = async (req: Request, res: Response): Promise<void> => {
+export const analyzeEventInvoices = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req?.user?.sub) {
+      res.status(401).json({
+        success: false,
+        message: 'Authorization required',
+      });
+      return;
+    }
+    
+    const auth0Id = req.user.sub;
+    const subscriptionLevel = req.user.subscriptionLevel || 'FREE';
+    const currentInvoicesCount = await usageStatsService.getInvoicesAnalyzedCount(auth0Id);
+    
+    const checkResult = subscriptionLimitsService.canAnalyzeInvoices(
+      subscriptionLevel as SubscriptionLevel, 
+      currentInvoicesCount
+    );
+    
+    if (!checkResult.allowed) {
+      res.status(403).json({
+        success: false,
+        message: checkResult.message
+      });
+      return;
+    }
+    
     const updatedEvent = await eventsService.analyzeEventInvoices(req.params.id);
     if (!updatedEvent) {
       res.status(404).json({ success: false, message: 'Event not found' });
       return;
     }
+    
+    const invoicesCount = updatedEvent.invoiceAnalysis?.budgetSummary?.invoiceCount || 1;
+    await usageStatsService.incrementInvoicesAnalyzed(auth0Id, invoicesCount);
+    
     res.status(200).json({
       success: true,
       data: updatedEvent.invoiceAnalysis,

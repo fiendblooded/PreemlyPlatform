@@ -6,6 +6,9 @@ import multer from 'multer';
 import { EventsService } from './events.service';
 import { AuthRequest } from '../../types/auth.types';
 import { processEventDescription } from '../../domains/openai-wrapper/openai-wrapper.controller'; // TODO: move to events.controller
+import { subscriptionLimitsService } from '../../services/subscription-limits.service';
+import { usageStatsService } from '../../services/usage-stats.service';
+import { SubscriptionLevel } from '../../types/subscription.types';
 
 import { analyzeReviews } from './openai.service';
 
@@ -32,9 +35,29 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
   }
 
   try {
-    console.log(`Создание события пользователем с уровнем подписки: ${req.user.subscriptionLevel}`);
+    const auth0Id = req.user.sub;
+    const subscriptionLevel = req.user.subscriptionLevel || 'FREE';
+    console.log(`Creating event by user with subscription level: ${subscriptionLevel}`);
     
-    const newEvent = await eventsService.createEvent(event, req.user.sub);
+    const guestsCount = event.guests ? event.guests.length : 0;
+    
+    const checkResult = subscriptionLimitsService.canCreateEventWithGuests(
+      subscriptionLevel as SubscriptionLevel, 
+      guestsCount
+    );
+    
+    if (!checkResult.allowed) {
+      res.status(403).json({
+        success: false,
+        message: checkResult.message
+      });
+      return;
+    }
+    
+    const newEvent = await eventsService.createEvent(event, auth0Id);
+    
+    await usageStatsService.incrementEventStats(auth0Id, guestsCount);
+    
     res.json({
       success: true,
       message: { _id: newEvent._id },

@@ -5,6 +5,8 @@ import { UsersService } from './users.service';
 import { SubscriptionLevel } from '../../types/subscription.types';
 import { AuthRequest } from '../../types/auth.types';
 import { SUBSCRIPTION_API_KEY, ALLOWED_TILDA_ORIGINS } from '../../index';
+import { usageStatsService } from '../../services/usage-stats.service';
+import { subscriptionLimitsService } from '../../services/subscription-limits.service';
 
 const usersService = new UsersService();
 
@@ -160,7 +162,7 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
       
       res.status(403).json({
         success: false,
-        message: 'Доступ запрещен'
+        message: 'Access denied'
       });
       return;
     }
@@ -170,7 +172,7 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
     if (!userId || !subscriptionLevel || !Object.values(SubscriptionLevel).includes(subscriptionLevel)) {
       res.status(400).json({
         success: false,
-        message: 'Предоставьте все необходимые данные в правильном формате',
+        message: 'Please provide all required data in the correct format',
       });
       return;
     }
@@ -188,7 +190,7 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
     console.error('Error updating subscription level:', error);
     res.status(500).json({
       success: false,
-      message: 'Ошибка сервера',
+      message: 'Server Error',
     });
   }
 };
@@ -198,7 +200,7 @@ export const getUserSubscription = async (req: AuthRequest, res: Response): Prom
     if (!req?.user?.sub) {
       res.status(401).json({
         success: false,
-        message: 'Требуется ID пользователя',
+        message: 'User ID is required',
       });
       return;
     }
@@ -213,7 +215,56 @@ export const getUserSubscription = async (req: AuthRequest, res: Response): Prom
     console.error('Error getting subscription level:', error);
     res.status(500).json({
       success: false,
-      message: 'Ошибка сервера',
+      message: 'Server Error',
+    });
+  }
+};
+
+export const getSubscriptionLimits = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!req?.user?.sub) {
+      res.status(401).json({
+        success: false,
+        message: 'Authorization required',
+      });
+      return;
+    }
+    
+    const subscriptionLevel = req.user.subscriptionLevel || 'FREE';
+    const auth0Id = req.user.sub;
+    
+    // Get subscription limits information
+    const limitsInfo = subscriptionLimitsService.getLimitsInfo(subscriptionLevel as SubscriptionLevel);
+    
+    // Get usage statistics
+    const currentStats = await Promise.all([
+      usageStatsService.getEventStats(auth0Id),
+      usageStatsService.getReviewsAnalyzedCount(auth0Id),
+      usageStatsService.getInvoicesAnalyzedCount(auth0Id),
+      usageStatsService.getEmailsSentCount(auth0Id)
+    ]);
+    
+    const [eventStats, reviewsCount, invoicesCount, emailsCount] = currentStats;
+    
+    res.json({
+      success: true,
+      data: {
+        subscriptionLevel,
+        limits: limitsInfo,
+        currentUsage: {
+          events: eventStats.eventsCreated,
+          guests: eventStats.guestsTotal,
+          reviewsAnalyzed: reviewsCount,
+          invoicesAnalyzed: invoicesCount,
+          emailsSent: emailsCount
+        }
+      },
+    });
+  } catch (error) {
+    console.error('Error getting subscription limits:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
     });
   }
 };
