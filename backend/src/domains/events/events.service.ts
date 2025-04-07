@@ -12,6 +12,18 @@ import {
   analyzeStructuredFeedback,
   rewriteEventDescription
 } from './openai.service';
+import { SUBSCRIPTION_GUEST_LIMITS } from '../../types/subscription.types';
+import { UsersService } from '../users/users.service';
+import mongoose from 'mongoose';
+
+const usersService = new UsersService();
+
+interface GuestData {
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  age: number;
+}
 
 export class EventsService {
   // Event CRUD operations
@@ -132,68 +144,79 @@ export class EventsService {
   }
 
   // Guest operations
-  async updateEventGuests(id: string, guests: any[]) {
-    const createdGuests = await Guest.insertMany(guests);
-    const guestIds = createdGuests.map((guest) => guest._id);
+  async updateEventGuests(eventId: string, guests: any[], userId: string) {
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return null;
+    }
 
-    return await Event.findByIdAndUpdate(
-      id,
-      { $addToSet: { guests: { $each: guestIds } } },
-      { new: true },
-    ).populate('guests');
+    // Получаем уровень подписки пользователя
+    const subscriptionLevel = await usersService.getUserSubscriptionLevel(userId);
+    const guestLimit = SUBSCRIPTION_GUEST_LIMITS[subscriptionLevel];
+
+    // Проверяем, не превышает ли количество гостей лимит
+    if (guests.length > guestLimit) {
+      throw new Error(
+        `Превышен лимит количества гостей для вашего уровня подписки. 
+        Текущий лимит: ${guestLimit} гостей. 
+        Попробуйте обновить подписку для увеличения лимита.`
+      );
+    }
+
+    event.guests = guests;
+    return await event.save();
   }
 
-  async uploadGuestsFromExcel(id: string, fileBuffer: Buffer) {
+  private async readGuestsFromExcel(fileBuffer: Buffer): Promise<GuestData[]> {
     const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
-
     const dataWithoutHeader = data.slice(1);
 
     if (dataWithoutHeader.length === 0) {
       throw new Error('No guest data found in the Excel file');
     }
 
-    const validGuests: any[] = [];
-    const invalidRows = [];
+    const guests = dataWithoutHeader.map((row: any) => ({
+      fullName: row[0]?.toString().trim(),
+      email: row[1]?.toString().trim(),
+      phoneNumber: row[2]?.toString().trim() || '',
+      age: 0
+    })).filter(guest => guest.fullName && guest.email);
 
-    dataWithoutHeader.forEach((row: any, index: number) => {
-      if (!row || row.length === 0 || (row.length === 1 && !row[0])) {
-        return;
-      }
+    return guests;
+  }
 
-      const fullName = row[0]?.toString().trim();
-      const email = row[1]?.toString().trim();
-
-      if (fullName && email) {
-        validGuests.push({
-          fullName,
-          email,
-          phoneNumber: row[2]?.toString().trim() || '',
-          age: 0,
-        });
-      } else {
-        invalidRows.push({
-          rowNumber: index + 2,
-          fullName: fullName || '[MISSING]',
-          email: email || '[MISSING]',
-        });
-      }
-    });
-
-    if (invalidRows.length > 0) {
-      throw new Error('Some rows are missing required fields');
+  async uploadGuestsFromExcel(eventId: string, fileBuffer: Buffer, userId: string) {
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return null;
     }
 
-    const createdGuests = await Guest.insertMany(validGuests);
-    const guestIds = createdGuests.map((guest) => guest._id);
+    // Читаем Excel файл и получаем список гостей
+    const guestData = await this.readGuestsFromExcel(fileBuffer);
 
-    return await Event.findByIdAndUpdate(
-      id,
-      { $addToSet: { guests: { $each: guestIds } } },
-      { new: true },
-    ).populate('guests');
+    // Получаем уровень подписки пользователя
+    const subscriptionLevel = await usersService.getUserSubscriptionLevel(userId);
+    const guestLimit = SUBSCRIPTION_GUEST_LIMITS[subscriptionLevel];
+
+    // Проверяем, не превышает ли количество гостей лимит
+    if (guestData.length > guestLimit) {
+      throw new Error(
+        `Превышен лимит количества гостей для вашего уровня подписки. 
+        Текущий лимит: ${guestLimit} гостей. 
+        Попробуйте обновить подписку для увеличения лимита.`
+      );
+    }
+
+    // Создаем гостей в базе данных
+    const createdGuests = await Guest.insertMany(guestData);
+    const guestIds = createdGuests.map(guest => guest._id) as mongoose.Types.ObjectId[];
+
+    // Обновляем список гостей в событии
+    event.guests = guestIds;
+    return await event.save();
   }
 
   async downloadGuestsToExcel(id: string) {

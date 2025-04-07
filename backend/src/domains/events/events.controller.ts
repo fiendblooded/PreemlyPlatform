@@ -175,8 +175,17 @@ export const updateEventPoster = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const updateEventGuests = async (req: Request, res: Response): Promise<void> => {
+export const updateEventGuests = async (req: AuthRequest, res: Response): Promise<void> => {
   const { guests } = req.body;
+  const userId = req.user?.sub;
+
+  if (!userId) {
+    res.status(401).json({
+      success: false,
+      message: 'Требуется авторизация',
+    });
+    return;
+  }
 
   if (!Array.isArray(guests)) {
     res.status(400).json({
@@ -187,7 +196,7 @@ export const updateEventGuests = async (req: Request, res: Response): Promise<vo
   }
 
   try {
-    const updatedEvent = await eventsService.updateEventGuests(req.params.id, guests);
+    const updatedEvent = await eventsService.updateEventGuests(req.params.id, guests, userId);
     if (!updatedEvent) {
       res.status(404).json({ success: false, message: 'Event not found' });
       return;
@@ -198,11 +207,24 @@ export const updateEventGuests = async (req: Request, res: Response): Promise<vo
     });
   } catch (error) {
     console.error('Error updating event guests:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({ 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Server Error' 
+    });
   }
 };
 
-export const uploadGuestsFromExcel = async (req: Request, res: Response): Promise<void> => {
+export const uploadGuestsFromExcel = async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user?.sub;
+
+  if (!userId) {
+    res.status(401).json({
+      success: false,
+      message: 'Требуется авторизация',
+    });
+    return;
+  }
+
   upload.single('file')(req, res, async (err) => {
     if (err) {
       res.status(400).json({ success: false, message: 'File upload error' });
@@ -215,7 +237,11 @@ export const uploadGuestsFromExcel = async (req: Request, res: Response): Promis
     }
 
     try {
-      const updatedEvent = await eventsService.uploadGuestsFromExcel(req.params.id, req.file.buffer);
+      const updatedEvent = await eventsService.uploadGuestsFromExcel(
+        req.params.id, 
+        req.file.buffer,
+        userId
+      );
       if (!updatedEvent) {
         res.status(404).json({ success: false, message: 'Event not found' });
         return;
