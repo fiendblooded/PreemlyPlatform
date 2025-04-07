@@ -1,11 +1,21 @@
 /* eslint-disable indent */
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '../../types/auth.types';
 import Event from '../../models/event.model';
 import { analyzeStructuredFeedback } from './openai.service';
+import { SubscriptionLevel } from '../../types/subscription.types';
 
-export const analyzeEventFeedback = async (req: Request, res: Response): Promise<void> => {
+export const analyzeEventFeedback = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const eventId = req.params.id;
+    const subscription = req.user?.subscriptionLevel || SubscriptionLevel.FREE;
+    
+    if (subscription === SubscriptionLevel.FREE
+      || subscription === SubscriptionLevel.LITE) {
+        throw new Error(
+          'Your subscription level is not appropriate for this functionality.'
+        );
+      }
 
     // Find the event
     const event = await Event.findById(eventId);

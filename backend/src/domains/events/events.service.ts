@@ -150,16 +150,14 @@ export class EventsService {
       return null;
     }
 
-    // Получаем уровень подписки пользователя
     const subscriptionLevel = await usersService.getUserSubscriptionLevel(userId);
     const guestLimit = SUBSCRIPTION_GUEST_LIMITS[subscriptionLevel];
 
-    // Проверяем, не превышает ли количество гостей лимит
     if (guests.length > guestLimit) {
       throw new Error(
-        `Превышен лимит количества гостей для вашего уровня подписки. 
-        Текущий лимит: ${guestLimit} гостей. 
-        Попробуйте обновить подписку для увеличения лимита.`
+        `The guest limit for your subscription level has been exceeded.
+        Current limit: ${guestLimit} guests.
+        Try upgrading your subscription to increase the limit.`
       );
     }
 

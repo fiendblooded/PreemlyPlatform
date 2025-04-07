@@ -1,13 +1,25 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '../../types/auth.types';
 import Event from '../../models/event.model';
 import Invoice from '../../models/invoice.model';
 import { extractTextFromPdf } from './pdf.service';
 import { analyzeInvoices } from './openai.service';
+import { SubscriptionLevel } from '../../types/subscription.types';
 
-export const analyzeEventInvoices = async (req: Request, res: Response): Promise<void> => {
+export const analyzeEventInvoices = async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
 
   try {
+    const subscription = req.user?.subscriptionLevel || SubscriptionLevel.FREE;
+    
+    if (subscription === SubscriptionLevel.FREE
+      || subscription === SubscriptionLevel.LITE) {
+      throw new Error(
+        'Your subscription level is not appropriate for this functionality.'
+      );
+    }
+
+
     // Find the event and populate invoices
     const event = await Event.findById(id);
     if (!event) {
