@@ -178,7 +178,11 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
     const originInfo = origin || referer || 'unknown';
     console.log(`Subscription update: User=${userId}, Level=${subscriptionLevel}, Origin=${originInfo}`);
     
-    const updatedUser = await usersService.updateSubscriptionLevel(userId, subscriptionLevel);
+    // Добавляем месяц к текущей дате для subscriptionEndDate
+    const subscriptionEndDate = new Date();
+    subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
+    
+    const updatedUser = await usersService.updateSubscriptionLevel(userId, subscriptionLevel, subscriptionEndDate);
     
     res.json({
       success: true,
