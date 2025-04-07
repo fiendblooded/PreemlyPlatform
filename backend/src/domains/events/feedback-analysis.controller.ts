@@ -4,18 +4,34 @@ import { AuthRequest } from '../../types/auth.types';
 import Event from '../../models/event.model';
 import { analyzeStructuredFeedback } from './openai.service';
 import { SubscriptionLevel } from '../../types/subscription.types';
+import { UsersService } from '../users/users.service';
+
+const usersService = new UsersService();
 
 export const analyzeEventFeedback = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const eventId = req.params.id;
-    const subscription = req.user?.subscriptionLevel || SubscriptionLevel.FREE;
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Требуется авторизация',
+      });
+      return;
+    }
+
+    // Проверяем уровень подписки
+    const subscriptionLevel = await usersService.getUserSubscriptionLevel(userId);
+    const allowedLevels = [SubscriptionLevel.PLUS, SubscriptionLevel.PREMIUM, SubscriptionLevel.ENTERPRISE];
     
-    if (subscription === SubscriptionLevel.FREE
-      || subscription === SubscriptionLevel.LITE) {
-        throw new Error(
-          'Your subscription level is not appropriate for this functionality.'
-        );
-      }
+    if (!allowedLevels.includes(subscriptionLevel)) {
+      res.status(403).json({
+        success: false,
+        message: 'Анализ отзывов доступен только для подписок PLUS, PREMIUM и ENTERPRISE',
+      });
+      return;
+    }
 
     // Find the event
     const event = await Event.findById(eventId);

@@ -5,20 +5,34 @@ import Invoice from '../../models/invoice.model';
 import { extractTextFromPdf } from './pdf.service';
 import { analyzeInvoices } from './openai.service';
 import { SubscriptionLevel } from '../../types/subscription.types';
+import { UsersService } from '../users/users.service';
+
+const usersService = new UsersService();
 
 export const analyzeEventInvoices = async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
+  const userId = req.user?.sub;
 
   try {
-    const subscription = req.user?.subscriptionLevel || SubscriptionLevel.FREE;
-    
-    if (subscription === SubscriptionLevel.FREE
-      || subscription === SubscriptionLevel.LITE) {
-      throw new Error(
-        'Your subscription level is not appropriate for this functionality.'
-      );
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Требуется авторизация',
+      });
+      return;
     }
 
+    // Проверяем уровень подписки
+    const subscriptionLevel = await usersService.getUserSubscriptionLevel(userId);
+    const allowedLevels = [SubscriptionLevel.PLUS, SubscriptionLevel.PREMIUM, SubscriptionLevel.ENTERPRISE];
+    
+    if (!allowedLevels.includes(subscriptionLevel)) {
+      res.status(403).json({
+        success: false,
+        message: 'Анализ счетов доступен только для подписок PLUS, PREMIUM и ENTERPRISE',
+      });
+      return;
+    }
 
     // Find the event and populate invoices
     const event = await Event.findById(id);
