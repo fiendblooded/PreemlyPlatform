@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import multer from 'multer';
+// import multer from 'multer';
 import { EventsService } from '../events/events.service';
 
 const eventsService = new EventsService();
-const upload = multer({ storage: multer.memoryStorage() });
+// const upload = multer({ storage: multer.memoryStorage() });
 
 export const getEventInvoices = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -14,31 +14,24 @@ export const getEventInvoices = async (req: Request, res: Response): Promise<voi
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
-
 export const uploadInvoice = async (req: Request, res: Response): Promise<void> => {
-  upload.single('invoice')(req, res, async (err) => {
-    if (err) {
-      res.status(400).json({ success: false, message: 'File upload error' });
+  if (!req.file) {
+    res.status(400).json({ success: false, message: 'No file uploaded' });
+    return;
+  }
+
+  try {
+    const invoice = await eventsService.uploadInvoice(req.params.id, req.file, req.body);
+    if (!invoice) {
+      res.status(404).json({ success: false, message: 'Event not found' });
       return;
     }
 
-    if (!req.file) {
-      res.status(400).json({ success: false, message: 'No file uploaded' });
-      return;
-    }
-
-    try {
-      const invoice = await eventsService.uploadInvoice(req.params.id, req.file, req.body);
-      if (!invoice) {
-        res.status(404).json({ success: false, message: 'Event not found' });
-        return;
-      }
-      res.status(201).json({ success: true, data: invoice });
-    } catch (error) {
-      console.error('Error uploading invoice:', error);
-      res.status(500).json({ success: false, message: 'Server Error' });
-    }
-  });
+    res.status(201).json({ success: true, data: invoice });
+  } catch (error) {
+    console.error('Error uploading invoice:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
 };
 
 export const deleteInvoice = async (req: Request, res: Response): Promise<void> => {

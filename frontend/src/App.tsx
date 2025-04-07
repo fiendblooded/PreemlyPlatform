@@ -22,6 +22,7 @@ import EventDetail from "./components/EventDetail";
 import Financials from "./components/Financials";
 import Tasks from "./components/Tasks";
 import InvitePage from "./components/InvitePage";
+import GuestRegistration from "./components/GuestRegistration";
 
 export const GlobalStyle = createGlobalStyle`
   /* Font loading optimization */
@@ -171,6 +172,7 @@ const AppContent: React.FC = () => {
     "/preembot",
     "/space",
     "/invites",
+    "/registration",
   ];
   const isFullWidth =
     noSidebarRoutes.includes(location.pathname) ||
@@ -301,6 +303,10 @@ const AppContent: React.FC = () => {
             }
           />
           <Route path="/invites/:eventId/:guestId" element={<InvitePage />} />
+          <Route
+            path="/registration/:eventId"
+            element={<GuestRegistration />}
+          />
         </Routes>
       </ContentWrapper>
 

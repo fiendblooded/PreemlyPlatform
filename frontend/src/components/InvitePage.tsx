@@ -213,7 +213,7 @@ const QRCodeContainer = styled.div`
   border: 2px solid ${colors.primaryLight};
   position: relative;
   box-sizing: border-box;
-
+  margin-bottom: 80px;
   &::before {
     content: "";
     position: absolute;

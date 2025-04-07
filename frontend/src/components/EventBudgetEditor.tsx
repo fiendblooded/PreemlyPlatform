@@ -1000,18 +1000,12 @@ const EventBudgetEditor: React.FC<{
   const handleUpload = async (file: File) => {
     const formData = new FormData();
     formData.append("invoice", file);
-
-    // Add current date as default
-    const currentDate = new Date().toISOString().split("T")[0]; // Format as YYYY-MM-DD
-    formData.append("date", currentDate);
+    formData.append("date", new Date().toISOString().split("T")[0]);
 
     try {
       setShowUploadArea(false);
-      await axiosInstance.post(`/events/${event._id}/invoices`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+
+      await axiosInstance.post(`/events/${event._id}/invoices`, formData); // ❌ NO headers
 
       addToast("Invoice uploaded successfully", ToastType.SUCCESS);
       fetchInvoices();

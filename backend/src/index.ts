@@ -18,11 +18,9 @@ import invoiceRoutes from './domains/invoices/invoices.route';
 
 dotenv.config();
 
-export const SUBSCRIPTION_API_KEY = process.env.SUBSCRIPTION_API_KEY
-  || 'default-subscription-key-change-in-prod';
-export const ALLOWED_TILDA_ORIGINS = [
-  'https://project123456.tilda.ws'
-];
+export const SUBSCRIPTION_API_KEY =
+  process.env.SUBSCRIPTION_API_KEY || 'default-subscription-key-change-in-prod';
+export const ALLOWED_TILDA_ORIGINS = ['https://project123456.tilda.ws'];
 
 const app: Application = express();
 
@@ -44,7 +42,7 @@ const corsOptions: cors.CorsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
-
+app.use('/api/events', invoiceRoutes);
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json());
@@ -56,7 +54,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/events', eventRoutes);
-app.use('/api/events', invoiceRoutes); // TODO: change to invoices
 app.use('/api/guests', guestRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/mail', mailRoutes);

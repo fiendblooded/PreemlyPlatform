@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { getDateRangeDetails, loadGoogleMapsScript } from "../common/common";
+import { getDateRangeDetails } from "../common/common";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -767,16 +767,6 @@ const PosterIcon = styled.div`
 `;
 
 // Add location editor styled components
-const MapContainer = styled.div`
-  height: 400px;
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-top: 16px;
-  box-shadow: 0 4px 16px ${colors.shadow};
-  border: 1px solid ${colors.borderLight};
-`;
-
 const AddressInput = styled.input`
   width: 100%;
   font-family: Axiforma, sans-serif;
@@ -806,6 +796,29 @@ const AddressInput = styled.input`
   }
 `;
 
+const LocationInputGroup = styled.div`
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 8px;
+  }
+`;
+
+const LocationInput = styled(AddressInput)`
+  flex: 1;
+  margin: 0;
+`;
+
+const LocationLabel = styled.label`
+  display: block;
+  color: ${colors.textSecondary};
+  font-size: 14px;
+  margin-bottom: 8px;
+`;
+
 const LocationActions = styled.div`
   display: flex;
   justify-content: flex-start;
@@ -827,110 +840,14 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
   const [isRewritingDescription, setIsRewritingDescription] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
 
-  // Add location state and refs
-  const mapRef = useRef<HTMLDivElement>(null);
-  const autocompleteRef = useRef<HTMLInputElement>(null);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
+  // Add location state
   const [location, setLocation] = useState({
-    latitude: event.location?.latitude || 37.7749, // Default to San Francisco
-    longitude: event.location?.longitude || -122.4194,
+    latitude: "",
+    longitude: "",
     address: event.location?.address || "",
     placeId: event.location?.placeId || "",
   });
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
-  const gmapsKey = import.meta.env.VITE_GOOGLE_MAPS_API;
-
-  // Add location initialization effect
-  useEffect(() => {
-    const initializeMap = async () => {
-      if (eventType !== "Online") {
-        try {
-          await loadGoogleMapsScript(gmapsKey); // Ensure the script is loaded
-
-          if (!mapRef.current) return;
-
-          const mapInstance = new google.maps.Map(mapRef.current, {
-            center: { lat: location.latitude, lng: location.longitude },
-            zoom: 15,
-          });
-
-          const markerInstance = new google.maps.Marker({
-            position: { lat: location.latitude, lng: location.longitude },
-            map: mapInstance,
-            draggable: true,
-          });
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          markerInstance.addListener("dragend", (event: any) => {
-            const newLat = event.latLng?.lat() ?? 0;
-            const newLng = event.latLng?.lng() ?? 0;
-
-            const geocoder = new google.maps.Geocoder();
-            geocoder.geocode(
-              { location: { lat: newLat, lng: newLng } },
-              (results, status) => {
-                if (status === "OK" && results && results[0]) {
-                  setLocation({
-                    latitude: newLat,
-                    longitude: newLng,
-                    address: results[0].formatted_address,
-                    placeId: results[0].place_id || "",
-                  });
-                } else {
-                  console.error("Geocoding failed: ", status);
-                }
-              }
-            );
-          });
-
-          setMap(mapInstance);
-          setMarker(markerInstance);
-        } catch (error) {
-          console.error("Failed to load Google Maps script:", error);
-        }
-      }
-    };
-
-    initializeMap();
-  }, [eventType, gmapsKey, location.latitude, location.longitude]);
-
-  // Add autocomplete effect
-  useEffect(() => {
-    if (!autocompleteRef.current || !map || eventType === "Online") return;
-
-    const autocomplete = new google.maps.places.Autocomplete(
-      autocompleteRef.current,
-      {
-        fields: ["formatted_address", "geometry", "place_id"],
-      }
-    );
-
-    autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
-      if (place.geometry && place.geometry.location) {
-        const newLat = place.geometry.location.lat();
-        const newLng = place.geometry.location.lng();
-        const newAddress = place.formatted_address || "";
-        const newPlaceId = place.place_id || "";
-
-        setLocation({
-          latitude: newLat,
-          longitude: newLng,
-          address: newAddress,
-          placeId: newPlaceId,
-        });
-
-        if (marker) {
-          marker.setPosition({ lat: newLat, lng: newLng });
-        }
-
-        if (map) {
-          map.setCenter({ lat: newLat, lng: newLng });
-        }
-      }
-    });
-  }, [map, marker, eventType]);
 
   // Add location save handler
   const handleSaveLocation = async () => {
@@ -1377,21 +1294,25 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
               </svg>
               Event location
             </SectionTitle>
-            <AddressInput
-              ref={autocompleteRef}
-              type="text"
-              placeholder="Search for a location..."
-              defaultValue={location.address}
-            />
-            <MapContainer ref={mapRef}></MapContainer>
+            <LocationInputGroup>
+              <div style={{ flex: 1 }}>
+                <LocationLabel>Address</LocationLabel>
+                <LocationInput
+                  type="text"
+                  placeholder="Enter event address"
+                  value={location.address}
+                  onChange={(e) =>
+                    setLocation({ ...location, address: e.target.value })
+                  }
+                />
+              </div>
+            </LocationInputGroup>
             <LocationActions>
               <PrimaryButton
                 onClick={handleSaveLocation}
                 disabled={
                   isUpdatingLocation ||
-                  (event.location?.latitude === location.latitude &&
-                    event.location?.longitude === location.longitude &&
-                    event.location?.address === location.address)
+                  event.location?.address === location.address
                 }
               >
                 {isUpdatingLocation ? "Saving..." : "Save Location"}

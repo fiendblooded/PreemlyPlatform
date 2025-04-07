@@ -1129,16 +1129,25 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         eventDetails.description,
         eventDetails.date,
         eventDetails.endDate,
-        { enabled: true, content: eventDetails.emailParams.parking.content },
         {
-          enabled: true,
-          content: eventDetails.emailParams.scheduleSrc.content,
+          enabled: eventDetails.emailParams.parking?.enabled || false,
+          content: eventDetails.emailParams.parking?.content || "",
         },
-        { enabled: true, content: eventDetails.emailParams.dining.content },
+        {
+          enabled: eventDetails.emailParams.scheduleSrc?.enabled || false,
+          content: eventDetails.emailParams.scheduleSrc?.content || "",
+        },
+        {
+          enabled: eventDetails.emailParams.dining?.enabled || false,
+          content: eventDetails.emailParams.dining?.content || "",
+        },
         eventDetails.location.address || "",
         false,
         eventDetails.emailParams.customHtmlTemplate?.enabled
           ? eventDetails.emailParams.customHtmlTemplate.content
+          : undefined,
+        eventDetails.emailParams.virtualSpace?.enabled
+          ? `https://platform.preemly.eu/space/${eventDetails._id}`
           : undefined
       ),
       emails,
@@ -1657,7 +1666,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       const messages = guestsWithPhones.map((guestId) => {
         const guest = event.guests.find((g) => g._id === guestId);
         const inviteLink = `https://platform.preemly.eu/invites/${event._id}/${guestId}`;
-        return `Hi ${guest?.fullName}, you've been invited to ${event.title}! Get your ticket here: ${inviteLink}`;
+        return `Hi ${guest?.fullName}, you are registered for ${event.title}! Get your ticket here: ${inviteLink}`;
       });
 
       await axiosInstance.post("/sms/send", {
@@ -2396,7 +2405,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
             <ReminderPreview>
               <strong>Message Example:</strong>
               <p style={{ marginTop: "8px", color: "#4b5563" }}>
-                Hi John Doe, you've been invited to {event.title}! Get your
+                Hi John Doe, you are registered for {event.title}! Get your
                 ticket here: [Invite Link]
               </p>
             </ReminderPreview>
