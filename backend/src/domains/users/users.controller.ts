@@ -199,18 +199,21 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
 
 export const updateSubscriptionLevelTest = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { userId } = req.body;
-    const subscriptionLevel = req.user?.subscriptionLevel || SubscriptionLevel.FREE;
+    const { userId, subscriptionLevel } = req.body;
     
-    if (!userId) {
+    if (!userId || !subscriptionLevel || !Object.values(SubscriptionLevel).includes(subscriptionLevel)) {
       res.status(400).json({
         success: false,
-        message: 'Требуется ID пользователя',
+        message: 'Требуется ID пользователя и валидный уровень подписки',
       });
       return;
     }
     
-    const updatedUser = await usersService.updateSubscriptionLevel(userId, subscriptionLevel);
+    // Добавляем месяц к текущей дате для subscriptionEndDate
+    const subscriptionEndDate = new Date();
+    subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
+    
+    const updatedUser = await usersService.updateSubscriptionLevel(userId, subscriptionLevel, subscriptionEndDate);
     
     res.json({
       success: true,
