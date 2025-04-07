@@ -193,19 +193,18 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
   }
 };
 
-export const updateSubscriptionLevelTest = async (req: Request, res: Response): Promise<void> => {
+export const updateSubscriptionLevelTest = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { userId, subscriptionLevel } = req.body;
+    const { userId } = req.body;
+    const subscriptionLevel = req.user?.subscriptionLevel || SubscriptionLevel.FREE;
     
-    if (!userId || !subscriptionLevel || !Object.values(SubscriptionLevel).includes(subscriptionLevel)) {
+    if (!userId) {
       res.status(400).json({
         success: false,
-        message: 'Предоставьте все необходимые данные в правильном формате',
+        message: 'Требуется ID пользователя',
       });
       return;
     }
-    
-    console.log(`Тестовое обновление подписки: User=${userId}, Level=${subscriptionLevel}`);
     
     const updatedUser = await usersService.updateSubscriptionLevel(userId, subscriptionLevel);
     

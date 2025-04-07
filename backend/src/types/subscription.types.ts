@@ -1,5 +1,7 @@
 export enum SubscriptionLevel {
   FREE = 'FREE',
+  LITE = 'LITE',
+  PLUS = 'PLUS',
   PREMIUM = 'PREMIUM',
   ENTERPRISE = 'ENTERPRISE'
 }
@@ -7,4 +9,5 @@ export enum SubscriptionLevel {
 export interface UserSubscription {
   level: SubscriptionLevel;
   updatedAt: Date;
+  lastStatusChangeDate: Date;
 } 
