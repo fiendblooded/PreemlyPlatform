@@ -222,6 +222,7 @@ export const updateSubscriptionLevelTest = async (req: AuthRequest, res: Respons
 };
 
 export const getUserSubscription = async (req: AuthRequest, res: Response): Promise<void> => {
+  console.log('getUserSubscription', req?.user?.subscriptionLevel);
   try {
     if (!req?.user?.sub) {
       res.status(401).json({
