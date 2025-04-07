@@ -193,6 +193,35 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
   }
 };
 
+export const updateSubscriptionLevelTest = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId, subscriptionLevel } = req.body;
+    
+    if (!userId || !subscriptionLevel || !Object.values(SubscriptionLevel).includes(subscriptionLevel)) {
+      res.status(400).json({
+        success: false,
+        message: 'Предоставьте все необходимые данные в правильном формате',
+      });
+      return;
+    }
+    
+    console.log(`Тестовое обновление подписки: User=${userId}, Level=${subscriptionLevel}`);
+    
+    const updatedUser = await usersService.updateSubscriptionLevel(userId, subscriptionLevel);
+    
+    res.json({
+      success: true,
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error('Error updating subscription level:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Ошибка сервера',
+    });
+  }
+};
+
 export const getUserSubscription = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (!req?.user?.sub) {

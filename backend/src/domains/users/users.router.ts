@@ -18,6 +18,7 @@ router.patch('/:id/name', verifyUser, userController.updateUserName);
 
 // Subscription routes
 router.post('/subscription', userController.updateSubscriptionLevel);
+router.post('/subscription/test', userController.updateSubscriptionLevelTest);
 router.get('/subscription', verifyUser, userController.getUserSubscription);
 
 export default router;
