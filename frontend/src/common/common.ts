@@ -74,6 +74,22 @@ export function isTablet(): boolean {
   return width >= 600 && width <= 1200;
 }
 
+export function isMobile(): boolean {
+  // Define a typical mobile screen size cutoff
+  const width = window.innerWidth;
+
+  // Check for mobile user agent first
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobileDevice =
+    /iphone|ipod|android|blackberry|iemobile|opera mini|mobile/.test(userAgent);
+
+  // For DevTools emulation, directly check screen dimensions
+  // iPhone 12/12 Pro has a width of 390px in portrait mode
+  const isSmallScreen = width < 600;
+
+  return isMobileDevice || isSmallScreen;
+}
+
 export const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (typeof window.google !== "undefined") {

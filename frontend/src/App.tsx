@@ -16,13 +16,15 @@ import ChatbotPage from "./components/chatbot/ChatbotPage";
 import useAuthSetup from "./useAuthSetup";
 import Profile from "./components/Profile";
 import PreemlyFAQ from "./components/PreemlyFAQ";
-import { isTablet } from "./common/common";
+import { isTablet, isMobile } from "./common/common";
 import VirtualSpace from "./components/VirtualSpace";
 import EventDetail from "./components/EventDetail";
 import Financials from "./components/Financials";
 import Tasks from "./components/Tasks";
 import InvitePage from "./components/InvitePage";
 import GuestRegistration from "./components/GuestRegistration";
+import { useState, useEffect } from "react";
+import GuestRegistrationDesktop from "./components/GuestRegistrationDesktop";
 
 export const GlobalStyle = createGlobalStyle`
   /* Font loading optimization */
@@ -166,6 +168,37 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const tabletMode = isTablet();
   // Define routes where the sidebar should not be displayed
+
+  // Use a function that checks current state to ensure accurate detection
+  const checkIfMobile = () => isMobile();
+  const [mobileState, setMobileState] = useState(checkIfMobile());
+
+  useEffect(() => {
+    const handleResize = () => {
+      setMobileState(checkIfMobile());
+    };
+
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+
+    // This will handle the case when DevTools device emulation changes
+    const checkScreenSize = () => {
+      const currentMobileState = checkIfMobile();
+      if (mobileState !== currentMobileState) {
+        setMobileState(currentMobileState);
+      }
+    };
+
+    // Check periodically
+    const interval = setInterval(checkScreenSize, 500);
+
+    // Clean up
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearInterval(interval);
+    };
+  }, [mobileState]);
+
   const noSidebarRoutes = [
     "/login",
     "/welcome",
@@ -178,7 +211,8 @@ const AppContent: React.FC = () => {
     noSidebarRoutes.includes(location.pathname) ||
     location.pathname.startsWith("/welcome/") ||
     location.pathname.startsWith("/space/") ||
-    location.pathname.startsWith("/invites/");
+    location.pathname.startsWith("/invites/") ||
+    location.pathname.startsWith("/register/");
 
   // Don't show chatbot on login, welcome, or dedicated chatbot page
   // const hideChatbot =
@@ -186,7 +220,6 @@ const AppContent: React.FC = () => {
   //   location.pathname === "/welcome" ||
   //   location.pathname === "/preembot" ||
   //   location.pathname.startsWith("/welcome/");
-
   return (
     <AppWrapper>
       {!isFullWidth && <Sidebar />}
@@ -304,8 +337,10 @@ const AppContent: React.FC = () => {
           />
           <Route path="/invites/:eventId/:guestId" element={<InvitePage />} />
           <Route
-            path="/registration/:eventId"
-            element={<GuestRegistration />}
+            path="/register/:eventId"
+            element={
+              mobileState ? <GuestRegistration /> : <GuestRegistrationDesktop />
+            }
           />
         </Routes>
       </ContentWrapper>

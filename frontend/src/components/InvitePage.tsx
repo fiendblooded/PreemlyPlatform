@@ -45,21 +45,16 @@ const InviteWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   background: linear-gradient(135deg, ${colors.primaryLight} 0%, #ffffff 100%);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   font-size: 16px;
   color: ${colors.textPrimary};
   scroll-behavior: smooth;
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding: ${designTokens.spacing.lg} 0;
   box-sizing: border-box;
 `;
 
@@ -76,7 +71,6 @@ const ContentContainer = styled.div`
   gap: ${designTokens.spacing.lg};
   margin: ${designTokens.spacing.md} 0;
   position: relative;
-  overflow: hidden;
   box-sizing: border-box;
 
   &::before {
@@ -98,10 +92,9 @@ const ContentContainer = styled.div`
     margin: 0;
     border-radius: 0;
     box-shadow: none;
-    min-height: 100vh;
+    min-height: unset;
     padding: ${designTokens.spacing.md};
     background: ${colors.backgroundLight};
-    overflow-y: auto;
   }
 
   @media (min-width: ${designTokens.breakpoints.md}) {
@@ -213,7 +206,7 @@ const QRCodeContainer = styled.div`
   border: 2px solid ${colors.primaryLight};
   position: relative;
   box-sizing: border-box;
-  margin-bottom: 80px;
+  margin-bottom: ${designTokens.spacing.lg};
   &::before {
     content: "";
     position: absolute;

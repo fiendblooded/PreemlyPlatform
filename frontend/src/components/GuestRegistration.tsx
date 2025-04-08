@@ -281,6 +281,7 @@ const Label = styled.label`
 const Input = styled.input`
   width: 100%;
   padding: 2.5rem;
+  box-sizing: border-box;
   border: 3px solid ${colors.borderLight};
   border-radius: 1.5rem;
   font-size: 32px;

@@ -405,6 +405,35 @@ const VirtualSpaceButton = styled.div`
   }
 `;
 
+// Add a new RegistrationButton component
+const RegistrationButton = styled.div`
+  display: flex;
+  width: 130px;
+  height: 40px;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 8px;
+  background-color: transparent;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 1.5px solid #10b981; /* Green color */
+  color: #10b981;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #10b981;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+`;
+
 // const ErrorNotYourEvent = styled.div`
 //   width: 60%;
 //   height: 100%;
@@ -595,6 +624,35 @@ const EventDetail: React.FC = () => {
               }}
             />
             <HeaderButtonsContainer>
+              <RegistrationButton
+                onClick={() => navigate(`/register/${event._id}`)}
+                title="Go to Registration"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ marginRight: 4 }}
+                >
+                  <path
+                    d="M12 4V20M4 12H20"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M9 9H15V15H9V9Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div style={{ paddingTop: 4 }}>Register</div>
+              </RegistrationButton>
               <VirtualSpaceButton
                 onClick={() => navigate(`/space/${event._id}`)}
                 title="Go to Virtual Space"
