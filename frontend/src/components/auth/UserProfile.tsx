@@ -1,7 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import useAxiosWithAuth from "./useAxiosWithAuth";
+
+// Define SubscriptionLevel enum locally since we can't import it from backend
+enum SubscriptionLevel {
+  FREE = "FREE",
+  LITE = "LITE",
+  PLUS = "PLUS",
+  PREMIUM = "PREMIUM",
+  ENTERPRISE = "ENTERPRISE",
+}
+
 const ProfileContainer = styled.div`
   display: flex;
   align-items: center;
@@ -113,10 +124,83 @@ export const Overlay = styled.div<{ isVisible: boolean }>`
 
 const namespace = "https://custom-claims.preemly.eu/";
 
+const SubscriptionBadge = styled.div<{ level: string }>`
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: ${(props) => {
+    switch (props.level) {
+      case SubscriptionLevel.FREE:
+        return "#e0e0e0";
+      case SubscriptionLevel.LITE:
+        return "#4caf50";
+      case SubscriptionLevel.PLUS:
+        return "#2196f3";
+      case SubscriptionLevel.PREMIUM:
+        return "#9c27b0";
+      case SubscriptionLevel.ENTERPRISE:
+        return "#ff9800";
+      default:
+        return "#e0e0e0";
+    }
+  }};
+  color: ${(props) => {
+    switch (props.level) {
+      case SubscriptionLevel.FREE:
+        return "#555";
+      default:
+        return "#fff";
+    }
+  }};
+  border: 1px solid
+    ${(props) => {
+      switch (props.level) {
+        case SubscriptionLevel.FREE:
+          return "#d0d0d0";
+        case SubscriptionLevel.LITE:
+          return "#388e3c";
+        case SubscriptionLevel.PLUS:
+          return "#1976d2";
+        case SubscriptionLevel.PREMIUM:
+          return "#7b1fa2";
+        case SubscriptionLevel.ENTERPRISE:
+          return "#f57c00";
+        default:
+          return "#d0d0d0";
+      }
+    }};
+`;
+
 const UserProfile: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth0();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [subscriptionLevel, setSubscriptionLevel] = useState<SubscriptionLevel>(
+    SubscriptionLevel.FREE
+  );
   const navigate = useNavigate();
+  const axiosInstance = useAxiosWithAuth();
+
+  useEffect(() => {
+    const fetchSubscriptionLevel = async () => {
+      if (!isAuthenticated) return;
+
+      try {
+        const response = await axiosInstance.get("/users/subscription");
+        if (response.data.success && response.data.data.subscriptionLevel) {
+          setSubscriptionLevel(response.data.data.subscriptionLevel);
+        }
+      } catch (error) {
+        console.error("Error fetching subscription level:", error);
+      }
+    };
+
+    fetchSubscriptionLevel();
+  }, [isAuthenticated, axiosInstance]);
 
   if (!isAuthenticated) return null;
 
@@ -146,6 +230,9 @@ const UserProfile: React.FC = () => {
               />
               <UserName>{user?.[`${namespace}displayName`]}</UserName>
               <UserEmail>{user?.[`${namespace}email`]}</UserEmail>
+              <SubscriptionBadge level={subscriptionLevel}>
+                {subscriptionLevel}
+              </SubscriptionBadge>
             </UserInfoSection>
             <OptionsSection>
               <Option onClick={() => navigate("/help")}>Help</Option>

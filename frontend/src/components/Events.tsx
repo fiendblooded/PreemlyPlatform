@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Event } from "../types";
+import { EventSummary } from "../types/eventSummary";
 import EventList from "./EventList";
 import useAxiosWithAuth from "./auth/useAxiosWithAuth";
 import useAuthSetup from "../useAuthSetup";
@@ -259,14 +259,14 @@ const Events: React.FC = () => {
   const { user } = useAuth0();
   const { id } = useParams<{ id: string }>();
   const [activeStatus, setActiveStatus] = useState("All");
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const axiosInstance = useAxiosWithAuth();
   const navigate = useNavigate();
   const fetchEvents = async () => {
     setLoading(true); // Start loading
     try {
-      const response = await axiosInstance.get(`/events`);
+      const response = await axiosInstance.get(`/events/summary`);
       console.log(response.data.data);
       setEvents(response.data.data);
     } catch (error) {
@@ -291,10 +291,8 @@ const Events: React.FC = () => {
     let filteredEvents = events;
 
     if (searchQuery != "") {
-      filteredEvents = filteredEvents.filter(
-        (event) =>
-          event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.description.toLowerCase().includes(searchQuery.toLowerCase())
+      filteredEvents = filteredEvents.filter((event) =>
+        event.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     if (filterStatus === "All") {

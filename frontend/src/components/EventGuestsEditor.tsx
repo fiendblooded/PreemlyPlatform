@@ -6,7 +6,8 @@ import { ToastType, useToast } from "./Toasts";
 import { getMailHtml, SvgSC } from "../common/common";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-// import { ActivityStatus } from "./EventDetail";
+// import { ScheduleModule } from "../../common/common";
+// import { ScheduleItem } from "../common/common";
 
 interface Props {
   event: Event;
@@ -1011,6 +1012,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     fullName: string;
     age: number;
     email: string;
+    phoneNumber?: string;
   } | null>(null);
   const [filterText, setFilterText] = useState<string>("");
   const [selectedGuests, setSelectedGuests] = useState<string[]>([]); // Selected guest IDs
@@ -1034,7 +1036,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
 
   const addNewGuestRow = () => {
     if (newGuests === null) {
-      setNewGuests({ fullName: "", age: 0, email: "" });
+      setNewGuests({ fullName: "", age: 0, email: "", phoneNumber: "" });
     }
   };
 
@@ -1136,6 +1138,8 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         {
           enabled: eventDetails.emailParams.scheduleSrc?.enabled || false,
           content: eventDetails.emailParams.scheduleSrc?.content || "",
+          // @ts-expect-error Schedule items are present but TypeScript doesn't recognize them
+          items: eventDetails.emailParams.scheduleSrc?.items || [],
         },
         {
           enabled: eventDetails.emailParams.dining?.enabled || false,
@@ -1260,7 +1264,12 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
           event.date,
           event.endDate,
           { enabled: true, content: event.emailParams.parking.content },
-          { enabled: true, content: event.emailParams.scheduleSrc.content },
+          {
+            enabled: true,
+            content: event.emailParams.scheduleSrc.content,
+            // @ts-expect-error Schedule items are present but TypeScript doesn't recognize them
+            items: event.emailParams.scheduleSrc.items || [],
+          },
           { enabled: true, content: event.emailParams.dining.content },
           event.location.address || "",
           false,
@@ -1356,14 +1365,29 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   };
 
   const saveGuests = async () => {
+    if (!newGuests) return;
+
+    const guestData = newGuests as {
+      fullName: string;
+      email: string;
+      phoneNumber?: string;
+    };
+
     try {
-      await axiosInstance.put(`/events/${event._id}/guests`, {
-        guests: [newGuests],
+      await axiosInstance.post(`/guests`, {
+        fullName: guestData.fullName,
+        email: guestData.email,
+        phoneNumber: guestData.phoneNumber || "",
+        eventId: event._id,
+        attendance_status: false,
+        email_sent: false,
+        gdpr_consent: false,
       });
       refetch();
       setNewGuests(null);
     } catch (error) {
       console.error("Error saving guests:", error);
+      addToast("Failed to add guest", ToastType.ERROR);
     }
   };
 
@@ -1939,7 +1963,16 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                 </td>
                 <td></td>
                 <td></td>
-                <td></td>
+                <td>
+                  <Input
+                    type="tel"
+                    placeholder="Phone (optional)"
+                    value={newGuests.phoneNumber || ""}
+                    onChange={(e) =>
+                      handleGuestChange("phoneNumber", e.target.value)
+                    }
+                  />
+                </td>
                 <td></td>
                 <td></td>
                 <td>

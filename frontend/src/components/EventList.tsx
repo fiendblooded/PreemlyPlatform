@@ -1,5 +1,5 @@
 import styled, { keyframes } from "styled-components";
-import { Event } from "../types";
+import { EventSummary } from "../types/eventSummary";
 import EventComponent from "./EventComponent";
 import EventForm from "./form/EventForm";
 import { useState } from "react";
@@ -154,7 +154,7 @@ export const CreateLink = styled.a`
 `;
 
 interface EventListProps {
-  events: Event[];
+  events: EventSummary[];
   isFilterQueue: boolean;
 }
 

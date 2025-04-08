@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Event } from "../types";
+import { EventSummary } from "../types/eventSummary";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import {
@@ -23,7 +23,7 @@ const colors = {
 };
 
 interface EventProps {
-  event: Event;
+  event: EventSummary;
 }
 
 const Card = styled.div<{ color: string }>`

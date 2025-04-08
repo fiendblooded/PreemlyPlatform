@@ -33,7 +33,7 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
 
   try {
     console.log(`Создание события пользователем с уровнем подписки: ${req.user.subscriptionLevel}`);
-    
+
     const newEvent = await eventsService.createEvent(event, req.user.sub);
     res.json({
       success: true,
@@ -56,32 +56,23 @@ export const getEvents = async (req: AuthRequest, res: Response): Promise<void> 
 
   try {
     const events = await eventsService.getEvents(req.user.sub);
-
-    const eventsWithImages = await Promise.all(
-      events.map(async (event) => {
-        try {
-          const imageResponse = await axios.get(event.poster, {
-            responseType: 'arraybuffer',
-          });
-          const imageBase64 = Buffer.from(imageResponse.data, 'binary').toString('base64');
-
-          return {
-            ...event.toObject(),
-            posterImage: `data:image/jpeg;base64,${imageBase64}`,
-          };
-        } catch (err) {
-          console.error(`Error fetching image for event ${event._id}:`, err);
-          return {
-            ...event.toObject(),
-            posterImage: null,
-          };
-        }
-      }),
-    );
-
-    res.json({ success: true, data: eventsWithImages });
+    res.json({ success: true, data: events });
   } catch (error) {
     console.error('Error fetching events:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+export const getEventsSummary = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+    const events = await eventsService.getEventsSummary(req.user.sub);
+    res.json({ success: true, data: events });
+  } catch (error) {
+    console.error('Error fetching events summary:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
@@ -207,9 +198,9 @@ export const updateEventGuests = async (req: AuthRequest, res: Response): Promis
     });
   } catch (error) {
     console.error('Error updating event guests:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error instanceof Error ? error.message : 'Server Error' 
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'Server Error',
     });
   }
 };
@@ -237,11 +228,7 @@ export const uploadGuestsFromExcel = async (req: AuthRequest, res: Response): Pr
     }
 
     try {
-      const updatedEvent = await eventsService.uploadGuestsFromExcel(
-        req.params.id, 
-        req.file.buffer,
-        userId
-      );
+      const updatedEvent = await eventsService.uploadGuestsFromExcel(req.params.id, req.file.buffer, userId);
       if (!updatedEvent) {
         res.status(404).json({ success: false, message: 'Event not found' });
         return;
@@ -478,18 +465,12 @@ export const addEventTask = async (req: Request, res: Response): Promise<void> =
 
 export const updateEventTask = async (req: Request, res: Response): Promise<void> => {
   try {
-    const updatedEvent = await eventsService.updateEventTask(
-      req.params.eventId,
-      req.params.taskId,
-      req.body,
-    );
+    const updatedEvent = await eventsService.updateEventTask(req.params.eventId, req.params.taskId, req.body);
     if (!updatedEvent) {
       res.status(404).json({ message: 'Event or task not found' });
       return;
     }
-    const task = updatedEvent.tasks.find(
-      (t) => t._id && t._id.toString() === req.params.taskId,
-    );
+    const task = updatedEvent.tasks.find((t) => t._id && t._id.toString() === req.params.taskId);
     res.status(200).json({
       message: 'Task updated successfully',
       task,
@@ -523,18 +504,12 @@ export const updateTaskStatus = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    const updatedEvent = await eventsService.updateTaskStatus(
-      req.params.eventId,
-      req.params.taskId,
-      status,
-    );
+    const updatedEvent = await eventsService.updateTaskStatus(req.params.eventId, req.params.taskId, status);
     if (!updatedEvent) {
       res.status(404).json({ message: 'Event or task not found' });
       return;
     }
-    const task = updatedEvent.tasks.find(
-      (t) => t._id && t._id.toString() === req.params.taskId,
-    );
+    const task = updatedEvent.tasks.find((t) => t._id && t._id.toString() === req.params.taskId);
     res.status(200).json({
       message: 'Task status updated successfully',
       task,

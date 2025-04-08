@@ -389,6 +389,7 @@ const EmailTemplateEditor: React.FC<Props> = ({ event, refetch }) => {
         hasVirtualSpace ||
         hasEmailIdentifier
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     parking,
     schedule,

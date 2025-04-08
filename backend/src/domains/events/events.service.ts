@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Event from '../../models/event.model';
 import Guest from '../../models/guest.model';
@@ -7,11 +8,7 @@ import { uploadImage } from '../../config/cloudinary';
 import { extractPublicId } from '../../utils/helpers';
 import { extractTextFromPdf } from './pdf.service';
 import xlsx from 'xlsx';
-import {
-  analyzeInvoices,
-  analyzeStructuredFeedback,
-  rewriteEventDescription
-} from './openai.service';
+import { analyzeInvoices, analyzeStructuredFeedback, rewriteEventDescription } from './openai.service';
 import { SUBSCRIPTION_GUEST_LIMITS } from '../../types/subscription.types';
 import { UsersService } from '../users/users.service';
 import mongoose from 'mongoose';
@@ -96,6 +93,14 @@ export class EventsService {
     return events;
   }
 
+  async getEventsSummary(userId: string) {
+    const events = await Event.find(
+      { ownerId: userId },
+      '_id title date endDate poster eventType location.address guests',
+    );
+    return events;
+  }
+
   async getEventById(id: string) {
     return await Event.findById(id).populate('guests');
   }
@@ -136,11 +141,7 @@ export class EventsService {
 
     const uploadResponse = await uploadImage(poster, 'events_posters');
 
-    return await Event.findByIdAndUpdate(
-      id,
-      { poster: uploadResponse.secure_url },
-      { new: true },
-    );
+    return await Event.findByIdAndUpdate(id, { poster: uploadResponse.secure_url }, { new: true });
   }
 
   // Guest operations
@@ -159,7 +160,7 @@ export class EventsService {
       throw new Error(
         `Превышен лимит количества гостей для вашего уровня подписки. 
         Текущий лимит: ${guestLimit} гостей. 
-        Попробуйте обновить подписку для увеличения лимита.`
+        Попробуйте обновить подписку для увеличения лимита.`,
       );
     }
 
@@ -178,12 +179,14 @@ export class EventsService {
       throw new Error('No guest data found in the Excel file');
     }
 
-    const guests = dataWithoutHeader.map((row: any) => ({
-      fullName: row[0]?.toString().trim(),
-      email: row[1]?.toString().trim(),
-      phoneNumber: row[2]?.toString().trim() || '',
-      age: 0
-    })).filter(guest => guest.fullName && guest.email);
+    const guests = dataWithoutHeader
+      .map((row: any) => ({
+        fullName: row[0]?.toString().trim(),
+        email: row[1]?.toString().trim(),
+        phoneNumber: row[2]?.toString().trim() || '',
+        age: 0,
+      }))
+      .filter((guest) => guest.fullName && guest.email);
 
     return guests;
   }
@@ -206,13 +209,13 @@ export class EventsService {
       throw new Error(
         `Превышен лимит количества гостей для вашего уровня подписки. 
         Текущий лимит: ${guestLimit} гостей. 
-        Попробуйте обновить подписку для увеличения лимита.`
+        Попробуйте обновить подписку для увеличения лимита.`,
       );
     }
 
     // Создаем гостей в базе данных
     const createdGuests = await Guest.insertMany(guestData);
-    const guestIds = createdGuests.map(guest => guest._id) as mongoose.Types.ObjectId[];
+    const guestIds = createdGuests.map((guest) => guest._id) as mongoose.Types.ObjectId[];
 
     // Обновляем список гостей в событии
     event.guests = guestIds;
@@ -272,14 +275,16 @@ export class EventsService {
     const event = await Event.findById(id);
     if (!event) return null;
 
-    return event.feedbackForm || {
-      title: 'Event Feedback',
-      description: 'Please share your thoughts about the event',
-      questions: [],
-      isEnabled: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    return (
+      event.feedbackForm || {
+        title: 'Event Feedback',
+        description: 'Please share your thoughts about the event',
+        questions: [],
+        isEnabled: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+    );
   }
 
   async updateFeedbackForm(id: string, feedbackForm: any) {
@@ -458,31 +463,31 @@ export class EventsService {
         let formattedAnswer = '';
 
         switch (question.type) {
-        case 'text':
-          formattedAnswer = answer.textAnswer || '';
-          break;
-        case 'rating':
-          formattedAnswer = answer.ratingAnswer?.toString() || '';
-          break;
-        case 'single_choice':
-        case 'multiple_choice':
-          if (answer.selectedOptions && answer.selectedOptions.length > 0) {
-            const selectedTexts = answer.selectedOptions.map((optionId) => {
-              const option = question.options?.find((opt) => opt.id === optionId);
-              return option ? option.text : optionId;
-            });
-            formattedAnswer = selectedTexts.join(', ');
-          }
-          break;
-        case 'ranking':
-          if (answer.rankingOrder && answer.rankingOrder.length > 0) {
-            const rankedTexts = answer.rankingOrder.map((optionId, index) => {
-              const option = question.options?.find((opt) => opt.id === optionId);
-              return `${index + 1}. ${option ? option.text : optionId}`;
-            });
-            formattedAnswer = rankedTexts.join('; ');
-          }
-          break;
+          case 'text':
+            formattedAnswer = answer.textAnswer || '';
+            break;
+          case 'rating':
+            formattedAnswer = answer.ratingAnswer?.toString() || '';
+            break;
+          case 'single_choice':
+          case 'multiple_choice':
+            if (answer.selectedOptions && answer.selectedOptions.length > 0) {
+              const selectedTexts = answer.selectedOptions.map((optionId) => {
+                const option = question.options?.find((opt) => opt.id === optionId);
+                return option ? option.text : optionId;
+              });
+              formattedAnswer = selectedTexts.join(', ');
+            }
+            break;
+          case 'ranking':
+            if (answer.rankingOrder && answer.rankingOrder.length > 0) {
+              const rankedTexts = answer.rankingOrder.map((optionId, index) => {
+                const option = question.options?.find((opt) => opt.id === optionId);
+                return `${index + 1}. ${option ? option.text : optionId}`;
+              });
+              formattedAnswer = rankedTexts.join('; ');
+            }
+            break;
         }
 
         processedAnswers.push({

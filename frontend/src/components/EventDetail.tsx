@@ -28,7 +28,7 @@ import FeedbackSettingsIcon from "./icons/FeedbackSettingsIcon";
 import EventFeedbackViewer from "./EventFeedbackViewer";
 import { useAuth0 } from "@auth0/auth0-react";
 
-import ErrorBigIcon from "./icons/ErrorBigIcon";
+// import ErrorBigIcon from "./icons/ErrorBigIcon";
 import EventBudgetEditor from "./EventBudgetEditor";
 import BudgetSettingsIcon from "./icons/BudgetSettingsIcon";
 import ScheduleEditor from "./ScheduleEditor";
@@ -159,28 +159,28 @@ const EventDetailWrapper = styled.div<{ tabletMode: boolean }>`
   }
 `;
 
-const ContactButton = styled.a`
-  margin: 20px 0;
-  border: 2px solid #ff8c00;
-  color: #ff8c00;
-  padding: 0.5rem 1.2rem;
-  border-radius: 8px;
-  font-size: 18px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: all 0.2s ease;
+// const ContactButton = styled.a`
+//   margin: 20px 0;
+//   border: 2px solid #ff8c00;
+//   color: #ff8c00;
+//   padding: 0.5rem 1.2rem;
+//   border-radius: 8px;
+//   font-size: 18px;
+//   text-decoration: none;
+//   font-weight: bold;
+//   transition: all 0.2s ease;
 
-  &:hover {
-    background-color: rgb(255, 245, 233);
-    color: #ff8c00;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.15);
-  }
+//   &:hover {
+//     background-color: rgb(255, 245, 233);
+//     color: #ff8c00;
+//     transform: translateY(-2px);
+//     box-shadow: 0 4px 12px rgba(255, 140, 0, 0.15);
+//   }
 
-  &:active {
-    transform: translateY(0);
-  }
-`;
+//   &:active {
+//     transform: translateY(0);
+//   }
+// `;
 
 export const SecondaryButton = styled.button<{
   marginTop?: number;
@@ -538,6 +538,7 @@ const EventDetail: React.FC = () => {
   // Update tab when URL changes
   useEffect(() => {
     setOpenSection(getTabFromPath());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   const axiosInstance = useAxiosWithAuth();

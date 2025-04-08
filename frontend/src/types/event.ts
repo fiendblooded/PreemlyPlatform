@@ -50,3 +50,17 @@ export interface Event {
     gdpr_consent: boolean;
   }[];
 }
+
+export interface EventSummary {
+  _id: string;
+  title: string;
+  date: string;
+  endDate: string;
+  poster?: string | null;
+  location: {
+    address?: string;
+  };
+  guests: {
+    _id: string;
+  }[];
+}

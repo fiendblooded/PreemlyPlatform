@@ -10,6 +10,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Event CRUD routes
 router.post('/', verifyUser, eventsController.createEvent);
 router.get('/', verifyUser, checkScopes(['read:events']), eventsController.getEvents);
+router.get('/summary', verifyUser, checkScopes(['read:events']), eventsController.getEventsSummary);
 router.get('/:id', eventsController.getEventById);
 router.put('/:id', verifyUser, eventsController.updateEvent);
 router.delete('/:id', eventsController.deleteEvent);

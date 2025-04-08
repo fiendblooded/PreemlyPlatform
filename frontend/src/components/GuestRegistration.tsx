@@ -213,122 +213,157 @@ const EventName = styled.p`
 `;
 
 const ContentSection = styled.div`
-  padding: ${designTokens.spacing.lg} ${designTokens.spacing.md};
+  padding: 3rem 2rem;
   flex: 1;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
   position: relative;
   z-index: 2;
-  margin-bottom: 32px;
-  /* Add more padding on larger screens */
+  margin-bottom: 4rem;
+
   @media (min-width: ${designTokens.breakpoints.md}) {
-    padding: ${designTokens.spacing.xl} ${designTokens.spacing.lg};
-    max-width: 800px;
+    padding: 4rem 3rem;
+    max-width: 100%;
   }
 `;
 
 const Card = styled.div`
-  background-color: ${colors.white};
-  border-radius: ${designTokens.borderRadius.lg};
-  box-shadow: ${designTokens.shadows.md};
-  padding: ${designTokens.spacing.xl};
+  background-color: ${colors.backgroundLight};
+  border-radius: 1.5rem;
+  box-shadow: ${designTokens.shadows.xl};
+  padding: 3rem;
   margin: 0 auto;
   width: 100%;
-  max-width: 800px;
+  max-width: 100%;
   box-sizing: border-box;
+  padding-top: 1rem;
 
   @media (min-width: ${designTokens.breakpoints.md}) {
-    padding: ${designTokens.spacing.xxl};
+    padding: 4rem;
+    padding-top: 1rem;
   }
 `;
 
+const FormTitle = styled.h2`
+  font-size: 48px;
+  font-weight: ${fontWeights.bold};
+  margin-bottom: 3rem;
+  color: ${colors.textPrimary};
+`;
+
+const FormDescription = styled.p`
+  font-size: 32px;
+  margin-bottom: 4rem;
+  color: ${colors.textSecondary};
+  line-height: 1.5;
+`;
+
 const FormGroup = styled.div`
-  margin-bottom: ${designTokens.spacing.xl};
+  margin-bottom: 4rem;
   width: 100%;
 `;
 
 const Label = styled.label`
   display: block;
   color: ${colors.textSecondary};
-  font-size: 16px;
+  font-size: 32px;
   font-weight: ${fontWeights.medium};
-  margin-bottom: ${designTokens.spacing.md};
-  padding-left: ${designTokens.spacing.xs};
+  margin-bottom: 1.5rem;
+  padding-left: 1rem;
 
   @media (min-width: ${designTokens.breakpoints.md}) {
-    font-size: 14px;
-    margin-bottom: ${designTokens.spacing.sm};
+    font-size: 32px;
+    margin-bottom: 1.5rem;
   }
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 24px;
-  border: 1px solid ${colors.borderLight};
-  border-radius: ${designTokens.borderRadius.md};
-  font-size: 18px;
+  padding: 2.5rem;
+  border: 3px solid ${colors.borderLight};
+  border-radius: 1.5rem;
+  font-size: 32px;
   transition: all ${designTokens.animation.fast};
   box-sizing: border-box;
-  background-color: ${colors.backgroundSecondary};
+  background-color: ${colors.backgroundLight};
   color: ${colors.textPrimary};
-  box-shadow: ${designTokens.shadows.sm};
+  box-shadow: ${designTokens.shadows.lg};
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
-  height: 72px;
+  height: 120px;
 
   &::placeholder {
     color: ${colors.textTertiary};
     opacity: 0.8;
+    font-size: 32px;
   }
 
   &:focus {
     outline: none;
     border-color: ${colors.primary};
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-    background-color: ${colors.white};
+    box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.2);
   }
 
   @media (min-width: ${designTokens.breakpoints.md}) {
-    font-size: 16px;
-    padding: 20px 24px;
-    height: 64px;
+    font-size: 32px;
+    padding: 2.5rem;
+    height: 120px;
   }
 `;
 
 const ErrorMessage = styled.div`
   color: ${colors.error};
-  font-size: 14px;
-  margin-top: ${designTokens.spacing.sm};
-  padding-left: ${designTokens.spacing.xs};
+  background-color: ${colors.errorLight};
+  padding: ${designTokens.spacing.lg};
+  border-radius: ${designTokens.borderRadius.lg};
+  text-align: center;
+  margin: ${designTokens.spacing.lg};
+  font-size: 16px;
+  box-shadow: ${designTokens.shadows.md};
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${designTokens.spacing.md};
+
+  &::before {
+    content: "⚠️";
+    font-size: 28px;
+    margin-bottom: ${designTokens.spacing.sm};
+  }
+
+  @media (min-width: ${designTokens.breakpoints.md}) {
+    margin: ${designTokens.spacing.xl};
+  }
 `;
 
 const CheckboxContainer = styled.div`
   display: flex;
   align-items: flex-start;
-  margin: ${designTokens.spacing.lg} 0;
+  margin: 4rem 0;
   cursor: pointer;
   user-select: none;
-  padding: ${designTokens.spacing.md};
-  border-radius: ${designTokens.borderRadius.md};
+  padding: 3rem;
+  border-radius: 1.5rem;
   transition: all ${designTokens.animation.fast};
   width: 100%;
   box-sizing: border-box;
-  gap: ${designTokens.spacing.md};
+  gap: 2rem;
 
   @media (min-width: ${designTokens.breakpoints.md}) {
-    margin: ${designTokens.spacing.xl} 0;
+    margin: 4rem 0;
   }
 `;
 
 const Checkbox = styled.input.attrs({ type: "checkbox" })`
-  width: 20px;
-  height: 20px;
+  width: 40px;
+  height: 40px;
   margin: 0;
   cursor: pointer;
   accent-color: ${colors.primary};
-  border-radius: ${designTokens.borderRadius.sm};
-  border: 2px solid ${colors.borderLight};
+  border-radius: 1rem;
+  border: 3px solid ${colors.borderLight};
   transition: all ${designTokens.animation.fast};
 
   &:checked {
@@ -339,26 +374,26 @@ const Checkbox = styled.input.attrs({ type: "checkbox" })`
   &:focus {
     outline: none;
     border-color: ${colors.primary};
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.2);
   }
 `;
 
 const CheckboxLabel = styled.label`
-  font-size: 14px;
+  font-size: 28px;
   color: ${colors.textSecondary};
   cursor: pointer;
-  line-height: 1.4;
+  line-height: 1.5;
   flex: 1;
-  padding-top: 2px;
+  padding-top: 0.25rem;
 `;
 
 const SubmitButton = styled.button`
   background: ${colors.primaryGradient};
   color: white;
   border: none;
-  border-radius: ${designTokens.borderRadius.md};
-  padding: ${designTokens.spacing.lg};
-  font-size: 16px;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  font-size: 36px;
   font-weight: ${fontWeights.semibold};
   cursor: pointer;
   width: 100%;
@@ -368,11 +403,11 @@ const SubmitButton = styled.button`
   transition: all ${designTokens.animation.medium};
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
-  box-shadow: ${designTokens.shadows.md};
+  box-shadow: ${designTokens.shadows.xl};
   position: relative;
   overflow: hidden;
-  height: 48px;
-  margin-top: ${designTokens.spacing.xl};
+  height: 120px;
+  margin-top: 4rem;
 
   &::before {
     content: "";
@@ -390,8 +425,8 @@ const SubmitButton = styled.button`
   }
 
   &:active {
-    transform: translateY(1px);
-    box-shadow: ${designTokens.shadows.sm};
+    transform: translateY(3px);
+    box-shadow: ${designTokens.shadows.lg};
   }
 
   &:disabled {
@@ -402,9 +437,13 @@ const SubmitButton = styled.button`
   }
 
   @media (min-width: ${designTokens.breakpoints.md}) {
+    font-size: 36px;
+    padding: 2.5rem;
+    height: 120px;
+
     &:hover {
-      transform: translateY(-1px);
-      box-shadow: ${designTokens.shadows.lg};
+      transform: translateY(-4px);
+      box-shadow: ${designTokens.shadows.xl};
 
       &::before {
         opacity: 1;
@@ -444,12 +483,72 @@ const LoadingText = styled.p`
   margin: 0;
 `;
 
+const ErrorContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: ${designTokens.spacing.xl};
+  text-align: center;
+  background-color: ${colors.backgroundSecondary};
+`;
+
+const ErrorCard = styled.div`
+  background-color: ${colors.backgroundLight};
+  border-radius: ${designTokens.borderRadius.lg};
+  box-shadow: ${designTokens.shadows.xl};
+  padding: ${designTokens.spacing.xl};
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid ${colors.errorLight};
+`;
+
+const ErrorTitle = styled.h2`
+  color: ${colors.error};
+  font-size: 2rem;
+  margin-bottom: ${designTokens.spacing.lg};
+  font-weight: ${fontWeights.bold};
+`;
+
+const ErrorMessageText = styled.p`
+  color: ${colors.textPrimary};
+  font-size: 1.2rem;
+  margin-bottom: ${designTokens.spacing.xl};
+  line-height: 1.6;
+`;
+
+const RetryButton = styled.button`
+  background: ${colors.primaryGradient};
+  color: white;
+  border: none;
+  border-radius: ${designTokens.borderRadius.md};
+  padding: ${designTokens.spacing.md} ${designTokens.spacing.xl};
+  font-size: 1.1rem;
+  font-weight: ${fontWeights.semibold};
+  cursor: pointer;
+  transition: all ${designTokens.animation.medium};
+  box-shadow: ${designTokens.shadows.md};
+  margin-top: ${designTokens.spacing.lg};
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${designTokens.shadows.lg};
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 const GuestRegistration: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [registrationError, setRegistrationError] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -551,12 +650,15 @@ const GuestRegistration: React.FC = () => {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/events/${eventId}/guests`,
+        `${import.meta.env.VITE_API_BASE_URL}/guests`,
         {
           fullName: formData.fullName.trim(),
           email: formData.email.trim(),
           phoneNumber: formData.phoneNumber.trim() || undefined,
           gdpr_consent: formData.gdprConsent,
+          eventId: eventId,
+          attendance_status: false,
+          age: 0,
         }
       );
 
@@ -564,12 +666,16 @@ const GuestRegistration: React.FC = () => {
         // Redirect to invite page after successful registration
         navigate(`/invites/${eventId}/${response.data.data._id}`);
       } else {
-        setError("Failed to register. Please try again.");
+        setRegistrationError(true);
       }
     } catch (err) {
       console.error("Error registering guest:", err);
-      setError("Failed to register. Please try again later.");
+      setRegistrationError(true);
     }
+  };
+
+  const handleRetry = () => {
+    setRegistrationError(false);
   };
 
   if (loading) {
@@ -589,11 +695,27 @@ const GuestRegistration: React.FC = () => {
     );
   }
 
+  if (registrationError) {
+    return (
+      <ErrorContainer>
+        <ErrorCard>
+          <ErrorTitle>Registration Failed</ErrorTitle>
+          <ErrorMessageText>
+            We're sorry, but we couldn't complete your registration at this
+            time. Please try again later or contact the event organizer for
+            assistance.
+          </ErrorMessageText>
+          <RetryButton onClick={handleRetry}>Try Again</RetryButton>
+        </ErrorCard>
+      </ErrorContainer>
+    );
+  }
+
   return (
     <SpaceWrapper>
       <HeaderCard posterUrl={event.poster || undefined}>
         <HeaderContent>
-          <WelcomeText>Register for the Event</WelcomeText>
+          <WelcomeText>Register for Event</WelcomeText>
           <EventName>{event.title}</EventName>
         </HeaderContent>
       </HeaderCard>
@@ -601,6 +723,11 @@ const GuestRegistration: React.FC = () => {
       <ContentSection>
         <Card>
           <form onSubmit={handleSubmit}>
+            <FormTitle>Registration Form</FormTitle>
+            <FormDescription>
+              Please fill out the form below to register for the event.
+            </FormDescription>
+
             <FormGroup>
               <Label htmlFor="fullName">Full Name</Label>
               <Input

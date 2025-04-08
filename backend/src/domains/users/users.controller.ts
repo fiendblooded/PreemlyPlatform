@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import type { Request, Response } from 'express';
 import axios from 'axios';
 import dotenv from 'dotenv';
@@ -143,30 +144,30 @@ export const updateUserName = async (req: Request, res: Response): Promise<void>
 export const updateSubscriptionLevel = async (req: Request, res: Response): Promise<void> => {
   try {
     const apiKey = req.headers['x-api-key'];
-    
+
     const referer = req.headers.referer || '';
     const origin = req.headers.origin || '';
-    
+
     const hasValidApiKey = apiKey === SUBSCRIPTION_API_KEY;
     const hasValidOrigin = ALLOWED_TILDA_ORIGINS.some(
-      allowed => referer.includes(allowed) || origin.includes(allowed)
+      (allowed) => referer.includes(allowed) || origin.includes(allowed),
     );
-    
+
     const isProduction = process.env.NODE_ENV === 'production';
-    
+
     if (!hasValidApiKey || (isProduction && !hasValidOrigin)) {
       const reason = !hasValidApiKey ? 'invalid API key' : 'unauthorized origin';
       console.warn(`Attempt to update subscription with ${reason}`);
-      
+
       res.status(403).json({
         success: false,
-        message: 'Доступ запрещен'
+        message: 'Доступ запрещен',
       });
       return;
     }
-    
+
     const { userId, subscriptionLevel } = req.body;
-    
+
     if (!userId || !subscriptionLevel || !Object.values(SubscriptionLevel).includes(subscriptionLevel)) {
       res.status(400).json({
         success: false,
@@ -174,16 +175,20 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
       });
       return;
     }
-    
+
     const originInfo = origin || referer || 'unknown';
     console.log(`Subscription update: User=${userId}, Level=${subscriptionLevel}, Origin=${originInfo}`);
-    
+
     // Добавляем месяц к текущей дате для subscriptionEndDate
     const subscriptionEndDate = new Date();
     subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
-    
-    const updatedUser = await usersService.updateSubscriptionLevel(userId, subscriptionLevel, subscriptionEndDate);
-    
+
+    const updatedUser = await usersService.updateSubscriptionLevel(
+      userId,
+      subscriptionLevel,
+      subscriptionEndDate,
+    );
+
     res.json({
       success: true,
       data: updatedUser,
@@ -200,7 +205,7 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
 export const updateSubscriptionLevelTest = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { userId, subscriptionLevel } = req.body;
-    
+
     if (!userId || !subscriptionLevel || !Object.values(SubscriptionLevel).includes(subscriptionLevel)) {
       res.status(400).json({
         success: false,
@@ -208,13 +213,17 @@ export const updateSubscriptionLevelTest = async (req: AuthRequest, res: Respons
       });
       return;
     }
-    
+
     // Добавляем месяц к текущей дате для subscriptionEndDate
     const subscriptionEndDate = new Date();
     subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
-    
-    const updatedUser = await usersService.updateSubscriptionLevel(userId, subscriptionLevel, subscriptionEndDate);
-    
+
+    const updatedUser = await usersService.updateSubscriptionLevel(
+      userId,
+      subscriptionLevel,
+      subscriptionEndDate,
+    );
+
     res.json({
       success: true,
       data: updatedUser,
@@ -238,9 +247,9 @@ export const getUserSubscription = async (req: AuthRequest, res: Response): Prom
       });
       return;
     }
-    
+
     const subscriptionLevel = await usersService.getUserSubscriptionLevel(req.user.sub);
-    
+
     res.json({
       success: true,
       data: { subscriptionLevel },
