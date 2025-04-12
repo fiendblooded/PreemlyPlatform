@@ -70,7 +70,6 @@ export class UsersService {
       return SubscriptionLevel.FREE;
     }
 
-    // Проверяем, не истек ли срок подписки
     const now = new Date();
     if (user.subscriptionEndDate && user.subscriptionEndDate < now) {
       user.subscriptionLevel = SubscriptionLevel.FREE;
@@ -79,25 +78,5 @@ export class UsersService {
     }
 
     return user.subscriptionLevel;
-  }
-
-  async getUserSubscriptionInfo(auth0Id: string) {
-    const user = await User.findOne({ auth0Id });
-    if (!user) {
-      return null;
-    }
-
-    // Проверяем, не истек ли срок подписки
-    const now = new Date();
-    if (user.subscriptionEndDate && user.subscriptionEndDate < now) {
-      user.subscriptionLevel = SubscriptionLevel.FREE;
-      user.subscriptionEndDate = null;
-      await user.save();
-    }
-
-    return {
-      subscriptionLevel: user.subscriptionLevel,
-      subscriptionEndDate: user.subscriptionEndDate,
-    };
   }
 }
