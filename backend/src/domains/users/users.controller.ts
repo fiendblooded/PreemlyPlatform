@@ -238,7 +238,6 @@ export const updateSubscriptionLevelTest = async (req: AuthRequest, res: Respons
 };
 
 export const getUserSubscription = async (req: AuthRequest, res: Response): Promise<void> => {
-  console.log('getUserSubscription log', JSON.stringify(req?.user));
   try {
     if (!req?.user?.sub) {
       res.status(401).json({
@@ -260,7 +259,10 @@ export const getUserSubscription = async (req: AuthRequest, res: Response): Prom
 
     res.json({
       success: true,
-      data: subscriptionInfo,
+      data: {
+        userId: req.user.sub,
+        subscriptionLevel: subscriptionInfo,
+      },
     });
   } catch (error) {
     console.error('Error getting subscription info:', error);
