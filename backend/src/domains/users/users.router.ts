@@ -7,6 +7,11 @@ const router = Router();
 // Get all users
 router.get('/', verifyUser, userController.getUsers);
 
+// Subscription routes
+router.post('/subscription', userController.updateSubscriptionLevel);
+router.post('/subscription/test', userController.updateSubscriptionLevelTest);
+router.get('/subscription', verifyUser, userController.getUserSubscription);
+
 // Get user by ID
 router.get('/:id', verifyUser, userController.getUserById);
 
@@ -15,10 +20,5 @@ router.delete('/:id', verifyUser, userController.deleteUser);
 
 // Update user's name
 router.patch('/:id/name', verifyUser, userController.updateUserName);
-
-// Subscription routes
-router.post('/subscription', userController.updateSubscriptionLevel);
-router.post('/subscription/test', userController.updateSubscriptionLevelTest);
-router.get('/subscription', verifyUser, userController.getUserSubscription);
 
 export default router;
