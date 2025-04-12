@@ -161,7 +161,7 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
 
       res.status(403).json({
         success: false,
-        message: 'Доступ запрещен',
+        message: 'Access denied',
       });
       return;
     }
@@ -171,7 +171,7 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
     if (!userId || !subscriptionLevel || !Object.values(SubscriptionLevel).includes(subscriptionLevel)) {
       res.status(400).json({
         success: false,
-        message: 'Предоставьте все необходимые данные в правильном формате',
+        message: 'Please provide all required data in the correct format',
       });
       return;
     }
@@ -197,7 +197,7 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
     console.error('Error updating subscription level:', error);
     res.status(500).json({
       success: false,
-      message: 'Ошибка сервера',
+      message: 'Server error',
     });
   }
 };
@@ -209,7 +209,7 @@ export const updateSubscriptionLevelTest = async (req: AuthRequest, res: Respons
     if (!userId || !subscriptionLevel || !Object.values(SubscriptionLevel).includes(subscriptionLevel)) {
       res.status(400).json({
         success: false,
-        message: 'Требуется ID пользователя и валидный уровень подписки',
+        message: 'User ID and valid subscription level are required',
       });
       return;
     }
@@ -232,43 +232,50 @@ export const updateSubscriptionLevelTest = async (req: AuthRequest, res: Respons
     console.error('Error updating subscription level:', error);
     res.status(500).json({
       success: false,
-      message: 'Ошибка сервера',
+      message: 'Server error',
     });
   }
 };
 
 export const getUserSubscription = async (req: AuthRequest, res: Response): Promise<void> => {
+  console.log('getUserSubscription user:', req?.user?.sub);
   try {
     if (!req?.user?.sub) {
       res.status(401).json({
         success: false,
-        message: 'Требуется ID пользователя',
+        message: 'User ID is required',
       });
       return;
     }
 
-    const subscriptionInfo = await usersService.getUserSubscriptionLevel(req.user.sub);
+    const subscriptionLevel = await usersService.getUserSubscriptionLevel(req.user.sub);
     
-    if (!subscriptionInfo) {
+    // Метод всегда возвращает как минимум FREE уровень, поэтому !subscriptionLevel никогда не будет true
+    // но оставим проверку на будущее
+    if (!subscriptionLevel) {
       res.status(404).json({
         success: false,
-        message: 'Информация о подписке не найдена',
+        message: 'Subscription information not found',
       });
       return;
     }
+    
+    // Получаем дополнительную информацию о пользователе
+    const user = await usersService.getUserByAuth0Id(req.user.sub);
 
     res.json({
       success: true,
       data: {
         userId: req.user.sub,
-        subscriptionLevel: subscriptionInfo,
+        subscriptionLevel: subscriptionLevel,
+        subscriptionEndDate: user?.subscriptionEndDate || null
       },
     });
   } catch (error) {
     console.error('Error getting subscription info:', error);
     res.status(500).json({
       success: false,
-      message: 'Ошибка сервера',
+      message: 'Server error',
     });
   }
 };
