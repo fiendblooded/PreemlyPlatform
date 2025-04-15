@@ -593,8 +593,15 @@ const Profile: React.FC = () => {
       if (!user?.sub) return;
       try {
         const response = await axiosInstance.get(`/users/${user.sub}`);
-        setProfile(response.data.data);
-        setNewName(response.data.data.user_metadata.displayName); // Set name for editing
+        if (response.data.success && response.data.data) {
+          setProfile(response.data.data);
+          if (
+            response.data.data.user_metadata &&
+            response.data.data.user_metadata.displayName
+          ) {
+            setNewName(response.data.data.user_metadata.displayName); // Set name for editing
+          }
+        }
       } catch (error) {
         console.error("Error fetching user profile:", error);
       } finally {
@@ -676,7 +683,7 @@ const Profile: React.FC = () => {
             <ProfilePictureSection>
               <ProfilePicture
                 src={profile.picture}
-                alt={`${profile.user_metadata.name}'s profile`}
+                alt={`${profile?.user_metadata?.name}'s profile`}
               />
               <ProfileNameWrapper>
                 <SeamlessInput

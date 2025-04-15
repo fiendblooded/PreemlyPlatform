@@ -334,7 +334,15 @@ const DatePickerWrapper = styled.div`
     position: absolute;
     left: 12px;
     color: ${colors.primary};
-    z-index: 1;
+  }
+
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+
+  .react-datepicker-popper {
+    position: absolute;
+    z-index: 999999 !important;
   }
 
   .react-datepicker {

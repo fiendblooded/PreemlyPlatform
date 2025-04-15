@@ -511,6 +511,94 @@ const SponsorDealsIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
+// Add a VirtualSpaceEditor component
+const VirtualSpaceEditor: React.FC<{ event: Event; refetch: () => void }> = ({
+  event,
+  refetch,
+}) => {
+  const [activeSubtab, setActiveSubtab] = useState<"schedule" | "sponsors">(
+    "schedule"
+  );
+
+  const SubTabButton = styled.button<{ isActive: boolean }>`
+    padding: 10px 24px;
+    background-color: ${(props) =>
+      props.isActive ? "#6b3ddf" : "transparent"};
+    color: ${(props) => (props.isActive ? "white" : "#666")};
+    border: 1px solid ${(props) => (props.isActive ? "#6b3ddf" : "#ccc")};
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: ${(props) => (props.isActive ? "600" : "500")};
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 12px;
+    margin-bottom: 20px;
+
+    &:hover {
+      background-color: ${(props) => (props.isActive ? "#6b3ddf" : "#f5f5f5")};
+    }
+  `;
+
+  const SubTabsContainer = styled.div`
+    display: flex;
+    width: 90%;
+    margin: 0 auto;
+    margin-bottom: 10px;
+  `;
+
+  return (
+    <>
+      <SubTabsContainer>
+        <SubTabButton
+          isActive={activeSubtab === "schedule"}
+          onClick={() => setActiveSubtab("schedule")}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <ScheduleIcon color="currentColor" />
+            Schedule
+          </div>
+        </SubTabButton>
+        <SubTabButton
+          isActive={activeSubtab === "sponsors"}
+          onClick={() => setActiveSubtab("sponsors")}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <SponsorDealsIcon color="currentColor" />
+            Sponsor Deals
+          </div>
+        </SubTabButton>
+      </SubTabsContainer>
+
+      {activeSubtab === "schedule" && (
+        <ScheduleEditor event={event} refetch={refetch} />
+      )}
+      {activeSubtab === "sponsors" && (
+        <SponsorDealsEditor event={event} refetch={refetch} />
+      )}
+    </>
+  );
+};
+
+// Add a VirtualSpaceIcon component with a phone icon
+const VirtualSpaceIcon = ({ color }: { color: string }) => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ color }}
+  >
+    <path
+      d="M12 17V18M8 21H16C17.1046 21 18 20.1046 18 19V5C18 3.89543 17.1046 3 16 3H8C6.89543 3 6 3.89543 6 5V19C6 20.1046 6.89543 21 8 21Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const EventDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -519,7 +607,6 @@ const EventDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const tabletMode = isTablet();
-  const { user } = useAuth0();
 
   // Extract the tab from the URL path
   const getTabFromPath = () => {
@@ -534,8 +621,7 @@ const EventDetail: React.FC = () => {
         welcome: "welcome",
         budget: "budget",
         feedback: "feedback",
-        schedule: "schedule",
-        sponsors: "sponsors",
+        virtualspace: "virtualspace",
       };
       return tabMap[tab] || "info";
     }
@@ -558,8 +644,7 @@ const EventDetail: React.FC = () => {
       welcome: "welcome",
       budget: "budget",
       feedback: "feedback",
-      schedule: "schedule",
-      sponsors: "sponsors",
+      virtualspace: "virtualspace",
     };
     navigate(`/events/${id}/${pathMap[tab] || tab}`, { replace: true });
   };
@@ -818,20 +903,12 @@ const EventDetail: React.FC = () => {
               Feedback
             </ActiveStatusButton>
             <ActiveStatusButton
-              isActive={openSection === "schedule"}
-              onClick={() => handleTabChange("schedule")}
+              isActive={openSection === "virtualspace"}
+              onClick={() => handleTabChange("virtualspace")}
               borderColor="#e6bf30"
             >
-              <ScheduleIcon color={"currentColor"} />
-              Schedule
-            </ActiveStatusButton>
-            <ActiveStatusButton
-              isActive={openSection === "sponsors"}
-              onClick={() => handleTabChange("sponsors")}
-              borderColor="#e6bf30"
-            >
-              <SponsorDealsIcon color={"currentColor"} />
-              Sponsors
+              <VirtualSpaceIcon color={"currentColor"} />
+              Virtual Space
             </ActiveStatusButton>
           </ActiveStatusContainer>
           {openSection === "info" && (
@@ -855,11 +932,8 @@ const EventDetail: React.FC = () => {
           {openSection === "feedback" && (
             <EventFeedbackViewer event={event} refetch={fetchEvent} />
           )}
-          {openSection === "schedule" && event && (
-            <ScheduleEditor event={event} refetch={fetchEvent} />
-          )}
-          {openSection === "sponsors" && event && (
-            <SponsorDealsEditor event={event} refetch={fetchEvent} />
+          {openSection === "virtualspace" && event && (
+            <VirtualSpaceEditor event={event} refetch={fetchEvent} />
           )}
         </>
         {/* ) : (

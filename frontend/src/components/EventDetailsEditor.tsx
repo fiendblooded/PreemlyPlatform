@@ -47,7 +47,16 @@ export const StyledDatePickerWrapper = styled.div`
     position: absolute;
     left: 14px;
     color: ${colors.primary};
-    z-index: 1;
+  }
+
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+
+  /* This is the most important part - ensuring the popper is above everything */
+  .react-datepicker-popper {
+    position: absolute;
+    z-index: 999999 !important;
   }
 
   .react-datepicker {
@@ -283,6 +292,8 @@ const EventTypeSelector = styled.div`
   margin-top: 16px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
   border: 1px solid ${colors.borderLight};
+  position: static;
+  z-index: 1;
 `;
 
 const SelectorOption = styled.label<{ selected: boolean }>`
@@ -393,7 +404,6 @@ const DateTimeGrid = styled.div`
   gap: 20px;
   width: 100%;
   margin-top: 20px;
-
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -826,6 +836,157 @@ const LocationActions = styled.div`
   margin-top: 16px;
 `;
 
+// Add dialog components after the existing component definitions
+const DialogOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+`;
+
+const DialogContent = styled.div`
+  background-color: white;
+  padding: 28px;
+  border-radius: 12px;
+  width: 450px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(20px);
+  animation: slideUp 0.3s forwards;
+
+  @keyframes slideUp {
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .react-datepicker {
+    font-size: 14px;
+    background-color: ${colors.backgroundLight};
+    color: ${colors.textPrimary};
+    border: 1px solid ${colors.borderLight};
+    border-radius: 12px;
+    box-shadow: 0 8px 24px ${colors.shadow};
+    padding: 12px;
+    transition: all 0.3s ease;
+    font-family: Axiforma, sans-serif;
+    margin: 0 auto;
+    width: calc(100% - 24px);
+  }
+
+  .react-datepicker__header {
+    background-color: ${colors.backgroundSecondary};
+    border-bottom: none;
+    padding-top: 12px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .react-datepicker__month-container {
+    width: 100%;
+  }
+
+  .react-datepicker__day-names,
+  .react-datepicker__week {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+  }
+
+  .react-datepicker__day--selected {
+    background-color: ${colors.primary};
+    color: white;
+    border-radius: 6px;
+  }
+
+  .react-datepicker__day:hover {
+    background-color: rgba(99, 102, 241, 0.1);
+    border-radius: 6px;
+  }
+
+  .react-datepicker__current-month {
+    font-weight: 600;
+    color: ${colors.textPrimary};
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+
+  .react-datepicker__day-name {
+    color: ${colors.textSecondary};
+    font-weight: 500;
+    margin-top: 4px;
+    width: 32px;
+  }
+
+  .react-datepicker__day {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    margin: 2px;
+  }
+
+  .react-datepicker__time-container {
+    width: 100%;
+    border-left: none;
+  }
+
+  .react-datepicker__time-container .react-datepicker__time {
+    background-color: ${colors.backgroundLight};
+  }
+
+  .react-datepicker__time-container
+    .react-datepicker__time
+    .react-datepicker__time-box {
+    width: 100%;
+    margin: 0;
+  }
+
+  .react-datepicker__time-list {
+    height: 200px !important;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .react-datepicker__time-list-item {
+    padding: 8px 10px !important;
+    height: auto !important;
+    line-height: 1.2 !important;
+  }
+
+  .react-datepicker__time-list-item--selected {
+    background-color: ${colors.primary} !important;
+  }
+`;
+
+const DialogTitle = styled.h3`
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: ${colors.textPrimary};
+  font-size: 20px;
+  font-weight: 600;
+`;
+
+const DialogButtons = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+`;
+
 const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
   event,
   refetch,
@@ -848,6 +1009,17 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
     placeId: event.location?.placeId || "",
   });
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
+
+  // Modify date picker implementation - add new states for date picker dialogs
+  const [showStartDatePickerDialog, setShowStartDatePickerDialog] =
+    useState(false);
+  const [showEndDatePickerDialog, setShowEndDatePickerDialog] = useState(false);
+
+  // Open/close handlers for date picker dialogs
+  const openStartDatePickerDialog = () => setShowStartDatePickerDialog(true);
+  const closeStartDatePickerDialog = () => setShowStartDatePickerDialog(false);
+  const openEndDatePickerDialog = () => setShowEndDatePickerDialog(true);
+  const closeEndDatePickerDialog = () => setShowEndDatePickerDialog(false);
 
   // Add location save handler
   const handleSaveLocation = async () => {
@@ -1180,14 +1352,24 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <DatePicker
-                    selected={startDate}
-                    onChange={(date) => setStartDate(date || new Date())}
-                    placeholderText="Select start date and time"
-                    showTimeSelect
-                    timeFormat="HH:mm"
-                    timeIntervals={15}
-                    dateFormat="MMMM d, yyyy h:mm aa"
+                  <input
+                    type="text"
+                    value={startDate ? startDate.toLocaleString() : ""}
+                    onClick={openStartDatePickerDialog}
+                    readOnly
+                    placeholder="Select start date and time"
+                    style={{
+                      backgroundColor: colors.backgroundLight,
+                      color: colors.textPrimary,
+                      border: `1px solid ${colors.borderLight}`,
+                      borderRadius: "10px",
+                      padding: "12px 16px 12px 42px",
+                      fontSize: "15px",
+                      width: "100%",
+                      fontFamily: "Axiforma, sans-serif",
+                      boxSizing: "border-box",
+                      cursor: "pointer",
+                    }}
                   />
                 </StyledDatePickerWrapper>
               </DateTimeInputGroup>
@@ -1210,14 +1392,24 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <DatePicker
-                    selected={endDate}
-                    onChange={(date) => setEndDate(date || new Date())}
-                    placeholderText="Select end date and time"
-                    showTimeSelect
-                    timeFormat="HH:mm"
-                    timeIntervals={15}
-                    dateFormat="MMMM d, yyyy h:mm aa"
+                  <input
+                    type="text"
+                    value={endDate ? endDate.toLocaleString() : ""}
+                    onClick={openEndDatePickerDialog}
+                    readOnly
+                    placeholder="Select end date and time"
+                    style={{
+                      backgroundColor: colors.backgroundLight,
+                      color: colors.textPrimary,
+                      border: `1px solid ${colors.borderLight}`,
+                      borderRadius: "10px",
+                      padding: "12px 16px 12px 42px",
+                      fontSize: "15px",
+                      width: "100%",
+                      fontFamily: "Axiforma, sans-serif",
+                      boxSizing: "border-box",
+                      cursor: "pointer",
+                    }}
                   />
                 </StyledDatePickerWrapper>
               </DateTimeInputGroup>
@@ -1321,6 +1513,59 @@ const EventDetailsEditor: React.FC<{ event: Event; refetch: () => void }> = ({
           </>
         )}
       </EventDetails>
+
+      {/* Add date picker dialogs */}
+      {showStartDatePickerDialog && (
+        <DialogOverlay onClick={closeStartDatePickerDialog}>
+          <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogTitle>Select Start Date & Time</DialogTitle>
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => {
+                setStartDate(date || new Date());
+                closeStartDatePickerDialog();
+              }}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="MMMM d, yyyy h:mm aa"
+              inline
+              fixedHeight
+            />
+            <DialogButtons>
+              <SecondaryButton onClick={closeStartDatePickerDialog}>
+                Cancel
+              </SecondaryButton>
+            </DialogButtons>
+          </DialogContent>
+        </DialogOverlay>
+      )}
+
+      {showEndDatePickerDialog && (
+        <DialogOverlay onClick={closeEndDatePickerDialog}>
+          <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogTitle>Select End Date & Time</DialogTitle>
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => {
+                setEndDate(date || new Date());
+                closeEndDatePickerDialog();
+              }}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="MMMM d, yyyy h:mm aa"
+              inline
+              fixedHeight
+            />
+            <DialogButtons>
+              <SecondaryButton onClick={closeEndDatePickerDialog}>
+                Cancel
+              </SecondaryButton>
+            </DialogButtons>
+          </DialogContent>
+        </DialogOverlay>
+      )}
 
       {isModalOpen && (
         <PosterUploadModal

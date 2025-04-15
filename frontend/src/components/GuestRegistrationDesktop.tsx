@@ -1,8 +1,43 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import axios from "axios";
 import { Event } from "../types/event";
+import { getMailHtml, type ScheduleItem } from "../common/common";
+
+// Define the EmailExtraModule type based on what's in common.ts
+type EmailExtraModule = {
+  enabled: boolean;
+  content: string;
+  items?: ScheduleItem[];
+};
+
+// Add global styles for background animation
+const GlobalAnimationStyles = createGlobalStyle`
+  @property --hue1 {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+  }
+  
+  @property --hue2 {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+  }
+  
+  @keyframes anim_bg {
+    0% {
+      --hue1: 0deg;
+      --hue2: 300deg;
+    }
+  
+    100% {
+      --hue1: 360deg;
+      --hue2: 660deg;
+    }
+  }
+`;
 
 // Modern color palette with gradients
 const colors = {
@@ -87,14 +122,41 @@ const PageWrapper = styled.div`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: ${colors.backgroundSecondary};
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
   position: relative;
   font-size: 16px;
   color: ${colors.textPrimary};
   overflow-x: hidden;
-  padding: ${designTokens.spacing.xl} 0;
+
+  /* Background animation */
+  background-image: linear-gradient(
+      in oklch longer hue to right,
+      oklch(0.93 0.08 var(--hue1) / 50%),
+      oklch(0.93 0.08 var(--hue2) / 50%)
+    ),
+    linear-gradient(
+      in oklch longer hue to bottom,
+      oklch(0.93 0.08 var(--hue1) / 50%),
+      oklch(0.93 0.08 var(--hue2) / 50%)
+    );
+  background-size: 100% 100%;
+  animation-name: anim_bg;
+  animation-duration: 5s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+
+  /* Fallback background for browsers that don't support custom properties */
+  @supports not (
+    background:
+      linear-gradient(
+        in oklch longer hue to right,
+        oklch(0.93 0.08 0deg / 50%),
+        oklch(0.93 0.08 300deg / 50%)
+      )
+  ) {
+    background-image: linear-gradient(to bottom, #f9fafb, #f3f4f8);
+  }
 `;
 
 const ContentSection = styled.div`
@@ -105,134 +167,263 @@ const ContentSection = styled.div`
   box-sizing: border-box;
   position: relative;
   z-index: 2;
-  max-width: 900px;
+  max-width: 1200px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   min-height: 100vh;
-`;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  justify-content: center;
 
-const Card = styled.div`
-  background-color: ${colors.backgroundLight};
-  border-radius: 1rem;
-  box-shadow: ${designTokens.shadows.xl};
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-  overflow: hidden;
-`;
-
-const CardHeader = styled.div<{ posterUrl?: string }>`
-  width: 100%;
-  height: 220px;
-  background-color: #000;
-  background-image: ${(props) =>
-    props.posterUrl ? `url(${props.posterUrl})` : colors.primaryGradient};
-  background-size: cover;
-  background-position: center;
-  position: relative;
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.3) 0%,
-      rgba(0, 0, 0, 0.8) 100%
-    );
-    z-index: 0;
+  @media (max-width: 768px) {
+    padding: 0 1.5rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 `;
 
-const HeaderContent = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: ${designTokens.spacing.xl};
-  z-index: 1;
+const EventContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${designTokens.spacing.sm};
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 1.25rem;
+  box-shadow: ${designTokens.shadows.xl};
+  overflow: hidden;
+  margin-bottom: 2rem;
+  transform: translateY(0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 22px 45px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (max-width: 992px) {
+    flex-direction: column-reverse;
+  }
 `;
 
-const WelcomeText = styled.h1`
-  color: white;
-  font-size: 30px;
+const EventDetailsSection = styled.div`
+  flex: 1;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+`;
+
+const EventPosterSection = styled.div`
+  width: 400px;
+  height: 400px;
+  flex-shrink: 0;
+  background-color: #000;
+  position: relative;
+  overflow: hidden;
+
+  @media (max-width: 992px) {
+    width: 100%;
+    height: 300px;
+  }
+`;
+
+const EventPoster = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: relative;
+`;
+
+const PosterOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  z-index: 1;
+`;
+
+const EventTitle = styled.h1`
+  font-size: 2.25rem;
   font-weight: ${fontWeights.bold};
+  color: ${colors.textPrimary};
   margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
   letter-spacing: -0.5px;
 `;
 
+const EventDescription = styled.p`
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: ${colors.textSecondary};
+  margin: 0;
+  max-height: 170px;
+  overflow-y: auto;
+  padding-right: 6px;
+
+  /* Custom scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  /* Firefox scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.12) rgba(0, 0, 0, 0.03);
+`;
+
+const EventMetaInfo = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  color: ${colors.textPrimary};
+  margin-top: 0.5rem;
+  gap: 1.5rem;
+`;
+
+const EventMetaItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const EventDateIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${colors.primary};
+`;
+
+const EventLocationIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${colors.primary};
+`;
+
+const FormCard = styled.div`
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 1.25rem;
+  box-shadow: ${designTokens.shadows.xl};
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  transform: translateY(0);
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 22px 45px rgba(0, 0, 0, 0.08);
+  }
+`;
+
 const CardBody = styled.div`
-  padding: 2.25rem;
-  padding-top: 1.75rem;
+  padding: 2.5rem;
+  padding-top: 2rem;
 `;
 
 const FormTitle = styled.div`
   font-size: 1.75rem;
   font-weight: ${fontWeights.bold};
-  margin-bottom: 0.85rem;
+  margin-bottom: 1rem;
   color: ${colors.textPrimary};
+  letter-spacing: -0.01em;
 `;
 
 const FormDescription = styled.p`
   font-size: 1.1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
   color: ${colors.textSecondary};
-  line-height: 1.4;
+  line-height: 1.5;
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  position: relative;
 `;
 
 const Label = styled.label`
   display: block;
   color: ${colors.textSecondary};
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: ${fontWeights.medium};
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
+  transition: color 0.2s ease;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.85rem;
+  padding: 0.9rem 1rem;
   border: 2px solid ${colors.borderLight};
   border-radius: ${designTokens.borderRadius.md};
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   transition: all ${designTokens.animation.fast};
   background-color: ${colors.backgroundLight};
   color: ${colors.textPrimary};
   box-sizing: border-box;
-  height: 46px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  height: 50px;
+
   &::placeholder {
     color: ${colors.textTertiary};
-    opacity: 0.8;
+    opacity: 0.6;
   }
 
   &:focus {
     outline: none;
     border-color: ${colors.primary};
-    box-shadow: 0 0 0 3px ${colors.primaryLight};
+    box-shadow: 0 0 0 4px ${colors.primaryLight};
+  }
+
+  &:hover:not(:focus) {
+    border-color: #c0c5d0;
   }
 `;
 
 const ErrorMessage = styled.div`
   color: ${colors.error};
   background-color: ${colors.errorLight};
-  padding: ${designTokens.spacing.md};
+  padding: 0.75rem 1rem;
   border-radius: ${designTokens.borderRadius.md};
-  margin-top: ${designTokens.spacing.xs};
+  margin-top: 0.5rem;
   font-size: 0.9rem;
   display: flex;
   align-items: center;
-  gap: ${designTokens.spacing.xs};
+  gap: 0.5rem;
+  animation: fadeIn 0.3s ease;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   &::before {
     content: "⚠️";
@@ -243,40 +434,63 @@ const ErrorMessage = styled.div`
 const CheckboxContainer = styled.div`
   display: flex;
   align-items: flex-start;
-  margin: 1rem 0;
+  margin: 1.5rem 0;
   cursor: pointer;
   user-select: none;
-  gap: ${designTokens.spacing.sm};
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: ${designTokens.borderRadius.md};
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${colors.backgroundTertiary};
+  }
 `;
 
 const Checkbox = styled.input.attrs({ type: "checkbox" })`
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   margin: 0;
   cursor: pointer;
-  accent-color: ${colors.primary};
-  border-radius: ${designTokens.borderRadius.sm};
+  appearance: none;
+  background-color: ${colors.backgroundLight};
   border: 2px solid ${colors.borderLight};
+  border-radius: ${designTokens.borderRadius.sm};
   transition: all ${designTokens.animation.fast};
+  position: relative;
+  flex-shrink: 0;
 
   &:checked {
     background-color: ${colors.primary};
     border-color: ${colors.primary};
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 25%;
+      left: 40%;
+      width: 25%;
+      height: 50%;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg) translate(-50%, -50%);
+    }
   }
 
   &:focus {
     outline: none;
     border-color: ${colors.primary};
-    box-shadow: 0 0 0 4px ${colors.primaryLight};
+    box-shadow: 0 0 0 3px ${colors.primaryLight};
   }
 `;
 
 const CheckboxLabel = styled.label`
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: ${colors.textSecondary};
   cursor: pointer;
   line-height: 1.5;
   flex: 1;
+  padding-top: 0.15rem;
 `;
 
 const SubmitButton = styled.button`
@@ -284,8 +498,8 @@ const SubmitButton = styled.button`
   color: white;
   border: none;
   border-radius: ${designTokens.borderRadius.md};
-  padding: 0.85rem 1.5rem;
-  font-size: 1.1rem;
+  padding: 0.9rem 1.5rem;
+  font-size: 1rem;
   font-weight: ${fontWeights.semibold};
   cursor: pointer;
   width: 100%;
@@ -293,13 +507,36 @@ const SubmitButton = styled.button`
   align-items: center;
   justify-content: center;
   transition: all ${designTokens.animation.medium};
-  margin-top: 1.25rem;
+  margin-top: 1.75rem;
   box-shadow: ${designTokens.shadows.lg};
-  height: 48px;
+  height: 52px;
+  letter-spacing: 0.3px;
+  position: relative;
+  overflow: hidden;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${designTokens.shadows.xl};
+  }
+
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: all 0.6s ease;
+  }
+
+  &:hover:before {
+    left: 100%;
   }
 
   &:active {
@@ -403,6 +640,20 @@ const RetryButton = styled.button`
     transform: translateY(0);
   }
 `;
+
+// Helper function to format the date string
+const formatEventDate = (dateString: string) => {
+  try {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return "Date to be announced";
+  }
+};
 
 const GuestRegistrationDesktop: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
@@ -521,10 +772,16 @@ const GuestRegistrationDesktop: React.FC = () => {
           eventId: eventId,
           attendance_status: false,
           age: 0,
+          email_sent: false,
         }
       );
 
       if (response.data.success) {
+        // Send the invitation email
+        if (event) {
+          await sendInvitationEmail(response.data.data, event);
+        }
+
         // Redirect to invite page after successful registration
         navigate(`/invites/${eventId}/${response.data.data._id}`);
       } else {
@@ -536,127 +793,267 @@ const GuestRegistrationDesktop: React.FC = () => {
     }
   };
 
+  // Send invitation email to the newly registered guest
+  const sendInvitationEmail = async (
+    guest: {
+      _id: string;
+      email: string;
+      fullName: string;
+    },
+    eventDetails: Event
+  ) => {
+    try {
+      const qrContent = guest._id.toString();
+      const qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+        qrContent
+      )}&size=320x320&color=000000&bgcolor=FFFFFF`;
+
+      const emails = [
+        {
+          recipient: guest.email.toLowerCase(),
+          guestName: guest.fullName,
+          qrCode: qrCodeBase64,
+        },
+      ];
+
+      // Create schedule items safely - using type assertion at the parent level
+      const scheduleModule = eventDetails.emailParams
+        ?.scheduleSrc as unknown as EmailExtraModule;
+      const scheduleItems = scheduleModule?.items || [];
+
+      // Send the invitation email
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/mail`, {
+        subject: `${eventDetails.title} - here's your ticket!`,
+        htmlTemplate: getMailHtml(
+          "{{guestName}}",
+          "{{qrCode}}",
+          eventDetails.title,
+          eventDetails.poster || "",
+          eventDetails.description,
+          eventDetails.date,
+          eventDetails.endDate,
+          {
+            enabled: eventDetails.emailParams?.parking?.enabled || false,
+            content: eventDetails.emailParams?.parking?.content || "",
+          } as EmailExtraModule,
+          {
+            enabled: scheduleModule?.enabled || false,
+            content: scheduleModule?.content || "",
+            items: scheduleItems,
+          },
+          {
+            enabled: eventDetails.emailParams?.dining?.enabled || false,
+            content: eventDetails.emailParams?.dining?.content || "",
+          } as EmailExtraModule,
+          eventDetails.location?.address || "",
+          false,
+          eventDetails.emailParams?.customHtmlTemplate?.enabled
+            ? eventDetails.emailParams?.customHtmlTemplate.content
+            : undefined,
+          eventDetails.emailParams?.virtualSpace?.enabled
+            ? `https://platform.preemly.eu/space/${eventDetails._id}`
+            : undefined
+        ),
+        emails,
+        eventId: eventDetails._id,
+      });
+
+      // Update the email_sent status to true
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/mail/update-status`,
+        {
+          guestIds: [guest._id],
+        }
+      );
+    } catch (error) {
+      console.error("Error sending invitation email:", error);
+      // We don't set registration error here as the guest is already registered
+    }
+  };
+
   const handleRetry = () => {
     setRegistrationError(false);
   };
 
-  if (loading) {
-    return (
-      <LoadingContainer>
-        <LoadingSpinner />
-        <LoadingText>Loading event details...</LoadingText>
-      </LoadingContainer>
-    );
-  }
-
-  if (error || !event) {
-    return (
-      <LoadingContainer>
-        <LoadingText style={{ color: colors.error }}>{error}</LoadingText>
-      </LoadingContainer>
-    );
-  }
-
-  if (registrationError) {
-    return (
-      <ErrorContainer>
-        <ErrorCard>
-          <ErrorTitle>Registration Failed</ErrorTitle>
-          <ErrorMessageText>
-            We're sorry, but we couldn't complete your registration at this
-            time. Please try again later or contact the event organizer for
-            assistance.
-          </ErrorMessageText>
-          <RetryButton onClick={handleRetry}>Try Again</RetryButton>
-        </ErrorCard>
-      </ErrorContainer>
-    );
-  }
-
   return (
-    <PageWrapper>
-      <ContentSection>
-        <Card>
-          <CardHeader posterUrl={event.poster || undefined}>
-            <HeaderContent>
-              <WelcomeText>{event.title}</WelcomeText>
-            </HeaderContent>
-          </CardHeader>
+    <>
+      <GlobalAnimationStyles />
+      <PageWrapper>
+        <ContentSection>
+          {loading ? (
+            <LoadingContainer>
+              <LoadingSpinner />
+              <LoadingText>Loading event details...</LoadingText>
+            </LoadingContainer>
+          ) : error || !event ? (
+            <LoadingContainer>
+              <LoadingText style={{ color: colors.error }}>{error}</LoadingText>
+            </LoadingContainer>
+          ) : registrationError ? (
+            <ErrorContainer>
+              <ErrorCard>
+                <ErrorTitle>Registration Failed</ErrorTitle>
+                <ErrorMessageText>
+                  We're sorry, but we couldn't complete your registration at
+                  this time. Please try again later or contact the event
+                  organizer for assistance.
+                </ErrorMessageText>
+                <RetryButton onClick={handleRetry}>Try Again</RetryButton>
+              </ErrorCard>
+            </ErrorContainer>
+          ) : (
+            <>
+              <EventContainer>
+                <EventDetailsSection>
+                  <EventTitle>{event.title}</EventTitle>
+                  <EventDescription>
+                    {event.description || "Join us for this exciting event!"}
+                  </EventDescription>
+                  <EventMetaInfo>
+                    <EventMetaItem>
+                      <EventDateIcon>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M16 2V6M8 2V6M3 10H21"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </EventDateIcon>
+                      {formatEventDate(event.date)}
+                    </EventMetaItem>
+                    <EventMetaItem>
+                      <EventLocationIcon>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.364 3.63604C20.0518 5.32387 21 7.61305 21 10Z"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </EventLocationIcon>
+                      {event.location?.address || "Location to be announced"}
+                    </EventMetaItem>
+                  </EventMetaInfo>
+                </EventDetailsSection>
+                <EventPosterSection>
+                  {event.poster && (
+                    <EventPoster src={event.poster} alt={event.title} />
+                  )}
+                  <PosterOverlay />
+                </EventPosterSection>
+              </EventContainer>
 
-          <CardBody>
-            <form onSubmit={handleSubmit}>
-              <FormTitle>Registration Form</FormTitle>
-              <FormDescription>
-                Please fill out the form below to register for the event.
-              </FormDescription>
+              <FormCard>
+                <CardBody>
+                  <form onSubmit={handleSubmit}>
+                    <FormTitle>Registration Form</FormTitle>
+                    <FormDescription>
+                      Please fill out the form below to register for the event.
+                    </FormDescription>
 
-              <FormGroup>
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  placeholder="Enter your full name"
-                />
-                {formErrors.fullName && (
-                  <ErrorMessage>{formErrors.fullName}</ErrorMessage>
-                )}
-              </FormGroup>
+                    <FormGroup>
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <Input
+                        type="text"
+                        id="fullName"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        placeholder="Enter your full name"
+                      />
+                      {formErrors.fullName && (
+                        <ErrorMessage>{formErrors.fullName}</ErrorMessage>
+                      )}
+                    </FormGroup>
 
-              <FormGroup>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="Enter your email"
-                />
-                {formErrors.email && (
-                  <ErrorMessage>{formErrors.email}</ErrorMessage>
-                )}
-              </FormGroup>
+                    <FormGroup>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="Enter your email"
+                      />
+                      {formErrors.email && (
+                        <ErrorMessage>{formErrors.email}</ErrorMessage>
+                      )}
+                    </FormGroup>
 
-              <FormGroup>
-                <Label htmlFor="phoneNumber">Phone Number (Optional)</Label>
-                <Input
-                  type="tel"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleInputChange}
-                  placeholder="Enter your phone number"
-                />
-                {formErrors.phoneNumber && (
-                  <ErrorMessage>{formErrors.phoneNumber}</ErrorMessage>
-                )}
-              </FormGroup>
+                    <FormGroup>
+                      <Label htmlFor="phoneNumber">
+                        Phone Number (Optional)
+                      </Label>
+                      <Input
+                        type="tel"
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleInputChange}
+                        placeholder="Enter your phone number"
+                      />
+                      {formErrors.phoneNumber && (
+                        <ErrorMessage>{formErrors.phoneNumber}</ErrorMessage>
+                      )}
+                    </FormGroup>
 
-              <CheckboxContainer>
-                <Checkbox
-                  id="gdprConsent"
-                  name="gdprConsent"
-                  checked={formData.gdprConsent}
-                  onChange={handleInputChange}
-                />
-                <CheckboxLabel htmlFor="gdprConsent">
-                  I agree to the processing of my personal data in accordance
-                  with GDPR
-                </CheckboxLabel>
-              </CheckboxContainer>
-              {formErrors.gdprConsent && (
-                <ErrorMessage>{formErrors.gdprConsent}</ErrorMessage>
-              )}
+                    <CheckboxContainer>
+                      <Checkbox
+                        id="gdprConsent"
+                        name="gdprConsent"
+                        checked={formData.gdprConsent}
+                        onChange={handleInputChange}
+                      />
+                      <CheckboxLabel htmlFor="gdprConsent">
+                        I agree to the processing of my personal data in
+                        accordance with GDPR
+                      </CheckboxLabel>
+                    </CheckboxContainer>
+                    {formErrors.gdprConsent && (
+                      <ErrorMessage>{formErrors.gdprConsent}</ErrorMessage>
+                    )}
 
-              <SubmitButton type="submit">Register</SubmitButton>
-            </form>
-          </CardBody>
-        </Card>
-      </ContentSection>
-    </PageWrapper>
+                    <SubmitButton type="submit">Register</SubmitButton>
+                  </form>
+                </CardBody>
+              </FormCard>
+            </>
+          )}
+        </ContentSection>
+      </PageWrapper>
+    </>
   );
 };
 

@@ -1018,8 +1018,7 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   const [selectedGuests, setSelectedGuests] = useState<string[]>([]); // Selected guest IDs
 
   const [showReminderDialog, setShowReminderDialog] = useState(false);
-  const [daysBefore, setDaysBefore] = useState(1);
-  const [reminderTime, setReminderTime] = useState("12:00"); // Default to noon
+  const [hoursBefore, setHoursBefore] = useState("24"); // Changed to string to allow empty values
   const [showSendEmailDialog, setShowSendEmailDialog] = useState(false);
   const [showDeleteGuestsDialog, setShowDeleteGuestsDialog] = useState(false);
   const [showSendSMSDialog, setShowSendSMSDialog] = useState(false);
@@ -1197,11 +1196,12 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
   const calculateReminderDate = () => {
     const eventDate = new Date(event.date);
     const reminderDate = new Date(eventDate);
-    reminderDate.setDate(eventDate.getDate() - daysBefore);
 
-    // Set the time from the time input
-    const [hours, minutes] = reminderTime.split(":").map(Number);
-    reminderDate.setHours(hours, minutes, 0, 0);
+    // Parse hoursBefore safely, default to 24 if invalid
+    const hours = parseInt(hoursBefore) || 24;
+
+    // Subtract hours from the event date
+    reminderDate.setHours(reminderDate.getHours() - hours);
 
     return reminderDate;
   };
@@ -1231,6 +1231,22 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
         "No guests selected to schedule reminder emails for.",
         ToastType.INFO
       );
+      return;
+    }
+
+    // Validate hours input before proceeding
+    const hours = parseInt(hoursBefore);
+
+    if (isNaN(hours) || hours <= 0) {
+      addToast(
+        "Please enter a valid number of hours greater than 0.",
+        ToastType.ERROR
+      );
+      return;
+    }
+
+    if (hours > 168) {
+      addToast("Maximum 168 hours (1 week) allowed.", ToastType.ERROR);
       return;
     }
 
@@ -1305,7 +1321,9 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       addToast(
         `Reminder emails scheduled for ${
           selectedGuests.length
-        } guests on ${reminderDate.toLocaleDateString()}`,
+        } guests ${hours} hour${
+          hours !== 1 ? "s" : ""
+        } before the event (${reminderDate.toLocaleString()})`,
         ToastType.SUCCESS
       );
       setSelectedGuests([]);
@@ -1560,12 +1578,6 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
     addToast("Template downloaded successfully", ToastType.SUCCESS);
   };
 
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
   const startEditing = (guestId: string, field: string, value: string) => {
     setEditingGuest({ id: guestId, field, value });
   };
@@ -1708,6 +1720,12 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
       console.error("Failed to send SMS:", error);
       addToast("Failed to send SMS. Please try again.", ToastType.ERROR);
     }
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
   };
 
   return (
@@ -2284,28 +2302,19 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
             <DialogTitle>Schedule Reminder Emails</DialogTitle>
             <DialogDescription>
               Set when reminder emails should be sent to your guests. Choose how
-              many days before the event and at what time.
+              many hours before the event the reminders should be sent.
             </DialogDescription>
 
             <InputGroup>
-              <Label htmlFor="daysBefore">Days before event:</Label>
+              <Label htmlFor="hoursBefore">Hours before event:</Label>
               <Input
-                id="daysBefore"
+                id="hoursBefore"
                 type="number"
                 min="1"
-                max="30"
-                value={daysBefore}
-                onChange={(e) => setDaysBefore(parseInt(e.target.value) || 1)}
-              />
-            </InputGroup>
-
-            <InputGroup>
-              <Label htmlFor="reminderTime">Time of day:</Label>
-              <Input
-                id="reminderTime"
-                type="time"
-                value={reminderTime}
-                onChange={(e) => setReminderTime(e.target.value)}
+                max="168" // Maximum one week (168 hours)
+                value={hoursBefore}
+                onChange={(e) => setHoursBefore(e.target.value)}
+                placeholder="Enter hours (1-168)"
               />
             </InputGroup>
 
@@ -2318,6 +2327,12 @@ const EventGuestsEditor: React.FC<Props> = ({ event, refetch }) => {
                   minute: "2-digit",
                 })}
               </strong>
+              <br />
+              {hoursBefore
+                ? `(${hoursBefore} hour${
+                    parseInt(hoursBefore) !== 1 ? "s" : ""
+                  } before the event)`
+                : "(Please enter hours before event)"}
             </ReminderPreview>
 
             <DialogButtons>

@@ -1244,37 +1244,6 @@ const SectionDivider = styled.div`
   }
 `;
 
-const EmptyStateMessage = styled.div`
-  text-align: center;
-  padding: ${designTokens.spacing.xl};
-  color: white;
-  font-size: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: ${designTokens.spacing.md};
-  position: relative;
-  z-index: 1;
-  background-color: rgba(255, 255, 255, 0.08);
-  border-radius: ${designTokens.borderRadius.lg};
-  backdrop-filter: blur(4px);
-  margin: ${designTokens.spacing.md};
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-
-  &::before {
-    content: "📅";
-    font-size: 36px;
-    margin-bottom: ${designTokens.spacing.sm};
-    background: rgba(255, 255, 255, 0.15);
-    width: 64px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-  }
-`;
-
 const FormTitle = styled.h2`
   font-size: 24px;
   font-weight: ${fontWeights.bold};
@@ -2220,17 +2189,15 @@ const VirtualSpace: React.FC = () => {
       </HeaderCard>
 
       <ContentSection>
-        <SectionHeader>
-          <SectionTitle>Schedule</SectionTitle>
-        </SectionHeader>
+        {schedule.length > 0 && (
+          <SectionHeader>
+            <SectionTitle>Schedule</SectionTitle>
+          </SectionHeader>
+        )}
 
-        <ScheduleContainer>
-          {schedule.length === 0 ? (
-            <EmptyStateMessage>
-              No schedule items available for this event.
-            </EmptyStateMessage>
-          ) : (
-            schedule.map((item) => {
+        {schedule.length > 0 && (
+          <ScheduleContainer>
+            {schedule.map((item) => {
               const start = new Date(item.startDateTime);
               const end = new Date(item.endDateTime);
               const sameDay = isSameDay(start, end);
@@ -2274,9 +2241,9 @@ const VirtualSpace: React.FC = () => {
                   </ScheduleTimeContainer>
                 </ScheduleItem>
               );
-            })
-          )}
-        </ScheduleContainer>
+            })}
+          </ScheduleContainer>
+        )}
 
         {event.emailParams.sponsorDeals?.items &&
           event.emailParams.sponsorDeals.items.length > 0 && (
@@ -2321,8 +2288,6 @@ const VirtualSpace: React.FC = () => {
               </Card>
             </>
           )}
-
-        <SectionDivider />
 
         <SectionHeader>
           <SectionTitle>Feedback</SectionTitle>
