@@ -141,6 +141,7 @@ const PageWrapper = styled.div`
       oklch(0.93 0.08 var(--hue2) / 50%)
     );
   background-size: 100% 100%;
+  background-attachment: fixed;
   animation-name: anim_bg;
   animation-duration: 5s;
   animation-timing-function: linear;
@@ -156,11 +157,12 @@ const PageWrapper = styled.div`
       )
   ) {
     background-image: linear-gradient(to bottom, #f9fafb, #f3f4f8);
+    background-attachment: fixed;
   }
 `;
 
 const ContentSection = styled.div`
-  padding: 0 3rem;
+  padding: 2rem;
   flex: 1;
   margin: 0 auto;
   width: 100%;
@@ -170,15 +172,11 @@ const ContentSection = styled.div`
   max-width: 1200px;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  padding-top: 3rem;
-  padding-bottom: 3rem;
   justify-content: center;
+  min-height: 100vh;
 
-  @media (max-width: 768px) {
-    padding: 0 1.5rem;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+  @media (min-width: 768px) {
+    padding: 2rem 3rem;
   }
 `;
 
@@ -186,39 +184,44 @@ const EventContainer = styled.div`
   display: flex;
   background-color: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   box-shadow: ${designTokens.shadows.xl};
   overflow: hidden;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.7);
   transform: translateY(0);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.7);
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 22px 45px rgba(0, 0, 0, 0.08);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (min-width: 992px) {
+    height: 320px;
   }
 
   @media (max-width: 992px) {
     flex-direction: column-reverse;
+    height: auto;
   }
 `;
 
 const EventDetailsSection = styled.div`
   flex: 1;
-  padding: 2.5rem;
+  padding: 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     padding: 2rem;
   }
 `;
 
 const EventPosterSection = styled.div`
-  width: 400px;
-  height: 400px;
+  width: 320px;
+  height: 320px;
   flex-shrink: 0;
   background-color: #000;
   position: relative;
@@ -226,7 +229,7 @@ const EventPosterSection = styled.div`
 
   @media (max-width: 992px) {
     width: 100%;
-    height: 300px;
+    height: 240px;
   }
 `;
 
@@ -252,7 +255,7 @@ const PosterOverlay = styled.div`
 `;
 
 const EventTitle = styled.h1`
-  font-size: 2.25rem;
+  font-size: 1.875rem;
   font-weight: ${fontWeights.bold};
   color: ${colors.textPrimary};
   margin: 0;
@@ -261,18 +264,18 @@ const EventTitle = styled.h1`
 `;
 
 const EventDescription = styled.p`
-  font-size: 1.1rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.5;
   color: ${colors.textSecondary};
   margin: 0;
-  max-height: 170px;
+  max-height: 100px;
   overflow-y: auto;
   padding-right: 6px;
 
   /* Custom scrollbar styling */
   &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
 
   &::-webkit-scrollbar-track {
@@ -285,10 +288,6 @@ const EventDescription = styled.p`
     border-radius: 10px;
   }
 
-  &::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.2);
-  }
-
   /* Firefox scrollbar styling */
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.12) rgba(0, 0, 0, 0.03);
@@ -297,10 +296,10 @@ const EventDescription = styled.p`
 const EventMetaInfo = styled.div`
   display: flex;
   align-items: center;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: ${colors.textPrimary};
   margin-top: 0.5rem;
-  gap: 1.5rem;
+  gap: 1.25rem;
 `;
 
 const EventMetaItem = styled.div`
@@ -326,65 +325,83 @@ const EventLocationIcon = styled.div`
 const FormCard = styled.div`
   background-color: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   box-shadow: ${designTokens.shadows.xl};
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.7);
-  transform: translateY(0);
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 22px 45px rgba(0, 0, 0, 0.08);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.08);
   }
 `;
 
 const CardBody = styled.div`
-  padding: 2.5rem;
-  padding-top: 2rem;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
 `;
 
 const FormTitle = styled.div`
-  font-size: 1.75rem;
+  font-size: 1.625rem;
   font-weight: ${fontWeights.bold};
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   color: ${colors.textPrimary};
   letter-spacing: -0.01em;
 `;
 
 const FormDescription = styled.p`
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
   color: ${colors.textSecondary};
   line-height: 1.5;
 `;
 
+// Design a compact form layout with two columns on desktop
+const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+`;
+
 const FormGroup = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   position: relative;
+
+  @media (min-width: 768px) {
+    margin-bottom: 0;
+  }
 `;
 
 const Label = styled.label`
   display: block;
   color: ${colors.textSecondary};
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: ${fontWeights.medium};
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.375rem;
   transition: color 0.2s ease;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.9rem 1rem;
+  padding: 0.8rem 1rem;
   border: 2px solid ${colors.borderLight};
   border-radius: ${designTokens.borderRadius.md};
-  font-size: 1.05rem;
+  font-size: 1rem;
   transition: all ${designTokens.animation.fast};
   background-color: ${colors.backgroundLight};
   color: ${colors.textPrimary};
   box-sizing: border-box;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-  height: 50px;
+  height: 46px;
 
   &::placeholder {
     color: ${colors.textTertiary};
@@ -394,7 +411,7 @@ const Input = styled.input`
   &:focus {
     outline: none;
     border-color: ${colors.primary};
-    box-shadow: 0 0 0 4px ${colors.primaryLight};
+    box-shadow: 0 0 0 3px ${colors.primaryLight};
   }
 
   &:hover:not(:focus) {
@@ -405,10 +422,10 @@ const Input = styled.input`
 const ErrorMessage = styled.div`
   color: ${colors.error};
   background-color: ${colors.errorLight};
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.875rem;
   border-radius: ${designTokens.borderRadius.md};
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
+  margin-top: 0.375rem;
+  font-size: 0.875rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -427,18 +444,18 @@ const ErrorMessage = styled.div`
 
   &::before {
     content: "⚠️";
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 `;
 
 const CheckboxContainer = styled.div`
   display: flex;
   align-items: flex-start;
-  margin: 1.5rem 0;
+  margin: 1.25rem 0;
   cursor: pointer;
   user-select: none;
-  gap: 0.75rem;
-  padding: 0.5rem;
+  gap: 0.625rem;
+  padding: 0.375rem;
   border-radius: ${designTokens.borderRadius.md};
   transition: background-color 0.2s ease;
 
@@ -485,12 +502,12 @@ const Checkbox = styled.input.attrs({ type: "checkbox" })`
 `;
 
 const CheckboxLabel = styled.label`
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: ${colors.textSecondary};
   cursor: pointer;
   line-height: 1.5;
   flex: 1;
-  padding-top: 0.15rem;
+  padding-top: 0.125rem;
 `;
 
 const SubmitButton = styled.button`
@@ -498,7 +515,7 @@ const SubmitButton = styled.button`
   color: white;
   border: none;
   border-radius: ${designTokens.borderRadius.md};
-  padding: 0.9rem 1.5rem;
+  padding: 0.85rem 1.5rem;
   font-size: 1rem;
   font-weight: ${fontWeights.semibold};
   cursor: pointer;
@@ -507,9 +524,9 @@ const SubmitButton = styled.button`
   align-items: center;
   justify-content: center;
   transition: all ${designTokens.animation.medium};
-  margin-top: 1.75rem;
+  margin-top: 1.5rem;
   box-shadow: ${designTokens.shadows.lg};
-  height: 52px;
+  height: 50px;
   letter-spacing: 0.3px;
   position: relative;
   overflow: hidden;
@@ -913,8 +930,8 @@ const GuestRegistrationDesktop: React.FC = () => {
                     <EventMetaItem>
                       <EventDateIcon>
                         <svg
-                          width="20"
-                          height="20"
+                          width="18"
+                          height="18"
                           viewBox="0 0 24 24"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"
@@ -940,8 +957,8 @@ const GuestRegistrationDesktop: React.FC = () => {
                     <EventMetaItem>
                       <EventLocationIcon>
                         <svg
-                          width="20"
-                          height="20"
+                          width="18"
+                          height="18"
                           viewBox="0 0 24 24"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"
@@ -976,43 +993,45 @@ const GuestRegistrationDesktop: React.FC = () => {
 
               <FormCard>
                 <CardBody>
+                  <FormTitle>Registration Form</FormTitle>
+                  <FormDescription>
+                    Please fill out the form below to register for the event.
+                  </FormDescription>
+
                   <form onSubmit={handleSubmit}>
-                    <FormTitle>Registration Form</FormTitle>
-                    <FormDescription>
-                      Please fill out the form below to register for the event.
-                    </FormDescription>
+                    <FormGrid>
+                      <FormGroup>
+                        <Label htmlFor="fullName">Full Name</Label>
+                        <Input
+                          type="text"
+                          id="fullName"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          placeholder="Enter your full name"
+                        />
+                        {formErrors.fullName && (
+                          <ErrorMessage>{formErrors.fullName}</ErrorMessage>
+                        )}
+                      </FormGroup>
 
-                    <FormGroup>
-                      <Label htmlFor="fullName">Full Name</Label>
-                      <Input
-                        type="text"
-                        id="fullName"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        placeholder="Enter your full name"
-                      />
-                      {formErrors.fullName && (
-                        <ErrorMessage>{formErrors.fullName}</ErrorMessage>
-                      )}
-                    </FormGroup>
+                      <FormGroup>
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          type="email"
+                          id="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="Enter your email"
+                        />
+                        {formErrors.email && (
+                          <ErrorMessage>{formErrors.email}</ErrorMessage>
+                        )}
+                      </FormGroup>
+                    </FormGrid>
 
-                    <FormGroup>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="Enter your email"
-                      />
-                      {formErrors.email && (
-                        <ErrorMessage>{formErrors.email}</ErrorMessage>
-                      )}
-                    </FormGroup>
-
-                    <FormGroup>
+                    <FormGroup style={{ marginTop: "1.25rem" }}>
                       <Label htmlFor="phoneNumber">
                         Phone Number (Optional)
                       </Label>
