@@ -6,7 +6,7 @@ import multer from 'multer';
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Invoice routes
+// IInvoice routes
 router.get('/:id/invoices', verifyUser, invoicesController.getEventInvoices);
 router.post('/:id/invoices', verifyUser, upload.single('invoice'), invoicesController.uploadInvoice);
 router.delete('/invoices/:id', verifyUser, invoicesController.deleteInvoice);

@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import { InvoiceAnalysis } from '../../types/event.types';
+import { IInvoiceAnalysis } from '../../types/event.types';
 import {
   IChatMessage,
   IReviewAnalysis,
@@ -13,7 +13,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const analyzeInvoices = async (invoiceTexts: string[]): Promise<InvoiceAnalysis> => {
+export const analyzeInvoices = async (invoiceTexts: string[]): Promise<IInvoiceAnalysis> => {
   try {
     const systemPrompt = `You are an AI assistant specialized in financial analysis for event planning. 
         Your task is to analyze invoice data and provide meaningful insights.
@@ -23,9 +23,9 @@ export const analyzeInvoices = async (invoiceTexts: string[]): Promise<InvoiceAn
 
     const userPromptTemplate = `Analyze these invoices and extract key financial insights.
         
-        Invoice Data: {invoiceData}
+        IInvoice Data: {invoiceData}
         
-        Invoice Texts: {invoiceTexts}
+        IInvoice Texts: {invoiceTexts}
         
         Please analyze the invoices and extract the following information:
         
@@ -114,7 +114,7 @@ export const analyzeInvoices = async (invoiceTexts: string[]): Promise<InvoiceAn
     }
 
     try {
-      const analysis = JSON.parse(analysisText) as InvoiceAnalysis;
+      const analysis = JSON.parse(analysisText) as IInvoiceAnalysis;
 
       return analysis;
     } catch (parseError) {
@@ -252,7 +252,7 @@ export const analyzeStructuredFeedback = async (
     const userPromptTemplate = `Analyze this structured feedback from
     event attendees and provide a detailed overview.
         
-        Structured Feedback: {feedback}
+        Structured IFeedback: {feedback}
         
         Please analyze the feedback and extract the following information:
         

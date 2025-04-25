@@ -77,7 +77,7 @@ const eventSchema = new Schema<Event>({
     type: Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),
   },
-  invoices: [{ type: Schema.Types.ObjectId, ref: 'Invoice' }],
+  invoices: [{ type: Schema.Types.ObjectId, ref: 'IInvoice' }],
   feedback: [
     {
       guestName: { type: String },
@@ -95,7 +95,7 @@ const eventSchema = new Schema<Event>({
     },
   ],
   feedbackForm: {
-    title: { type: String, default: 'Event Feedback' },
+    title: { type: String, default: 'Event IFeedback' },
     description: { type: String },
     questions: [
       {

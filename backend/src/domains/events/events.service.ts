@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Event from '../../models/event.model';
 import Guest from '../../models/guest.model';
-import Invoice from '../../models/invoice.model';
+import IInvoice from '../../models/invoice.model';
 import cloudinary from '../../config/cloudinary';
 import { uploadImage } from '../../config/cloudinary';
 import { extractPublicId } from '../../utils/helpers';
@@ -14,10 +14,10 @@ import pdfParse from 'pdf-parse';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { 
-  InvoiceAnalysis, 
+  IInvoiceAnalysis, 
   IEventData,
   IEventFeedbackType,
-  FeedbackQuestionOption,
+  IFeedbackQuestionOption,
   FeedbackQuestion,
   IFeedbackItem
 } from '../../types/event.types';
@@ -51,7 +51,7 @@ export class EventsService {
     }
   }
 
-  async analyzeInvoices(invoiceTexts: string[]): Promise<InvoiceAnalysis> {
+  async analyzeInvoices(invoiceTexts: string[]): Promise<IInvoiceAnalysis> {
     try {
       const systemPrompt = `You are an AI assistant specialized in financial analysis for event planning. 
           Your task is to analyze invoice data and provide meaningful insights.
@@ -61,9 +61,9 @@ export class EventsService {
 
       const userPromptTemplate = `Analyze these invoices and extract key financial insights.
           
-          Invoice Data: {invoiceData}
+          IInvoice Data: {invoiceData}
           
-          Invoice Texts: {invoiceTexts}
+          IInvoice Texts: {invoiceTexts}
           
           Please analyze the invoices and extract the following information:
           
@@ -152,7 +152,7 @@ export class EventsService {
       }
 
       try {
-        const analysis = JSON.parse(analysisText) as InvoiceAnalysis;
+        const analysis = JSON.parse(analysisText) as IInvoiceAnalysis;
         return analysis;
       } catch (parseError) {
         console.error('Error parsing OpenAI response:', parseError);
@@ -289,7 +289,7 @@ export class EventsService {
       const userPromptTemplate = `Analyze this structured feedback from event attendees and provide a
       detailed overview.
           
-          Structured Feedback: {feedback}
+          Structured IFeedback: {feedback}
           
           Please analyze the feedback and extract the following information:
           
@@ -616,7 +616,7 @@ export class EventsService {
 
     return (
       event.feedbackForm || {
-        title: 'Event Feedback',
+        title: 'Event IFeedback',
         description: 'Please share your thoughts about the event',
         questions: [],
         isEnabled: true,
@@ -649,7 +649,7 @@ export class EventsService {
     );
 
     const questionsWithoutOptions = choiceQuestions.filter(
-      (q: { options?: FeedbackQuestionOption[]; title: string }) =>
+      (q: { options?: IFeedbackQuestionOption[]; title: string }) =>
         !q.options || !Array.isArray(q.options) || q.options.length < 2,
     );
 
@@ -693,7 +693,7 @@ export class EventsService {
       secure: true,
     });
 
-    const invoice = new Invoice({
+    const invoice = new IInvoice({
       eventId: id,
       title: file.originalname.replace(/\.pdf$/i, ''),
       pdfUrl: pdfUrl,
@@ -711,11 +711,11 @@ export class EventsService {
   }
 
   async getEventInvoices(id: string) {
-    return await Invoice.find({ eventId: id }).sort({ createdAt: -1 });
+    return await IInvoice.find({ eventId: id }).sort({ createdAt: -1 });
   }
 
   async deleteInvoice(id: string) {
-    const invoice = await Invoice.findById(id);
+    const invoice = await IInvoice.findById(id);
     if (!invoice) return null;
 
     if (invoice.pdfUrl) {
@@ -734,14 +734,14 @@ export class EventsService {
     }
 
     await Event.findByIdAndUpdate(invoice.eventId, { $pull: { invoices: invoice._id } });
-    return await Invoice.findByIdAndDelete(id);
+    return await IInvoice.findByIdAndDelete(id);
   }
 
   async analyzeEventInvoices(id: string) {
     const event = await Event.findById(id);
     if (!event) return null;
 
-    const invoices = await Invoice.find({ eventId: id });
+    const invoices = await IInvoice.find({ eventId: id });
     if (invoices.length === 0) {
       throw new Error('No invoices found for this event');
     }
@@ -821,7 +821,7 @@ export class EventsService {
           if (answer.selectedOptions && answer.selectedOptions.length > 0) {
             const selectedTexts = answer.selectedOptions.map((optionId: string) => {
               const option = question.options?.find(
-                (opt: FeedbackQuestionOption) => opt.id === optionId
+                (opt: IFeedbackQuestionOption) => opt.id === optionId
               );
               return option ? option.text : optionId;
             });
@@ -833,7 +833,7 @@ export class EventsService {
             const rankedTexts = answer.rankingOrder.map(
               (optionId: string, index: number) => {
                 const option = question.options?.find(
-                  (opt: FeedbackQuestionOption) => opt.id === optionId
+                  (opt: IFeedbackQuestionOption) => opt.id === optionId
                 );
                 return `${index + 1}. ${option ? option.text : optionId}`;
               }

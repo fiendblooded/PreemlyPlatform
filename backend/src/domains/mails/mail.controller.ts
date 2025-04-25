@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import ScheduledEmail from '../../models/scheduled-email.model';
 import mongoose from 'mongoose';
-import type { EmailData } from '../../types/mail.types';
+import type { IEmailData } from '../../types/mail.types';
 import Guest from '../../models/guest.model';
 import Event from '../../models/event.model';
 import sendEmail from './mail.service';
@@ -30,7 +30,7 @@ export const sendMailController = async (req: Request, res: Response): Promise<v
     const recipients: string[] = [];
     const personalizedHtmlContents: string[] = [];
 
-    for (const email of emails as EmailData[]) {
+    for (const email of emails as IEmailData[]) {
       if (!email.recipient || !email.guestName || !email.qrCode) {
         throw new Error('Each email must contain recipient, guestName and qrCode');
       }

@@ -14,7 +14,7 @@ export const SUBSCRIPTION_GUEST_LIMITS = {
   [SubscriptionLevel.ENTERPRISE]: 5000
 } as const;
 
-export interface UserSubscription {
+export interface IUserSubscription {
   level: SubscriptionLevel;
   updatedAt: Date;
   lastStatusChangeDate: Date;

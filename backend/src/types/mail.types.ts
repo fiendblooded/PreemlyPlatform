@@ -1,12 +1,12 @@
 import type { MailgunClientOptions as MGClientOptions, MailgunMessageData } from 'mailgun.js';
 
-export interface EmailResponse {
+export interface IEmailResponse {
   id: string
   message: string
   status: number
 }
 
-export interface EmailData {
+export interface IEmailData {
   recipient: string
   guestName: string
   qrCode: string

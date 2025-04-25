@@ -17,7 +17,7 @@ export class OpenAIWrapperService {
     - Event title (REQUIRED - always provide a title even if you need to 
       generate one based on other information)
     - Date
-    - Location
+    - ILocation
     - Event type (e.g., conference, wedding, party)
     - Description
     

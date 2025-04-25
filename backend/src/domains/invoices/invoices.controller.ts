@@ -37,10 +37,10 @@ export const deleteInvoice = async (req: Request, res: Response): Promise<void> 
   try {
     const deletedInvoice = await invoicesService.deleteInvoice(req.params.id);
     if (!deletedInvoice) {
-      res.status(404).json({ success: false, message: 'Invoice not found' });
+      res.status(404).json({ success: false, message: 'IInvoice not found' });
       return;
     }
-    res.status(200).json({ success: true, message: 'Invoice deleted successfully' });
+    res.status(200).json({ success: true, message: 'IInvoice deleted successfully' });
   } catch (error) {
     console.error('Error deleting invoice:', error);
     res.status(500).json({ success: false, message: 'Server Error' });

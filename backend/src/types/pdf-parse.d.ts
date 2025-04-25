@@ -1,5 +1,5 @@
 declare module 'pdf-parse' {
-  interface PDFData {
+  interface IPDFData {
     text: string;
     numpages: number;
     info: Record<string, unknown>;
@@ -7,6 +7,6 @@ declare module 'pdf-parse' {
     version: string;
   }
 
-  function parse(dataBuffer: Buffer | ArrayBuffer): Promise<PDFData>;
+  function parse(dataBuffer: Buffer | ArrayBuffer): Promise<IPDFData>;
   export default parse;
 }

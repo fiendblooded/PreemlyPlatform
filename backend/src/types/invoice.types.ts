@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-export interface Invoice {
+export interface IInvoice {
   _id: Types.ObjectId;
   eventId: Types.ObjectId;
   title: string;

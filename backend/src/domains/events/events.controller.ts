@@ -275,7 +275,7 @@ export const addEventFeedback = async (req: Request, res: Response): Promise<voi
     if (!answers || !Array.isArray(answers) || answers.length === 0) {
       res.status(400).json({
         success: false,
-        message: 'Feedback answers are required',
+        message: 'IFeedback answers are required',
       });
       return;
     }
@@ -293,7 +293,7 @@ export const addEventFeedback = async (req: Request, res: Response): Promise<voi
 
     res.json({
       success: true,
-      message: 'Feedback added successfully',
+      message: 'IFeedback added successfully',
       data: updatedEvent.feedback?.[updatedEvent.feedback?.length - 1],
     });
   } catch (error) {
@@ -330,7 +330,7 @@ export const updateFeedbackForm = async (req: Request, res: Response): Promise<v
 
     res.json({
       success: true,
-      message: 'Feedback form updated successfully',
+      message: 'IFeedback form updated successfully',
       data: updatedEvent.feedbackForm,
     });
   } catch (error) {
@@ -358,7 +358,7 @@ export const analyzeEventFeedback = async (req: AuthRequest, res: Response): Pro
     if (!allowedLevels.includes(subscriptionLevel)) {
       res.status(403).json({
         success: false,
-        message: 'Feedback analysis is only available for PLUS, PREMIUM and ENTERPRISE subscriptions',
+        message: 'IFeedback analysis is only available for PLUS, PREMIUM and ENTERPRISE subscriptions',
       });
       return;
     }
@@ -733,10 +733,10 @@ export const deleteInvoice = async (req: Request, res: Response): Promise<void> 
         }
       }
 
-      res.status(200).json({ success: true, message: 'Invoice deleted successfully' });
+      res.status(200).json({ success: true, message: 'IInvoice deleted successfully' });
     } catch (error) {
-      if (error instanceof Error && error.message === 'Invoice not found') {
-        res.status(404).json({ success: false, message: 'Invoice not found' });
+      if (error instanceof Error && error.message === 'IInvoice not found') {
+        res.status(404).json({ success: false, message: 'IInvoice not found' });
         return;
       }
       throw error;
@@ -767,7 +767,7 @@ export const analyzeEventInvoices = async (req: AuthRequest, res: Response): Pro
     if (!allowedLevels.includes(subscriptionLevel)) {
       res.status(403).json({
         success: false,
-        message: 'Invoice analysis is only available for PLUS, PREMIUM and ENTERPRISE subscriptions',
+        message: 'IInvoice analysis is only available for PLUS, PREMIUM and ENTERPRISE subscriptions',
       });
       return;
     }
