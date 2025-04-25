@@ -1,4 +1,3 @@
-// backend/src/models/scheduledEmail.model.ts
 import mongoose, { Schema, model } from 'mongoose';
 
 export interface ScheduledEmail {

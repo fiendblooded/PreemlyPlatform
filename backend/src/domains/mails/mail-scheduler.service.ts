@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import ScheduledEmail from '../../models/scheduledEmail.model';
+import ScheduledEmail from '../../models/scheduled-email.model';
 import sendEmail from './mail.service';
 import Guest from '../../models/guest.model';
 import Event from '../../models/event.model';

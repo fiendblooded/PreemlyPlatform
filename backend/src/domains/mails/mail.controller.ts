@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import ScheduledEmail from '../../models/scheduledEmail.model';
+import ScheduledEmail from '../../models/scheduled-email.model';
 import mongoose from 'mongoose';
 import type { EmailData } from '../../types/mail.types';
 import Guest from '../../models/guest.model';

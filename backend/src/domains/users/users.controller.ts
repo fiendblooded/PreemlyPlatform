@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import type { Request, Response } from 'express';
 import axios from 'axios';
 import dotenv from 'dotenv';
@@ -10,19 +9,14 @@ import { SUBSCRIPTION_API_KEY, ALLOWED_TILDA_ORIGINS } from '../../index';
 const usersService = new UsersService();
 
 dotenv.config();
+const AUTH0_API_URL = `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2`;
+
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
   try {
-    const tokenResponse = await axios.post(`https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`, {
-      client_id: process.env.AUTH0_M2M_CLIENT_ID,
-      client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
-      audience: `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/`,
-      grant_type: 'client_credentials',
-    });
-
-    const accessToken = tokenResponse.data.access_token;
+    const accessToken = await usersService.getAuth0Token();
 
     const query = req.query.q ? `users?q=${encodeURIComponent(JSON.stringify(req.query.q))}` : 'users';
-    const response = await axios.get(`https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/${query}`, {
+    const response = await axios.get(`${AUTH0_API_URL}/${query}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
@@ -35,18 +29,11 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 
 export const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const tokenResponse = await axios.post(`https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`, {
-      client_id: process.env.AUTH0_M2M_CLIENT_ID,
-      client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
-      audience: `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/`,
-      grant_type: 'client_credentials',
-    });
-
-    const accessToken = tokenResponse.data.access_token;
+    const accessToken = await usersService.getAuth0Token();
     const userId = req.params.id;
 
     const response = await axios.get(
-      `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/users/${encodeURIComponent(userId)}`,
+      `${AUTH0_API_URL}/users/${encodeURIComponent(userId)}`,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       },
@@ -64,17 +51,10 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
 
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const tokenResponse = await axios.post(`https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`, {
-      client_id: process.env.AUTH0_M2M_CLIENT_ID,
-      client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
-      audience: `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/`,
-      grant_type: 'client_credentials',
-    });
-
-    const accessToken = tokenResponse.data.access_token;
+    const accessToken = await usersService.getAuth0Token();
     const userId = req.params.id;
 
-    await axios.delete(`https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/users/${encodeURIComponent(userId)}`, {
+    await axios.delete(`${AUTH0_API_URL}/users/${encodeURIComponent(userId)}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
@@ -93,28 +73,18 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
 
 export const updateUserName = async (req: Request, res: Response): Promise<void> => {
   try {
-    // 1. Request an access token from Auth0
-    const tokenResponse = await axios.post(`https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`, {
-      client_id: process.env.AUTH0_M2M_CLIENT_ID,
-      client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
-      audience: `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/`,
-      grant_type: 'client_credentials',
-    });
-
-    const accessToken = tokenResponse.data.access_token;
-
-    // 2. Extract user ID and new name from the request
-    const userId = req.params.id; // User ID should be passed in the request URL
-    const { name } = req.body; // New name should be sent in the request body
+    const userId = req.params.id;
+    const { name } = req.body;
 
     if (!name) {
       res.status(400).json({ success: false, message: 'Name is required.' });
       return;
     }
 
-    // 3. Send request to Auth0 Management API to update the user's profile
+    const accessToken = await usersService.getAuth0Token();
+    
     const updateResponse = await axios.patch(
-      `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/users/${encodeURIComponent(userId)}`,
+      `${AUTH0_API_URL}/users/${encodeURIComponent(userId)}`,
       {
         user_metadata: { displayName: name },
       },
@@ -123,16 +93,10 @@ export const updateUserName = async (req: Request, res: Response): Promise<void>
       },
     );
 
-    // 4. Return success response
     res.json({ success: true, data: updateResponse.data });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error('Error updating name:', {
-      message: error.message,
-      response: error.response?.data || 'No response data',
-      status: error.response?.status || 'No status',
-      headers: error.response?.headers || 'No headers',
-    });
+
+  } catch (error) {
+    console.error('Error updating name:', error);
 
     res.status(500).json({
       success: false,
@@ -144,7 +108,6 @@ export const updateUserName = async (req: Request, res: Response): Promise<void>
 export const updateSubscriptionLevel = async (req: Request, res: Response): Promise<void> => {
   try {
     const apiKey = req.headers['x-api-key'];
-
     const referer = req.headers.referer || '';
     const origin = req.headers.origin || '';
 
@@ -179,7 +142,6 @@ export const updateSubscriptionLevel = async (req: Request, res: Response): Prom
     const originInfo = origin || referer || 'unknown';
     console.log(`Subscription update: User=${userId}, Level=${subscriptionLevel}, Origin=${originInfo}`);
 
-    // Добавляем месяц к текущей дате для subscriptionEndDate
     const subscriptionEndDate = new Date();
     subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
 
@@ -214,7 +176,6 @@ export const updateSubscriptionLevelTest = async (req: AuthRequest, res: Respons
       return;
     }
 
-    // Добавляем месяц к текущей дате для subscriptionEndDate
     const subscriptionEndDate = new Date();
     subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
 
@@ -250,8 +211,6 @@ export const getUserSubscription = async (req: AuthRequest, res: Response): Prom
 
     const subscriptionLevel = await usersService.getUserSubscriptionLevel(req.user.sub);
     
-    // Метод всегда возвращает как минимум FREE уровень, поэтому !subscriptionLevel никогда не будет true
-    // но оставим проверку на будущее
     if (!subscriptionLevel) {
       res.status(404).json({
         success: false,
@@ -260,7 +219,6 @@ export const getUserSubscription = async (req: AuthRequest, res: Response): Prom
       return;
     }
     
-    // Получаем дополнительную информацию о пользователе
     const user = await usersService.getUserByAuth0Id(req.user.sub);
 
     res.json({
