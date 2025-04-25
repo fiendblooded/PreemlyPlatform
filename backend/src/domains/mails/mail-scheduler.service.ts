@@ -5,15 +5,13 @@ import Guest from '../../models/guest.model';
 import Event from '../../models/event.model';
 
 export function startEmailScheduler() {
-  // Run every hour
   cron.schedule('0 * * * *', async () => {
     console.log('Running email scheduler job...');
 
     try {
       const now = new Date();
-      const threeHoursFromNow = new Date(now.getTime() + 72 * 60 * 60 * 1000); // 72 hours from now
+      const threeHoursFromNow = new Date(now.getTime() + 72 * 60 * 60 * 1000);
 
-      // Find all pending emails scheduled within the next 72 hours
       const pendingEmails = await ScheduledEmail.find({
         status: 'pending',
         scheduledTime: { $lte: threeHoursFromNow, $gt: now },
@@ -23,14 +21,12 @@ export function startEmailScheduler() {
 
       for (const email of pendingEmails) {
         try {
-          // Get the event to access emailIdentifier
           const event = await Event.findById(email.eventId);
           if (!event) {
             console.error(`Event not found for scheduled email ${email._id}`);
             continue;
           }
 
-          // Schedule the email with Mailgun
           await sendEmail(
             [email.recipient],
             email.subject,
@@ -39,18 +35,15 @@ export function startEmailScheduler() {
             event.emailParams.emailIdentifier,
           );
 
-          // Update status to scheduled
           email.status = 'scheduled';
           await email.save();
 
           console.log(`Scheduled email to ${email.recipient} for ${email.scheduledTime}`);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
+        } catch (error) {
           console.error(`Failed to schedule email to ${email.recipient}:`, error);
 
-          // Mark as failed with error message
           email.status = 'failed';
-          email.error = error.message;
+          email.error = error instanceof Error ? error.message : String(error);
           await email.save();
         }
       }
@@ -61,12 +54,10 @@ export function startEmailScheduler() {
         scheduledTime: { $lt: now },
       });
 
-      // Update their status to 'sent'
       for (const email of sentEmails) {
         email.status = 'sent';
         await email.save();
 
-        // Update the guest's reminder_email_date if needed
         try {
           const guest = await Guest.findById(email.guestId);
           if (guest) {

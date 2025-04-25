@@ -25,7 +25,6 @@ const validateEmail = (email: string): boolean => {
   return re.test(email);
 };
 
-// Основная функция для отправки email
 const sendEmail = async (
   recipients: string[],
   subject: string,
@@ -33,7 +32,6 @@ const sendEmail = async (
   scheduledTime?: Date,
   emailIdentifier?: string,
 ): Promise<EmailResponse> => {
-  // Валидируем все email адреса
   for (const email of recipients) {
     if (!validateEmail(email)) {
       throw new Error(`Invalid email address: ${email}`);
