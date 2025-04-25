@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import ScheduledEmail from '../../models/scheduled-email.model';
+import IScheduledEmail from '../../models/scheduled-email.model';
 import mongoose from 'mongoose';
 import type { IEmailData } from '../../types/mail.types';
 import Guest from '../../models/guest.model';
@@ -100,7 +100,7 @@ export const scheduleReminderEmailsController = async (req: Request, res: Respon
         continue;
       }
 
-      const scheduledEmail = new ScheduledEmail({
+      const scheduledEmail = new IScheduledEmail({
         eventId: new mongoose.Types.ObjectId(eventId),
         guestId: new mongoose.Types.ObjectId(guestId),
         recipient,
@@ -166,7 +166,7 @@ export const getScheduledEmailsController = async (req: Request, res: Response):
   }
 
   try {
-    const scheduledEmails = await ScheduledEmail.find({
+    const scheduledEmails = await IScheduledEmail.find({
       eventId: new mongoose.Types.ObjectId(eventId),
     });
 

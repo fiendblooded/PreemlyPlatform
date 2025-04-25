@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import ScheduledEmail from '../../models/scheduled-email.model';
+import IScheduledEmail from '../../models/scheduled-email.model';
 import sendEmail from './mail.service';
 import Guest from '../../models/guest.model';
 import Event from '../../models/event.model';
@@ -12,7 +12,7 @@ export function startEmailScheduler() {
       const now = new Date();
       const threeHoursFromNow = new Date(now.getTime() + 72 * 60 * 60 * 1000);
 
-      const pendingEmails = await ScheduledEmail.find({
+      const pendingEmails = await IScheduledEmail.find({
         status: 'pending',
         scheduledTime: { $lte: threeHoursFromNow, $gt: now },
       }).sort({ scheduledTime: 1 });
@@ -49,7 +49,7 @@ export function startEmailScheduler() {
       }
 
       // Check for emails that should have been sent by now
-      const sentEmails = await ScheduledEmail.find({
+      const sentEmails = await IScheduledEmail.find({
         status: 'scheduled',
         scheduledTime: { $lt: now },
       });

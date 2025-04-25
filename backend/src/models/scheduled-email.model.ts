@@ -1,6 +1,6 @@
 import mongoose, { Schema, model } from 'mongoose';
 
-export interface ScheduledEmail {
+export interface IScheduledEmail {
   _id: mongoose.Types.ObjectId;
   eventId: mongoose.Types.ObjectId;
   guestId: mongoose.Types.ObjectId;
@@ -14,7 +14,7 @@ export interface ScheduledEmail {
   error?: string;
 }
 
-const scheduledEmailSchema = new Schema<ScheduledEmail>(
+const scheduledEmailSchema = new Schema<IScheduledEmail>(
   {
     eventId: { type: Schema.Types.ObjectId, ref: 'Event', required: true },
     guestId: { type: Schema.Types.ObjectId, ref: 'Guest', required: true },
@@ -33,4 +33,4 @@ const scheduledEmailSchema = new Schema<ScheduledEmail>(
   { timestamps: true },
 );
 
-export default model<ScheduledEmail>('ScheduledEmail', scheduledEmailSchema);
+export default model<IScheduledEmail>('IScheduledEmail', scheduledEmailSchema);
