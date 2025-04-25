@@ -14,3 +14,11 @@ export interface Invoice {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IInvoiceData {
+  title?: string;
+  amount?: number;
+  date?: string;
+  status?: string;
+  [key: string]: string | number | boolean | undefined;
+}

@@ -1,19 +1,18 @@
 import { Request, Response } from 'express';
-// import multer from 'multer';
-import { EventsService } from '../events/events.service';
+import { InvoicesService } from './invoices.service';
 
-const eventsService = new EventsService();
-// const upload = multer({ storage: multer.memoryStorage() });
+const invoicesService = new InvoicesService();
 
 export const getEventInvoices = async (req: Request, res: Response): Promise<void> => {
   try {
-    const invoices = await eventsService.getEventInvoices(req.params.id);
+    const invoices = await invoicesService.getEventInvoices(req.params.id);
     res.json({ success: true, data: invoices });
   } catch (error) {
     console.error('Error fetching invoices:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
 export const uploadInvoice = async (req: Request, res: Response): Promise<void> => {
   if (!req.file) {
     res.status(400).json({ success: false, message: 'No file uploaded' });
@@ -21,7 +20,7 @@ export const uploadInvoice = async (req: Request, res: Response): Promise<void> 
   }
 
   try {
-    const invoice = await eventsService.uploadInvoice(req.params.id, req.file, req.body);
+    const invoice = await invoicesService.uploadInvoice(req.params.id, req.file, req.body);
     if (!invoice) {
       res.status(404).json({ success: false, message: 'Event not found' });
       return;
@@ -36,7 +35,7 @@ export const uploadInvoice = async (req: Request, res: Response): Promise<void> 
 
 export const deleteInvoice = async (req: Request, res: Response): Promise<void> => {
   try {
-    const deletedInvoice = await eventsService.deleteInvoice(req.params.id);
+    const deletedInvoice = await invoicesService.deleteInvoice(req.params.id);
     if (!deletedInvoice) {
       res.status(404).json({ success: false, message: 'Invoice not found' });
       return;
@@ -50,7 +49,7 @@ export const deleteInvoice = async (req: Request, res: Response): Promise<void> 
 
 export const analyzeEventInvoices = async (req: Request, res: Response): Promise<void> => {
   try {
-    const updatedEvent = await eventsService.analyzeEventInvoices(req.params.id);
+    const updatedEvent = await invoicesService.analyzeEventInvoices(req.params.id);
     if (!updatedEvent) {
       res.status(404).json({ success: false, message: 'Event not found' });
       return;
