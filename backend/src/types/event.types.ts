@@ -1,6 +1,4 @@
 import type { Types } from 'mongoose';
-// Import the Task type but don't use it directly in this file
-// import { Task } from './task.types';
 
 export interface Location {
   address: string;
@@ -8,13 +6,6 @@ export interface Location {
   longitude: number;
   placeId: string;
 }
-
-// Remove the Task interface since we're now importing it from task.types.ts
-// export interface Task {
-//   title: string;
-//   isCompleted: boolean;
-//   dueDate: Date;
-// }
 
 export interface WelcomeScreenParams {
   backgroundColor: string;
@@ -179,7 +170,7 @@ export interface FeedbackAnalysis {
   lastUpdated: Date;
 }
 
-export interface Event {
+export interface IEvent {
   _id: Types.ObjectId;
   title: string;
   description?: string;
