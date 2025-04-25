@@ -24,7 +24,6 @@ export const analyzeCustomerReviews = async (req: Request, res: Response): Promi
   try {
     const analysis = await analyzeReviews(reviews);
 
-    // Save the analysis to the event
     const event = await Event.findById(eventId);
     if (!event) {
       res.status(404).json({
