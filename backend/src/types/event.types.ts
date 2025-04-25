@@ -1,4 +1,5 @@
 import type { Types } from 'mongoose';
+import { ITask } from './task.types';
 
 export interface Location {
   address: string;
@@ -146,7 +147,7 @@ export interface FeedbackForm {
   updatedAt: Date;
 }
 
-export interface FeedbackAnswer {
+export interface IFeedbackItem {
   questionId: string;
   textAnswer?: string;
   ratingAnswer?: number;
@@ -158,7 +159,7 @@ export interface Feedback {
   _id?: string;
   guestName?: string;
   guestEmail?: string;
-  answers: FeedbackAnswer[];
+  answers: IFeedbackItem[];
   createdAt: Date;
 }
 
@@ -189,4 +190,42 @@ export interface IEvent {
   feedbackForm?: FeedbackForm;
   feedback?: Feedback[];
   feedbackAnalysis?: FeedbackAnalysis;
+}
+
+export interface IEventData {
+  title: string;
+  description?: string;
+  poster?: string;
+  date?: string;
+  endDate?: string;
+  eventType?: string;
+  location?: Location;
+  tasks?: ITask[];
+  welcomeScreenParams?: WelcomeScreenParams;
+  emailParams?: EmailParams;
+}
+
+export interface IFeedbackData {
+  guestName?: string;
+  guestEmail?: string;
+  answers: IFeedbackItem[];
+}
+
+export interface IEventFeedback {
+  guestName?: string;
+  guestEmail?: string;
+  answers: IFeedbackItem[];
+  createdAt: Date;
+}
+
+export interface IEventFeedbackType {
+  guestName?: string;
+  guestEmail?: string;
+  answers: Array<{
+    questionId: string;
+    textAnswer?: string;
+    ratingAnswer?: number;
+    selectedOptions?: string[];
+    rankingOrder?: string[];
+  }>;
 }

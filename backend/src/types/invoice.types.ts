@@ -18,7 +18,10 @@ export interface Invoice {
 export interface IInvoiceData {
   title?: string;
   amount?: number;
-  date?: string;
+  date?: string | Date;
+  vendor?: string;
+  category?: string;
+  isPaid?: boolean;
   status?: string;
-  [key: string]: string | number | boolean | undefined;
+  [key: string]: string | number | boolean | Date | undefined;
 }
