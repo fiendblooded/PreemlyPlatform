@@ -15,6 +15,7 @@ import smsRoutes from './domains/sms/sms.router';
 import eventRoutes from './domains/events/events.router';
 import mailRoutes from './domains/mails/mail.router';
 import invoiceRoutes from './domains/invoices/invoices.route';
+import organizationRoutes from './domains/organizations/organizations.router';
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use('/api/openai', openaiAssistantRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/sms', smsRoutes);
+app.use('/api/organizations', organizationRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err.message === 'Not allowed by CORS') {
