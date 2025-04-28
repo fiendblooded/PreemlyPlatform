@@ -227,12 +227,7 @@ export function getMailHtml(
   <table width='100%' height="100%" border='0' cellspacing='0' cellpadding='0' style='background-color: #EEEDF2; min-height: 100vh;'>
         <tr>
             <td align='center' style='padding:0;'>
-                <table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color: #ffffff; border-radius: 10px; margin:0 auto; width:100%; max-width:700px;'>
-                    <tr>
-                        <td align='center' style='padding:0; margin:0; background-color:#ffffff; border-radius:10px 10px 0 0; line-height:0; font-size:0;'>
-                           <img src='${lightModeLogoLink}' alt="Preemly Logo" style='display:block; width:100%; height:auto; border-radius:10px 10px 0 0; margin:0; padding:0;'/>
-                        </td>
-                    </tr>
+                <table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color: #ffffff; margin:0 auto; width:100%; max-width:700px;'>
                     <tr>
                         <td align='center' style='font-size: 24px; font-weight: bold; color: #333; padding-top:20px; padding-left: 20px; padding-right: 20px;'>You're invited, ${guestName}!</td>
                     </tr>
@@ -354,13 +349,15 @@ export function getMailHtml(
                     </tr>
 
                     <tr>
-                        <td align='center' style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;'>
+                        <td align='center' style='background-color: black; padding: 20px; color: #ffffff; font-size: 14px; '>
                             Follow us on:
                             <a href='https://x.com/trypreemly' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>Twitter</a> |
                             <a href='https://www.linkedin.com/company/106173934' style='color: #ffffff; text-decoration: none; margin: 0 10px;'>LinkedIn</a>
                             <br>
                             Visit our website: <a href='https://preemly.eu' style='color: #FFCC32; text-decoration: none;'><b>preemly.eu</b></a>
+                            <img src='${lightModeLogoLink}' alt="Preemly Logo" style='display:block; width:100%; height:auto; margin:0; padding:0;'/>
                         </td>
+                        
                     </tr>
                 </table>
             </td>
