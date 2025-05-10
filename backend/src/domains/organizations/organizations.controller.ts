@@ -19,12 +19,12 @@ export const getOrganizationById = async (req: Request, res: Response): Promise<
   try {
     const organizationId = req.params.id;
     const organization = await organizationsService.getOrganizationById(organizationId);
-    
+
     if (!organization) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
     }
-    
+
     res.json({ success: true, data: organization });
   } catch (error) {
     console.error('Error fetching organization:', error);
@@ -54,20 +54,13 @@ export const createOrganization = async (req: AuthRequest, res: Response): Promi
       return;
     }
 
-    const { 
-      name, 
-      image, 
-      location, 
-      description, 
-      productCategories, 
-      serviceProviders, 
-      serviceDates 
-    } = req.body;
+    const { name, image, location, description, productCategories, serviceProviders, serviceDates } =
+      req.body;
 
-    if (!name || !location || !description) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Name, location, and description are required' 
+    if (!name) {
+      res.status(400).json({
+        success: false,
+        message: 'Name is required',
       });
       return;
     }
@@ -75,7 +68,7 @@ export const createOrganization = async (req: AuthRequest, res: Response): Promi
     if (image && !image.startsWith('data:image')) {
       res.status(400).json({
         success: false,
-        message: 'Image must be a valid base64 encoded image'
+        message: 'Image must be a valid base64 encoded image',
       });
       return;
     }
@@ -88,7 +81,7 @@ export const createOrganization = async (req: AuthRequest, res: Response): Promi
       productCategories,
       serviceProviders,
       serviceDates,
-      ownerId: req.user.sub
+      ownerId: req.user.sub,
     };
 
     const organization = await organizationsService.createOrganization(organizationData);
@@ -108,7 +101,7 @@ export const updateOrganization = async (req: AuthRequest, res: Response): Promi
 
     const organizationId = req.params.id;
     const organization = await organizationsService.getOrganizationById(organizationId);
-    
+
     if (!organization) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
@@ -120,11 +113,11 @@ export const updateOrganization = async (req: AuthRequest, res: Response): Promi
     }
 
     const { name, image, location, description } = req.body;
-    
+
     if (image && !image.startsWith('data:image') && !image.startsWith('http')) {
       res.status(400).json({
         success: false,
-        message: 'Image must be a valid base64 encoded image or URL'
+        message: 'Image must be a valid base64 encoded image or URL',
       });
       return;
     }
@@ -133,7 +126,7 @@ export const updateOrganization = async (req: AuthRequest, res: Response): Promi
       name,
       image,
       location,
-      description
+      description,
     });
 
     res.json({ success: true, data: updatedOrganization });
@@ -152,7 +145,7 @@ export const deleteOrganization = async (req: AuthRequest, res: Response): Promi
 
     const organizationId = req.params.id;
     const organization = await organizationsService.getOrganizationById(organizationId);
-    
+
     if (!organization) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
@@ -164,7 +157,7 @@ export const deleteOrganization = async (req: AuthRequest, res: Response): Promi
     }
 
     const success = await organizationsService.deleteOrganization(organizationId);
-    
+
     if (!success) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
@@ -186,7 +179,7 @@ export const addProductCategory = async (req: AuthRequest, res: Response): Promi
 
     const organizationId = req.params.id;
     const organization = await organizationsService.getOrganizationById(organizationId);
-    
+
     if (!organization) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
@@ -198,7 +191,7 @@ export const addProductCategory = async (req: AuthRequest, res: Response): Promi
     }
 
     const { name, products } = req.body;
-    
+
     if (!name) {
       res.status(400).json({ success: false, message: 'Category name is required' });
       return;
@@ -206,7 +199,7 @@ export const addProductCategory = async (req: AuthRequest, res: Response): Promi
 
     const updatedOrganization = await organizationsService.addProductCategory(organizationId, {
       name,
-      products: products || []
+      products: products || [],
     });
 
     res.json({ success: true, data: updatedOrganization });
@@ -225,7 +218,7 @@ export const updateProductCategory = async (req: AuthRequest, res: Response): Pr
 
     const { organizationId, categoryId } = req.params;
     const organization = await organizationsService.getOrganizationById(organizationId);
-    
+
     if (!organization) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
@@ -237,11 +230,10 @@ export const updateProductCategory = async (req: AuthRequest, res: Response): Pr
     }
 
     const { name, products } = req.body;
-    const updatedOrganization = await organizationsService.updateProductCategory(
-      organizationId,
-      categoryId,
-      { name, products }
-    );
+    const updatedOrganization = await organizationsService.updateProductCategory(organizationId, categoryId, {
+      name,
+      products,
+    });
 
     if (!updatedOrganization) {
       res.status(404).json({ success: false, message: 'Category not found' });
@@ -264,7 +256,7 @@ export const deleteProductCategory = async (req: AuthRequest, res: Response): Pr
 
     const { organizationId, categoryId } = req.params;
     const organization = await organizationsService.getOrganizationById(organizationId);
-    
+
     if (!organization) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
@@ -275,10 +267,7 @@ export const deleteProductCategory = async (req: AuthRequest, res: Response): Pr
       return;
     }
 
-    const updatedOrganization = await organizationsService.deleteProductCategory(
-      organizationId,
-      categoryId
-    );
+    const updatedOrganization = await organizationsService.deleteProductCategory(organizationId, categoryId);
 
     if (!updatedOrganization) {
       res.status(404).json({ success: false, message: 'Category not found' });
@@ -301,7 +290,7 @@ export const addServiceProvider = async (req: AuthRequest, res: Response): Promi
 
     const organizationId = req.params.id;
     const organization = await organizationsService.getOrganizationById(organizationId);
-    
+
     if (!organization) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
@@ -313,16 +302,16 @@ export const addServiceProvider = async (req: AuthRequest, res: Response): Promi
     }
 
     const { name, description, image } = req.body;
-    
+
     if (!name) {
       res.status(400).json({ success: false, message: 'Provider name is required' });
       return;
     }
-    
+
     if (image && !image.startsWith('data:image') && !image.startsWith('http')) {
       res.status(400).json({
         success: false,
-        message: 'Image must be a valid base64 encoded image or URL'
+        message: 'Image must be a valid base64 encoded image or URL',
       });
       return;
     }
@@ -330,12 +319,65 @@ export const addServiceProvider = async (req: AuthRequest, res: Response): Promi
     const updatedOrganization = await organizationsService.addServiceProvider(organizationId, {
       name,
       description,
-      image
+      image,
     });
 
     res.json({ success: true, data: updatedOrganization });
   } catch (error) {
     console.error('Error adding service provider:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+export const updateServiceProvider = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user?.sub) {
+      res.status(401).json({ success: false, message: 'User not authenticated' });
+      return;
+    }
+
+    const { organizationId, providerId } = req.params;
+    const organization = await organizationsService.getOrganizationById(organizationId);
+
+    if (!organization) {
+      res.status(404).json({ success: false, message: 'Organization not found' });
+      return;
+    }
+
+    if (organization.ownerId !== req.user.sub) {
+      res.status(403).json({ success: false, message: 'Not authorized to update this organization' });
+      return;
+    }
+
+    const { name, description, image } = req.body;
+
+    if (!name) {
+      res.status(400).json({ success: false, message: 'Provider name is required' });
+      return;
+    }
+
+    if (image && !image.startsWith('data:image') && !image.startsWith('http')) {
+      res.status(400).json({
+        success: false,
+        message: 'Image must be a valid base64 encoded image or URL',
+      });
+      return;
+    }
+
+    const updatedOrganization = await organizationsService.updateServiceProvider(organizationId, providerId, {
+      name,
+      description,
+      image,
+    });
+
+    if (!updatedOrganization) {
+      res.status(404).json({ success: false, message: 'Service provider not found' });
+      return;
+    }
+
+    res.json({ success: true, data: updatedOrganization });
+  } catch (error) {
+    console.error('Error updating service provider:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
@@ -349,7 +391,7 @@ export const addServiceDate = async (req: AuthRequest, res: Response): Promise<v
 
     const organizationId = req.params.id;
     const organization = await organizationsService.getOrganizationById(organizationId);
-    
+
     if (!organization) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
@@ -361,18 +403,18 @@ export const addServiceDate = async (req: AuthRequest, res: Response): Promise<v
     }
 
     const { date, timeSlots } = req.body;
-    
+
     if (!date || !timeSlots || !Array.isArray(timeSlots)) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Date and time slots are required' 
+      res.status(400).json({
+        success: false,
+        message: 'Date and time slots are required',
       });
       return;
     }
 
     const updatedOrganization = await organizationsService.addServiceDate(organizationId, {
       date: new Date(date),
-      timeSlots
+      timeSlots,
     });
 
     res.json({ success: true, data: updatedOrganization });
@@ -386,26 +428,26 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
   try {
     const organizationId = req.params.id;
     const organization = await organizationsService.getOrganizationById(organizationId);
-    
+
     if (!organization) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
     }
 
     const { serviceProviderId, serviceDate, serviceTime, client } = req.body;
-    
+
     if (!serviceProviderId || !serviceDate || !serviceTime || !client) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Service provider, date, time, and client information are required' 
+      res.status(400).json({
+        success: false,
+        message: 'Service provider, date, time, and client information are required',
       });
       return;
     }
 
     if (!client.firstName || !client.lastName || !client.email || !client.phone) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Client first name, last name, email, and phone are required' 
+      res.status(400).json({
+        success: false,
+        message: 'Client first name, last name, email, and phone are required',
       });
       return;
     }
@@ -414,7 +456,7 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
       serviceProviderId,
       serviceDate: new Date(serviceDate),
       serviceTime,
-      client
+      client,
     });
 
     if (!booking) {
@@ -433,18 +475,18 @@ export const addRating = async (req: Request, res: Response): Promise<void> => {
   try {
     const organizationId = req.params.id;
     const organization = await organizationsService.getOrganizationById(organizationId);
-    
+
     if (!organization) {
       res.status(404).json({ success: false, message: 'Organization not found' });
       return;
     }
 
     const { score, comment, clientId } = req.body;
-    
+
     if (!score || score < 1 || score > 5) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Rating score is required and must be between 1 and 5' 
+      res.status(400).json({
+        success: false,
+        message: 'Rating score is required and must be between 1 and 5',
       });
       return;
     }
@@ -453,7 +495,7 @@ export const addRating = async (req: Request, res: Response): Promise<void> => {
       score,
       comment,
       clientId,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     const updatedOrganization = await organizationsService.addRating(organizationId, rating);
@@ -468,24 +510,24 @@ export const getAverageRating = async (req: Request, res: Response): Promise<voi
   try {
     const organizationId = req.params.id;
     const averageRating = await organizationsService.getAverageRating(organizationId);
-    
+
     if (averageRating === null) {
       res.json({ success: true, data: { averageRating: 0, ratingsCount: 0 } });
       return;
     }
-    
+
     const organization = await organizationsService.getOrganizationById(organizationId);
     const ratingsCount = organization?.ratings.length || 0;
-    
-    res.json({ 
-      success: true, 
-      data: { 
-        averageRating, 
-        ratingsCount 
-      } 
+
+    res.json({
+      success: true,
+      data: {
+        averageRating,
+        ratingsCount,
+      },
     });
   } catch (error) {
     console.error('Error getting average rating:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
-}; 
+};

@@ -6,16 +6,19 @@ const guestsService = new GuestsService();
 export const createGuest = async (req: Request, res: Response): Promise<void> => {
   try {
     const { eventId, fullName, email, age, attendance_status, phoneNumber, gdpr_consent } = req.body;
-    
+
     try {
-      const savedGuest = await guestsService.createGuest({
-        fullName,
-        email,
-        age,
-        attendance_status,
-        phoneNumber,
-        gdpr_consent
-      }, eventId);
+      const savedGuest = await guestsService.createGuest(
+        {
+          fullName,
+          email,
+          age,
+          attendance_status,
+          phoneNumber,
+          gdpr_consent,
+        },
+        eventId,
+      );
 
       res.status(201).json({ success: true, data: savedGuest });
     } catch (error) {
@@ -71,7 +74,7 @@ export const deleteGuest = async (req: Request, res: Response): Promise<void> =>
 export const markAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const { status } = req.body;
-    
+
     try {
       const guest = await guestsService.markAttendance(req.params.id, status);
       res.json({ success: true, data: guest });
@@ -109,7 +112,7 @@ export const markEmailSent = async (req: Request, res: Response): Promise<void> 
 export const updateReminderEmailDate = async (req: Request, res: Response): Promise<void> => {
   try {
     const { reminderDate } = req.body;
-    
+
     try {
       const guest = await guestsService.updateReminderEmailDate(req.params.id, new Date(reminderDate));
       res.json({ success: true, data: guest });
@@ -143,6 +146,16 @@ export const getGuestById = async (req: Request, res: Response): Promise<void> =
     }
   } catch (error) {
     console.error('Error in Get Guest:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+export const getAllGuests = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const guests = await guestsService.getAllGuests();
+    res.json(guests);
+  } catch (error) {
+    console.error('Error in Get All Guests:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };

@@ -8,6 +8,7 @@ import { startEmailScheduler } from './domains/mails/mail-scheduler.service';
 
 import reviewRoutes from './domains/reviews/reviews.router';
 import guestRoutes from './domains/guests/guests.router';
+import clientRoutes from './domains/clients/clients.router';
 import userRoutes from './domains/users/users.router';
 import openaiAssistantRoutes from './domains/openai-wrapper/openai-wrapper.router';
 import taskRoutes from './domains/tasks/tasks.router';
@@ -16,6 +17,7 @@ import eventRoutes from './domains/events/events.router';
 import mailRoutes from './domains/mails/mail.router';
 import invoiceRoutes from './domains/invoices/invoices.route';
 import organizationRoutes from './domains/organizations/organizations.router';
+import bookingRoutes from './domains/bookings/bookings.router';
 
 dotenv.config();
 
@@ -56,6 +58,7 @@ app.use((req, res, next) => {
 
 app.use('/api/events', eventRoutes);
 app.use('/api/guests', guestRoutes);
+app.use('/api/clients', clientRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/mail', mailRoutes);
 app.use('/api/openai', openaiAssistantRoutes);
@@ -63,6 +66,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/sms', smsRoutes);
 app.use('/api/organizations', organizationRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err.message === 'Not allowed by CORS') {

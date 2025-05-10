@@ -12,6 +12,7 @@ export interface IProduct {
   name: string;
   description: string;
   price: number;
+  image?: string;
 }
 
 export interface IProductCategory {
@@ -51,8 +52,11 @@ export interface IBooking {
   serviceProvider: Types.ObjectId | IServiceProvider;
   serviceDate: Date;
   serviceTime: string;
-  client: IClient;
+  client: Types.ObjectId;
+  products?: Types.ObjectId[] | IProduct[];
+  totalAmount?: number;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IRating {
@@ -88,4 +92,4 @@ export interface IOrganizationData {
   serviceProviders?: IServiceProvider[];
   serviceDates?: IServiceDate[];
   ownerId: string;
-} 
+}

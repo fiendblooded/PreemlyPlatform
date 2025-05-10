@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as guestController from './guests.controller';
 const router = Router();
 
+router.get('/', guestController.getAllGuests);
 router.get('/:id', guestController.getGuestById);
 router.post('/', guestController.createGuest);
 router.put('/:id', guestController.updateGuest);

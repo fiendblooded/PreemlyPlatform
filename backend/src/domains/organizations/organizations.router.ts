@@ -17,18 +17,23 @@ router.delete('/:id', verifyUser, organizationsController.deleteOrganization);
 
 router.post('/:id/categories', verifyUser, organizationsController.addProductCategory);
 router.put(
-  '/:organizationId/categories/:categoryId', 
-  verifyUser, 
-  organizationsController.updateProductCategory
+  '/:organizationId/categories/:categoryId',
+  verifyUser,
+  organizationsController.updateProductCategory,
 );
 router.delete(
-  '/:organizationId/categories/:categoryId', 
-  verifyUser, 
-  organizationsController.deleteProductCategory
+  '/:organizationId/categories/:categoryId',
+  verifyUser,
+  organizationsController.deleteProductCategory,
 );
 
 router.post('/:id/providers', verifyUser, organizationsController.addServiceProvider);
+router.put(
+  '/:organizationId/providers/:providerId',
+  verifyUser,
+  organizationsController.updateServiceProvider,
+);
 
 router.post('/:id/dates', verifyUser, organizationsController.addServiceDate);
 
-export default router; 
+export default router;

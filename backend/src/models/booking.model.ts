@@ -1,20 +1,19 @@
 import mongoose, { Schema } from 'mongoose';
-import { IBooking, IClient } from '../types/organization.types';
-
-const ClientSchema = new Schema<IClient>({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  email: { type: String, required: true },
-  phone: { type: String, required: true },
-  comment: { type: String }
-});
+import { IBooking } from '../types/organization.types';
 
 const BookingSchema = new Schema<IBooking>({
-  serviceProvider: { type: Schema.Types.ObjectId, ref: 'ServiceProvider', required: true },
+  serviceProvider: { type: Schema.Types.ObjectId, required: true },
   serviceDate: { type: Date, required: true },
   serviceTime: { type: String, required: true },
-  client: { type: ClientSchema, required: true },
-  createdAt: { type: Date, default: Date.now }
+  client: { type: Schema.Types.ObjectId, ref: 'Client', required: true },
+  products: [{ type: Schema.Types.ObjectId }],
+  totalAmount: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<IBooking>('Booking', BookingSchema); 
+// Add index for faster querying
+BookingSchema.index({ client: 1 });
+BookingSchema.index({ serviceProvider: 1 });
+
+export default mongoose.model<IBooking>('Booking', BookingSchema);

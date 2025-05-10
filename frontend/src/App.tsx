@@ -25,6 +25,11 @@ import InvitePage from "./components/InvitePage";
 import GuestRegistration from "./components/GuestRegistration";
 import { useState, useEffect } from "react";
 import GuestRegistrationDesktop from "./components/GuestRegistrationDesktop";
+import Clients from "./components/Clients";
+import ClientDetails from "./components/ClientDetails";
+import OrganizationGeneral from "./components/organization/OrganizationGeneral";
+import OrganizationProducts from "./components/organization/OrganizationProducts";
+import OrganizationProviders from "./components/organization/OrganizationProviders";
 
 export const GlobalStyle = createGlobalStyle`
   /* Font loading optimization */
@@ -335,11 +340,51 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/clients"
+            element={
+              <ProtectedRoute>
+                <Clients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clients/:clientId"
+            element={
+              <ProtectedRoute>
+                <ClientDetails />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/invites/:eventId/:guestId" element={<InvitePage />} />
           <Route
             path="/register/:eventId"
             element={
               mobileState ? <GuestRegistration /> : <GuestRegistrationDesktop />
+            }
+          />
+          <Route
+            path="/organization"
+            element={
+              <ProtectedRoute>
+                <OrganizationGeneral />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/organization/products"
+            element={
+              <ProtectedRoute>
+                <OrganizationProducts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/organization/providers"
+            element={
+              <ProtectedRoute>
+                <OrganizationProviders />
+              </ProtectedRoute>
             }
           />
         </Routes>
