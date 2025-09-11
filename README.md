@@ -1,4 +1,4 @@
-Codebase for preemly platform at platform.preemly.eu
+Codebase for Preemly Platform at platform.preemly.eu
 
 # **Preemly**
 
