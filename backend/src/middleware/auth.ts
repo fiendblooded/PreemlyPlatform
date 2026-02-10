@@ -59,7 +59,6 @@ export const verifyUser = async (req: AuthRequest, res: Response, next: NextFunc
       }
       req.user = decoded as AuthRequest['user'];
       
-      // Добавляем уровень подписки
       if (req.user && req.user.sub) {
         const subscriptionLevel = await usersService.getUserSubscriptionLevel(req.user.sub);
         req.user.subscriptionLevel = subscriptionLevel;

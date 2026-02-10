@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { SubscriptionLevel } from '../types/subscription.types';
 
-export interface User {
+export interface IUser {
   auth0Id: string;
   subscriptionLevel: SubscriptionLevel;
   updatedAt: Date;
@@ -9,7 +9,7 @@ export interface User {
   subscriptionEndDate: Date | null;
 }
 
-const UserSchema = new Schema<User>({
+const UserSchema = new Schema<IUser>({
   auth0Id: { type: String, required: true, unique: true },
   subscriptionLevel: { 
     type: String, 
@@ -21,4 +21,4 @@ const UserSchema = new Schema<User>({
   subscriptionEndDate: { type: Date, default: null }
 }, { timestamps: true });
 
-export default mongoose.model<User>('User', UserSchema); 
+export default mongoose.model<IUser>('User', UserSchema); 

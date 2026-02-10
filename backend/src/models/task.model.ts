@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { Task } from '../types/task.types';
+import { ITask } from '../types/task.types';
 
-const taskSchema = new Schema<Task>(
+const taskSchema = new Schema<ITask>(
   {
     title: {
       type: String,
@@ -52,4 +52,4 @@ const taskSchema = new Schema<Task>(
   },
 );
 
-export default model<Task>('Task', taskSchema);
+export default model<ITask>('Task', taskSchema);

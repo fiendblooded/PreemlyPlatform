@@ -1,15 +1,15 @@
-/* eslint-disable max-len */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from 'express';
 import axios from 'axios';
 import multer from 'multer';
 import { EventsService } from './events.service';
 import { AuthRequest } from '../../types/auth.types';
-import { processEventDescription } from '../../domains/openai-wrapper/openai-wrapper.controller'; // TODO: move to events.controller
-
-import { analyzeReviews } from './openai.service';
+import { processEventDescription } from '../../domains/openai-wrapper/openai-wrapper.controller';
+import { SubscriptionLevel } from '../../types/subscription.types';
+import { UsersService } from '../users/users.service';
+import cloudinary from '../../config/cloudinary';
 
 const eventsService = new EventsService();
+const usersService = new UsersService();
 const upload = multer({ storage: multer.memoryStorage() });
 
 export const createEvent = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -32,12 +32,15 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
   }
 
   try {
-    console.log(`Создание события пользователем с уровнем подписки: ${req.user.subscriptionLevel}`);
+    console.log(`Creating event by user with subscription level: ${req.user.subscriptionLevel}`);
 
     const newEvent = await eventsService.createEvent(event, req.user.sub);
     res.json({
       success: true,
-      message: { _id: newEvent._id },
+      message: 'Event created successfully',
+      data: {
+        event: newEvent,
+      },
     });
   } catch (error) {
     console.error('Error in Create Event:', error);
@@ -173,7 +176,7 @@ export const updateEventGuests = async (req: AuthRequest, res: Response): Promis
   if (!userId) {
     res.status(401).json({
       success: false,
-      message: 'Требуется авторизация',
+      message: 'Authorization required',
     });
     return;
   }
@@ -211,7 +214,7 @@ export const uploadGuestsFromExcel = async (req: AuthRequest, res: Response): Pr
   if (!userId) {
     res.status(401).json({
       success: false,
-      message: 'Требуется авторизация',
+      message: 'Authorization required',
     });
     return;
   }
@@ -272,7 +275,7 @@ export const addEventFeedback = async (req: Request, res: Response): Promise<voi
     if (!answers || !Array.isArray(answers) || answers.length === 0) {
       res.status(400).json({
         success: false,
-        message: 'Feedback answers are required',
+        message: 'IFeedback answers are required',
       });
       return;
     }
@@ -290,7 +293,7 @@ export const addEventFeedback = async (req: Request, res: Response): Promise<voi
 
     res.json({
       success: true,
-      message: 'Feedback added successfully',
+      message: 'IFeedback added successfully',
       data: updatedEvent.feedback?.[updatedEvent.feedback?.length - 1],
     });
   } catch (error) {
@@ -327,7 +330,7 @@ export const updateFeedbackForm = async (req: Request, res: Response): Promise<v
 
     res.json({
       success: true,
-      message: 'Feedback form updated successfully',
+      message: 'IFeedback form updated successfully',
       data: updatedEvent.feedbackForm,
     });
   } catch (error) {
@@ -336,17 +339,62 @@ export const updateFeedbackForm = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const analyzeEventFeedback = async (req: Request, res: Response): Promise<void> => {
+export const analyzeEventFeedback = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const updatedEvent = await eventsService.analyzeEventFeedback(req.params.id);
-    if (!updatedEvent) {
-      res.status(404).json({ success: false, message: 'Event not found' });
+    const eventId = req.params.id;
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Authorization required',
+      });
       return;
     }
-    res.status(200).json({
-      success: true,
-      data: updatedEvent.feedbackAnalysis,
-    });
+
+    const subscriptionLevel = await usersService.getUserSubscriptionLevel(userId);
+    const allowedLevels = [SubscriptionLevel.PLUS, SubscriptionLevel.PREMIUM, SubscriptionLevel.ENTERPRISE];
+    
+    if (!allowedLevels.includes(subscriptionLevel)) {
+      res.status(403).json({
+        success: false,
+        message: 'IFeedback analysis is only available for PLUS, PREMIUM and ENTERPRISE subscriptions',
+      });
+      return;
+    }
+
+    try {
+      const updatedEvent = await eventsService.analyzeEventFeedback(eventId);
+      if (!updatedEvent) {
+        res.status(404).json({
+          success: false,
+          message: 'Event not found',
+        });
+        return;
+      }
+      
+      res.status(200).json({
+        success: true,
+        data: updatedEvent.feedbackAnalysis,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'No feedback available for analysis') {
+          res.status(400).json({
+            success: false,
+            message: 'No feedback available for analysis',
+          });
+          return;
+        } else if (error.message === 'No feedback form structure available') {
+          res.status(400).json({
+            success: false,
+            message: 'No feedback form structure available',
+          });
+          return;
+        }
+      }
+      throw error;
+    }
   } catch (error) {
     console.error('Error analyzing feedback:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -470,7 +518,13 @@ export const updateEventTask = async (req: Request, res: Response): Promise<void
       res.status(404).json({ message: 'Event or task not found' });
       return;
     }
-    const task = updatedEvent.tasks.find((t) => t._id && t._id.toString() === req.params.taskId);
+    
+    type TaskItem = { _id?: { toString(): string } };
+    
+    const task = updatedEvent.tasks.find(
+      (t: TaskItem) => t._id && t._id.toString() === req.params.taskId
+    );
+    
     res.status(200).json({
       message: 'Task updated successfully',
       task,
@@ -509,7 +563,13 @@ export const updateTaskStatus = async (req: Request, res: Response): Promise<voi
       res.status(404).json({ message: 'Event or task not found' });
       return;
     }
-    const task = updatedEvent.tasks.find((t) => t._id && t._id.toString() === req.params.taskId);
+    
+    type TaskItem = { _id?: { toString(): string } };
+    
+    const task = updatedEvent.tasks.find(
+      (t: TaskItem) => t._id && t._id.toString() === req.params.taskId
+    );
+    
     res.status(200).json({
       message: 'Task status updated successfully',
       task,
@@ -557,7 +617,7 @@ export const analyzeEventReviews = async (req: Request, res: Response): Promise<
   }
 
   try {
-    const analysis = await analyzeReviews(reviews);
+    const analysis = await eventsService.analyzeReviews(reviews);
     const updatedEvent = await eventsService.updateEventFeedbackAnalysis(eventId, analysis);
 
     if (!updatedEvent) {
@@ -574,6 +634,165 @@ export const analyzeEventReviews = async (req: Request, res: Response): Promise<
     });
   } catch (error) {
     console.error('Error analyzing reviews:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: errorMessage,
+    });
+  }
+};
+
+export const uploadInvoice = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+
+  if (!req.file) {
+    res.status(400).json({ success: false, message: 'No file uploaded' });
+    return;
+  }
+
+  try {
+    const event = await eventsService.getEventById(id);
+    if (!event) {
+      res.status(404).json({ success: false, message: 'Event not found' });
+      return;
+    }
+
+    const base64Data = req.file.buffer.toString('base64');
+    const dataURI = `data:${req.file.mimetype};base64,${base64Data}`;
+
+    const filename = req.file.originalname.replace(/\.pdf$/i, '');
+
+    const uploadResult = await cloudinary.uploader.upload(dataURI, {
+      resource_type: 'raw',
+      folder: 'event_invoices',
+      public_id: filename,
+      access_mode: 'public',
+    });
+
+    const pdfUrl = cloudinary.url(uploadResult.public_id, {
+      resource_type: 'raw',
+      secure: true,
+    });
+
+    const { amount, date, vendor, category, isPaid } = req.body;
+
+    const invoice = await eventsService.uploadInvoice(id, req.file, {
+      title: req.file.originalname.replace(/\.pdf$/i, ''),
+      pdfUrl,
+      amount: amount ? parseFloat(amount) : undefined,
+      date: date ? new Date(date) : new Date(),
+      vendor: vendor || undefined,
+      category: category || undefined,
+      isPaid: isPaid === 'true' || isPaid === true || false,
+    });
+
+    res.status(201).json({ success: true, data: invoice });
+  } catch (error: unknown) {
+    console.error('Error uploading invoice:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Server Error';
+    res.status(500).json({ success: false, message: errorMessage });
+  }
+};
+
+export const getEventInvoices = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+
+  try {
+    const invoices = await eventsService.getEventInvoices(id);
+    res.json({ success: true, data: invoices });
+  } catch (error) {
+    console.error('Error fetching invoices:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Server Error';
+    res.status(500).json({ success: false, message: errorMessage });
+  }
+};
+
+export const deleteInvoice = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+
+  try {
+    console.log(`Attempting to delete invoice with ID: ${id}`);
+
+    try {
+      const invoice = await eventsService.deleteInvoice(id);
+      
+      if (invoice && invoice.pdfUrl) {
+        try {
+          const match = invoice.pdfUrl.match(/event_invoices\/([^/]+)(?:\.[^.]+)?$/);
+          const publicId = match ? match[1] : null;
+
+          if (publicId) {
+            console.log(`Attempting to delete from Cloudinary: event_invoices/${publicId}`);
+            await cloudinary.uploader.destroy(`event_invoices/${publicId}`, {
+              resource_type: 'raw',
+            });
+          }
+        } catch (cloudinaryError) {
+          console.error('Error deleting from Cloudinary:', cloudinaryError);
+        }
+      }
+
+      res.status(200).json({ success: true, message: 'IInvoice deleted successfully' });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'IInvoice not found') {
+        res.status(404).json({ success: false, message: 'IInvoice not found' });
+        return;
+      }
+      throw error;
+    }
+  } catch (error: unknown) {
+    console.error('Error deleting invoice:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Server Error';
+    res.status(500).json({ success: false, message: 'Server Error', error: errorMessage });
+  }
+};
+
+export const analyzeEventInvoices = async (req: AuthRequest, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const userId = req.user?.sub;
+
+  try {
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Authorization required',
+      });
+      return;
+    }
+
+    const subscriptionLevel = await usersService.getUserSubscriptionLevel(userId);
+    const allowedLevels = [SubscriptionLevel.PLUS, SubscriptionLevel.PREMIUM, SubscriptionLevel.ENTERPRISE];
+    
+    if (!allowedLevels.includes(subscriptionLevel)) {
+      res.status(403).json({
+        success: false,
+        message: 'IInvoice analysis is only available for PLUS, PREMIUM and ENTERPRISE subscriptions',
+      });
+      return;
+    }
+
+    try {
+      const updatedEvent = await eventsService.analyzeEventInvoices(id);
+      if (!updatedEvent) {
+        res.status(404).json({ success: false, message: 'Event not found' });
+        return;
+      }
+      res.status(200).json({
+        success: true,
+        data: updatedEvent.invoiceAnalysis,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.includes('No invoices found')) {
+          res.status(400).json({ success: false, message: error.message });
+          return;
+        }
+      }
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error analyzing invoices:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,

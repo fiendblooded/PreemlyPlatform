@@ -1,7 +1,7 @@
 import xlsx from 'xlsx';
-import type { GuestData } from '../types/guest.types';
+import type { IGuestData } from '../types/guest.types';
 
-export const parseExcelFile = (filePath: string): Promise<GuestData[]> => {
+export const parseExcelFile = (filePath: string): Promise<IGuestData[]> => {
   return new Promise((resolve, reject) => {
     try {
       const workbook = xlsx.readFile(filePath);
@@ -10,7 +10,7 @@ export const parseExcelFile = (filePath: string): Promise<GuestData[]> => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any[] = xlsx.utils.sheet_to_json(worksheet);
 
-      const guests: GuestData[] = data.map((row) => ({
+      const guests: IGuestData[] = data.map((row) => ({
         fullName: row['Full Name'],
         email: row['Email'],
       }));

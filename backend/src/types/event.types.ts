@@ -1,22 +1,14 @@
 import type { Types } from 'mongoose';
-// Import the Task type but don't use it directly in this file
-// import { Task } from './task.types';
+import { ITask } from './task.types';
 
-export interface Location {
+export interface ILocation {
   address: string;
   latitude: number;
   longitude: number;
   placeId: string;
 }
 
-// Remove the Task interface since we're now importing it from task.types.ts
-// export interface Task {
-//   title: string;
-//   isCompleted: boolean;
-//   dueDate: Date;
-// }
-
-export interface WelcomeScreenParams {
+export interface IWelcomeScreenParams {
   backgroundColor: string;
   textColor: string;
   isManualCheckin: boolean;
@@ -24,12 +16,12 @@ export interface WelcomeScreenParams {
   videoUrl: string;
 }
 
-export interface EmailExtraModule {
+export interface IEmailExtraModule {
   enabled: boolean;
   content: string;
 }
 
-export interface ScheduleItem {
+export interface IScheduleItem {
   id: number;
   title: string;
   startDateTime: string;
@@ -40,8 +32,8 @@ export interface ScheduleItem {
   time?: string;
 }
 
-export interface ScheduleModule extends EmailExtraModule {
-  items?: ScheduleItem[];
+export interface IScheduleModule extends IEmailExtraModule {
+  items?: IScheduleItem[];
 }
 
 export interface SponsorDeal {
@@ -52,7 +44,7 @@ export interface SponsorDeal {
   linkUrl: string;
 }
 
-export interface SponsorDealsModule extends EmailExtraModule {
+export interface ISponsorDealsModule extends IEmailExtraModule {
   items?: SponsorDeal[];
 }
 
@@ -61,10 +53,10 @@ export interface EmailParams {
     enabled: boolean;
     content: string;
   };
-  parking: EmailExtraModule;
-  scheduleSrc: ScheduleModule;
-  dining: EmailExtraModule;
-  sponsorDeals: SponsorDealsModule;
+  parking: IEmailExtraModule;
+  scheduleSrc: IScheduleModule;
+  dining: IEmailExtraModule;
+  sponsorDeals: ISponsorDealsModule;
   virtualSpace?: {
     enabled: boolean;
   };
@@ -77,13 +69,13 @@ export interface CategoryBreakdown {
   percentage: number;
 }
 
-export interface VendorBreakdown {
+export interface IVendorBreakdown {
   vendor: string;
   amount: number;
   invoiceCount: number;
 }
 
-export interface InvoiceAnalysis {
+export interface IInvoiceAnalysis {
   budgetSummary: {
     totalSpend: number;
     budgetVariance?: {
@@ -97,7 +89,7 @@ export interface InvoiceAnalysis {
   costBreakdown: {
     categories: CategoryBreakdown[];
     topCategories: string[];
-    vendors: VendorBreakdown[];
+    vendors: IVendorBreakdown[];
     recurringExpenses?: string[];
   };
   performanceInsights?: {
@@ -129,7 +121,7 @@ export enum FeedbackQuestionType {
   RANKING = 'ranking',
 }
 
-export interface FeedbackQuestionOption {
+export interface IFeedbackQuestionOption {
   id: string;
   text: string;
 }
@@ -139,14 +131,14 @@ export interface FeedbackQuestion {
   title: string;
   type: FeedbackQuestionType;
   required: boolean;
-  options?: FeedbackQuestionOption[]; // For choice and ranking questions
+  options?: IFeedbackQuestionOption[]; // For choice and ranking questions
   minRating?: number; // For rating questions (default 0)
   maxRating?: number; // For rating questions (default 10)
   minLabel?: string; // Label for the lowest rating
   maxLabel?: string; // Label for the highest rating
 }
 
-export interface FeedbackForm {
+export interface IFeedbackForm {
   title: string;
   description?: string;
   questions: FeedbackQuestion[];
@@ -155,7 +147,7 @@ export interface FeedbackForm {
   updatedAt: Date;
 }
 
-export interface FeedbackAnswer {
+export interface IFeedbackItem {
   questionId: string;
   textAnswer?: string;
   ratingAnswer?: number;
@@ -163,15 +155,15 @@ export interface FeedbackAnswer {
   rankingOrder?: string[]; // IDs of options in ranked order
 }
 
-export interface Feedback {
+export interface IFeedback {
   _id?: string;
   guestName?: string;
   guestEmail?: string;
-  answers: FeedbackAnswer[];
+  answers: IFeedbackItem[];
   createdAt: Date;
 }
 
-export interface FeedbackAnalysis {
+export interface IFeedbackAnalysis {
   overview: string;
   strengths: string[];
   weaknesses: string[];
@@ -179,7 +171,7 @@ export interface FeedbackAnalysis {
   lastUpdated: Date;
 }
 
-export interface Event {
+export interface IEvent {
   _id: Types.ObjectId;
   title: string;
   description?: string;
@@ -189,13 +181,51 @@ export interface Event {
   date: Date;
   eventType: string;
   endDate: Date;
-  location: Location;
+  location: ILocation;
   tasks: Types.ObjectId[];
-  welcomeScreenParams: WelcomeScreenParams;
+  welcomeScreenParams: IWelcomeScreenParams;
   emailParams: EmailParams;
   invoices?: Types.ObjectId[];
-  invoiceAnalysis?: InvoiceAnalysis;
-  feedbackForm?: FeedbackForm;
-  feedback?: Feedback[];
-  feedbackAnalysis?: FeedbackAnalysis;
+  invoiceAnalysis?: IInvoiceAnalysis;
+  feedbackForm?: IFeedbackForm;
+  feedback?: IFeedback[];
+  feedbackAnalysis?: IFeedbackAnalysis;
+}
+
+export interface IEventData {
+  title: string;
+  description?: string;
+  poster?: string;
+  date?: string;
+  endDate?: string;
+  eventType?: string;
+  location?: ILocation;
+  tasks?: ITask[];
+  welcomeScreenParams?: IWelcomeScreenParams;
+  emailParams?: EmailParams;
+}
+
+export interface IFeedbackData {
+  guestName?: string;
+  guestEmail?: string;
+  answers: IFeedbackItem[];
+}
+
+export interface IEventFeedback {
+  guestName?: string;
+  guestEmail?: string;
+  answers: IFeedbackItem[];
+  createdAt: Date;
+}
+
+export interface IEventFeedbackType {
+  guestName?: string;
+  guestEmail?: string;
+  answers: Array<{
+    questionId: string;
+    textAnswer?: string;
+    ratingAnswer?: number;
+    selectedOptions?: string[];
+    rankingOrder?: string[];
+  }>;
 }

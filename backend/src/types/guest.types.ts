@@ -1,11 +1,7 @@
 import type { Document } from 'mongoose';
 
-export interface GuestData {
-  fullName: string;
-  email: string;
-}
 
-export interface Guest extends GuestData, Document {
+export interface IGuest extends IGuestData, Document {
   age?: number;
   phoneNumber?: string;
   attendance_status: boolean;
@@ -15,3 +11,12 @@ export interface Guest extends GuestData, Document {
   eventId?: string;
   gdpr_consent?: boolean;
 }
+
+export interface IGuestData {
+  fullName: string;
+  email: string;
+  age?: number;
+  phoneNumber?: string;
+  attendance_status?: boolean;
+  gdpr_consent?: boolean;
+} 

@@ -1,5 +1,9 @@
-import User from '../../models/user.model';
+import User, { IUser } from '../../models/user.model';
 import { SubscriptionLevel } from '../../types/subscription.types';
+import axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export class UsersService {
   async getUserByAuth0Id(auth0Id: string) {
@@ -9,22 +13,24 @@ export class UsersService {
   async createUser(
     auth0Id: string, 
     subscriptionLevel: SubscriptionLevel = SubscriptionLevel.FREE
-  ) {
-    const newUser = new User({
+  ): Promise<IUser> {
+    const user = new User({
       auth0Id,
       subscriptionLevel,
       updatedAt: new Date(),
-      lastStatusChangeDate: new Date(),
-      subscriptionEndDate: null
+      lastStatusChangeDate: new Date()
     });
-    return await newUser.save();
+
+    await user.save();
+
+    return user;
   }
 
   async updateSubscriptionLevel(
     auth0Id: string, 
     subscriptionLevel: SubscriptionLevel, 
     subscriptionEndDate?: Date
-  ) {
+  ): Promise<IUser> {
     const user = await User.findOne({ auth0Id });
     
     if (!user) {
@@ -33,7 +39,6 @@ export class UsersService {
 
     const now = new Date();
     
-    // Проверяем, истек ли срок подписки
     if (user.subscriptionEndDate && user.subscriptionEndDate < now) {
       user.subscriptionLevel = SubscriptionLevel.FREE;
       user.subscriptionEndDate = null;
@@ -46,14 +51,16 @@ export class UsersService {
     
     user.updatedAt = new Date();
     user.lastStatusChangeDate = new Date();
-    return await user.save();
+    await user.save();
+
+    return user;
   }
 
-  async setSubscriptionPeriod(auth0Id: string, months: number) {
+  async setSubscriptionPeriod(auth0Id: string, months: number): Promise<IUser> {
     const user = await User.findOne({ auth0Id });
     
     if (!user) {
-      throw new Error('Пользователь не найден');
+      throw new Error('User is not found');
     }
 
     const now = new Date();
@@ -66,11 +73,13 @@ export class UsersService {
 
   async getUserSubscriptionLevel(auth0Id: string): Promise<SubscriptionLevel> {
     const user = await User.findOne({ auth0Id });
+
     if (!user) {
       return SubscriptionLevel.FREE;
     }
 
     const now = new Date();
+
     if (user.subscriptionEndDate && user.subscriptionEndDate < now) {
       user.subscriptionLevel = SubscriptionLevel.FREE;
       user.subscriptionEndDate = null;
@@ -78,5 +87,21 @@ export class UsersService {
     }
 
     return user.subscriptionLevel;
+  }
+
+  async getAuth0Token(): Promise<string> {
+    try {
+      const tokenResponse = await axios.post(`https://${process.env.AUTH0_M2M_DOMAIN}/oauth/token`, {
+        client_id: process.env.AUTH0_M2M_CLIENT_ID,
+        client_secret: process.env.AUTH0_M2M_CLIENT_SECRET,
+        audience: `https://${process.env.AUTH0_M2M_DOMAIN}/api/v2/`,
+        grant_type: 'client_credentials',
+      });
+      
+      return tokenResponse.data.access_token;
+    } catch (error) {
+      console.error('Error getting Auth0 token:', error);
+      throw new Error('Failed to get Auth0 access token');
+    }
   }
 }

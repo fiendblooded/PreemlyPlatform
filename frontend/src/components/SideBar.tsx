@@ -547,6 +547,274 @@ const Sidebar: React.FC = () => {
             )}
           </TooltipWrapper>
         </SidebarSection>
+
+        <SidebarSection>
+          <SectionTitle tablet={isTabletDevice}>CLIENTS</SectionTitle>
+
+          <TooltipWrapper
+            onMouseEnter={() => isTabletDevice && setActiveTooltip("clients")}
+            onMouseLeave={() => setActiveTooltip(null)}
+          >
+            <MenuButton
+              onClick={() => navigate("/clients")}
+              isactive={getPageStatus("clients")}
+              tablet={isTabletDevice}
+            >
+              <IconWrapper isactive={getPageStatus("clients")}>
+                <svg
+                  width="20"
+                  height="20"
+                  style={
+                    isTabletDevice
+                      ? { minWidth: "24px", minHeight: "24px" }
+                      : {}
+                  }
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6.66602 11.6673C8.50688 11.6673 9.99935 10.1748 9.99935 8.33398C9.99935 6.49313 8.50688 5.00065 6.66602 5.00065C4.82516 5.00065 3.33268 6.49313 3.33268 8.33398C3.33268 10.1748 4.82516 11.6673 6.66602 11.6673Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M1.66602 16.6673C1.66602 14.8263 3.15745 13.334 4.99935 13.334H8.33268C10.1746 13.334 11.666 14.8263 11.666 16.6673"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M13.334 5.08398C14.0405 5.32815 14.5776 5.94114 14.7351 6.6851"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M16.666 10.9993C16.666 11.6437 16.5166 12.2576 16.2493 12.7993"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M14.7344 15.2324C14.5752 15.9747 14.0388 16.5861 13.3344 16.8324"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M16.666 8.33398C16.666 7.68956 16.5166 7.07564 16.2493 6.53398"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </IconWrapper>
+              <MenuButtonText tablet={isTabletDevice}>Clients</MenuButtonText>
+            </MenuButton>
+            {isTabletDevice && activeTooltip === "clients" && (
+              <Tooltip show={true}>Clients</Tooltip>
+            )}
+          </TooltipWrapper>
+        </SidebarSection>
+
+        <SidebarSection>
+          <SectionTitle tablet={isTabletDevice}>BUSINESS</SectionTitle>
+
+          <TooltipWrapper
+            onMouseEnter={() =>
+              isTabletDevice && setActiveTooltip("organization")
+            }
+            onMouseLeave={() => setActiveTooltip(null)}
+          >
+            <MenuButton
+              onClick={() => navigate("/organization")}
+              isactive={location.pathname === "/organization"}
+              tablet={isTabletDevice}
+            >
+              <IconWrapper isactive={location.pathname === "/organization"}>
+                <svg
+                  width="20"
+                  height="20"
+                  style={
+                    isTabletDevice
+                      ? { minWidth: "24px", minHeight: "24px" }
+                      : {}
+                  }
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M1.66699 9.99996H6.66699V16.6666H1.66699V9.99996Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M7.5 3.33337H12.5V16.6667H7.5V3.33337Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M13.333 6.66663H18.333V16.6666H13.333V6.66663Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </IconWrapper>
+              <MenuButtonText tablet={isTabletDevice}>
+                Organization
+              </MenuButtonText>
+            </MenuButton>
+            {isTabletDevice && activeTooltip === "organization" && (
+              <Tooltip show={true}>Organization</Tooltip>
+            )}
+          </TooltipWrapper>
+
+          <TooltipWrapper
+            onMouseEnter={() => isTabletDevice && setActiveTooltip("products")}
+            onMouseLeave={() => setActiveTooltip(null)}
+          >
+            <MenuButton
+              onClick={() => navigate("/organization/products")}
+              isactive={location.pathname === "/organization/products"}
+              tablet={isTabletDevice}
+            >
+              <IconWrapper
+                isactive={location.pathname === "/organization/products"}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  style={
+                    isTabletDevice
+                      ? { minWidth: "24px", minHeight: "24px" }
+                      : {}
+                  }
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M17.5 8.33337H2.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M17.5 5H2.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M7.5 11.6666H2.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M7.5 15H2.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M11.6663 11.6666H16.6663"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M11.6663 15H16.6663"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M9.99967 11.6666V18.3333"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </IconWrapper>
+              <MenuButtonText tablet={isTabletDevice}>Products</MenuButtonText>
+            </MenuButton>
+            {isTabletDevice && activeTooltip === "products" && (
+              <Tooltip show={true}>Products</Tooltip>
+            )}
+          </TooltipWrapper>
+
+          <TooltipWrapper
+            onMouseEnter={() => isTabletDevice && setActiveTooltip("providers")}
+            onMouseLeave={() => setActiveTooltip(null)}
+          >
+            <MenuButton
+              onClick={() => navigate("/organization/providers")}
+              isactive={location.pathname === "/organization/providers"}
+              tablet={isTabletDevice}
+            >
+              <IconWrapper
+                isactive={location.pathname === "/organization/providers"}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  style={
+                    isTabletDevice
+                      ? { minWidth: "24px", minHeight: "24px" }
+                      : {}
+                  }
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.0003 4.16663C8.15944 4.16663 6.66699 5.65909 6.66699 7.49996C6.66699 9.34084 8.15944 10.8333 10.0003 10.8333C11.8412 10.8333 13.3337 9.34084 13.3337 7.49996C13.3337 5.65909 11.8412 4.16663 10.0003 4.16663Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M5 16.6667C5 14.0893 7.2893 12 10 12C12.7107 12 15 14.0893 15 16.6667"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </IconWrapper>
+              <MenuButtonText tablet={isTabletDevice}>
+                Service Providers
+              </MenuButtonText>
+            </MenuButton>
+            {isTabletDevice && activeTooltip === "providers" && (
+              <Tooltip show={true}>Service Providers</Tooltip>
+            )}
+          </TooltipWrapper>
+        </SidebarSection>
       </SidebarTopContainer>
     </SidebarWrapper>
   );

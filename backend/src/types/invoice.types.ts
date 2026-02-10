@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-export interface Invoice {
+export interface IInvoice {
   _id: Types.ObjectId;
   eventId: Types.ObjectId;
   title: string;
@@ -13,4 +13,15 @@ export interface Invoice {
   pdfUrl: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IInvoiceData {
+  title?: string;
+  amount?: number;
+  date?: string | Date;
+  vendor?: string;
+  category?: string;
+  isPaid?: boolean;
+  status?: string;
+  [key: string]: string | number | boolean | Date | undefined;
 }

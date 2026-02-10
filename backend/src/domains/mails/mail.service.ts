@@ -1,7 +1,7 @@
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 import dotenv from 'dotenv';
-import type { MailgunClientOptions, EmailResponse, EmailPayload } from '../../types/mail.types';
+import type { MailgunClientOptions, IEmailResponse, EmailPayload } from '../../types/mail.types';
 
 dotenv.config();
 
@@ -25,15 +25,13 @@ const validateEmail = (email: string): boolean => {
   return re.test(email);
 };
 
-// Основная функция для отправки email
 const sendEmail = async (
   recipients: string[],
   subject: string,
   htmlContents: string[],
   scheduledTime?: Date,
   emailIdentifier?: string,
-): Promise<EmailResponse> => {
-  // Валидируем все email адреса
+): Promise<IEmailResponse> => {
   for (const email of recipients) {
     if (!validateEmail(email)) {
       throw new Error(`Invalid email address: ${email}`);
@@ -63,7 +61,7 @@ const sendEmail = async (
       responses.push(response);
     }
 
-    return responses[0] as EmailResponse;
+    return responses[0] as IEmailResponse;
   } catch (error) {
     console.error('Error sending email with Mailgun:', error);
     throw error;

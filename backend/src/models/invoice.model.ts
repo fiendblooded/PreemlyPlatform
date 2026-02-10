@@ -1,7 +1,7 @@
 import mongoose, { Schema, model } from 'mongoose';
-import type { Invoice } from '../types/invoice.types';
+import type { IInvoice } from '../types/invoice.types';
 
-const invoiceSchema = new Schema<Invoice>(
+const invoiceSchema = new Schema<IInvoice>(
   {
     eventId: { type: Schema.Types.ObjectId, ref: 'Event', required: true },
     title: { type: String, required: true },
@@ -20,4 +20,4 @@ const invoiceSchema = new Schema<Invoice>(
   { timestamps: true },
 );
 
-export default model<Invoice>('Invoice', invoiceSchema);
+export default model<IInvoice>('IInvoice', invoiceSchema);

@@ -1,20 +1,14 @@
 import { Response } from 'express';
-import Task from '../../models/task.model';
-import Event from '../../models/event.model';
 import { AuthRequest } from '../../types/auth.types';
+import { TasksService } from './tasks.service';
+import { ITaskFilter } from '../../types/task.types';
 
-// Define filter interface
-interface TaskFilter {
-  eventId?: string | { $in: string[] };
-  status?: string;
-}
+const tasksService = new TasksService();
 
-// Get all tasks (with optional filtering)
 export const getTasks = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { eventId, status } = req.query;
 
-    // Get the current user's ID from the auth token
     const userId = req.user?.sub;
 
     if (!userId) {
@@ -22,22 +16,16 @@ export const getTasks = async (req: AuthRequest, res: Response): Promise<void> =
       return;
     }
 
-    // First, get all events owned by the current user
-    const userEvents = await Event.find({ ownerId: userId }, '_id');
-    const userEventIds = userEvents.map((event) => event._id.toString());
-
-    // Build filter object
-    const filter: TaskFilter = {};
+    const userEventIds = await tasksService.getUserEventIds(userId);
+    const filter: ITaskFilter = {};
 
     if (eventId && typeof eventId === 'string') {
-      // If a specific event ID is provided, make sure it belongs to the user
       if (!userEventIds.includes(eventId)) {
         res.status(403).json({ message: 'Access denied to this event' });
         return;
       }
       filter.eventId = eventId;
     } else {
-      // If no specific event ID is provided, filter by all user's events
       filter.eventId = { $in: userEventIds };
     }
 
@@ -45,34 +33,8 @@ export const getTasks = async (req: AuthRequest, res: Response): Promise<void> =
       filter.status = status;
     }
 
-    // Find tasks with filtering
-    const tasks = await Task.find(filter).sort({ createdAt: -1 });
+    const tasksWithEventDetails = await tasksService.getTasksWithEventDetails(filter);
 
-    // Get event details for each task - but use a more efficient approach
-    // First, collect all unique event IDs
-    const eventIds = [...new Set(tasks.map((task) => task.eventId.toString()))];
-
-    // Then fetch all events in a single query
-    const events = await Event.find({ _id: { $in: eventIds } }, 'title');
-
-    // Create a map of event ID to event data for quick lookup
-    const eventMap = events.reduce((map, event) => {
-      map[event._id.toString()] = { _id: event._id.toString(), title: event.title };
-      return map;
-    }, {} as Record<string, { _id: string; title: string }>);
-
-    // Now map tasks with event data
-    const tasksWithEventDetails = tasks.map((task) => {
-      const eventId = task.eventId.toString();
-      const event = eventMap[eventId];
-
-      return {
-        ...task.toObject(),
-        event: event || undefined,
-      };
-    });
-
-    // Return the array directly
     res.status(200).json(tasksWithEventDetails);
   } catch (error) {
     console.error('Error fetching tasks:', error);
@@ -80,7 +42,6 @@ export const getTasks = async (req: AuthRequest, res: Response): Promise<void> =
   }
 };
 
-// Get tasks for a specific event
 export const getEventTasks = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { eventId } = req.params;
@@ -91,23 +52,33 @@ export const getEventTasks = async (req: AuthRequest, res: Response): Promise<vo
       return;
     }
 
-    // Check if the event belongs to the current user
-    const event = await Event.findOne({ _id: eventId, ownerId: userId });
+    const event = await tasksService.getEventById(eventId, userId);
     if (!event) {
       res.status(403).json({ message: 'Access denied to this event' });
       return;
     }
 
-    const tasks = await Task.find({ eventId }).sort({ createdAt: -1 });
+    const tasks = await tasksService.getTasksByEventId(eventId);
+    
+    const formattedTasks = tasks.map(task => {
+      const taskObj = task.toObject();
+      return {
+        ...taskObj,
+        _id: taskObj._id.toString(),
+        eventId: taskObj.eventId.toString(),
+        dueDate: taskObj.dueDate?.toISOString(),
+        createdAt: taskObj.createdAt?.toISOString(),
+        updatedAt: taskObj.updatedAt?.toISOString(),
+      };
+    });
 
-    res.status(200).json(tasks);
+    res.status(200).json(formattedTasks);
   } catch (error) {
     console.error('Error fetching event tasks:', error);
     res.status(500).json({ message: 'Failed to fetch event tasks', error });
   }
 };
 
-// Get a single task by ID
 export const getTaskById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { taskId } = req.params;
@@ -118,24 +89,28 @@ export const getTaskById = async (req: AuthRequest, res: Response): Promise<void
       return;
     }
 
-    const task = await Task.findById(taskId);
+    const task = await tasksService.getTaskById(taskId);
 
     if (!task) {
       res.status(404).json({ message: 'Task not found' });
       return;
     }
 
-    // Check if the task's event belongs to the current user
-    const event = await Event.findOne({ _id: task.eventId, ownerId: userId });
+    const event = await tasksService.getEventById(task.eventId.toString(), userId);
     if (!event) {
       res.status(403).json({ message: 'Access denied to this task' });
       return;
     }
 
-    // Get event details
+    const taskObj = task.toObject();
     const taskWithEvent = {
-      ...task.toObject(),
-      event: event ? { _id: event._id, title: event.title } : undefined,
+      ...taskObj,
+      _id: taskObj._id.toString(),
+      eventId: taskObj.eventId.toString(),
+      dueDate: taskObj.dueDate?.toISOString(),
+      createdAt: taskObj.createdAt?.toISOString(),
+      updatedAt: taskObj.updatedAt?.toISOString(),
+      event: { _id: event._id.toString(), title: event.title },
     };
 
     res.status(200).json(taskWithEvent);
@@ -145,7 +120,6 @@ export const getTaskById = async (req: AuthRequest, res: Response): Promise<void
   }
 };
 
-// Create a new task
 export const createTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { eventId } = req.params;
@@ -157,39 +131,21 @@ export const createTask = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    // Validate event exists and belongs to the current user
-    const event = await Event.findOne({ _id: eventId, ownerId: userId });
+    const event = await tasksService.getEventById(eventId, userId);
     if (!event) {
       res.status(403).json({ message: 'Access denied to this event' });
       return;
     }
 
-    // Create the task
-    const task = new Task({
-      ...taskData,
-      eventId,
-    });
+    const task = await tasksService.createTask(eventId, taskData);
 
-    await task.save();
-
-    // Add task reference to the event
-    event.tasks.push(task._id);
-    await event.save();
-
-    // Return the task with event info
-    const taskWithEvent = {
-      ...task.toObject(),
-      event: { _id: event._id, title: event.title },
-    };
-
-    res.status(201).json({ message: 'Task created successfully', task: taskWithEvent });
+    res.status(201).json({ message: 'Task created successfully', task });
   } catch (error) {
     console.error('Error creating task:', error);
     res.status(500).json({ message: 'Failed to create task', error });
   }
 };
 
-// Update a task
 export const updateTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { taskId } = req.params;
@@ -201,45 +157,32 @@ export const updateTask = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    // Find the task
-    const task = await Task.findById(taskId);
+    const task = await tasksService.getTaskById(taskId);
     if (!task) {
       res.status(404).json({ message: 'Task not found' });
       return;
     }
 
-    // Check if the task's event belongs to the current user
-    const event = await Event.findOne({ _id: task.eventId, ownerId: userId });
+    const event = await tasksService.getEventById(task.eventId.toString(), userId);
     if (!event) {
       res.status(403).json({ message: 'Access denied to this task' });
       return;
     }
 
-    // Update the task
-    const updatedTask = await Task.findByIdAndUpdate(
-      taskId,
-      { ...updates, updatedAt: new Date() },
-      { new: true },
-    );
+    const updatedTask = await tasksService.updateTask(taskId, updates);
 
     if (!updatedTask) {
       res.status(404).json({ message: 'Task not found after update' });
       return;
     }
 
-    const taskWithEvent = {
-      ...updatedTask.toObject(),
-      event: { _id: event._id, title: event.title },
-    };
-
-    res.status(200).json({ message: 'Task updated successfully', task: taskWithEvent });
+    res.status(200).json({ message: 'Task updated successfully', task: updatedTask });
   } catch (error) {
     console.error('Error updating task:', error);
     res.status(500).json({ message: 'Failed to update task', error });
   }
 };
 
-// Update task status (for drag and drop functionality)
 export const updateTaskStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { taskId } = req.params;
@@ -256,49 +199,32 @@ export const updateTaskStatus = async (req: AuthRequest, res: Response): Promise
       return;
     }
 
-    // Find the task
-    const task = await Task.findById(taskId);
+    const task = await tasksService.getTaskById(taskId);
     if (!task) {
       res.status(404).json({ message: 'Task not found' });
       return;
     }
 
-    // Check if the task's event belongs to the current user
-    const event = await Event.findOne({ _id: task.eventId, ownerId: userId });
+    const event = await tasksService.getEventById(task.eventId.toString(), userId);
     if (!event) {
       res.status(403).json({ message: 'Access denied to this task' });
       return;
     }
 
-    // Update the task status
-    const updatedTask = await Task.findByIdAndUpdate(
-      taskId,
-      {
-        status,
-        isCompleted: status === 'finished',
-        updatedAt: new Date(),
-      },
-      { new: true },
-    );
+    const updatedTask = await tasksService.updateTaskStatus(taskId, status);
 
     if (!updatedTask) {
       res.status(404).json({ message: 'Task not found after update' });
       return;
     }
 
-    const taskWithEvent = {
-      ...updatedTask.toObject(),
-      event: { _id: event._id, title: event.title },
-    };
-
-    res.status(200).json({ message: 'Task status updated successfully', task: taskWithEvent });
+    res.status(200).json({ message: 'Task status updated successfully', task: updatedTask });
   } catch (error) {
     console.error('Error updating task status:', error);
     res.status(500).json({ message: 'Failed to update task status', error });
   }
 };
 
-// Delete a task
 export const deleteTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { taskId } = req.params;
@@ -309,25 +235,24 @@ export const deleteTask = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    // Find the task
-    const task = await Task.findById(taskId);
+    const task = await tasksService.getTaskById(taskId);
     if (!task) {
       res.status(404).json({ message: 'Task not found' });
       return;
     }
 
-    // Check if the task's event belongs to the current user
-    const event = await Event.findOne({ _id: task.eventId, ownerId: userId });
+    const event = await tasksService.getEventById(task.eventId.toString(), userId);
     if (!event) {
       res.status(403).json({ message: 'Access denied to this task' });
       return;
     }
 
-    // Remove the task
-    await Task.findByIdAndDelete(taskId);
-
-    // Remove the task reference from the event
-    await Event.findByIdAndUpdate(task.eventId, { $pull: { tasks: taskId } });
+    const deleted = await tasksService.deleteTask(taskId);
+    
+    if (!deleted) {
+      res.status(404).json({ message: 'Task not found' });
+      return;
+    }
 
     res.status(200).json({ message: 'Task deleted successfully' });
   } catch (error) {

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { analyzeReviews } from './openai.service';
+import { analyzeReviews } from './reviews.service';
 import Event from '../../models/event.model';
 
 export const analyzeCustomerReviews = async (req: Request, res: Response): Promise<void> => {
@@ -24,7 +24,6 @@ export const analyzeCustomerReviews = async (req: Request, res: Response): Promi
   try {
     const analysis = await analyzeReviews(reviews);
 
-    // Save the analysis to the event
     const event = await Event.findById(eventId);
     if (!event) {
       res.status(404).json({

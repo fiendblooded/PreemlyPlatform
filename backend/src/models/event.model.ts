@@ -1,7 +1,7 @@
 import mongoose, { Schema, model } from 'mongoose';
-import type { Event } from '../types/event.types';
+import type { IEvent } from '../types/event.types';
 
-const eventSchema = new Schema<Event>({
+const eventSchema = new Schema<IEvent>({
   title: { type: String, required: true },
   description: { type: String },
   ownerId: { type: String, required: true },
@@ -77,7 +77,7 @@ const eventSchema = new Schema<Event>({
     type: Schema.Types.ObjectId,
     default: () => new mongoose.Types.ObjectId(),
   },
-  invoices: [{ type: Schema.Types.ObjectId, ref: 'Invoice' }],
+  invoices: [{ type: Schema.Types.ObjectId, ref: 'IInvoice' }],
   feedback: [
     {
       guestName: { type: String },
@@ -95,7 +95,7 @@ const eventSchema = new Schema<Event>({
     },
   ],
   feedbackForm: {
-    title: { type: String, default: 'Event Feedback' },
+    title: { type: String, default: 'Event IFeedback' },
     description: { type: String },
     questions: [
       {
@@ -186,4 +186,4 @@ const eventSchema = new Schema<Event>({
   },
 });
 
-export default model<Event>('Event', eventSchema);
+export default model<IEvent>('Event', eventSchema);

@@ -1,6 +1,10 @@
 import { Types } from 'mongoose';
 
-export interface Task {
+export interface ITaskFilter {
+  eventId?: string | { $in: string[] };
+  status?: string;
+}
+export interface ITask {
   _id?: Types.ObjectId;
   title: string;
   description?: string;
@@ -15,7 +19,7 @@ export interface Task {
   updatedAt?: Date;
 }
 
-export interface TaskResponse {
+export interface ITaskResponse {
   _id: string;
   title: string;
   description?: string;
